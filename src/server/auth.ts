@@ -50,8 +50,8 @@ export const authOptions: NextAuthOptions = {
   providers: [
     LineProvider({
       clientId: env.LINE_CLIENT_ID,
-      clientSecret: env.LINE_CLIENT_SECRET
-    })
+      clientSecret: env.LINE_CLIENT_SECRET,
+    }),
     /**
      * ...add more providers here.
      *

@@ -58,6 +58,8 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+
+    VolunteerActivity VolunteerActivity[]
 }
 
 model VerificationToken {
@@ -66,4 +68,20 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model VolunteerActivity {
+    id            Int      @id @default(autoincrement())
+    title         String
+    description   String?
+    headcount     Int
+    location      String
+    startDateTime DateTime
+    endDateTime   DateTime
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organiser   User   @relation(fields: [organiserId], references: [id])
+    organiserId String
 }
