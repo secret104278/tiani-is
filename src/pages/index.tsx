@@ -1,3 +1,4 @@
+import { orderBy } from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "~/utils/api";
@@ -20,8 +21,12 @@ export default function Home() {
       </Link>
       <div>
         {isLoading && <div className="loading loading-lg"></div>}
-        {activities?.map((activity) => (
-          <Link key={activity.id} href={`/volunteeractivity/${activity.id}`}>
+        <div className="divider">即將到達</div>
+        {orderBy(activities, "startDateTime", "desc")?.map((activity) => (
+          <Link
+            key={activity.id}
+            href={`/volunteeractivity/detail/${activity.id}`}
+          >
             <div className="card card-compact w-full bg-neutral text-neutral-content shadow-xl">
               <div className="card-body">
                 <h2 className="card-title">{activity.title}</h2>

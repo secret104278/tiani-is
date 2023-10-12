@@ -38,6 +38,10 @@ export default function VolunteerActivityDetailPage() {
     api.volunteerActivity.sendActivityAdvertisement.useMutation({
       onSettled: () => refetch(),
     });
+  const { mutate: deleteActivity } =
+    api.volunteerActivity.deleteActivity.useMutation({
+      onSuccess: () => router.push(`/`),
+    });
 
   if (!isNil(error)) {
     return <AlertWarning>{error.message}</AlertWarning>;
@@ -73,6 +77,25 @@ export default function VolunteerActivityDetailPage() {
         >
           核准
         </button>
+      )}
+      {(session?.user.role === "ADMIN" ||
+        session?.user.id === activity.organiserId) && (
+        <>
+          <button
+            className="btn"
+            onClick={() =>
+              void router.push(`/volunteeractivity/edit/${activity.id}`)
+            }
+          >
+            編輯
+          </button>
+          <button
+            className="btn"
+            onClick={() => deleteActivity({ id: activity.id })}
+          >
+            撤銷
+          </button>
+        </>
       )}
       {activity.status === "PUBLISHED" &&
         (session?.user.role === "ADMIN" ||

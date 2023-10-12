@@ -11,10 +11,11 @@ export const volunteerActivityRouter = createTRPCRouter({
         location: z.string(),
         startDateTime: z.date(),
         endDateTime: z.date(),
+        isDraft: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.volunteerActivity.create({
+      return await ctx.db.volunteerActivity.create({
         data: {
           title: input.title,
           description: input.description,
@@ -22,6 +23,7 @@ export const volunteerActivityRouter = createTRPCRouter({
           location: input.location,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
+          status: input.isDraft ? "DRAFT" : "INREVIEW",
           organiser: {
             connect: {
               id: ctx.session.user.id,
@@ -31,6 +33,49 @@ export const volunteerActivityRouter = createTRPCRouter({
         include: {
           organiser: true,
         },
+      });
+    }),
+
+  updateActivity: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        title: z.string(),
+        description: z.string().nullable(),
+        headcount: z.number(),
+        location: z.string(),
+        startDateTime: z.date(),
+        endDateTime: z.date(),
+        isDraft: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.volunteerActivity.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          title: input.title,
+          description: input.description,
+          headcount: input.headcount,
+          location: input.location,
+          startDateTime: input.startDateTime,
+          endDateTime: input.endDateTime,
+          status: input.isDraft ? "DRAFT" : undefined,
+          organiser: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+      });
+    }),
+
+  deleteActivity: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.volunteerActivity.delete({
+        where: { id: input.id },
       });
     }),
 
@@ -82,6 +127,9 @@ export const volunteerActivityRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
         where: { id: input.activityId },
+        include: {
+          organiser: true,
+        },
       });
 
       if (activity.organiserId !== ctx.session.user.id) {
@@ -93,7 +141,7 @@ export const volunteerActivityRouter = createTRPCRouter({
         messages: [
           {
             type: "text",
-            text: `有新的志工活動申請 ${activity.title} 需要審核囉`,
+            text: `有新的志工活動申請 ${activity.title} 來自 ${activity.organiser.name} 需要審核囉`,
           },
         ],
       });

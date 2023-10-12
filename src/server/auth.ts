@@ -53,6 +53,11 @@ export const authOptions: NextAuthOptions = {
     LineProvider({
       clientId: env.LINE_CLIENT_ID,
       clientSecret: env.LINE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          bot_prompt: "aggressive", // Add friend to be able to send messages
+        },
+      },
     }),
     /**
      * ...add more providers here.
