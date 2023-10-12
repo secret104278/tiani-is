@@ -1,39 +1,92 @@
+import { isNil } from "lodash";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { AlertWarning } from "~/components/Alert";
 import { api } from "~/utils/api";
 
 export default function VolunteerActivityDetailPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data: activity, error } = api.volunteerActivity.getActivity.useQuery({
+  const { data: session } = useSession();
+
+  const {
+    data: activity,
+    isLoading,
+    error,
+    refetch,
+  } = api.volunteerActivity.getActivity.useQuery({
     id: Number(id),
   });
 
-  if (!activity) {
-    return (
-      <div className="alert alert-warning">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 shrink-0 stroke-current"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
-        <span>找不到</span>
-      </div>
-    );
+  const { mutate: submitActivityForReview } =
+    api.volunteerActivity.submitActivityForReview.useMutation({
+      onSettled: () => refetch(),
+    });
+
+  const { mutate: sendReviewNotification } =
+    api.volunteerActivity.sendReviewNotification.useMutation({
+      onSettled: () => refetch(),
+    });
+
+  const { mutate: approveActivity } =
+    api.volunteerActivity.approveActivity.useMutation({
+      onSettled: () => refetch(),
+    });
+
+  const { mutate: sendActivityAdvertisement } =
+    api.volunteerActivity.sendActivityAdvertisement.useMutation({
+      onSettled: () => refetch(),
+    });
+
+  if (!isNil(error)) {
+    return <AlertWarning>{error.message}</AlertWarning>;
   }
+
+  if (isLoading) return <div className="loading"></div>;
+  if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
 
   // Fetch and display the details of the book with the given ID
   return (
     <div>
       <h1>{activity.title}</h1>
+      {activity.status === "DRAFT" && (
+        <button
+          className="btn"
+          onClick={() => submitActivityForReview({ activityId: activity.id })}
+        >
+          送出申請
+        </button>
+      )}
+      {activity.status === "INREVIEW" && session?.user.role === "USER" && (
+        <button
+          className="btn"
+          onClick={() => sendReviewNotification({ activityId: activity.id })}
+        >
+          提醒審核
+        </button>
+      )}
+      {activity.status === "INREVIEW" && session?.user.role === "ADMIN" && (
+        <button
+          className="btn"
+          onClick={() => approveActivity({ activityId: activity.id })}
+        >
+          核准
+        </button>
+      )}
+      {activity.status === "PUBLISHED" &&
+        (session?.user.role === "ADMIN" ||
+          session?.user.id == activity.organiserId) && (
+          <button
+            className="btn bg-green-500"
+            onClick={() =>
+              sendActivityAdvertisement({ activityId: activity.id })
+            }
+          >
+            推送 Line 通知
+          </button>
+        )}
+
       <ul className="list-disc">
         <li>需求人數：{activity.headcount}</li>
         <li>地點：{activity.location}</li>

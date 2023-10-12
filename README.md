@@ -1,3 +1,11 @@
+docker run -d \
+	--name tiani-is-postgres \
+	-e POSTGRES_PASSWORD=mysecretpassword \
+	-e PGDATA=/var/lib/postgresql/data/pgdata \
+	-v $PWD/prisma/pgdata:/var/lib/postgresql/data \
+    -p 5432:5432 \
+	postgres
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.

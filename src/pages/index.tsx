@@ -6,7 +6,7 @@ export default function Home() {
   const { data: sessionData } = useSession();
 
   const { data: activities, isLoading } =
-    api.volunteerActivity.getActivities.useQuery({});
+    api.volunteerActivity.getOrganizedActivities.useQuery({});
 
   if (!sessionData) {
     return <span className="loading loading-ring loading-md"></span>;
@@ -22,7 +22,7 @@ export default function Home() {
         {isLoading && <div className="loading loading-lg"></div>}
         {activities?.map((activity) => (
           <Link key={activity.id} href={`/volunteeractivity/${activity.id}`}>
-            <div className="card-compact card w-full bg-neutral text-neutral-content shadow-xl">
+            <div className="card card-compact w-full bg-neutral text-neutral-content shadow-xl">
               <div className="card-body">
                 <h2 className="card-title">{activity.title}</h2>
               </div>
