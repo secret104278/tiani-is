@@ -159,19 +159,21 @@ export const volunteerActivityRouter = createTRPCRouter({
         },
       });
 
-      for (const reviewer of reviewers) {
-        for (const account of reviewer.user.accounts) {
-          await ctx.bot.pushMessage({
-            to: account.providerAccountId,
-            messages: [
-              {
-                type: "text",
-                text: `有新的志工活動申請 ${activity.title} 來自 ${activity.organiser.name} 需要審核囉`,
-              },
-            ],
-          });
-        }
-      }
+      await Promise.all(
+        reviewers
+          .flatMap((reviewer) => reviewer.user.accounts)
+          .map((account) =>
+            ctx.bot.pushMessage({
+              to: account.providerAccountId,
+              messages: [
+                {
+                  type: "text",
+                  text: `有新的志工活動申請 ${activity.title} 來自 ${activity.organiser.name} 需要審核囉`,
+                },
+              ],
+            }),
+          ),
+      );
     }),
 
   approveActivity: protectedProcedure
@@ -226,12 +228,52 @@ export const volunteerActivityRouter = createTRPCRouter({
         throw new Error("Only organizer or admin can advertise activities");
       }
 
+      const targets = await ctx.db.activityAdvertisingTarget.findMany();
+
+      await Promise.all(
+        targets.map((target) =>
+          ctx.bot.pushMessage({
+            to: target.lineId,
+            messages: [
+              {
+                type: "text",
+                text: `有新的志工活動 ${activity.title}，快來報名吧！`,
+              },
+            ],
+          }),
+        ),
+      );
+    }),
+
+  participateActivity: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const activity = await ctx.db.volunteerActivity.update({
+        where: { id: input.activityId },
+        data: {
+          participants: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+      });
+
+      const lineAccount = await ctx.db.account.findFirstOrThrow({
+        select: { providerAccountId: true },
+        where: { userId: activity.organiserId, provider: "line" },
+      });
+
       await ctx.bot.pushMessage({
-        to: "U2e7b3e36921c71636fb4ab3ee49baa62",
+        to: lineAccount.providerAccountId,
         messages: [
           {
             type: "text",
-            text: `有新的志工活動 ${activity.title} ，快來報名吧！`,
+            text: `${ctx.session.user.name} 報名了你主辦的志工活動 ${activity.title}！`,
           },
         ],
       });

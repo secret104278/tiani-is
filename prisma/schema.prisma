@@ -67,8 +67,11 @@ model User {
 
     role Role @default(USER)
 
-    VolunteerActivity VolunteerActivity[]
-    ActivityReviewer  ActivityReviewer?
+    organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
+
+    participatedVolunteerActivites VolunteerActivity[] @relation("ParticipatedVolunteerActivites")
+
+    activityReviewer ActivityReviewer?
 }
 
 model VerificationToken {
@@ -92,8 +95,10 @@ model VolunteerActivity {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    organiser   User   @relation(fields: [organiserId], references: [id])
+    organiser   User   @relation("OrganizedVolunteerActivites", fields: [organiserId], references: [id])
     organiserId String
+
+    participants User[] @relation("ParticipatedVolunteerActivites")
 }
 
 enum VolunteerActivityStatus {
@@ -107,4 +112,8 @@ model ActivityReviewer {
 
     user   User   @relation(fields: [userId], references: [id])
     userId String @unique
+}
+
+model ActivityAdvertisingTarget {
+    lineId String @id
 }

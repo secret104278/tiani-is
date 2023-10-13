@@ -38,9 +38,15 @@ export default function VolunteerActivityDetailPage() {
     api.volunteerActivity.sendActivityAdvertisement.useMutation({
       onSettled: () => refetch(),
     });
+
   const { mutate: deleteActivity } =
     api.volunteerActivity.deleteActivity.useMutation({
       onSuccess: () => router.push(`/`),
+    });
+
+  const { mutate: participateActivity } =
+    api.volunteerActivity.participateActivity.useMutation({
+      onSuccess: () => refetch(),
     });
 
   if (!isNil(error)) {
@@ -109,6 +115,12 @@ export default function VolunteerActivityDetailPage() {
             推送 Line 通知
           </button>
         )}
+      <button
+        className="btn"
+        onClick={() => participateActivity({ activityId: activity.id })}
+      >
+        報名
+      </button>
 
       <ul className="list-disc">
         <li>需求人數：{activity.headcount}</li>
