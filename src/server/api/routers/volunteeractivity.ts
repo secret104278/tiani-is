@@ -136,15 +136,42 @@ export const volunteerActivityRouter = createTRPCRouter({
         throw new Error("Only organizer can send review notification");
       }
 
-      await ctx.bot.pushMessage({
-        to: "U2e7b3e36921c71636fb4ab3ee49baa62",
-        messages: [
-          {
-            type: "text",
-            text: `有新的志工活動申請 ${activity.title} 來自 ${activity.organiser.name} 需要審核囉`,
+      const reviewers = await ctx.db.activityReviewer.findMany({
+        select: {
+          user: {
+            select: {
+              accounts: {
+                select: {
+                  providerAccountId: true,
+                },
+              },
+            },
           },
-        ],
+        },
+        where: {
+          user: {
+            accounts: {
+              every: {
+                provider: "line",
+              },
+            },
+          },
+        },
       });
+
+      for (const reviewer of reviewers) {
+        for (const account of reviewer.user.accounts) {
+          await ctx.bot.pushMessage({
+            to: account.providerAccountId,
+            messages: [
+              {
+                type: "text",
+                text: `有新的志工活動申請 ${activity.title} 來自 ${activity.organiser.name} 需要審核囉`,
+              },
+            ],
+          });
+        }
+      }
     }),
 
   approveActivity: protectedProcedure
