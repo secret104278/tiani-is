@@ -7,13 +7,14 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    DATABASE_URL: z
+    DATABASE_PRISMA_URL: z
       .string()
       .url()
       .refine(
         (str) => !str.includes("YOUR_MYSQL_URL_HERE"),
         "You forgot to change the default URL",
       ),
+    DATABASE_URL_NON_POOLING: z.string().url(),
     LINE_BOT_CHANNEL_ACCESS_TOKEN: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -48,7 +49,8 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
+    DATABASE_PRISMA_URL: process.env.DATABASE_PRISMA_URL,
+    DATABASE_URL_NON_POOLING: process.env.DATABASE_URL_NON_POOLING,
     LINE_BOT_CHANNEL_ACCESS_TOKEN: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,

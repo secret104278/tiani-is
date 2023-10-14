@@ -110,6 +110,12 @@ export const volunteerActivityRouter = createTRPCRouter({
       return { activity: res, isParticipant: isParticipant };
     }),
 
+  getAllActivities: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx }) => {
+      return await ctx.db.volunteerActivity.findMany({});
+    }),
+
   getOrganizedActivities: protectedProcedure
     .input(z.object({}))
     .query(async ({ ctx }) => {

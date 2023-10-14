@@ -9,7 +9,6 @@ import {
 } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
 import ReactiveButton from "~/components/ReactiveButton";
@@ -194,7 +193,7 @@ export default function VolunteerActivityDetailPage() {
           </form>
         </dialog>
       </div>
-      <div className="collapse collapse-arrow  bg-base-200">
+      <div className="collapse-arrow collapse  bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -206,7 +205,7 @@ export default function VolunteerActivityDetailPage() {
                 {participant.image ? (
                   <div className="avatar mr-2">
                     <div className="w-8 rounded-full">
-                      <Image src={participant.image} alt="" />
+                      <img src={participant.image} />
                     </div>
                   </div>
                 ) : (

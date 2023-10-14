@@ -10,7 +10,7 @@ import { api } from "~/utils/api";
 
 export default function Home() {
   const { data: activities, isLoading } =
-    api.volunteerActivity.getOrganizedActivities.useQuery({});
+    api.volunteerActivity.getAllActivities.useQuery({});
 
   const onGoingActivities = activities?.filter(
     (activity) => activity.endDateTime > new Date(),
