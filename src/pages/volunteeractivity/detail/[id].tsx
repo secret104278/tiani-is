@@ -9,8 +9,10 @@ import {
 } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
+import ReactiveButton from "~/components/ReactiveButton";
 import { api } from "~/utils/api";
 
 export default function VolunteerActivityDetailPage() {
@@ -26,40 +28,55 @@ export default function VolunteerActivityDetailPage() {
 
   const { activity, isParticipant } = data ?? {};
 
-  const { mutate: submitActivityForReview } =
-    api.volunteerActivity.submitActivityForReview.useMutation({
-      onSettled: () => refetch(),
-    });
+  const {
+    mutate: submitActivityForReview,
+    isLoading: submitActivityForReviewIsLoading,
+  } = api.volunteerActivity.submitActivityForReview.useMutation({
+    onSettled: () => refetch(),
+  });
 
-  const { mutate: sendReviewNotification } =
-    api.volunteerActivity.sendReviewNotification.useMutation({
-      onSettled: () => refetch(),
-    });
+  const {
+    mutate: sendReviewNotification,
+    isLoading: sendReviewNotificationIsLoading,
+    isSuccess: sendReviewNotificationIsSuccess,
+    isError: sendReviewNotificationIsError,
+  } = api.volunteerActivity.sendReviewNotification.useMutation();
 
-  const { mutate: approveActivity } =
+  const { mutate: approveActivity, isLoading: approveActivityIsLoading } =
     api.volunteerActivity.approveActivity.useMutation({
       onSettled: () => refetch(),
     });
 
-  const { mutate: sendActivityAdvertisement } =
-    api.volunteerActivity.sendActivityAdvertisement.useMutation({
-      onSettled: () => refetch(),
-    });
+  const {
+    mutate: sendActivityAdvertisement,
+    isLoading: sendActivityAdvertisementIsLoading,
+    isSuccess: sendActivityAdvertisementIsSuccess,
+    isError: sendActivityAdvertisementIsError,
+  } = api.volunteerActivity.sendActivityAdvertisement.useMutation();
 
-  const { mutate: deleteActivity } =
-    api.volunteerActivity.deleteActivity.useMutation({
-      onSuccess: () => router.push(`/`),
-    });
+  const {
+    mutate: deleteActivity,
+    isLoading: deleteActivityIsLoading,
+    isError: deleteActivityIsError,
+  } = api.volunteerActivity.deleteActivity.useMutation({
+    onSuccess: () => router.push(`/`),
+  });
 
-  const { mutate: participateActivity } =
-    api.volunteerActivity.participateActivity.useMutation({
-      onSuccess: () => refetch(),
-    });
+  const {
+    mutate: participateActivity,
+    isLoading: participateActivityIsLoading,
+    isError: participateActivityIsError,
+  } = api.volunteerActivity.participateActivity.useMutation({
+    onSuccess: () => refetch(),
+  });
 
-  const { mutate: leaveActivity } =
-    api.volunteerActivity.leaveActivity.useMutation({
-      onSuccess: () => refetch(),
-    });
+  const {
+    mutate: leaveActivity,
+    isLoading: leaveActivityIsLoading,
+    isError: leaveActivityIsError,
+  } = api.volunteerActivity.leaveActivity.useMutation({
+    onSuccess: () => refetch(),
+  });
 
   if (!isNil(error)) {
     return <AlertWarning>{error.message}</AlertWarning>;
@@ -71,48 +88,58 @@ export default function VolunteerActivityDetailPage() {
   const isManager =
     session?.user.role === "ADMIN" || session?.user.id == activity.organiserId;
 
+  const isEnded = activity.endDateTime <= new Date();
+
   const FlowControl = () => {
     if (activity.status === "DRAFT")
       return (
-        <button
+        <ReactiveButton
           className="btn"
           onClick={() => submitActivityForReview({ activityId: activity.id })}
+          loading={submitActivityForReviewIsLoading}
         >
           送出申請
-        </button>
+        </ReactiveButton>
       );
 
     if (activity.status === "INREVIEW") {
       if (session?.user.role === "USER")
         return (
-          <button
+          <ReactiveButton
             className="btn"
+            loading={sendReviewNotificationIsLoading}
+            isSuccess={sendReviewNotificationIsSuccess}
+            isError={sendReviewNotificationIsError}
             onClick={() => sendReviewNotification({ activityId: activity.id })}
           >
             <BellAlertIcon className="h-4 w-4" />
             提醒審核
-          </button>
+          </ReactiveButton>
         );
 
       if (session?.user.role === "ADMIN")
         return (
-          <button
+          <ReactiveButton
             className="btn"
+            loading={approveActivityIsLoading}
             onClick={() => approveActivity({ activityId: activity.id })}
           >
             核准
-          </button>
+          </ReactiveButton>
         );
     }
 
     if (activity.status === "PUBLISHED")
       return (
-        <button
+        <ReactiveButton
           className="btn bg-green-500"
           onClick={() => sendActivityAdvertisement({ activityId: activity.id })}
+          loading={sendActivityAdvertisementIsLoading}
+          isSuccess={sendActivityAdvertisementIsSuccess}
+          isError={sendActivityAdvertisementIsError}
         >
           推送 Line 通知
-        </button>
+        </ReactiveButton>
       );
   };
 
@@ -120,7 +147,7 @@ export default function VolunteerActivityDetailPage() {
     <>
       <div className="divider">活動管理</div>
       <div className="flex flex-row space-x-2">
-        <FlowControl />
+        {!isEnded && <FlowControl />}
         <div className="grow" />
         <button
           className="btn"
@@ -131,20 +158,41 @@ export default function VolunteerActivityDetailPage() {
           <PencilSquareIcon className="h-4 w-4" />
           編輯
         </button>
-        <button
+        <ReactiveButton
           className="btn btn-warning"
-          onClick={() => deleteActivity({ id: activity.id })}
+          loading={deleteActivityIsLoading}
+          isError={deleteActivityIsError}
+          onClick={() =>
+            void (
+              document.getElementById(
+                "confirm_delete_modal",
+              ) as HTMLDialogElement
+            ).showModal()
+          }
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="h-5 w-5"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </svg>
+          <TrashIcon className="h-4 w-4" />
           撤銷
-        </button>
+        </ReactiveButton>
+        <dialog id="confirm_delete_modal" className="modal">
+          <div className="modal-box">
+            <h3 className="text-lg font-bold">確認撤銷</h3>
+            <p className="py-4">活動撤銷後就無法復原囉！</p>
+            <div className="modal-action">
+              <form method="dialog" className="space-x-2">
+                <button className="btn">取消</button>
+                <button
+                  className="btn btn-error"
+                  onClick={() => deleteActivity({ id: activity.id })}
+                >
+                  撤銷
+                </button>
+              </form>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
       </div>
       <div className="collapse collapse-arrow  bg-base-200">
         <input type="checkbox" />
@@ -155,11 +203,19 @@ export default function VolunteerActivityDetailPage() {
           <ul className="space-y-2">
             {activity.participants.map((participant) => (
               <li key={participant.id} className="flex items-center">
-                <div className="avatar mr-2">
-                  <div className="w-8 rounded-full">
-                    <img src={participant.image} />
+                {participant.image ? (
+                  <div className="avatar mr-2">
+                    <div className="w-8 rounded-full">
+                      <Image src={participant.image} alt="" />
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="avatar placeholder mr-2">
+                    <div className="w-8 rounded-full bg-neutral-focus text-neutral-content">
+                      <span>{participant.name?.charAt(0)}</span>
+                    </div>
+                  </div>
+                )}
                 {participant.name}
               </li>
             ))}
@@ -171,6 +227,19 @@ export default function VolunteerActivityDetailPage() {
   );
 
   const ParticipateControl = () => {
+    if (isParticipant)
+      return (
+        <ReactiveButton
+          className="btn btn-secondary"
+          onClick={() => leaveActivity({ activityId: activity.id })}
+          loading={leaveActivityIsLoading}
+          isError={leaveActivityIsError}
+        >
+          <UserPlusIcon className="h-4 w-4" />
+          取消報名
+        </ReactiveButton>
+      );
+
     if (activity.participants.length >= activity.headcount)
       return (
         <button className="btn btn-disabled">
@@ -179,25 +248,16 @@ export default function VolunteerActivityDetailPage() {
         </button>
       );
 
-    if (isParticipant)
-      return (
-        <button
-          className="btn btn-secondary"
-          onClick={() => leaveActivity({ activityId: activity.id })}
-        >
-          <UserPlusIcon className="h-4 w-4" />
-          取消報名
-        </button>
-      );
-
     return (
-      <button
+      <ReactiveButton
         className="btn btn-accent"
         onClick={() => participateActivity({ activityId: activity.id })}
+        loading={participateActivityIsLoading}
+        isError={participateActivityIsError}
       >
         <UserPlusIcon className="h-4 w-4" />
         報名
-      </button>
+      </ReactiveButton>
     );
   };
 

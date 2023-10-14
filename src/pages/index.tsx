@@ -1,18 +1,23 @@
-import { PlusIcon } from "@heroicons/react/20/solid";
+import {
+  ClockIcon,
+  MapPinIcon,
+  PlusIcon,
+  UsersIcon,
+} from "@heroicons/react/20/solid";
 import { orderBy } from "lodash";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "~/utils/api";
 
 export default function Home() {
-  const { data: sessionData } = useSession();
-
   const { data: activities, isLoading } =
     api.volunteerActivity.getOrganizedActivities.useQuery({});
 
-  if (!sessionData) {
-    return <span className="loading loading-ring loading-md"></span>;
-  }
+  const onGoingActivities = activities?.filter(
+    (activity) => activity.endDateTime > new Date(),
+  );
+  const endedActivities = activities?.filter(
+    (activity) => activity.endDateTime <= new Date(),
+  );
 
   return (
     <div className="flex flex-col space-y-4">
@@ -31,19 +36,55 @@ export default function Home() {
         {isLoading && <div className="loading loading-lg"></div>}
         <div className="divider">即將到達</div>
         <div className="flex flex-col space-y-4">
-          {orderBy(activities, "startDateTime", "desc")?.map((activity) => (
-            <Link
-              key={activity.id}
-              href={`/volunteeractivity/detail/${activity.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              <div className="card card-compact w-full bg-neutral text-neutral-content shadow-xl">
-                <div className="card-body">
-                  <h2 className="card-title">{activity.title}</h2>
+          {orderBy(onGoingActivities, "startDateTime", "desc")?.map(
+            (activity) => (
+              <Link
+                key={activity.id}
+                href={`/volunteeractivity/detail/${activity.id}`}
+                style={{ textDecoration: "none" }}
+              >
+                <div className="card card-compact w-full bg-accent text-accent-content shadow-xl">
+                  <div className="card-body">
+                    <h2 className="card-title">{activity.title}</h2>
+                    <div className="flex items-center">
+                      <UsersIcon className="mr-1 h-4 w-4" />
+                      <p>人數：{activity.headcount} 人</p>
+                    </div>
+                    <div className="flex items-center">
+                      <MapPinIcon className="mr-1 h-4 w-4" />
+                      <p>地點：{activity.location}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <ClockIcon className="mr-1 h-4 w-4" />
+                      <p>開始：{activity.startDateTime.toLocaleString()}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <ClockIcon className="mr-1 h-4 w-4" />
+                      <p>結束：{activity.endDateTime.toLocaleString()}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ),
+          )}
+        </div>
+        <div className="divider">已結束</div>
+        <div className="flex flex-col space-y-4">
+          {orderBy(endedActivities, "startDateTime", "desc")?.map(
+            (activity) => (
+              <Link
+                key={activity.id}
+                href={`/volunteeractivity/detail/${activity.id}`}
+                style={{ textDecoration: "none" }}
+              >
+                <div className="card-compact card w-full bg-base-200 shadow-xl">
+                  <div className="card-body">
+                    <h2 className="card-title">{activity.title}</h2>
+                  </div>
+                </div>
+              </Link>
+            ),
+          )}
         </div>
       </div>
     </div>

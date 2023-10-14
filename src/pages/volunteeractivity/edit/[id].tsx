@@ -8,13 +8,13 @@ export default function EditVolunteerActivityPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const {
-    data: activity,
-    isLoading,
-    error,
-  } = api.volunteerActivity.getActivity.useQuery({
-    id: Number(id),
-  });
+  const { data, isLoading, error } = api.volunteerActivity.getActivity.useQuery(
+    {
+      id: Number(id),
+    },
+  );
+
+  const { activity } = data ?? {};
 
   if (!isNil(error)) {
     return <AlertWarning>{error.message}</AlertWarning>;
@@ -28,6 +28,7 @@ export default function EditVolunteerActivityPage() {
       <article className="prose">
         <h1>{activity.title}</h1>
       </article>
+
       <VolunteerActivityForm defaultActivity={activity} />
     </div>
   );

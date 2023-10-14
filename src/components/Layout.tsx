@@ -53,10 +53,10 @@ export default function Layout({ children }: { children: ReactNode }) {
             </label>
             <ul
               tabIndex={0}
-              className="menu dropdown-content rounded-box menu-sm z-[1] mt-3 w-52 bg-base-100 p-2 shadow"
+              className="menu dropdown-content rounded-box z-[1] mt-3 w-52 bg-base-100 p-2 shadow-xl outline outline-1 outline-base-200"
             >
               <li>
-                <a onClick={() => void signOut()}>Logout</a>
+                <a onClick={() => void signOut()}>登出</a>
               </li>
             </ul>
           </div>

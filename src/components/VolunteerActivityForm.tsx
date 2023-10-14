@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { api } from "~/utils/api";
 import { AlertWarning } from "./Alert";
+import ReactiveButton from "./ReactiveButton";
 
 type VolunteerActivityFormData = {
   id: number;
@@ -14,7 +15,7 @@ type VolunteerActivityFormData = {
   location: string;
   startDateTime: Date;
   endDateTime: Date;
-  description: string;
+  description: string | null;
   status: VolunteerActivityStatus;
 };
 
@@ -89,12 +90,6 @@ export default function VolunteerActivityForm({
 
   return (
     <div>
-      {!isNil(createActivityError) && (
-        <AlertWarning>{createActivityError.message}</AlertWarning>
-      )}
-      {!isNil(updateActivityError) && (
-        <AlertWarning>{updateActivityError.message}</AlertWarning>
-      )}
       <form className="form-control max-w-xs">
         <div hidden={!isNil(defaultActivity)}>
           <label className="label">
@@ -114,6 +109,7 @@ export default function VolunteerActivityForm({
           </label>
           <input
             type="number"
+            inputMode="numeric"
             className="input input-bordered w-full invalid:input-error"
             required
             defaultValue={defaultActivity?.headcount}
@@ -172,34 +168,38 @@ export default function VolunteerActivityForm({
           </label>
           <textarea
             className="textarea textarea-bordered textarea-lg w-full"
-            defaultValue={defaultActivity?.description}
+            defaultValue={defaultActivity?.description ?? ""}
             {...register("description")}
           ></textarea>
         </div>
         <div className="divider"></div>
-        {createActivityIsLoading || updateActivityIsLoading ? (
-          <div className="loading"></div>
-        ) : (
-          <div className="flex flex-row justify-end space-x-4">
-            {canSaveDraft && (
-              <button
-                className="btn"
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onClick={_hadleSubmit(true)}
-              >
-                保存草稿
-              </button>
-            )}
-
-            <button
-              className="btn btn-primary"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={_hadleSubmit()}
-            >
-              送出
-            </button>
-          </div>
+        {!isNil(createActivityError) && (
+          <AlertWarning>{createActivityError.message}</AlertWarning>
         )}
+        {!isNil(updateActivityError) && (
+          <AlertWarning>{updateActivityError.message}</AlertWarning>
+        )}
+        <div className="flex flex-row justify-end space-x-4">
+          {canSaveDraft && (
+            <ReactiveButton
+              className="btn"
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onClick={_hadleSubmit(true)}
+              loading={createActivityIsLoading || updateActivityIsLoading}
+            >
+              保存草稿
+            </ReactiveButton>
+          )}
+
+          <ReactiveButton
+            className="btn btn-primary"
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onClick={_hadleSubmit()}
+            loading={createActivityIsLoading || updateActivityIsLoading}
+          >
+            送出
+          </ReactiveButton>
+        </div>
       </form>
     </div>
   );
