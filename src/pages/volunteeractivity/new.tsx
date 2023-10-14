@@ -2,9 +2,11 @@ import VolunteerActivityForm from "~/components/VolunteerActivityForm";
 
 export default function NewVolunteerActivityPage() {
   return (
-    <>
-      <h1>建立新活動</h1>
+    <div className="flex flex-col space-y-4">
+      <article className="prose">
+        <h1>建立新活動</h1>
+      </article>
       <VolunteerActivityForm />
-    </>
+    </div>
   );
 }

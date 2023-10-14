@@ -88,7 +88,7 @@ export default function VolunteerActivityForm({
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   return (
-    <>
+    <div>
       {!isNil(createActivityError) && (
         <AlertWarning>{createActivityError.message}</AlertWarning>
       )}
@@ -172,6 +172,7 @@ export default function VolunteerActivityForm({
           </label>
           <textarea
             className="textarea textarea-bordered textarea-lg w-full"
+            defaultValue={defaultActivity?.description}
             {...register("description")}
           ></textarea>
         </div>
@@ -179,7 +180,7 @@ export default function VolunteerActivityForm({
         {createActivityIsLoading || updateActivityIsLoading ? (
           <div className="loading"></div>
         ) : (
-          <div>
+          <div className="flex flex-row justify-end space-x-4">
             {canSaveDraft && (
               <button
                 className="btn"
@@ -200,6 +201,6 @@ export default function VolunteerActivityForm({
           </div>
         )}
       </form>
-    </>
+    </div>
   );
 }

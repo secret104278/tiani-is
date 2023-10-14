@@ -80,11 +80,34 @@ export const volunteerActivityRouter = createTRPCRouter({
     }),
 
   getActivity: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(
+      z.object({
+        id: z.number(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.volunteerActivity.findUnique({
+      const res = await ctx.db.volunteerActivity.findUnique({
         where: { id: input.id },
+        include: {
+          organiser: true,
+          participants: true,
+        },
       });
+
+      const isParticipant =
+        res?.participants.find((p) => p.id === ctx.session.user.id) !==
+        undefined;
+
+      if (
+        res &&
+        ctx.session.user.id !== res.organiserId &&
+        ctx.session.user.role !== "ADMIN"
+      ) {
+        // always join participants and hide participants if not organizer for convenience
+        res.participants = [];
+      }
+
+      return { activity: res, isParticipant: isParticipant };
     }),
 
   getOrganizedActivities: protectedProcedure
@@ -274,6 +297,40 @@ export const volunteerActivityRouter = createTRPCRouter({
           {
             type: "text",
             text: `${ctx.session.user.name} 報名了你主辦的志工活動 ${activity.title}！`,
+          },
+        ],
+      });
+    }),
+
+  leaveActivity: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const activity = await ctx.db.volunteerActivity.update({
+        where: { id: input.activityId },
+        data: {
+          participants: {
+            disconnect: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+      });
+
+      const lineAccount = await ctx.db.account.findFirstOrThrow({
+        select: { providerAccountId: true },
+        where: { userId: activity.organiserId, provider: "line" },
+      });
+
+      await ctx.bot.pushMessage({
+        to: lineAccount.providerAccountId,
+        messages: [
+          {
+            type: "text",
+            text: `${ctx.session.user.name} 取消報名了你主辦的志工活動 ${activity.title}！`,
           },
         ],
       });

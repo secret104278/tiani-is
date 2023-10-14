@@ -62,9 +62,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="container mx-auto px-4">
-        <article className="prose lg:prose-xl">{children}</article>
-      </div>
+      <div className="mx-auto max-w-xl px-4 pb-16">{children}</div>
+      {/* <div className="container mx-auto w-full px-4"></div> */}
     </>
   );
 }

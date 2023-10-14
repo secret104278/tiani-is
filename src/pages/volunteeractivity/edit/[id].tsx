@@ -24,9 +24,11 @@ export default function EditVolunteerActivityPage() {
   if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
 
   return (
-    <>
-      <h1>{activity.title}</h1>
+    <div className="flex flex-col space-y-4">
+      <article className="prose">
+        <h1>{activity.title}</h1>
+      </article>
       <VolunteerActivityForm defaultActivity={activity} />
-    </>
+    </div>
   );
 }
