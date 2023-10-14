@@ -116,5 +116,5 @@ model ActivityReviewer {
 }
 
 model ActivityAdvertisingTarget {
-    lineId String @id
+    lineId String @id @unique
 }

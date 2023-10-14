@@ -4,7 +4,7 @@ export default function NewVolunteerActivityPage() {
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
-        <h1>建立新活動</h1>
+        <h1>建立新工作</h1>
       </article>
       <VolunteerActivityForm />
     </div>

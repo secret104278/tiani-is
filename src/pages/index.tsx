@@ -22,13 +22,13 @@ export default function Home() {
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
-        <h1>志工活動</h1>
+        <h1>工作總覽</h1>
       </article>
       <div className="flex flex-row justify-end">
         <Link href="/volunteeractivity/new">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
-            建立新活動
+            建立新工作
           </div>
         </Link>
       </div>
@@ -36,14 +36,14 @@ export default function Home() {
         {isLoading && <div className="loading loading-lg"></div>}
         <div className="divider">即將到達</div>
         <div className="flex flex-col space-y-4">
-          {orderBy(onGoingActivities, "startDateTime", "desc")?.map(
+          {orderBy(onGoingActivities, "startDateTime", "asc")?.map(
             (activity) => (
               <Link
                 key={activity.id}
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card card-compact w-full bg-accent text-accent-content shadow-xl">
+                <div className="card-compact card w-full bg-accent text-accent-content shadow-xl">
                   <div className="card-body">
                     <h2 className="card-title">{activity.title}</h2>
                     <div className="flex items-center">

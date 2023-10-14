@@ -113,7 +113,15 @@ export const volunteerActivityRouter = createTRPCRouter({
   getAllActivities: protectedProcedure
     .input(z.object({}))
     .query(async ({ ctx }) => {
-      return await ctx.db.volunteerActivity.findMany({});
+      if (ctx.session.user.role === "ADMIN") {
+        return await ctx.db.volunteerActivity.findMany({});
+      }
+
+      return await ctx.db.volunteerActivity.findMany({
+        where: {
+          OR: [{ status: "PUBLISHED" }, { organiserId: ctx.session.user.id }],
+        },
+      });
     }),
 
   getOrganizedActivities: protectedProcedure
