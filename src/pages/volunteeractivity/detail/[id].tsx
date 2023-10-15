@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
 import ReactiveButton from "~/components/ReactiveButton";
 import { api } from "~/utils/api";
+import { getActivityStatusText } from "~/utils/ui";
 
 export default function VolunteerActivityDetailPage() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function VolunteerActivityDetailPage() {
   }
 
   if (isLoading) return <div className="loading"></div>;
-  if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
+  if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   const isManager =
     session?.user.role === "ADMIN" || session?.user.id == activity.organiserId;
@@ -144,7 +145,12 @@ export default function VolunteerActivityDetailPage() {
 
   const AdminPanel = () => (
     <>
-      <div className="divider">活動管理</div>
+      <div className="divider">工作管理</div>
+      <div className="flex flex-row justify-end">
+        <div className="badge badge-primary">
+          {getActivityStatusText(activity.status)}
+        </div>
+      </div>
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
@@ -175,7 +181,7 @@ export default function VolunteerActivityDetailPage() {
         <dialog id="confirm_delete_modal" className="modal">
           <div className="modal-box">
             <h3 className="text-lg font-bold">確認撤銷</h3>
-            <p className="py-4">活動撤銷後就無法復原囉！</p>
+            <p className="py-4">工作撤銷後就無法復原囉！</p>
             <div className="modal-action">
               <form method="dialog" className="space-x-2">
                 <button className="btn">取消</button>
@@ -193,7 +199,7 @@ export default function VolunteerActivityDetailPage() {
           </form>
         </dialog>
       </div>
-      <div className="collapse-arrow collapse  bg-base-200">
+      <div className="collapse collapse-arrow  bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -266,6 +272,11 @@ export default function VolunteerActivityDetailPage() {
       <article className="prose">
         <h1>{activity.title}</h1>
       </article>
+      {isParticipant && (
+        <div className="flex justify-end">
+          <div className="badge badge-neutral">已報名</div>
+        </div>
+      )}
       {isManager && <AdminPanel />}
       <div className="flex flex-col space-y-2 align-bottom">
         <p>發起人：{activity.organiser.name}</p>

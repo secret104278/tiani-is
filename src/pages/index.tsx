@@ -7,6 +7,7 @@ import {
 import { orderBy } from "lodash";
 import Link from "next/link";
 import { api } from "~/utils/api";
+import { getActivityStatusText } from "~/utils/ui";
 
 export default function Home() {
   const { data: activities, isLoading } =
@@ -43,9 +44,14 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card-compact card w-full bg-accent text-accent-content shadow-xl">
+                <div className="card card-compact w-full bg-accent text-accent-content shadow-xl">
                   <div className="card-body">
-                    <h2 className="card-title">{activity.title}</h2>
+                    <div className="flex flex-row items-center justify-between">
+                      <h2 className="card-title">{activity.title}</h2>
+                      <div className="badge badge-outline">
+                        {getActivityStatusText(activity.status)}
+                      </div>
+                    </div>
                     <div className="flex items-center">
                       <UsersIcon className="mr-1 h-4 w-4" />
                       <p>人數：{activity.headcount} 人</p>

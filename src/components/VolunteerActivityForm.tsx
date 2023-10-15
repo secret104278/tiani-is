@@ -41,6 +41,12 @@ export default function VolunteerActivityForm({
     onSuccess: (data) => router.push(`/volunteeractivity/detail/${data.id}`),
   });
 
+  const toDuration = (startDateTime: Date, endDateTime: Date) =>
+    (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
+
+  const getEndTime = (startDateTime: Date, duration: number) =>
+    new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
+
   const _hadleSubmit = (isDraft = false) => {
     if (defaultActivity) {
       return handleSubmit((data) =>
@@ -50,7 +56,10 @@ export default function VolunteerActivityForm({
           headcount: data.headcount,
           location: data.location,
           startDateTime: data.startDateTime,
-          endDateTime: data.endDateTime,
+          endDateTime: getEndTime(
+            data.startDateTime as Date,
+            data.duration as number,
+          ),
           description: data.description,
           isDraft: isDraft,
         }),
@@ -63,7 +72,10 @@ export default function VolunteerActivityForm({
         headcount: data.headcount,
         location: data.location,
         startDateTime: data.startDateTime,
-        endDateTime: data.endDateTime,
+        endDateTime: getEndTime(
+          data.startDateTime as Date,
+          data.duration as number,
+        ),
         description: data.description,
         isDraft: isDraft,
       }),
@@ -147,18 +159,23 @@ export default function VolunteerActivityForm({
         </div>
         <div>
           <label className="label">
-            <span className="label-text">預估結束時間</span>
+            <span className="label-text">預估時數</span>
           </label>
           <input
-            type="datetime-local"
+            type="number"
+            inputMode="decimal"
             className="input input-bordered w-full invalid:input-error"
-            defaultValue={
-              defaultActivity?.endDateTime
-                ? getDateTimeString(defaultActivity.endDateTime)
-                : getCurrentDateTime(60)
-            }
+            step="0.1"
             required
-            {...register("endDateTime", { valueAsDate: true })}
+            defaultValue={
+              defaultActivity
+                ? toDuration(
+                    defaultActivity.startDateTime,
+                    defaultActivity.endDateTime,
+                  )
+                : 1
+            }
+            {...register("duration", { valueAsNumber: true })}
           />
         </div>
         <div className="divider"></div>

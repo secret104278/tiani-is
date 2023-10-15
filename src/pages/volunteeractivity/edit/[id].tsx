@@ -21,7 +21,7 @@ export default function EditVolunteerActivityPage() {
   }
 
   if (isLoading) return <div className="loading"></div>;
-  if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
+  if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   return (
     <div className="flex flex-col space-y-4">

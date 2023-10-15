@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getActivityDetailURL } from "~/utils/url";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const volunteerActivityRouter = createTRPCRouter({
@@ -98,11 +99,15 @@ export const volunteerActivityRouter = createTRPCRouter({
         res?.participants.find((p) => p.id === ctx.session.user.id) !==
         undefined;
 
-      if (
+      const isManager =
         res &&
-        ctx.session.user.id !== res.organiserId &&
-        ctx.session.user.role !== "ADMIN"
-      ) {
+        (ctx.session.user.id === res.organiserId ||
+          ctx.session.user.role === "ADMIN");
+
+      if (res?.status !== "PUBLISHED" && !isManager)
+        return { activity: null, isParticipant: false };
+
+      if (!isManager) {
         // always join participants and hide participants if not organizer for convenience
         res.participants = [];
       }
@@ -205,7 +210,9 @@ export const volunteerActivityRouter = createTRPCRouter({
               messages: [
                 {
                   type: "text",
-                  text: `有新的志工活動申請 ${activity.title} 來自 ${activity.organiser.name} 需要審核囉`,
+                  text: `有新的志工工作申請 ${activity.title} 來自 ${
+                    activity.organiser.name
+                  } 需要審核囉！\n${getActivityDetailURL(input.activityId)}`,
                 },
               ],
             }),
@@ -241,7 +248,9 @@ export const volunteerActivityRouter = createTRPCRouter({
         messages: [
           {
             type: "text",
-            text: `你的志工活動申請 ${activity.title} 已經通過審核囉`,
+            text: `你的志工工作申請 ${
+              activity.title
+            } 已經通過審核囉！\n${getActivityDetailURL(input.activityId)}`,
           },
         ],
       });
@@ -274,7 +283,9 @@ export const volunteerActivityRouter = createTRPCRouter({
             messages: [
               {
                 type: "text",
-                text: `有新的志工活動 ${activity.title}，快來報名吧！`,
+                text: `有新的志工工作 ${
+                  activity.title
+                }，快來報名吧！\n${getActivityDetailURL(input.activityId)}`,
               },
             ],
           }),
@@ -310,7 +321,9 @@ export const volunteerActivityRouter = createTRPCRouter({
         messages: [
           {
             type: "text",
-            text: `${ctx.session.user.name} 報名了你主辦的志工活動 ${activity.title}！`,
+            text: `${ctx.session.user.name} 報名了你主辦的志工工作 ${
+              activity.title
+            }！\n${getActivityDetailURL(input.activityId)}`,
           },
         ],
       });
@@ -344,7 +357,9 @@ export const volunteerActivityRouter = createTRPCRouter({
         messages: [
           {
             type: "text",
-            text: `${ctx.session.user.name} 取消報名了你主辦的志工活動 ${activity.title}！`,
+            text: `${ctx.session.user.name} 取消報名了你主辦的志工工作 ${
+              activity.title
+            }！\n${getActivityDetailURL(input.activityId)}`,
           },
         ],
       });
