@@ -1,30 +1,101 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { VolunteerActivityStatus } from "@prisma/client";
+import type { $Enums } from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { api } from "~/utils/api";
+import {
+  VOLUNTEER_ACTIVITY_TOPICS,
+  VOLUNTEER_ACTIVITY_TOPIC_OTHER,
+} from "~/utils/ui";
 import { AlertWarning } from "./Alert";
 import ReactiveButton from "./ReactiveButton";
 
 type VolunteerActivityFormData = {
-  id: number;
   title: string;
+  titleOther: string;
   headcount: number;
   location: string;
-  startDateTime: Date;
-  endDateTime: Date;
-  description: string | null;
-  status: VolunteerActivityStatus;
+  startDateTime: Date | string;
+  duration: number;
+  description: string;
+};
+
+const toDuration = (startDateTime: Date, endDateTime: Date) =>
+  (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
+
+const getEndTime = (startDateTime: Date, duration: number) =>
+  new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
+
+const getCurrentDateTime = (offset = 0) => {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset();
+  const offsetMs = (-tzOffset + offset) * 60 * 1000;
+  const localTime = new Date(now.getTime() + offsetMs);
+  return localTime.toISOString().slice(0, 16);
+};
+
+const getDateTimeString = (date: Date) => {
+  const tzOffset = date.getTimezoneOffset();
+  const offsetMs = -tzOffset * 60 * 1000;
+  const localTime = new Date(date.getTime() + offsetMs);
+  return localTime.toISOString().slice(0, 16);
+};
+
+const titleIsOther = (title: string) => {
+  for (const topic of VOLUNTEER_ACTIVITY_TOPICS) {
+    if (topic.options.includes(title)) {
+      return false;
+    }
+  }
+  return true;
 };
 
 export default function VolunteerActivityForm({
   defaultActivity,
 }: {
-  defaultActivity?: VolunteerActivityFormData;
+  defaultActivity?: {
+    id: number;
+    title: string;
+    headcount: number;
+    location: string;
+    startDateTime: Date;
+    endDateTime: Date;
+    description: string | null;
+    status: $Enums.VolunteerActivityStatus;
+  };
 }) {
-  const { register, handleSubmit } = useForm();
+  let formDefaultValues: Partial<VolunteerActivityFormData> = {
+    title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],
+    startDateTime: getCurrentDateTime(),
+    description: "",
+  };
+  if (defaultActivity) {
+    const defaultTitleIsOther = titleIsOther(defaultActivity.title);
+    formDefaultValues = {
+      title: defaultTitleIsOther
+        ? VOLUNTEER_ACTIVITY_TOPIC_OTHER
+        : defaultActivity.title,
+      titleOther: defaultTitleIsOther ? defaultActivity.title : "",
+      headcount: defaultActivity.headcount,
+      location: defaultActivity.location,
+      startDateTime: getDateTimeString(defaultActivity.startDateTime),
+      duration: toDuration(
+        defaultActivity.startDateTime,
+        defaultActivity.endDateTime,
+      ),
+      description: defaultActivity.description ?? "",
+    };
+  }
+
+  const { register, handleSubmit, control } =
+    useForm<VolunteerActivityFormData>({
+      defaultValues: formDefaultValues,
+      mode: "all",
+    });
+  const formTitleValue = useWatch({ control, name: "title" });
+
   const router = useRouter();
   const {
     mutate: createActivity,
@@ -41,25 +112,16 @@ export default function VolunteerActivityForm({
     onSuccess: (data) => router.push(`/volunteeractivity/detail/${data.id}`),
   });
 
-  const toDuration = (startDateTime: Date, endDateTime: Date) =>
-    (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
-
-  const getEndTime = (startDateTime: Date, duration: number) =>
-    new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
-
   const _hadleSubmit = (isDraft = false) => {
     if (defaultActivity) {
       return handleSubmit((data) =>
         updateActivity({
           id: defaultActivity.id,
-          title: data.title,
+          title: titleIsOther(data.title) ? data.titleOther : data.title,
           headcount: data.headcount,
           location: data.location,
-          startDateTime: data.startDateTime,
-          endDateTime: getEndTime(
-            data.startDateTime as Date,
-            data.duration as number,
-          ),
+          startDateTime: data.startDateTime as Date,
+          endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
           isDraft: isDraft,
         }),
@@ -68,33 +130,15 @@ export default function VolunteerActivityForm({
 
     return handleSubmit((data) =>
       createActivity({
-        title: data.title,
+        title: titleIsOther(data.title) ? data.titleOther : data.title,
         headcount: data.headcount,
         location: data.location,
-        startDateTime: data.startDateTime,
-        endDateTime: getEndTime(
-          data.startDateTime as Date,
-          data.duration as number,
-        ),
+        startDateTime: data.startDateTime as Date,
+        endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
         isDraft: isDraft,
       }),
     );
-  };
-
-  const getCurrentDateTime = (offset = 0) => {
-    const now = new Date();
-    const tzOffset = now.getTimezoneOffset();
-    const offsetMs = (-tzOffset + offset) * 60 * 1000;
-    const localTime = new Date(now.getTime() + offsetMs);
-    return localTime.toISOString().slice(0, 16);
-  };
-
-  const getDateTimeString = (date: Date) => {
-    const tzOffset = date.getTimezoneOffset();
-    const offsetMs = -tzOffset * 60 * 1000;
-    const localTime = new Date(date.getTime() + offsetMs);
-    return localTime.toISOString().slice(0, 16);
   };
 
   const canSaveDraft =
@@ -107,12 +151,32 @@ export default function VolunteerActivityForm({
           <label className="label">
             <span className="label-text">主題</span>
           </label>
+          <select
+            className="select select-bordered w-full"
+            required
+            {...register("title")}
+          >
+            {VOLUNTEER_ACTIVITY_TOPICS.map((topic, i) => (
+              <optgroup key={i} label={topic.topic}>
+                {topic.options.map((option, j) => (
+                  <option key={j}>{option}</option>
+                ))}
+              </optgroup>
+            ))}
+            <optgroup label="其他">
+              <option>{VOLUNTEER_ACTIVITY_TOPIC_OTHER}</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text"></span>
+          </label>
           <input
             type="text"
+            hidden={!isNil(defaultActivity) || !titleIsOther(formTitleValue)}
             className="input input-bordered w-full invalid:input-error"
-            required
-            defaultValue={defaultActivity?.title}
-            {...register("title")}
+            {...register("titleOther")}
           />
         </div>
         <div>
@@ -124,7 +188,6 @@ export default function VolunteerActivityForm({
             inputMode="numeric"
             className="input input-bordered w-full invalid:input-error"
             required
-            defaultValue={defaultActivity?.headcount}
             {...register("headcount", { valueAsNumber: true })}
           />
         </div>
@@ -136,7 +199,6 @@ export default function VolunteerActivityForm({
             type="text"
             className="input input-bordered w-full invalid:input-error"
             required
-            defaultValue={defaultActivity?.location}
             {...register("location")}
           />
         </div>
@@ -148,11 +210,6 @@ export default function VolunteerActivityForm({
           <input
             type="datetime-local"
             className="input input-bordered w-full invalid:input-error"
-            defaultValue={
-              defaultActivity?.startDateTime
-                ? getDateTimeString(defaultActivity.startDateTime)
-                : getCurrentDateTime()
-            }
             required
             {...register("startDateTime", { valueAsDate: true })}
           />
@@ -167,14 +224,6 @@ export default function VolunteerActivityForm({
             className="input input-bordered w-full invalid:input-error"
             step="0.1"
             required
-            defaultValue={
-              defaultActivity
-                ? toDuration(
-                    defaultActivity.startDateTime,
-                    defaultActivity.endDateTime,
-                  )
-                : 1
-            }
             {...register("duration", { valueAsNumber: true })}
           />
         </div>
@@ -185,7 +234,6 @@ export default function VolunteerActivityForm({
           </label>
           <textarea
             className="textarea textarea-bordered textarea-lg w-full"
-            defaultValue={defaultActivity?.description ?? ""}
             {...register("description")}
           ></textarea>
         </div>
