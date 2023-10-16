@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="navbar-center">
           <Link href="/">
             <button className="btn btn-ghost text-xl normal-case">
-              天一聖道院
+              天一志工隊
             </button>
           </Link>
         </div>

@@ -16,8 +16,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <>
       <Head>
-        <title>天一聖道院道務系統</title>
-        <meta name="description" content="天一聖道院道務系統" />
+        <title>天一聖道院資訊系統</title>
+        <meta name="description" content="天一聖道院資訊系統" />
         <meta name="theme-color" content="#836b5d" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
