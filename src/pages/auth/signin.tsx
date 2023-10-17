@@ -15,9 +15,9 @@ export default function SinginPage({
   const error = router.query.error && "無法進行登入";
 
   return (
-    <div className="container mx-auto w-96">
+    <div className="container mx-auto">
       <div className="card bg-base-100 shadow-xl">
-        <div className="card-body mx-auto flex w-80 flex-col items-center text-center">
+        <div className="card-body mx-auto flex flex-col items-center text-center">
           <h2 className="card-title">登入</h2>
           {error && <AlertWarning>{error}</AlertWarning>}
           <button

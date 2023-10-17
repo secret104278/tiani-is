@@ -311,22 +311,50 @@ export const volunteerActivityRouter = createTRPCRouter({
         },
       });
 
-      const lineAccount = await ctx.db.account.findFirstOrThrow({
-        select: { providerAccountId: true },
-        where: { userId: activity.organiserId, provider: "line" },
+      const organizer = await ctx.db.user.findFirstOrThrow({
+        select: {
+          name: true,
+          accounts: { select: { providerAccountId: true } },
+        },
+        where: {
+          id: activity.organiserId,
+          accounts: { every: { provider: "line" } },
+        },
       });
 
-      await ctx.bot.pushMessage({
-        to: lineAccount.providerAccountId,
-        messages: [
-          {
-            type: "text",
-            text: `${ctx.session.user.name} 報名了你主辦的志工工作 ${
-              activity.title
-            }！\n${getActivityDetailURL(input.activityId)}`,
-          },
-        ],
+      const userLineAccount = await ctx.db.account.findFirst({
+        select: { providerAccountId: true },
+        where: {
+          userId: ctx.session.user.id,
+          provider: "line",
+        },
       });
+
+      if (userLineAccount)
+        await ctx.bot.pushMessage({
+          to: userLineAccount.providerAccountId,
+          messages: [
+            {
+              type: "text",
+              text: `你完成報名了 ${organizer.name} 主辦的志工工作 ${
+                activity.title
+              }！\n${getActivityDetailURL(input.activityId)}`,
+            },
+          ],
+        });
+
+      if (organizer.accounts[0])
+        await ctx.bot.pushMessage({
+          to: organizer.accounts[0].providerAccountId,
+          messages: [
+            {
+              type: "text",
+              text: `${ctx.session.user.name} 報名了你主辦的志工工作 ${
+                activity.title
+              }！\n${getActivityDetailURL(input.activityId)}`,
+            },
+          ],
+        });
     }),
 
   leaveActivity: protectedProcedure
@@ -347,21 +375,49 @@ export const volunteerActivityRouter = createTRPCRouter({
         },
       });
 
-      const lineAccount = await ctx.db.account.findFirstOrThrow({
-        select: { providerAccountId: true },
-        where: { userId: activity.organiserId, provider: "line" },
+      const organizer = await ctx.db.user.findFirstOrThrow({
+        select: {
+          name: true,
+          accounts: { select: { providerAccountId: true } },
+        },
+        where: {
+          id: activity.organiserId,
+          accounts: { every: { provider: "line" } },
+        },
       });
 
-      await ctx.bot.pushMessage({
-        to: lineAccount.providerAccountId,
-        messages: [
-          {
-            type: "text",
-            text: `${ctx.session.user.name} 取消報名了你主辦的志工工作 ${
-              activity.title
-            }！\n${getActivityDetailURL(input.activityId)}`,
-          },
-        ],
+      const userLineAccount = await ctx.db.account.findFirst({
+        select: { providerAccountId: true },
+        where: {
+          userId: ctx.session.user.id,
+          provider: "line",
+        },
       });
+
+      if (userLineAccount)
+        await ctx.bot.pushMessage({
+          to: userLineAccount.providerAccountId,
+          messages: [
+            {
+              type: "text",
+              text: `你取消報名了 ${organizer.name} 主辦的志工工作 ${
+                activity.title
+              }！\n${getActivityDetailURL(input.activityId)}`,
+            },
+          ],
+        });
+
+      if (organizer.accounts[0])
+        await ctx.bot.pushMessage({
+          to: organizer.accounts[0].providerAccountId,
+          messages: [
+            {
+              type: "text",
+              text: `${ctx.session.user.name} 取消報名了你主辦的志工工作 ${
+                activity.title
+              }！\n${getActivityDetailURL(input.activityId)}`,
+            },
+          ],
+        });
     }),
 });
