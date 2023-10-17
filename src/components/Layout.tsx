@@ -31,10 +31,6 @@ function UserAvatar() {
 export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
 
-  if (!sessionData) {
-    return <span className="loading loading-ring loading-md"></span>;
-  }
-
   return (
     <>
       <div className="navbar bg-base-100">
@@ -47,19 +43,21 @@ export default function Layout({ children }: { children: ReactNode }) {
           </Link>
         </div>
         <div className="navbar-end">
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
-              <UserAvatar />
-            </label>
-            <ul
-              tabIndex={0}
-              className="menu dropdown-content rounded-box z-[1] mt-3 w-52 bg-base-100 p-2 shadow-xl outline outline-1 outline-base-200"
-            >
-              <li>
-                <a onClick={() => void signOut()}>登出</a>
-              </li>
-            </ul>
-          </div>
+          {sessionData && (
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
+                <UserAvatar />
+              </label>
+              <ul
+                tabIndex={0}
+                className="menu dropdown-content rounded-box z-[1] mt-3 w-52 bg-base-100 p-2 shadow-xl outline outline-1 outline-base-200"
+              >
+                <li>
+                  <a onClick={() => void signOut()}>登出</a>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       <div className="mx-auto max-w-xl px-4 pb-16">{children}</div>
