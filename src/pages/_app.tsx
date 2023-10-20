@@ -28,6 +28,10 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
           property="og:description"
           content={ogMeta?.ogDescription ?? "天一聖道院資訊系統"}
         ></meta>
+        <meta
+          property="og:image"
+          content={ogMeta?.ogImage ?? "/logo512.png"}
+        ></meta>
         <meta name="theme-color" content="#836b5d" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

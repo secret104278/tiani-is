@@ -71,6 +71,9 @@ export const volunteerActivityRouter = createTRPCRouter({
               id: ctx.session.user.id,
             },
           },
+          version: {
+            increment: 1,
+          },
         },
       });
     }),
@@ -215,7 +218,7 @@ export const volunteerActivityRouter = createTRPCRouter({
                   type: "text",
                   text: `有新的志工工作申請 ${activity.title} 來自 ${
                     activity.organiser.name
-                  } 需要審核囉！\n${getActivityDetailURL(input.activityId)}`,
+                  } 需要審核囉！\n${getActivityDetailURL(activity)}`,
                 },
               ],
             }),
@@ -244,42 +247,42 @@ export const volunteerActivityRouter = createTRPCRouter({
       void approveActivityEventQueue.push({ activityId: input.activityId });
     }),
 
-  sendActivityAdvertisement: protectedProcedure
-    .input(
-      z.object({
-        activityId: z.number(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
-        where: { id: input.activityId },
-      });
+  // sendActivityAdvertisement: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       activityId: z.number(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+  //       where: { id: input.activityId },
+  //     });
 
-      if (
-        ctx.session.user.id !== activity.organiserId &&
-        ctx.session.user.role !== "ADMIN"
-      ) {
-        throw new Error("Only organizer or admin can advertise activities");
-      }
+  //     if (
+  //       ctx.session.user.id !== activity.organiserId &&
+  //       ctx.session.user.role !== "ADMIN"
+  //     ) {
+  //       throw new Error("Only organizer or admin can advertise activities");
+  //     }
 
-      const targets = await ctx.db.activityAdvertisingTarget.findMany();
+  //     const targets = await ctx.db.activityAdvertisingTarget.findMany();
 
-      await Promise.all(
-        targets.map((target) =>
-          ctx.bot.pushMessage({
-            to: target.lineId,
-            messages: [
-              {
-                type: "text",
-                text: `有新的志工工作 ${
-                  activity.title
-                }，快來報名吧！\n${getActivityDetailURL(input.activityId)}`,
-              },
-            ],
-          }),
-        ),
-      );
-    }),
+  //     await Promise.all(
+  //       targets.map((target) =>
+  //         ctx.bot.pushMessage({
+  //           to: target.lineId,
+  //           messages: [
+  //             {
+  //               type: "text",
+  //               text: `有新的志工工作 ${
+  //                 activity.title
+  //               }，快來報名吧！\n${getActivityDetailURL(input.activityId)}`,
+  //             },
+  //           ],
+  //         }),
+  //       ),
+  //     );
+  //   }),
 
   participateActivity: protectedProcedure
     .input(

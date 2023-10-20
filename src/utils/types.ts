@@ -7,4 +7,5 @@ export interface VolunteerActivityTopic {
 export interface OGMetaProps {
   ogTitle?: string | null;
   ogDescription?: string | null;
+  ogImage?: string | null;
 }

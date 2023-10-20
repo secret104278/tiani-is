@@ -15,7 +15,7 @@ export const leaveActivityEventQueue: queueAsPromised<LeaveActivityEvent> =
 
 async function worker(input: LeaveActivityEvent): Promise<void> {
   const activity = await db.volunteerActivity.findFirstOrThrow({
-    select: { organiserId: true, title: true },
+    select: { organiserId: true, title: true, id: true, version: true },
     where: { id: input.activityId },
   });
 
@@ -46,7 +46,7 @@ async function worker(input: LeaveActivityEvent): Promise<void> {
           type: "text",
           text: `你取消報名了 ${organizer.name} 主辦的志工工作 ${
             activity.title
-          }！\n${getActivityDetailURL(input.activityId)}`,
+          }！\n${getActivityDetailURL(activity)}`,
         },
       ],
     });
@@ -59,7 +59,7 @@ async function worker(input: LeaveActivityEvent): Promise<void> {
           type: "text",
           text: `${input.user.name} 取消報名了你主辦的志工工作 ${
             activity.title
-          }！\n${getActivityDetailURL(input.activityId)}`,
+          }！\n${getActivityDetailURL(activity)}`,
         },
       ],
     });

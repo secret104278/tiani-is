@@ -13,7 +13,7 @@ export const approveActivityEventQueue: queueAsPromised<ApproveActivityEvent> =
 
 async function worker(input: ApproveActivityEvent): Promise<void> {
   const activity = await db.volunteerActivity.findFirstOrThrow({
-    select: { organiserId: true, title: true },
+    select: { organiserId: true, title: true, version: true, id: true },
     where: { id: input.activityId },
   });
 
@@ -29,7 +29,7 @@ async function worker(input: ApproveActivityEvent): Promise<void> {
         type: "text",
         text: `你的志工工作申請 ${
           activity.title
-        } 已經通過審核囉！\n${getActivityDetailURL(input.activityId)}`,
+        } 已經通過審核囉！\n${getActivityDetailURL(activity)}`,
       },
     ],
   });

@@ -11,6 +11,7 @@ import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { AlertWarning } from "~/components/Alert";
 import ReactiveButton from "~/components/ReactiveButton";
 import { db } from "~/server/db";
@@ -22,20 +23,26 @@ export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
 }> = async (context) => {
   const res = await db.volunteerActivity.findFirst({
-    select: { title: true, startDateTime: true, description: true },
+    select: {
+      title: true,
+      startDateTime: true,
+    },
     where: { id: Number(context.query.id) },
   });
   let dateString = "";
   if (!isNil(res)) {
     const d = res.startDateTime;
-    dateString = `${d.getMonth()}月${d.getDate()}日 ${d.toLocaleTimeString()} `;
+    dateString = `${d.getMonth() + 1}月${d.getDate()}日 ${d
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
   }
 
   return {
     props: {
       ogMeta: {
         ogTitle: `${res?.title} - ${dateString} - 天一志工隊`,
-        ogDescription: res?.description,
+        ogDescription: `有新的志工工作需要協助，快來報名吧！`,
       },
     },
   };
@@ -72,6 +79,8 @@ export default function VolunteerActivityDetailPage() {
     api.volunteerActivity.approveActivity.useMutation({
       onSettled: () => refetch(),
     });
+
+  const [shareBtnLoading, setShareBtnLoading] = useState(false);
 
   // const {
   //   mutate: sendActivityAdvertisement,
@@ -159,24 +168,19 @@ export default function VolunteerActivityDetailPage() {
       return (
         <a
           href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-            `${window.location.origin}/volunteeractivity/detail/${activity.id}`,
+            `${window.location.origin}/volunteeractivity/detail/${activity.id}?v=${activity.version}`,
           )}`}
           target="_blank"
         >
-          <button className="btn bg-green-500">分享至Line</button>
+          <ReactiveButton
+            className="btn bg-green-500"
+            onClick={() => setShareBtnLoading(true)}
+            loading={shareBtnLoading}
+          >
+            分享至Line
+          </ReactiveButton>
         </a>
       );
-    // return (
-    //   <ReactiveButton
-    //     className="btn bg-green-500"
-    //     onClick={() => sendActivityAdvertisement({ activityId: activity.id })}
-    //     loading={sendActivityAdvertisementIsLoading}
-    //     isSuccess={sendActivityAdvertisementIsSuccess}
-    //     isError={sendActivityAdvertisementIsError}
-    //   >
-    //     推送 Line 通知
-    //   </ReactiveButton>
-    // );
   };
 
   const AdminPanel = () => (
@@ -235,7 +239,7 @@ export default function VolunteerActivityDetailPage() {
           </form>
         </dialog>
       </div>
-      <div className="collapse collapse-arrow  bg-base-200">
+      <div className="collapse-arrow collapse  bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
