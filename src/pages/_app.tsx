@@ -7,17 +7,27 @@ import { api } from "~/utils/api";
 import Head from "next/head";
 import AuthGaurd from "~/components/AuthGuard";
 import Layout from "~/components/Layout";
-import "~/styles/globals.css";
 
-const MyApp: AppType<{ session: Session | null }> = ({
+import "~/styles/globals.css";
+import type { OGMetaProps } from "~/utils/types";
+
+const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { session, ogMeta, ...pageProps },
 }) => {
   return (
     <>
       <Head>
-        <title>天一聖道院資訊系統</title>
+        <title>{ogMeta?.ogTitle ?? "天一聖道院資訊系統"}</title>
         <meta name="description" content="天一聖道院資訊系統" />
+        <meta
+          property="og:title"
+          content={ogMeta?.ogTitle ?? "天一聖道院資訊系統"}
+        ></meta>
+        <meta
+          property="og:description"
+          content={ogMeta?.ogDescription ?? "天一聖道院資訊系統"}
+        ></meta>
         <meta name="theme-color" content="#836b5d" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

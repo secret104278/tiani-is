@@ -8,12 +8,38 @@ import {
   UsersIcon,
 } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
+import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
 import ReactiveButton from "~/components/ReactiveButton";
+import { db } from "~/server/db";
 import { api } from "~/utils/api";
+import type { OGMetaProps } from "~/utils/types";
 import { getActivityStatusText } from "~/utils/ui";
+
+export const getServerSideProps: GetServerSideProps<{
+  ogMeta: OGMetaProps;
+}> = async (context) => {
+  const res = await db.volunteerActivity.findFirst({
+    select: { title: true, startDateTime: true, description: true },
+    where: { id: Number(context.query.id) },
+  });
+  let dateString = "";
+  if (!isNil(res)) {
+    const d = res.startDateTime;
+    dateString = `${d.getMonth()}月${d.getDate()}日 ${d.toLocaleTimeString()} `;
+  }
+
+  return {
+    props: {
+      ogMeta: {
+        ogTitle: `${res?.title} - ${dateString} - 天一志工隊`,
+        ogDescription: res?.description,
+      },
+    },
+  };
+};
 
 export default function VolunteerActivityDetailPage() {
   const router = useRouter();
@@ -47,12 +73,12 @@ export default function VolunteerActivityDetailPage() {
       onSettled: () => refetch(),
     });
 
-  const {
-    mutate: sendActivityAdvertisement,
-    isLoading: sendActivityAdvertisementIsLoading,
-    isSuccess: sendActivityAdvertisementIsSuccess,
-    isError: sendActivityAdvertisementIsError,
-  } = api.volunteerActivity.sendActivityAdvertisement.useMutation();
+  // const {
+  //   mutate: sendActivityAdvertisement,
+  //   isLoading: sendActivityAdvertisementIsLoading,
+  //   isSuccess: sendActivityAdvertisementIsSuccess,
+  //   isError: sendActivityAdvertisementIsError,
+  // } = api.volunteerActivity.sendActivityAdvertisement.useMutation();
 
   const {
     mutate: deleteActivity,
@@ -131,16 +157,26 @@ export default function VolunteerActivityDetailPage() {
 
     if (activity.status === "PUBLISHED")
       return (
-        <ReactiveButton
-          className="btn bg-green-500"
-          onClick={() => sendActivityAdvertisement({ activityId: activity.id })}
-          loading={sendActivityAdvertisementIsLoading}
-          isSuccess={sendActivityAdvertisementIsSuccess}
-          isError={sendActivityAdvertisementIsError}
+        <a
+          href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
+            `${window.location.origin}/volunteeractivity/detail/${activity.id}`,
+          )}`}
+          target="_blank"
         >
-          推送 Line 通知
-        </ReactiveButton>
+          <button className="btn bg-green-500">分享至Line</button>
+        </a>
       );
+    // return (
+    //   <ReactiveButton
+    //     className="btn bg-green-500"
+    //     onClick={() => sendActivityAdvertisement({ activityId: activity.id })}
+    //     loading={sendActivityAdvertisementIsLoading}
+    //     isSuccess={sendActivityAdvertisementIsSuccess}
+    //     isError={sendActivityAdvertisementIsError}
+    //   >
+    //     推送 Line 通知
+    //   </ReactiveButton>
+    // );
   };
 
   const AdminPanel = () => (

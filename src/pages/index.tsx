@@ -44,7 +44,7 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card card-compact w-full bg-accent text-accent-content shadow-xl">
+                <div className="card-compact card w-full bg-accent text-accent-content shadow-xl">
                   <div className="card-body">
                     <div className="flex flex-row items-center justify-between">
                       <h2 className="card-title">{activity.title}</h2>
