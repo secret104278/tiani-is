@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
@@ -66,11 +67,6 @@ export const volunteerActivityRouter = createTRPCRouter({
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           status: input.isDraft ? "DRAFT" : undefined,
-          organiser: {
-            connect: {
-              id: ctx.session.user.id,
-            },
-          },
           version: {
             increment: 1,
           },
@@ -122,16 +118,31 @@ export const volunteerActivityRouter = createTRPCRouter({
     }),
 
   getAllActivities: protectedProcedure
-    .input(z.object({}))
-    .query(async ({ ctx }) => {
-      if (ctx.session.user.role === "ADMIN") {
-        return await ctx.db.volunteerActivity.findMany({});
+    .input(
+      z.object({
+        organizedByMe: z.boolean().optional(),
+        participatedByMe: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const filters: Prisma.VolunteerActivityWhereInput[] = [];
+      if (input.organizedByMe) {
+        filters.push({ organiserId: ctx.session.user.id });
+      }
+      if (input.participatedByMe) {
+        filters.push({ participants: { some: { id: ctx.session.user.id } } });
+      }
+
+      if (filters.length === 0) {
+        if (ctx.session.user.role !== "ADMIN") {
+          filters.push({ status: "PUBLISHED" });
+          filters.push({ organiserId: ctx.session.user.id });
+        }
       }
 
       return await ctx.db.volunteerActivity.findMany({
-        where: {
-          OR: [{ status: "PUBLISHED" }, { organiserId: ctx.session.user.id }],
-        },
+        where: filters.length === 0 ? undefined : { OR: filters },
+        orderBy: { startDateTime: "desc" },
       });
     }),
 

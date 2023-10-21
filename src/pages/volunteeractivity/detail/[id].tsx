@@ -31,7 +31,12 @@ export const getServerSideProps: GetServerSideProps<{
   });
   let dateString = "";
   if (!isNil(res)) {
-    const d = res.startDateTime;
+    // since the server my run in different location,
+    // and the timestamp is stored in DB is in UTC,
+    // so convert it to Asia/Taipei when server side rendering
+    const d = new Date(
+      res.startDateTime.toLocaleString("en-US", { timeZone: "Asia/Taipei" }),
+    );
     dateString = `${d.getMonth() + 1}月${d.getDate()}日 ${d
       .getHours()
       .toString()
@@ -41,7 +46,7 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       ogMeta: {
-        ogTitle: `${res?.title} - ${dateString} - 天一志工隊`,
+        ogTitle: `${res?.title}・${dateString}・天一志工隊`,
         ogDescription: `有新的志工工作需要協助，快來報名吧！`,
       },
     },
@@ -239,7 +244,7 @@ export default function VolunteerActivityDetailPage() {
           </form>
         </dialog>
       </div>
-      <div className="collapse-arrow collapse  bg-base-200">
+      <div className="collapse collapse-arrow  bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名

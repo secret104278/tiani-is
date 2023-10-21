@@ -6,12 +6,19 @@ import {
 } from "@heroicons/react/20/solid";
 import { orderBy } from "lodash";
 import Link from "next/link";
+import { useState } from "react";
 import { api } from "~/utils/api";
 import { getActivityStatusText } from "~/utils/ui";
 
 export default function Home() {
+  const [filterOrganizedByMe, setFilterOrganizedByMe] = useState(false);
+  const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
+
   const { data: activities, isLoading } =
-    api.volunteerActivity.getAllActivities.useQuery({});
+    api.volunteerActivity.getAllActivities.useQuery({
+      organizedByMe: filterOrganizedByMe,
+      participatedByMe: filterParticipatedByMe,
+    });
 
   const onGoingActivities = activities?.filter(
     (activity) => activity.endDateTime > new Date(),
@@ -25,8 +32,29 @@ export default function Home() {
       <article className="prose">
         <h1>工作總覽</h1>
       </article>
-      <div className="flex flex-row justify-end">
-        <Link href="/volunteeractivity/new">
+      <div className="flex flex-row">
+        <div className="flex flex-row flex-wrap">
+          <label className="label cursor-pointer space-x-2">
+            <span className="label-text">我發起的</span>
+            <input
+              type="checkbox"
+              className="toggle toggle-primary"
+              checked={filterOrganizedByMe}
+              onChange={() => setFilterOrganizedByMe((prev) => !prev)}
+            />
+          </label>
+          <label className="label cursor-pointer space-x-2">
+            <span className="label-text">我報名的</span>
+            <input
+              type="checkbox"
+              className="toggle toggle-primary"
+              checked={filterParticipatedByMe}
+              onChange={() => setFilterParticipatedByMe((prev) => !prev)}
+            />
+          </label>
+        </div>
+        <div className="grow" />
+        <Link href="/volunteeractivity/new" className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
             建立新工作
@@ -35,7 +63,9 @@ export default function Home() {
       </div>
       <div>
         {isLoading && <div className="loading loading-lg"></div>}
-        <div className="divider">即將到達</div>
+        {onGoingActivities?.length !== 0 && (
+          <div className="divider">即將到達</div>
+        )}
         <div className="flex flex-col space-y-4">
           {orderBy(onGoingActivities, "startDateTime", "asc")?.map(
             (activity) => (
@@ -44,7 +74,7 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card-compact card w-full bg-accent text-accent-content shadow-xl">
+                <div className="card card-compact w-full bg-accent text-accent-content shadow-xl">
                   <div className="card-body">
                     <div className="flex flex-row items-center justify-between">
                       <h2 className="card-title">{activity.title}</h2>
@@ -74,7 +104,7 @@ export default function Home() {
             ),
           )}
         </div>
-        <div className="divider">已結束</div>
+        {endedActivities?.length !== 0 && <div className="divider">已結束</div>}
         <div className="flex flex-col space-y-4">
           {orderBy(endedActivities, "startDateTime", "desc")?.map(
             (activity) => (
