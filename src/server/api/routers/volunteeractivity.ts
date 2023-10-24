@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { isNil } from "lodash";
 import { z } from "zod";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
@@ -340,6 +341,81 @@ export const volunteerActivityRouter = createTRPCRouter({
       void leaveActivityEventQueue.push({
         activityId: input.activityId,
         user: ctx.session.user,
+      });
+    }),
+
+  getCheckInActivityHistory: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const first = await ctx.db.volunteerActivityCheckIn.findFirst({
+        where: {
+          activityId: input.activityId,
+          userId: ctx.session.user.id,
+        },
+        orderBy: {
+          checkAt: "asc",
+        },
+      });
+      const last = await ctx.db.volunteerActivityCheckIn.findFirst({
+        where: {
+          activityId: input.activityId,
+          userId: ctx.session.user.id,
+        },
+        orderBy: {
+          checkAt: "desc",
+        },
+      });
+
+      if (!isNil(first) && !isNil(last)) {
+        if (last.id === first.id) return { first, last: null };
+        return { first, last };
+      }
+      return null;
+    }),
+
+  checkInActivity: protectedProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        activityId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+        where: { id: input.activityId },
+      });
+
+      const TWO_HOUR = 2 * 60 * 60 * 1000;
+      const now = new Date();
+      if (
+        now.getUTCMilliseconds() - activity.startDateTime.getUTCMilliseconds() <
+          -TWO_HOUR ||
+        now.getUTCMilliseconds() - activity.endDateTime.getUTCMilliseconds() >
+          TWO_HOUR
+      ) {
+        throw new Error("非活動時間，無法簽到");
+      }
+
+      await ctx.db.volunteerActivityCheckIn.create({
+        data: {
+          activity: {
+            connect: {
+              id: input.activityId,
+            },
+          },
+          user: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+          latitude: input.latitude,
+          longitude: input.longitude,
+        },
       });
     }),
 });

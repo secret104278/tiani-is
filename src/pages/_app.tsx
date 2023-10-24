@@ -8,6 +8,7 @@ import Head from "next/head";
 import AuthGaurd from "~/components/AuthGuard";
 import Layout from "~/components/Layout";
 
+import "leaflet/dist/leaflet.css";
 import "~/styles/globals.css";
 import type { OGMetaProps } from "~/utils/types";
 

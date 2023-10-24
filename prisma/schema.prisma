@@ -73,6 +73,8 @@ model User {
     participatedVolunteerActivites VolunteerActivity[] @relation("ParticipatedVolunteerActivites")
 
     activityReviewer ActivityReviewer?
+
+    volunteerActivityCheckIns VolunteerActivityCheckIn[]
 }
 
 model VerificationToken {
@@ -102,6 +104,8 @@ model VolunteerActivity {
     participants User[] @relation("ParticipatedVolunteerActivites")
 
     version Int @default(1)
+
+    volunteerActivityCheckIns VolunteerActivityCheckIn[]
 }
 
 enum VolunteerActivityStatus {
@@ -120,3 +124,15 @@ model ActivityReviewer {
 // model ActivityAdvertisingTarget {
 //     lineId String @id @unique
 // }
+
+model VolunteerActivityCheckIn {
+    id         Int               @id @default(autoincrement())
+    user       User              @relation(fields: [userId], references: [id])
+    userId     String
+    activity   VolunteerActivity @relation(fields: [activityId], references: [id])
+    activityId Int
+    checkAt    DateTime          @default(now())
+
+    latitude  Float
+    longitude Float
+}

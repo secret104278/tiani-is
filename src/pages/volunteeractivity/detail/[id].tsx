@@ -1,4 +1,6 @@
 import {
+  ArrowDownOnSquareIcon,
+  ArrowUpOnSquareIcon,
   BellAlertIcon,
   ClockIcon,
   MapPinIcon,
@@ -10,14 +12,20 @@ import {
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
 import ReactiveButton from "~/components/ReactiveButton";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
-import { getActivityStatusText } from "~/utils/ui";
+
+import { formatMilliseconds, getActivityStatusText } from "~/utils/ui";
+
+const CheckInModal = dynamic(() => import("~/components/CheckInModal"), {
+  ssr: false,
+});
 
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
@@ -65,6 +73,11 @@ export default function VolunteerActivityDetailPage() {
     });
 
   const { activity, isParticipant } = data ?? {};
+
+  const { data: checkInData, refetch: refetchCheckInData } =
+    api.volunteerActivity.getCheckInActivityHistory.useQuery({
+      activityId: Number(id),
+    });
 
   const {
     mutate: submitActivityForReview,
@@ -118,12 +131,18 @@ export default function VolunteerActivityDetailPage() {
     onSuccess: () => refetch(),
   });
 
+  const [checkInModalOpen, setCheckInModalOpen] = useState(false);
+
   if (!isNil(error)) {
     return <AlertWarning>{error.message}</AlertWarning>;
   }
 
   if (isLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
+
+  const activityStartRough = activity.startDateTime;
+  activityStartRough.setHours(activityStartRough.getHours() - 2);
+  const isActivityAboutToStart = activityStartRough <= new Date();
 
   const isManager =
     session?.user.role === "ADMIN" || session?.user.id == activity.organiserId;
@@ -311,6 +330,55 @@ export default function VolunteerActivityDetailPage() {
     );
   };
 
+  const CheckInControl = () => {
+    const isCheckIn = isNil(checkInData);
+    const alreadyCheckIn = !isNil(checkInData?.last?.checkAt);
+    const [time, setTime] = useState(
+      alreadyCheckIn
+        ? checkInData!.last!.checkAt.getTime()
+        : new Date().getTime(),
+    );
+
+    useEffect(() => {
+      if (!alreadyCheckIn) {
+        const interval = setInterval(() => setTime(new Date().getTime()), 1000);
+        return () => clearInterval(interval);
+      }
+    }, [alreadyCheckIn]);
+
+    if (isParticipant)
+      return (
+        <>
+          <ReactiveButton
+            className="btn btn-accent"
+            disabled={!isActivityAboutToStart}
+            onClick={() => setCheckInModalOpen(true)}
+          >
+            {isCheckIn ? (
+              <ArrowDownOnSquareIcon className="h-4 w-4" />
+            ) : (
+              <ArrowUpOnSquareIcon className="h-4 w-4" />
+            )}
+            {isCheckIn ? "簽到" : "簽退"}
+            {isCheckIn &&
+              !isActivityAboutToStart &&
+              "（工作開始前 2 小時開放打卡）"}
+            {isCheckIn
+              ? ""
+              : ` (已工作 ${formatMilliseconds(
+                  time - checkInData.first.checkAt.getTime(),
+                )})`}
+          </ReactiveButton>
+          <CheckInModal
+            activityId={activity.id}
+            open={checkInModalOpen}
+            onClose={() => setCheckInModalOpen(false)}
+            onCheckIn={() => void refetchCheckInData()}
+          />
+        </>
+      );
+  };
+
   // Fetch and display the details of the book with the given ID
   return (
     <div className="flex flex-col space-y-4">
@@ -343,6 +411,7 @@ export default function VolunteerActivityDetailPage() {
         </div>
         <article className="prose">{activity.description}</article>
         <ParticipateControl />
+        <CheckInControl />
       </div>
     </div>
   );
