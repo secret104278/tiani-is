@@ -1,9 +1,11 @@
 import type { Prisma } from "@prisma/client";
-import { isNil } from "lodash";
+import { isNil, sum } from "lodash";
 import { z } from "zod";
+
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
+import { TIANI_GPS_CENTER, TIANI_GPS_RADIUS_KM, getDistance } from "~/utils/ui";
 import { getActivityDetailURL } from "~/utils/url";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -401,6 +403,15 @@ export const volunteerActivityRouter = createTRPCRouter({
         throw new Error("非活動時間，無法簽到");
       }
 
+      const isOutOfRange =
+        getDistance(
+          input.latitude,
+          input.longitude,
+          TIANI_GPS_CENTER[0],
+          TIANI_GPS_CENTER[1],
+        ) > TIANI_GPS_RADIUS_KM;
+      if (isOutOfRange) throw new Error("超出打卡範圍");
+
       await ctx.db.volunteerActivityCheckIn.create({
         data: {
           activity: {
@@ -417,5 +428,87 @@ export const volunteerActivityRouter = createTRPCRouter({
           longitude: input.longitude,
         },
       });
+    }),
+
+  getWorkingStats: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (
+        ctx.session.user.role !== "ADMIN" &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以查看其他人的工時");
+
+      async function getNumberOfParticipatedActivities() {
+        const res = await ctx.db.$queryRaw<
+          {
+            count: number;
+          }[]
+        >`
+        SELECT
+          COUNT(DISTINCT "activityId") AS count
+        FROM
+          "VolunteerActivityCheckIn"
+        WHERE
+          "userId" = ${input.userId ?? ctx.session.user.id};
+        `;
+        return Number(res[0]?.count ?? 0);
+      }
+
+      async function getCheckInHistories() {
+        return await ctx.db.$queryRaw<
+          {
+            checkinat: Date;
+            checkoutat: Date;
+            activityId: number;
+            startDateTime: Date;
+            endDateTime: Date;
+          }[]
+        >`
+        SELECT
+          a.*,
+          b. "startDateTime",
+          b. "endDateTime"
+        FROM (
+          SELECT
+            max("checkAt") AS checkoutat,
+            min("checkAt") AS checkinat,
+            "activityId"
+          FROM
+            "VolunteerActivityCheckIn"
+          WHERE
+            "userId" = ${input.userId}
+          GROUP BY
+            "activityId") AS a
+          JOIN "VolunteerActivity" AS b ON a. "activityId" = b.id;
+        `;
+      }
+
+      const [numberOfParticipatedActivities, checkInHistories] =
+        await Promise.all([
+          getNumberOfParticipatedActivities(),
+          getCheckInHistories(),
+        ]);
+
+      const totalWorkingHours =
+        sum(
+          checkInHistories.map(
+            (record) =>
+              record.checkoutat.getTime() - record.checkinat.getTime(),
+          ),
+        ) /
+        1000 /
+        60 /
+        60;
+
+      return {
+        numberOfParticipatedActivities,
+        totalWorkingHours,
+      };
     }),
 });

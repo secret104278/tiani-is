@@ -76,3 +76,41 @@ export function formatMilliseconds(milliseconds: number) {
 
   return formattedTime;
 }
+
+export const TIANI_GPS_CENTER: [number, number] = [
+  22.863541598094525, 120.36627531051637,
+];
+export const TIANI_GPS_RADIUS_KM = 0.5;
+
+export function getDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const R = 6371; // Radius of the Earth in kilometers
+  const lat1Rad = degToRad(lat1);
+  const lon1Rad = degToRad(lon1);
+  const lat2Rad = degToRad(lat2);
+  const lon2Rad = degToRad(lon2);
+
+  const dLat = lat2Rad - lat1Rad;
+  const dLon = lon2Rad - lon1Rad;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1Rad) *
+      Math.cos(lat2Rad) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const distance = R * c; // Distance in kilometers
+
+  return distance;
+}
+
+function degToRad(deg: number) {
+  return deg * (Math.PI / 180);
+}

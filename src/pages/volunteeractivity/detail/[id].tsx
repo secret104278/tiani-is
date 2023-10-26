@@ -140,14 +140,29 @@ export default function VolunteerActivityDetailPage() {
   if (isLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
-  const activityStartRough = activity.startDateTime;
-  activityStartRough.setHours(activityStartRough.getHours() - 2);
-  const isActivityAboutToStart = activityStartRough <= new Date();
-
   const isManager =
     session?.user.role === "ADMIN" || session?.user.id == activity.organiserId;
 
   const isEnded = activity.endDateTime <= new Date();
+
+  const ShareLineBtn = () => {
+    return (
+      <a
+        href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
+          `${window.location.origin}/volunteeractivity/detail/${activity.id}?v=${activity.version}`,
+        )}`}
+        target="_blank"
+      >
+        <ReactiveButton
+          className="btn bg-green-500"
+          onClick={() => setShareBtnLoading(true)}
+          loading={shareBtnLoading}
+        >
+          分享至Line
+        </ReactiveButton>
+      </a>
+    );
+  };
 
   const FlowControl = () => {
     if (activity.status === "DRAFT")
@@ -188,23 +203,7 @@ export default function VolunteerActivityDetailPage() {
         );
     }
 
-    if (activity.status === "PUBLISHED")
-      return (
-        <a
-          href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-            `${window.location.origin}/volunteeractivity/detail/${activity.id}?v=${activity.version}`,
-          )}`}
-          target="_blank"
-        >
-          <ReactiveButton
-            className="btn bg-green-500"
-            onClick={() => setShareBtnLoading(true)}
-            loading={shareBtnLoading}
-          >
-            分享至Line
-          </ReactiveButton>
-        </a>
-      );
+    if (activity.status === "PUBLISHED") return <ShareLineBtn />;
   };
 
   const AdminPanel = () => (
@@ -346,6 +345,10 @@ export default function VolunteerActivityDetailPage() {
       }
     }, [alreadyCheckIn]);
 
+    const isActivityAboutToStart =
+      new Date().getTime() >=
+      activity.startDateTime.getTime() - 2 * 60 * 60 * 1000;
+
     if (isParticipant)
       return (
         <>
@@ -385,11 +388,12 @@ export default function VolunteerActivityDetailPage() {
       <article className="prose">
         <h1>{activity.title}</h1>
       </article>
-      {isParticipant && (
-        <div className="flex justify-end">
-          <div className="badge badge-neutral">已報名</div>
-        </div>
-      )}
+
+      <div className="flex items-center justify-end space-x-4">
+        {isParticipant && <div className="badge badge-neutral">已報名</div>}
+        {!isManager && <ShareLineBtn />}
+      </div>
+
       {isManager && <AdminPanel />}
       <div className="flex flex-col space-y-2 align-bottom">
         <p>發起人：{activity.organiser.name}</p>

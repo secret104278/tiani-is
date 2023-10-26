@@ -3,6 +3,7 @@ import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import { useGeolocation } from "react-use";
 import { api } from "~/utils/api";
+import { TIANI_GPS_CENTER, TIANI_GPS_RADIUS_KM, getDistance } from "~/utils/ui";
 import { AlertWarning } from "./Alert";
 import CheckInMap from "./CheckInMap";
 import ReactiveButton from "./ReactiveButton";
@@ -39,6 +40,14 @@ const InnerModal = ({
   if (geoState.error)
     return <AlertWarning>{geoState.error.message}</AlertWarning>;
 
+  const isOutOfRange =
+    getDistance(
+      geoState.latitude ?? 0,
+      geoState.longitude ?? 0,
+      TIANI_GPS_CENTER[0],
+      TIANI_GPS_CENTER[1],
+    ) > TIANI_GPS_RADIUS_KM;
+
   return (
     <>
       <div className="modal-box flex h-full flex-col space-y-4">
@@ -60,7 +69,9 @@ const InnerModal = ({
         <div className="modal-action">
           <ReactiveButton
             className="btn btn-primary"
-            disabled={geoState.loading || !isEmpty(geoState.error)}
+            disabled={
+              geoState.loading || !isEmpty(geoState.error) || isOutOfRange
+            }
             loading={checkInActivityIsLoading}
             error={checkInActivityError?.message}
             onClick={() =>
@@ -71,7 +82,11 @@ const InnerModal = ({
               })
             }
           >
-            {geoState.loading ? "定位中..." : "打卡"}
+            {geoState.loading
+              ? "定位中..."
+              : isOutOfRange
+              ? "超出範圍"
+              : "打卡"}
           </ReactiveButton>
         </div>
       </div>
