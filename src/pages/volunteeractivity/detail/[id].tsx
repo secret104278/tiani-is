@@ -345,16 +345,30 @@ export default function VolunteerActivityDetailPage() {
       }
     }, [alreadyCheckIn]);
 
-    const isActivityAboutToStart =
-      new Date().getTime() >=
+    const isActivityNotYetForCheck =
+      new Date().getTime() <=
       activity.startDateTime.getTime() - 2 * 60 * 60 * 1000;
+    const isActivityClosedForCheck =
+      new Date().getTime() >=
+      activity.endDateTime.getTime() + 2 * 60 * 60 * 1000;
+
+    let checkButtonLabel = "";
+    if (isActivityNotYetForCheck)
+      checkButtonLabel = " （工作開始前 2 小時開放打卡）";
+    if (isActivityClosedForCheck) checkButtonLabel = " （工作已結束）";
+
+    if (isCheckIn) checkButtonLabel = `簽到${checkButtonLabel}`;
+    else
+      checkButtonLabel = `簽退 (已工作 ${formatMilliseconds(
+        time - checkInData.first.checkAt.getTime(),
+      )})`;
 
     if (isParticipant)
       return (
         <>
           <ReactiveButton
             className="btn btn-accent"
-            disabled={!isActivityAboutToStart}
+            disabled={isActivityNotYetForCheck || isActivityClosedForCheck}
             onClick={() => setCheckInModalOpen(true)}
           >
             {isCheckIn ? (
@@ -362,15 +376,7 @@ export default function VolunteerActivityDetailPage() {
             ) : (
               <ArrowUpOnSquareIcon className="h-4 w-4" />
             )}
-            {isCheckIn ? "簽到" : "簽退"}
-            {isCheckIn &&
-              !isActivityAboutToStart &&
-              "（工作開始前 2 小時開放打卡）"}
-            {isCheckIn
-              ? ""
-              : ` (已工作 ${formatMilliseconds(
-                  time - checkInData.first.checkAt.getTime(),
-                )})`}
+            {checkButtonLabel}
           </ReactiveButton>
           <CheckInModal
             activityId={activity.id}

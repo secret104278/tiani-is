@@ -1,3 +1,4 @@
+import { HomeIcon } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -33,8 +34,14 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <div className="navbar bg-base-100">
-        <div className="navbar-start" />
+      <div className="navbar mb-4 bg-base-100 shadow-md">
+        <div className="navbar-start">
+          <Link href="/">
+            <button className="btn btn-circle">
+              <HomeIcon className="h-6 w-6" />
+            </button>
+          </Link>
+        </div>
         <div className="navbar-center">
           <Link href="/">
             <button className="btn btn-ghost text-xl normal-case">

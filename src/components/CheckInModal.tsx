@@ -1,3 +1,4 @@
+import { XMarkIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
 import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
@@ -54,7 +55,9 @@ const InnerModal = ({
         <form method="dialog" className="flex flex-row items-center">
           <h3 className="text-lg font-bold">定位打卡</h3>
           <div className="flex-grow" />
-          <button className="btn btn-circle btn-ghost btn-sm">✕</button>
+          <button className="btn btn-circle btn-ghost btn-sm">
+            <XMarkIcon className="h-6 w-6" />
+          </button>
         </form>
         <CheckInMap>
           {!geoState.loading && (
