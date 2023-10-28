@@ -4,9 +4,10 @@ import {
   PlusIcon,
   UsersIcon,
 } from "@heroicons/react/20/solid";
-import { orderBy } from "lodash";
+import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { api } from "~/utils/api";
 import { getActivityStatusText } from "~/utils/ui";
 
@@ -14,11 +15,18 @@ export default function Home() {
   const [filterOrganizedByMe, setFilterOrganizedByMe] = useState(false);
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
 
-  const { data: activities, isLoading } =
-    api.volunteerActivity.getAllActivities.useQuery({
-      organizedByMe: filterOrganizedByMe,
-      participatedByMe: filterParticipatedByMe,
-    });
+  const activitiesQuery =
+    api.volunteerActivity.getAllActivitiesInfinite.useInfiniteQuery(
+      {
+        organizedByMe: filterOrganizedByMe,
+        participatedByMe: filterParticipatedByMe,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
+
+  const activities = activitiesQuery.data?.pages?.flatMap((page) => page.items);
 
   const { data: workingStats, isLoading: workingStatsIsLoading } =
     api.volunteerActivity.getWorkingStats.useQuery({});
@@ -36,8 +44,8 @@ export default function Home() {
         <h1>工作總覽</h1>
       </article>
       {!workingStatsIsLoading && (
-        <Link href="/personal/workingstats">
-          <div className="stats stats-vertical shadow-lg sm:stats-horizontal">
+        <div className="stats stats-vertical shadow-lg sm:stats-horizontal">
+          <Link href="/personal/workingstats">
             <div className="stat">
               <div className="stat-figure text-primary">
                 <ClockIcon className="h-8 w-8" />
@@ -47,8 +55,8 @@ export default function Home() {
                 {workingStats?.totalWorkingHours?.toFixed(2)}
               </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        </div>
       )}
       <div className="flex flex-row">
         <div className="flex flex-row flex-wrap">
@@ -80,19 +88,31 @@ export default function Home() {
         </Link>
       </div>
       <div>
-        {isLoading && <div className="loading loading-lg"></div>}
-        {onGoingActivities?.length !== 0 && (
-          <div className="divider">即將到達</div>
+        {activitiesQuery.isLoading && (
+          <div className="mt-4 flex flex-row justify-center">
+            <div className="loading" />
+          </div>
         )}
-        <div className="flex flex-col space-y-4">
-          {orderBy(onGoingActivities, "startDateTime", "asc")?.map(
-            (activity) => (
+        <InfiniteScroll
+          dataLength={
+            (onGoingActivities?.length ?? 0) + (endedActivities?.length ?? 0)
+          }
+          next={() => activitiesQuery.fetchNextPage()}
+          hasMore={activitiesQuery.hasNextPage ?? false}
+          loader={
+            <div className="mt-4 flex flex-row justify-center">
+              <div className="loading" />
+            </div>
+          }
+        >
+          <div className="flex flex-col space-y-4">
+            {onGoingActivities?.map((activity) => (
               <Link
                 key={activity.id}
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card-compact card w-full bg-accent text-accent-content shadow-lg">
+                <div className="card card-compact w-full bg-accent text-accent-content shadow">
                   <div className="card-body">
                     <div className="flex flex-row items-center justify-between">
                       <h2 className="card-title">{activity.title}</h2>
@@ -119,27 +139,25 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            ),
-          )}
-        </div>
-        {endedActivities?.length !== 0 && <div className="divider">已結束</div>}
-        <div className="flex flex-col space-y-4">
-          {orderBy(endedActivities, "startDateTime", "desc")?.map(
-            (activity) => (
+            ))}
+          </div>
+          {!isEmpty(endedActivities) && <div className="divider">已結束</div>}
+          <div className="flex flex-col space-y-4">
+            {endedActivities?.map((activity) => (
               <Link
                 key={activity.id}
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card-compact card w-full bg-base-200 shadow-lg">
+                <div className="card-compact card w-full bg-base-200 shadow">
                   <div className="card-body">
                     <h2 className="card-title">{activity.title}</h2>
                   </div>
                 </div>
               </Link>
-            ),
-          )}
-        </div>
+            ))}
+          </div>
+        </InfiniteScroll>
       </div>
     </div>
   );

@@ -150,6 +150,54 @@ export const volunteerActivityRouter = createTRPCRouter({
       });
     }),
 
+  getAllActivitiesInfinite: protectedProcedure
+    .input(
+      z.object({
+        organizedByMe: z.boolean().optional(),
+        participatedByMe: z.boolean().optional(),
+
+        limit: z.number().min(1).max(100).default(10),
+        cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const filters: Prisma.VolunteerActivityWhereInput[] = [];
+      if (input.organizedByMe) {
+        filters.push({ organiserId: ctx.session.user.id });
+      }
+      if (input.participatedByMe) {
+        filters.push({ participants: { some: { id: ctx.session.user.id } } });
+      }
+
+      if (filters.length === 0) {
+        if (ctx.session.user.role !== "ADMIN") {
+          filters.push({ status: "PUBLISHED" });
+          filters.push({ organiserId: ctx.session.user.id });
+        }
+      }
+
+      const items = await ctx.db.volunteerActivity.findMany({
+        where: filters.length === 0 ? undefined : { OR: filters },
+        orderBy: { startDateTime: "desc" },
+
+        take: input.limit + 1,
+        cursor: input.cursor
+          ? { startDateTime: input.cursor.startDateTime, id: input.cursor.id }
+          : undefined,
+      });
+
+      let nextCursor: typeof input.cursor | undefined = undefined;
+      if (items.length > input.limit) {
+        const nextItem = items.pop();
+        nextCursor = {
+          startDateTime: nextItem!.startDateTime,
+          id: nextItem!.id,
+        };
+      }
+
+      return { items, nextCursor };
+    }),
+
   getOrganizedActivities: protectedProcedure
     .input(z.object({}))
     .query(async ({ ctx }) => {

@@ -108,6 +108,7 @@ model VolunteerActivity {
     volunteerActivityCheckIns VolunteerActivityCheckIn[]
 
     @@index([organiserId])
+    @@index([startDateTime])
 }
 
 enum VolunteerActivityStatus {
