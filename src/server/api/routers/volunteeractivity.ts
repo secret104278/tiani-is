@@ -5,7 +5,7 @@ import { z } from "zod";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
-import { CheckInHistory } from "~/utils/types";
+import type { CheckInHistory, CheckRecord } from "~/utils/types";
 import { TIANI_GPS_CENTER, TIANI_GPS_RADIUS_KM, getDistance } from "~/utils/ui";
 import { getActivityDetailURL } from "~/utils/url";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -529,5 +529,36 @@ export const volunteerActivityRouter = createTRPCRouter({
       );
 
       return { checkInHistories, totalWorkingHours };
+    }),
+
+  getActivityCheckRecords: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.$queryRaw<CheckRecord[]>`
+        SELECT
+          a.*,
+          name,
+          image
+        FROM (
+          SELECT
+            max("checkAt") AS checkOutAt,
+            min("checkAt") AS checkInAt,
+            "A"
+          FROM
+            "_ParticipatedVolunteerActivites"
+          LEFT JOIN "VolunteerActivityCheckIn" ON "A" = "userId"
+            AND "B" = "activityId"
+          JOIN "User" ON "A" = "User"."id"
+        WHERE
+          "B" = ${input.activityId}
+        GROUP BY
+          "A",
+          "B") AS a
+          JOIN "User" ON "A" = "id"
+        `;
     }),
 });

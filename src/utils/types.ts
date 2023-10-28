@@ -17,3 +17,10 @@ export interface CheckInHistory {
   title: string;
   startDateTime: Date;
 }
+
+export interface CheckRecord {
+  checkinat?: Date;
+  checkoutat?: Date;
+  name: string;
+  photo?: string;
+}
