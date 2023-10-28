@@ -5,6 +5,7 @@ import {
   ClockIcon,
   MapPinIcon,
   PencilSquareIcon,
+  QueueListIcon,
   TrashIcon,
   UserPlusIcon,
   UsersIcon,
@@ -13,9 +14,11 @@ import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 import ReactiveButton from "~/components/ReactiveButton";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
@@ -131,12 +134,12 @@ export default function VolunteerActivityDetailPage() {
     onSuccess: () => refetch(),
   });
 
+  const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const [checkInModalOpen, setCheckInModalOpen] = useState(false);
 
-  if (!isNil(error)) {
-    return <AlertWarning>{error.message}</AlertWarning>;
-  }
+  const leaveDialogRef = useRef<HTMLDialogElement>(null);
 
+  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
@@ -217,52 +220,30 @@ export default function VolunteerActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <button
-          className="btn"
-          onClick={() =>
-            void router.push(`/volunteeractivity/edit/${activity.id}`)
-          }
-        >
-          <PencilSquareIcon className="h-4 w-4" />
-          編輯
-        </button>
+        <Link href={`/volunteeractivity/edit/${activity.id}`}>
+          <button className="btn">
+            <PencilSquareIcon className="h-4 w-4" />
+            編輯
+          </button>
+        </Link>
         <ReactiveButton
           className="btn btn-warning"
           loading={deleteActivityIsLoading}
           isError={deleteActivityIsError}
-          onClick={() =>
-            void (
-              document.getElementById(
-                "confirm_delete_modal",
-              ) as HTMLDialogElement
-            ).showModal()
-          }
+          onClick={() => void deleteDialogRef.current?.showModal()}
         >
           <TrashIcon className="h-4 w-4" />
           撤銷
         </ReactiveButton>
-        <dialog id="confirm_delete_modal" className="modal">
-          <div className="modal-box">
-            <h3 className="text-lg font-bold">確認撤銷</h3>
-            <p className="py-4">工作撤銷後就無法復原囉！</p>
-            <div className="modal-action">
-              <form method="dialog" className="space-x-2">
-                <button className="btn">取消</button>
-                <button
-                  className="btn btn-error"
-                  onClick={() => deleteActivity({ id: activity.id })}
-                >
-                  撤銷
-                </button>
-              </form>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button>close</button>
-          </form>
-        </dialog>
+        <ConfirmDialog
+          title="確認撤銷"
+          content="工作撤銷後就無法復原囉！"
+          confirmText="撤銷"
+          onConfirm={() => deleteActivity({ id: activity.id })}
+          ref={deleteDialogRef}
+        />
       </div>
-      <div className="collapse collapse-arrow  bg-base-200">
+      <div className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -290,6 +271,12 @@ export default function VolunteerActivityDetailPage() {
           </ul>
         </div>
       </div>
+      <Link href={`/volunteeractivity/checkrecord/${activity.id}`}>
+        <button className="btn">
+          <QueueListIcon className="h-4 w-4" />
+          打卡名單
+        </button>
+      </Link>
       <div className="divider" />
     </>
   );
@@ -297,15 +284,23 @@ export default function VolunteerActivityDetailPage() {
   const ParticipateControl = () => {
     if (isParticipant)
       return (
-        <ReactiveButton
-          className="btn btn-secondary"
-          onClick={() => leaveActivity({ activityId: activity.id })}
-          loading={leaveActivityIsLoading}
-          isError={leaveActivityIsError}
-        >
-          <UserPlusIcon className="h-4 w-4" />
-          取消報名
-        </ReactiveButton>
+        <>
+          <ReactiveButton
+            className="btn btn-secondary"
+            onClick={() => void leaveDialogRef.current?.showModal()}
+            loading={leaveActivityIsLoading}
+            isError={leaveActivityIsError}
+          >
+            <UserPlusIcon className="h-4 w-4" />
+            取消報名
+          </ReactiveButton>
+          <ConfirmDialog
+            title="取消報名"
+            content="確定要取消報名嗎？"
+            onConfirm={() => leaveActivity({ activityId: activity.id })}
+            ref={leaveDialogRef}
+          />
+        </>
       );
 
     if (activity.participants.length >= activity.headcount)
