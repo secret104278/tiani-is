@@ -5,6 +5,7 @@ import { z } from "zod";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
+import { CheckInHistory } from "~/utils/types";
 import { TIANI_GPS_CENTER, TIANI_GPS_RADIUS_KM, getDistance } from "~/utils/ui";
 import { getActivityDetailURL } from "~/utils/url";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -444,71 +445,41 @@ export const volunteerActivityRouter = createTRPCRouter({
       )
         throw new Error("只有管理員可以查看其他人的工時");
 
-      async function getNumberOfParticipatedActivities() {
-        const res = await ctx.db.$queryRaw<
-          {
-            count: number;
-          }[]
-        >`
-        SELECT
-          COUNT(DISTINCT "activityId") AS count
-        FROM
-          "VolunteerActivityCheckIn"
-        WHERE
-          "userId" = ${input.userId ?? ctx.session.user.id};
-        `;
-        return Number(res[0]?.count ?? 0);
-      }
-
       async function getCheckInHistories() {
-        return await ctx.db.$queryRaw<
-          {
-            checkinat: Date;
-            checkoutat: Date;
-            activityId: number;
-            startDateTime: Date;
-            endDateTime: Date;
-          }[]
-        >`
+        return await ctx.db.$queryRaw<CheckInHistory[]>`
         SELECT
           a.*,
-          b. "startDateTime",
-          b. "endDateTime"
+          b.title,
+          b. "startDateTime"
         FROM (
           SELECT
-            max("checkAt") AS checkoutat,
-            min("checkAt") AS checkinat,
+            max("checkAt") AS checkOutAt,
+            min("checkAt") AS checkInAt,
             "activityId"
           FROM
             "VolunteerActivityCheckIn"
           WHERE
-            "userId" = ${input.userId}
+            "userId" = ${input.userId ?? ctx.session.user.id}
           GROUP BY
             "activityId") AS a
-          JOIN "VolunteerActivity" AS b ON a. "activityId" = b.id;
+          JOIN "VolunteerActivity" AS b ON a. "activityId" = b.id
+        ORDER BY
+          b. "startDateTime" DESC;
         `;
       }
 
-      const [numberOfParticipatedActivities, checkInHistories] =
-        await Promise.all([
-          getNumberOfParticipatedActivities(),
-          getCheckInHistories(),
-        ]);
+      const checkInHistories = await getCheckInHistories();
 
-      const totalWorkingHours =
-        sum(
-          checkInHistories.map(
-            (record) =>
-              record.checkoutat.getTime() - record.checkinat.getTime(),
-          ),
-        ) /
-        1000 /
-        60 /
-        60;
+      const totalWorkingHours = sum(
+        checkInHistories.map(
+          (record) =>
+            (record.checkoutat.getTime() - record.checkinat.getTime()) /
+            1000 /
+            60 /
+            60,
+        ),
+      );
 
-      return {
-        numberOfParticipatedActivities,
-        totalWorkingHours,
-      };
+      return { checkInHistories, totalWorkingHours };
     }),
 });

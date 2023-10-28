@@ -37,7 +37,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <div className="navbar mb-4 bg-base-100 shadow-md">
         <div className="navbar-start">
           <Link href="/">
-            <button className="btn btn-circle">
+            <button className="btn btn-circle btn-ghost">
               <HomeIcon className="h-6 w-6" />
             </button>
           </Link>

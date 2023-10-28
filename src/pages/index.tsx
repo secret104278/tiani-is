@@ -1,12 +1,10 @@
 import {
-  BriefcaseIcon,
   ClockIcon,
   MapPinIcon,
   PlusIcon,
   UsersIcon,
 } from "@heroicons/react/20/solid";
 import { orderBy } from "lodash";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "~/utils/api";
@@ -22,11 +20,8 @@ export default function Home() {
       participatedByMe: filterParticipatedByMe,
     });
 
-  const { data: session } = useSession();
   const { data: workingStats, isLoading: workingStatsIsLoading } =
-    api.volunteerActivity.getWorkingStats.useQuery({
-      userId: session?.user?.id,
-    });
+    api.volunteerActivity.getWorkingStats.useQuery({});
 
   const onGoingActivities = activities?.filter(
     (activity) => activity.endDateTime > new Date(),
@@ -41,26 +36,19 @@ export default function Home() {
         <h1>工作總覽</h1>
       </article>
       {!workingStatsIsLoading && (
-        <div className="stats stats-vertical shadow sm:stats-horizontal">
-          <div className="stat">
-            <div className="stat-figure text-primary">
-              <ClockIcon className="h-8 w-8" />
-            </div>
-            <div className="stat-title">總服務小時</div>
-            <div className="stat-value">
-              {workingStats?.totalWorkingHours.toPrecision(1)}
-            </div>
-          </div>
-          <div className="stat">
-            <div className="stat-figure text-primary">
-              <BriefcaseIcon className="h-8 w-8" />
-            </div>
-            <div className="stat-title">已參與工作</div>
-            <div className="stat-value">
-              {workingStats?.numberOfParticipatedActivities}
+        <Link href="/personal/workingstats">
+          <div className="stats stats-vertical shadow-lg sm:stats-horizontal">
+            <div className="stat">
+              <div className="stat-figure text-primary">
+                <ClockIcon className="h-8 w-8" />
+              </div>
+              <div className="stat-title">總服務小時</div>
+              <div className="stat-value">
+                {workingStats?.totalWorkingHours?.toFixed(2)}
+              </div>
             </div>
           </div>
-        </div>
+        </Link>
       )}
       <div className="flex flex-row">
         <div className="flex flex-row flex-wrap">
@@ -104,7 +92,7 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card-compact card w-full bg-accent text-accent-content shadow-xl">
+                <div className="card-compact card w-full bg-accent text-accent-content shadow-lg">
                   <div className="card-body">
                     <div className="flex flex-row items-center justify-between">
                       <h2 className="card-title">{activity.title}</h2>
@@ -143,7 +131,7 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card-compact card w-full bg-base-200 shadow-xl">
+                <div className="card-compact card w-full bg-base-200 shadow-lg">
                   <div className="card-body">
                     <h2 className="card-title">{activity.title}</h2>
                   </div>

@@ -106,6 +106,8 @@ model VolunteerActivity {
     version Int @default(1)
 
     volunteerActivityCheckIns VolunteerActivityCheckIn[]
+
+    @@index([organiserId])
 }
 
 enum VolunteerActivityStatus {
@@ -135,4 +137,7 @@ model VolunteerActivityCheckIn {
 
     latitude  Float
     longitude Float
+
+    @@index([userId])
+    @@index([activityId])
 }

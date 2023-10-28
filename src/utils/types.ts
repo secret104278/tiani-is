@@ -9,3 +9,11 @@ export interface OGMetaProps {
   ogDescription?: string | null;
   ogImage?: string | null;
 }
+
+export interface CheckInHistory {
+  checkinat: Date;
+  checkoutat: Date;
+  activityId: number;
+  title: string;
+  startDateTime: Date;
+}
