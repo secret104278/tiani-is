@@ -243,7 +243,7 @@ export default function VolunteerActivityDetailPage() {
           ref={deleteDialogRef}
         />
       </div>
-      <div className="collapse-arrow collapse bg-base-200">
+      <div className="collapse collapse-arrow bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -272,7 +272,7 @@ export default function VolunteerActivityDetailPage() {
         </div>
       </div>
       <Link href={`/volunteeractivity/checkrecord/${activity.id}`}>
-        <button className="btn">
+        <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           打卡名單
         </button>
@@ -326,10 +326,10 @@ export default function VolunteerActivityDetailPage() {
 
   const CheckInControl = () => {
     const isCheckIn = isNil(checkInData);
-    const alreadyCheckIn = !isNil(checkInData?.last?.checkAt);
+    const alreadyCheckIn = !isNil(checkInData?.checkin.checkAt);
     const [time, setTime] = useState(
       alreadyCheckIn
-        ? checkInData!.last!.checkAt.getTime()
+        ? checkInData!.checkout!.checkAt.getTime()
         : new Date().getTime(),
     );
 
@@ -355,7 +355,7 @@ export default function VolunteerActivityDetailPage() {
     if (isCheckIn) checkButtonLabel = `簽到${checkButtonLabel}`;
     else
       checkButtonLabel = `簽退 (已工作 ${formatMilliseconds(
-        time - checkInData.first.checkAt.getTime(),
+        time - checkInData.checkin.checkAt.getTime(),
       )})`;
 
     if (isParticipant)

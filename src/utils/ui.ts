@@ -78,7 +78,8 @@ export function formatMilliseconds(milliseconds: number) {
 }
 
 export const TIANI_GPS_CENTER: [number, number] = [
-  22.863541598094525, 120.36627531051637,
+  // 22.863541598094525, 120.36627531051637,
+  22.975141, 120.298921,
 ];
 export const TIANI_GPS_RADIUS_KM = 0.5;
 
@@ -114,3 +115,10 @@ export function getDistance(
 function degToRad(deg: number) {
   return deg * (Math.PI / 180);
 }
+
+export const getDateTimeString = (date: Date) => {
+  const tzOffset = date.getTimezoneOffset();
+  const offsetMs = -tzOffset * 60 * 1000;
+  const localTime = new Date(date.getTime() + offsetMs);
+  return localTime.toISOString().slice(0, 16);
+};

@@ -8,6 +8,7 @@ import { api } from "~/utils/api";
 import {
   VOLUNTEER_ACTIVITY_TOPICS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
+  getDateTimeString,
 } from "~/utils/ui";
 import { AlertWarning } from "./Alert";
 import ReactiveButton from "./ReactiveButton";
@@ -33,13 +34,6 @@ const getCurrentDateTime = (offset = 0) => {
   const tzOffset = now.getTimezoneOffset();
   const offsetMs = (-tzOffset + offset) * 60 * 1000;
   const localTime = new Date(now.getTime() + offsetMs);
-  return localTime.toISOString().slice(0, 16);
-};
-
-const getDateTimeString = (date: Date) => {
-  const tzOffset = date.getTimezoneOffset();
-  const offsetMs = -tzOffset * 60 * 1000;
-  const localTime = new Date(date.getTime() + offsetMs);
   return localTime.toISOString().slice(0, 16);
 };
 

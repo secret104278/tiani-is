@@ -1,8 +1,11 @@
 import { isNil } from "lodash";
+import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 import type { CheckInHistory } from "~/utils/types";
 
 export default function WorkingStatsPage() {
+  const router = useRouter();
+
   const { data: workingStats, isLoading: workingStatsIsLoading } =
     api.volunteerActivity.getWorkingStats.useQuery({});
 
@@ -42,10 +45,26 @@ export default function WorkingStatsPage() {
             </thead>
             <tbody>
               {histories.map((history) => (
-                <tr key={history.activityId}>
+                <tr
+                  className="hover hover:cursor-pointer"
+                  key={history.activityId}
+                  onClick={() =>
+                    void router.push(
+                      `/volunteeractivity/detail/${history.activityId}`,
+                    )
+                  }
+                >
                   <td>{history.title}</td>
-                  <td>{history.checkinat.toLocaleTimeString()}</td>
-                  <td>{history.checkoutat.toLocaleTimeString()}</td>
+                  <td>
+                    {history.checkinat.toLocaleDateString()}
+                    <br />
+                    {history.checkinat.toLocaleTimeString()}
+                  </td>
+                  <td>
+                    {history.checkoutat.toLocaleDateString()}
+                    <br />
+                    {history.checkoutat.toLocaleTimeString()}
+                  </td>
                 </tr>
               ))}
             </tbody>

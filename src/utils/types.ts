@@ -21,6 +21,8 @@ export interface CheckInHistory {
 export interface CheckRecord {
   checkinat?: Date;
   checkoutat?: Date;
-  name: string;
+  userName: string;
+  userId: string;
+  activityId: number;
   photo?: string;
 }

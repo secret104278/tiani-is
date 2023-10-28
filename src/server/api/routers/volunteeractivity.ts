@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { VolunteerActivityCheckRecordType, type Prisma } from "@prisma/client";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
 
@@ -214,6 +214,7 @@ export const volunteerActivityRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+        select: { organiserId: true },
         where: { id: input.activityId },
       });
 
@@ -402,28 +403,29 @@ export const volunteerActivityRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const first = await ctx.db.volunteerActivityCheckIn.findFirst({
-        where: {
-          activityId: input.activityId,
-          userId: ctx.session.user.id,
-        },
-        orderBy: {
-          checkAt: "asc",
-        },
-      });
-      const last = await ctx.db.volunteerActivityCheckIn.findFirst({
-        where: {
-          activityId: input.activityId,
-          userId: ctx.session.user.id,
-        },
-        orderBy: {
-          checkAt: "desc",
-        },
-      });
+      const [checkin, checkout] = await Promise.all([
+        ctx.db.volunteerActivityCheckRecord.findUnique({
+          where: {
+            userId_activityId_type: {
+              userId: ctx.session.user.id,
+              activityId: input.activityId,
+              type: VolunteerActivityCheckRecordType.CHECKIN,
+            },
+          },
+        }),
+        ctx.db.volunteerActivityCheckRecord.findUnique({
+          where: {
+            userId_activityId_type: {
+              userId: ctx.session.user.id,
+              activityId: input.activityId,
+              type: VolunteerActivityCheckRecordType.CHECKOUT,
+            },
+          },
+        }),
+      ]);
 
-      if (!isNil(first) && !isNil(last)) {
-        if (last.id === first.id) return { first, last: null };
-        return { first, last };
+      if (!isNil(checkin)) {
+        return { checkin, checkout };
       }
       return null;
     }),
@@ -461,22 +463,59 @@ export const volunteerActivityRouter = createTRPCRouter({
         ) > TIANI_GPS_RADIUS_KM;
       if (isOutOfRange) throw new Error("超出打卡範圍");
 
-      await ctx.db.volunteerActivityCheckIn.create({
-        data: {
-          activity: {
-            connect: {
-              id: input.activityId,
-            },
-          },
-          user: {
-            connect: {
-              id: ctx.session.user.id,
-            },
-          },
-          latitude: input.latitude,
-          longitude: input.longitude,
+      const checkin = await ctx.db.volunteerActivityCheckRecord.findFirst({
+        where: {
+          activityId: input.activityId,
+          userId: ctx.session.user.id,
+          type: VolunteerActivityCheckRecordType.CHECKIN,
         },
       });
+
+      if (checkin) {
+        await ctx.db.volunteerActivityCheckRecord.upsert({
+          where: {
+            userId_activityId_type: {
+              userId: ctx.session.user.id,
+              activityId: input.activityId,
+              type: VolunteerActivityCheckRecordType.CHECKOUT,
+            },
+          },
+          update: {
+            checkAt: now,
+          },
+          create: {
+            user: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+            activity: {
+              connect: {
+                id: input.activityId,
+              },
+            },
+            type: VolunteerActivityCheckRecordType.CHECKOUT,
+            checkAt: now,
+          },
+        });
+      } else {
+        await ctx.db.volunteerActivityCheckRecord.create({
+          data: {
+            user: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+            activity: {
+              connect: {
+                id: input.activityId,
+              },
+            },
+            type: VolunteerActivityCheckRecordType.CHECKIN,
+            checkAt: now,
+          },
+        });
+      }
     }),
 
   getWorkingStats: protectedProcedure
@@ -496,23 +535,21 @@ export const volunteerActivityRouter = createTRPCRouter({
       async function getCheckInHistories() {
         return await ctx.db.$queryRaw<CheckInHistory[]>`
         SELECT
-          a.*,
-          b.title,
-          b. "startDateTime"
-        FROM (
-          SELECT
-            max("checkAt") AS checkOutAt,
-            min("checkAt") AS checkInAt,
-            "activityId"
-          FROM
-            "VolunteerActivityCheckIn"
-          WHERE
-            "userId" = ${input.userId ?? ctx.session.user.id}
-          GROUP BY
-            "activityId") AS a
-          JOIN "VolunteerActivity" AS b ON a. "activityId" = b.id
+          r1. "activityId",
+          r1. "checkAt" AS checkOutAt,
+          r2. "checkAt" AS checkInAt,
+          va. "title",
+          va. "startDateTime"
+        FROM
+          "VolunteerActivityCheckRecord" AS r1
+          JOIN "VolunteerActivityCheckRecord" AS r2 ON r1. "userId" = r2. "userId"
+            AND r1. "activityId" = r2. "activityId"
+            AND r1. "type" = 'CHECKOUT'
+            AND r2. "type" = 'CHECKIN'
+          JOIN "VolunteerActivity" AS va ON r1. "activityId" = va.id
+          WHERE r1. "userId" = ${input.userId ?? ctx.session.user.id}
         ORDER BY
-          b. "startDateTime" DESC;
+          va. "startDateTime" DESC;
         `;
       }
 
@@ -531,6 +568,90 @@ export const volunteerActivityRouter = createTRPCRouter({
       return { checkInHistories, totalWorkingHours };
     }),
 
+  modifyActivityCheckRecord: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+        userId: z.string(),
+        checkInAt: z.date(),
+        checkOutAt: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.checkInAt >= input.checkOutAt) {
+        throw new Error("簽退時間必須晚於簽到時間");
+      }
+
+      const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+        select: { organiserId: true },
+        where: { id: input.activityId },
+      });
+
+      if (
+        !(
+          ctx.session.user.role === "ADMIN" ||
+          ctx.session.user.id === activity.organiserId
+        )
+      )
+        throw new Error("只有管理員可以修改打卡紀錄");
+
+      const upsertCheckIn = ctx.db.volunteerActivityCheckRecord.upsert({
+        where: {
+          userId_activityId_type: {
+            userId: input.userId,
+            activityId: input.activityId,
+            type: VolunteerActivityCheckRecordType.CHECKIN,
+          },
+        },
+        create: {
+          user: {
+            connect: {
+              id: input.userId,
+            },
+          },
+          activity: {
+            connect: {
+              id: input.activityId,
+            },
+          },
+          type: VolunteerActivityCheckRecordType.CHECKIN,
+          checkAt: input.checkInAt,
+        },
+        update: {
+          checkAt: input.checkInAt,
+        },
+      });
+
+      const upsertCheckOut = ctx.db.volunteerActivityCheckRecord.upsert({
+        where: {
+          userId_activityId_type: {
+            userId: input.userId,
+            activityId: input.activityId,
+            type: VolunteerActivityCheckRecordType.CHECKOUT,
+          },
+        },
+        create: {
+          user: {
+            connect: {
+              id: input.userId,
+            },
+          },
+          activity: {
+            connect: {
+              id: input.activityId,
+            },
+          },
+          type: VolunteerActivityCheckRecordType.CHECKOUT,
+          checkAt: input.checkOutAt,
+        },
+        update: {
+          checkAt: input.checkOutAt,
+        },
+      });
+
+      await ctx.db.$transaction([upsertCheckIn, upsertCheckOut]);
+    }),
+
   getActivityCheckRecords: protectedProcedure
     .input(
       z.object({
@@ -540,25 +661,23 @@ export const volunteerActivityRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.$queryRaw<CheckRecord[]>`
         SELECT
-          a.*,
-          name,
+          pva. "A" AS "userId",
+          pva. "B" AS "activityId",
+          r1. "checkAt" AS checkOutAt,
+          r2. "checkAt" AS checkInAt,
+          name AS "userName",
           image
-        FROM (
-          SELECT
-            max("checkAt") AS checkOutAt,
-            min("checkAt") AS checkInAt,
-            "A"
-          FROM
-            "_ParticipatedVolunteerActivites"
-          LEFT JOIN "VolunteerActivityCheckIn" ON "A" = "userId"
-            AND "B" = "activityId"
-          JOIN "User" ON "A" = "User"."id"
+        FROM
+          "_ParticipatedVolunteerActivites" AS pva
+          LEFT JOIN "VolunteerActivityCheckRecord" AS r1 ON r1. "userId" = pva. "A"
+            AND r1. "activityId" = pva. "B"
+            AND r1. "type" = 'CHECKOUT'
+          LEFT JOIN "VolunteerActivityCheckRecord" AS r2 ON r1. "userId" = r2. "userId"
+            AND r1. "activityId" = r2. "activityId"
+            AND r2. "type" = 'CHECKIN'
+          JOIN "User" ON pva. "A" = "User"."id"
         WHERE
-          "B" = ${input.activityId}
-        GROUP BY
-          "A",
-          "B") AS a
-          JOIN "User" ON "A" = "id"
+          pva. "B" = ${input.activityId};
         `;
     }),
 });

@@ -74,7 +74,7 @@ model User {
 
     activityReviewer ActivityReviewer?
 
-    volunteerActivityCheckIns VolunteerActivityCheckIn[]
+    volunteerActivityCheckIns VolunteerActivityCheckRecord[]
 }
 
 model VerificationToken {
@@ -105,7 +105,7 @@ model VolunteerActivity {
 
     version Int @default(1)
 
-    volunteerActivityCheckIns VolunteerActivityCheckIn[]
+    volunteerActivityCheckIns VolunteerActivityCheckRecord[]
 
     @@index([organiserId])
     @@index([startDateTime])
@@ -128,17 +128,24 @@ model ActivityReviewer {
 //     lineId String @id @unique
 // }
 
-model VolunteerActivityCheckIn {
-    id         Int               @id @default(autoincrement())
-    user       User              @relation(fields: [userId], references: [id])
+enum VolunteerActivityCheckRecordType {
+    CHECKIN
+    CHECKOUT
+}
+
+model VolunteerActivityCheckRecord {
+    id         Int                              @id @default(autoincrement())
+    user       User                             @relation(fields: [userId], references: [id])
     userId     String
-    activity   VolunteerActivity @relation(fields: [activityId], references: [id])
+    activity   VolunteerActivity                @relation(fields: [activityId], references: [id])
     activityId Int
-    checkAt    DateTime          @default(now())
+    type       VolunteerActivityCheckRecordType
+    checkAt    DateTime                         @default(now())
 
-    latitude  Float
-    longitude Float
+    latitude  Float?
+    longitude Float?
 
+    @@unique([userId, activityId, type])
     @@index([userId])
     @@index([activityId])
 }
