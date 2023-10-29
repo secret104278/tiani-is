@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import ReactiveButton from "~/components/ReactiveButton";
@@ -243,7 +243,7 @@ export default function VolunteerActivityDetailPage() {
           ref={deleteDialogRef}
         />
       </div>
-      <div className="collapse collapse-arrow bg-base-200">
+      <div className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -326,19 +326,7 @@ export default function VolunteerActivityDetailPage() {
 
   const CheckInControl = () => {
     const isCheckIn = isNil(checkInData);
-    const alreadyCheckIn = !isNil(checkInData?.checkin.checkAt);
-    const [time, setTime] = useState(
-      alreadyCheckIn
-        ? checkInData!.checkout!.checkAt.getTime()
-        : new Date().getTime(),
-    );
-
-    useEffect(() => {
-      if (!alreadyCheckIn) {
-        const interval = setInterval(() => setTime(new Date().getTime()), 1000);
-        return () => clearInterval(interval);
-      }
-    }, [alreadyCheckIn]);
+    const alreadyCheckOut = !isNil(checkInData?.checkout?.checkAt);
 
     const isActivityNotYetForCheck =
       new Date().getTime() <=
@@ -351,12 +339,14 @@ export default function VolunteerActivityDetailPage() {
     if (isActivityNotYetForCheck)
       checkButtonLabel = " （工作開始前 2 小時開放打卡）";
     if (isActivityClosedForCheck) checkButtonLabel = " （工作已結束）";
+    if (alreadyCheckOut)
+      checkButtonLabel = ` （已工作 ${formatMilliseconds(
+        checkInData!.checkout!.checkAt.getTime() -
+          checkInData!.checkin.checkAt.getTime(),
+      )}）`;
 
     if (isCheckIn) checkButtonLabel = `簽到${checkButtonLabel}`;
-    else
-      checkButtonLabel = `簽退 (已工作 ${formatMilliseconds(
-        time - checkInData.checkin.checkAt.getTime(),
-      )})`;
+    else checkButtonLabel = `簽退${checkButtonLabel}`;
 
     if (isParticipant)
       return (
