@@ -59,6 +59,13 @@ export default function Layout({ children }: { children: ReactNode }) {
                 tabIndex={0}
                 className="menu dropdown-content rounded-box z-[1] mt-3 w-52 bg-base-100 p-2 shadow-xl outline outline-1 outline-base-200"
               >
+                <li className="disabled">
+                  <a>{sessionData.user.name}</a>
+                </li>
+
+                <li>
+                  <Link href="/personal/account">個人資料</Link>
+                </li>
                 <li>
                   <a onClick={() => void signOut()}>登出</a>
                 </li>
