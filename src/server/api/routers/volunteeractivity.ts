@@ -5,9 +5,9 @@ import { z } from "zod";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
+import { reviewActivityNotificationEventQueue } from "~/server/queue/reviewActivityNotification";
 import type { CheckInHistory, CheckRecord } from "~/utils/types";
 import { TIANI_GPS_CENTER, TIANI_GPS_RADIUS_KM, getDistance } from "~/utils/ui";
-import { getActivityDetailURL } from "~/utils/url";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const volunteerActivityRouter = createTRPCRouter({
@@ -24,7 +24,7 @@ export const volunteerActivityRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.volunteerActivity.create({
+      const activity = await ctx.db.volunteerActivity.create({
         data: {
           title: input.title,
           description: input.description,
@@ -43,6 +43,13 @@ export const volunteerActivityRouter = createTRPCRouter({
           organiser: true,
         },
       });
+
+      if (!input.isDraft)
+        void reviewActivityNotificationEventQueue.push({
+          activityId: activity.id,
+        });
+
+      return activity;
     }),
 
   updateActivity: protectedProcedure
@@ -59,7 +66,14 @@ export const volunteerActivityRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.volunteerActivity.update({
+      const orgActivity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+        select: { status: true },
+        where: {
+          id: input.id,
+        },
+      });
+
+      const res = await ctx.db.volunteerActivity.update({
         where: {
           id: input.id,
         },
@@ -70,12 +84,19 @@ export const volunteerActivityRouter = createTRPCRouter({
           location: input.location,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
-          status: input.isDraft ? "DRAFT" : undefined,
+          status: input.isDraft ? "DRAFT" : "INREVIEW",
           version: {
             increment: 1,
           },
         },
       });
+
+      if (!input.isDraft && orgActivity.status === "DRAFT")
+        void reviewActivityNotificationEventQueue.push({
+          activityId: input.id,
+        });
+
+      return res;
     }),
 
   deleteActivity: protectedProcedure
@@ -228,6 +249,10 @@ export const volunteerActivityRouter = createTRPCRouter({
           status: "INREVIEW",
         },
       });
+
+      await reviewActivityNotificationEventQueue.push({
+        activityId: input.activityId,
+      });
     }),
 
   sendReviewNotification: protectedProcedure
@@ -238,56 +263,16 @@ export const volunteerActivityRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+        select: { organiserId: true },
         where: { id: input.activityId },
-        include: {
-          organiser: true,
-        },
       });
 
-      if (activity.organiserId !== ctx.session.user.id) {
+      if (activity.organiserId !== ctx.session.user.id)
         throw new Error("Only organizer can send review notification");
-      }
 
-      const reviewers = await ctx.db.activityReviewer.findMany({
-        select: {
-          user: {
-            select: {
-              accounts: {
-                select: {
-                  providerAccountId: true,
-                },
-              },
-            },
-          },
-        },
-        where: {
-          user: {
-            accounts: {
-              every: {
-                provider: "line",
-              },
-            },
-          },
-        },
+      await reviewActivityNotificationEventQueue.push({
+        activityId: input.activityId,
       });
-
-      await Promise.all(
-        reviewers
-          .flatMap((reviewer) => reviewer.user.accounts)
-          .map((account) =>
-            ctx.bot.pushMessage({
-              to: account.providerAccountId,
-              messages: [
-                {
-                  type: "text",
-                  text: `有新的志工工作申請 ${activity.title} 來自 ${
-                    activity.organiser.name
-                  } 需要審核囉！\n${getActivityDetailURL(activity)}`,
-                },
-              ],
-            }),
-          ),
-      );
     }),
 
   approveActivity: protectedProcedure
