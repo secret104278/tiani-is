@@ -113,8 +113,8 @@ export const volunteerActivityRouter = createTRPCRouter({
       if (res?.status !== "PUBLISHED" && !isManager)
         return { activity: null, isParticipant: false };
 
-      if (!isManager) {
-        // always join participants and hide participants if not organizer for convenience
+      if (!isManager && !isParticipant) {
+        // always join participants and hide participants if not organizer or participant for convenience
         res.participants = [];
       }
 

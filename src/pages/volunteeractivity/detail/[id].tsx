@@ -167,6 +167,39 @@ export default function VolunteerActivityDetailPage() {
     );
   };
 
+  const ParticipantsCollapse = () => {
+    return (
+      <div className="collapse-arrow collapse bg-base-200">
+        <input type="checkbox" />
+        <div className="collapse-title font-medium">
+          目前有 {activity.participants?.length || 0} 人報名
+        </div>
+        <div className="collapse-content">
+          <ul className="space-y-2">
+            {activity.participants.map((participant) => (
+              <li key={participant.id} className="flex items-center">
+                {participant.image ? (
+                  <div className="avatar mr-2">
+                    <div className="w-8 rounded-full">
+                      <img src={participant.image} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="avatar placeholder mr-2">
+                    <div className="w-8 rounded-full bg-neutral-focus text-neutral-content">
+                      <span>{participant.name?.charAt(0)}</span>
+                    </div>
+                  </div>
+                )}
+                {participant.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   const FlowControl = () => {
     if (activity.status === "DRAFT")
       return (
@@ -243,34 +276,7 @@ export default function VolunteerActivityDetailPage() {
           ref={deleteDialogRef}
         />
       </div>
-      <div className="collapse-arrow collapse bg-base-200">
-        <input type="checkbox" />
-        <div className="collapse-title font-medium">
-          目前有 {activity.participants?.length || 0} 人報名
-        </div>
-        <div className="collapse-content">
-          <ul className="space-y-2">
-            {activity.participants.map((participant) => (
-              <li key={participant.id} className="flex items-center">
-                {participant.image ? (
-                  <div className="avatar mr-2">
-                    <div className="w-8 rounded-full">
-                      <img src={participant.image} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="avatar placeholder mr-2">
-                    <div className="w-8 rounded-full bg-neutral-focus text-neutral-content">
-                      <span>{participant.name?.charAt(0)}</span>
-                    </div>
-                  </div>
-                )}
-                {participant.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <ParticipantsCollapse />
       <Link href={`/volunteeractivity/checkrecord/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
@@ -384,7 +390,7 @@ export default function VolunteerActivityDetailPage() {
         {isParticipant && <div className="badge badge-neutral">已報名</div>}
         {!isManager && <ShareLineBtn />}
       </div>
-
+      {!isManager && isParticipant && <ParticipantsCollapse />}
       {isManager && <AdminPanel />}
       <div className="flex flex-col space-y-2 align-bottom">
         <p>發起人：{activity.organiser.name}</p>
