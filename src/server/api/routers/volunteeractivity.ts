@@ -88,7 +88,7 @@ export const volunteerActivityRouter = createTRPCRouter({
           location: input.location,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
-          status: input.isDraft ? "DRAFT" : "INREVIEW",
+          status: input.isDraft ? "DRAFT" : undefined,
           version: {
             increment: 1,
           },
