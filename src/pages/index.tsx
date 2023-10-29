@@ -27,6 +27,7 @@ export default function Home() {
     );
 
   const activities = activitiesQuery.data?.pages?.flatMap((page) => page.items);
+  console.log(activities);
 
   const { data: workingStats, isLoading: workingStatsIsLoading } =
     api.volunteerActivity.getWorkingStats.useQuery({});
@@ -112,12 +113,17 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card card-compact w-full bg-accent text-accent-content shadow">
+                <div className="card-compact card w-full bg-accent text-accent-content shadow">
                   <div className="card-body">
                     <div className="flex flex-row items-center justify-between">
                       <h2 className="card-title">{activity.title}</h2>
-                      <div className="badge badge-outline">
-                        {getActivityStatusText(activity.status)}
+                      <div className="space-x-2">
+                        <div className="badge badge-outline">
+                          {getActivityStatusText(activity.status)}
+                        </div>
+                        {activity._count.participants >= activity.headcount && (
+                          <div className="badge badge-primary">已額滿</div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center">

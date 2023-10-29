@@ -146,40 +146,41 @@ export const volunteerActivityRouter = createTRPCRouter({
       return { activity: res, isParticipant: isParticipant };
     }),
 
-  getAllActivities: protectedProcedure
-    .input(
-      z.object({
-        organizedByMe: z.boolean().optional(),
-        participatedByMe: z.boolean().optional(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const filters: Prisma.VolunteerActivityWhereInput[] = [];
-      if (input.organizedByMe) {
-        filters.push({ organiserId: ctx.session.user.id });
-      }
-      if (input.participatedByMe) {
-        filters.push({ participants: { some: { id: ctx.session.user.id } } });
-      }
+  // getAllActivities: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       organizedByMe: z.boolean().optional(),
+  //       participatedByMe: z.boolean().optional(),
+  //     }),
+  //   )
+  //   .query(async ({ ctx, input }) => {
+  //     const filters: Prisma.VolunteerActivityWhereInput[] = [];
+  //     if (input.organizedByMe) {
+  //       filters.push({ organiserId: ctx.session.user.id });
+  //     }
+  //     if (input.participatedByMe) {
+  //       filters.push({ participants: { some: { id: ctx.session.user.id } } });
+  //     }
 
-      if (filters.length === 0) {
-        if (ctx.session.user.role !== "ADMIN") {
-          filters.push({ status: "PUBLISHED" });
-          filters.push({ organiserId: ctx.session.user.id });
-        }
-      }
+  //     if (filters.length === 0) {
+  //       if (ctx.session.user.role !== "ADMIN") {
+  //         filters.push({ status: "PUBLISHED" });
+  //         filters.push({ organiserId: ctx.session.user.id });
+  //       }
+  //     }
 
-      return await ctx.db.volunteerActivity.findMany({
-        where: filters.length === 0 ? undefined : { OR: filters },
-        orderBy: { startDateTime: "desc" },
-      });
-    }),
+  //     return await ctx.db.volunteerActivity.findMany({
+  //       where: filters.length === 0 ? undefined : { OR: filters },
+  //       orderBy: { startDateTime: "desc" },
+  //     });
+  //   }),
 
   getAllActivitiesInfinite: protectedProcedure
     .input(
       z.object({
         organizedByMe: z.boolean().optional(),
         participatedByMe: z.boolean().optional(),
+        notFull: z.boolean().optional(),
 
         limit: z.number().min(1).max(100).default(10),
         cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
@@ -202,6 +203,14 @@ export const volunteerActivityRouter = createTRPCRouter({
       }
 
       const items = await ctx.db.volunteerActivity.findMany({
+        include: {
+          _count: {
+            select: {
+              participants: true,
+            },
+          },
+        },
+
         where: filters.length === 0 ? undefined : { OR: filters },
         orderBy: { startDateTime: "desc" },
 
