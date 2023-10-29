@@ -2,6 +2,7 @@ import { HomeIcon } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import LineImage from "./LineImage";
 
 function UserAvatar() {
   const { data: sessionData } = useSession();
@@ -14,7 +15,10 @@ function UserAvatar() {
     return (
       <div className="avatar">
         <div className="w-10 rounded-full">
-          <img src={sessionData.user.image} />
+          <LineImage
+            src={sessionData.user.image}
+            alt={sessionData.user.name ?? "user image"}
+          />
         </div>
       </div>
     );
@@ -51,7 +55,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown dropdown-end">
+            <div className="dropdown-end dropdown">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>

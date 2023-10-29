@@ -19,6 +19,7 @@ import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import LineImage from "~/components/LineImage";
 import ReactiveButton from "~/components/ReactiveButton";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
@@ -181,7 +182,10 @@ export default function VolunteerActivityDetailPage() {
                 {participant.image ? (
                   <div className="avatar mr-2">
                     <div className="w-8 rounded-full">
-                      <img src={participant.image} />
+                      <LineImage
+                        src={participant.image}
+                        alt={participant.name ?? ""}
+                      />
                     </div>
                   </div>
                 ) : (

@@ -1,5 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
+import LineImage from "~/components/LineImage";
 import ReactiveButton from "~/components/ReactiveButton";
 import { api } from "~/utils/api";
 
@@ -50,7 +51,11 @@ export default function PersonalAccountPage() {
           <div className="flex flex-row items-center space-x-4">
             <div className="avatar">
               <div className="w-24 rounded-full">
-                <img src={lineImage ?? sessionData.user.image ?? ""} />
+                <LineImage
+                  src={lineImage ?? sessionData.user.image ?? ""}
+                  alt="user image"
+                  unoptimized
+                />
               </div>
             </div>
             <ReactiveButton

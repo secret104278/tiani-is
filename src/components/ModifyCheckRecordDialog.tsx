@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
-import { ForwardedRef, forwardRef, useEffect } from "react";
+import type { ForwardedRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { api } from "~/utils/api";
 import { getDateTimeString } from "~/utils/ui";
