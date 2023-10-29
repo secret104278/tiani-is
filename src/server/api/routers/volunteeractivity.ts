@@ -7,7 +7,11 @@ import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
 import { reviewActivityNotificationEventQueue } from "~/server/queue/reviewActivityNotification";
 import type { CheckInHistory, CheckRecord } from "~/utils/types";
-import { TIANI_GPS_CENTER, TIANI_GPS_RADIUS_KM, getDistance } from "~/utils/ui";
+import {
+  TIANI_GPS_CENTERS,
+  TIANI_GPS_RADIUS_KM,
+  getDistance,
+} from "~/utils/ui";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const volunteerActivityRouter = createTRPCRouter({
@@ -439,13 +443,11 @@ export const volunteerActivityRouter = createTRPCRouter({
         throw new Error("非活動時間，無法簽到");
       }
 
-      const isOutOfRange =
-        getDistance(
-          input.latitude,
-          input.longitude,
-          TIANI_GPS_CENTER[0],
-          TIANI_GPS_CENTER[1],
-        ) > TIANI_GPS_RADIUS_KM;
+      const isOutOfRange = !TIANI_GPS_CENTERS.some(
+        (center) =>
+          getDistance(input.latitude, input.longitude, center[0], center[1]) <=
+          TIANI_GPS_RADIUS_KM,
+      );
       if (isOutOfRange) throw new Error("超出打卡範圍");
 
       const checkin = await ctx.db.volunteerActivityCheckRecord.findFirst({

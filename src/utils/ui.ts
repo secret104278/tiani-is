@@ -77,9 +77,10 @@ export function formatMilliseconds(milliseconds: number) {
   return formattedTime;
 }
 
-export const TIANI_GPS_CENTER: [number, number] = [
-  22.863541598094525, 120.36627531051637,
-  // 22.975141, 120.298921,
+export const TIANI_GPS_CENTERS: [number, number][] = [
+  [22.863541598094525, 120.36627531051637], // 天一
+  [22.975141, 120.298921], // 歸仁
+  [25.005224, 121.557164], // 文山
 ];
 export const TIANI_GPS_RADIUS_KM = 0.5;
 
