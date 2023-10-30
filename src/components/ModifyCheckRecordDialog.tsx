@@ -1,3 +1,4 @@
+import { isFinite, isNumber, round } from "lodash";
 import { useRouter } from "next/router";
 import type { ForwardedRef } from "react";
 import { forwardRef, useEffect } from "react";
@@ -17,6 +18,8 @@ export interface ModifyCheckRecordDialogProps {
 interface ModifyCheckRecordDialogForm {
   checkInAt: Date | string;
   checkOutAt: Date | string;
+
+  workHours: number;
 }
 
 function ModifyCheckRecordDialogInner(
@@ -25,14 +28,45 @@ function ModifyCheckRecordDialogInner(
 ) {
   const router = useRouter();
 
-  const { register, handleSubmit, setValue } =
-    useForm<ModifyCheckRecordDialogForm>({
-      defaultValues: {
-        checkInAt: getDateTimeString(props.defaultCheckInAt ?? new Date()),
-        checkOutAt: getDateTimeString(props.defaultCheckOutAt ?? new Date()),
-      },
-      mode: "all",
+  const { register, handleSubmit, setValue, watch } =
+    useForm<ModifyCheckRecordDialogForm>({ mode: "all" });
+
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (
+        ((name === "workHours" && type === "change") ||
+          (name === "checkInAt" && type === "change")) &&
+        isNumber(value.workHours) &&
+        isFinite(value.workHours)
+      ) {
+        setValue(
+          "checkOutAt",
+          getDateTimeString(
+            new Date(
+              (value.checkInAt as Date).getTime() +
+                value.workHours * 60 * 60 * 1000,
+            ),
+          ),
+        );
+      }
+
+      if (name === "checkOutAt" && type === "change") {
+        console.log(value.checkOutAt, value.checkInAt);
+        setValue(
+          "workHours",
+          round(
+            ((value.checkOutAt as Date).getTime() -
+              (value.checkInAt as Date).getTime()) /
+              60 /
+              60 /
+              1000,
+            2,
+          ),
+        );
+      }
     });
+    return () => subscription.unsubscribe();
+  }, [setValue, watch]);
 
   useEffect(() => {
     setValue(
@@ -47,6 +81,22 @@ function ModifyCheckRecordDialogInner(
       getDateTimeString(props.defaultCheckOutAt ?? new Date()),
     );
   }, [props.defaultCheckOutAt, setValue]);
+
+  useEffect(() => {
+    setValue(
+      "workHours",
+      props.defaultCheckInAt && props.defaultCheckOutAt
+        ? round(
+            (props.defaultCheckOutAt.getTime() -
+              props.defaultCheckInAt.getTime()) /
+              60 /
+              60 /
+              1000,
+            2,
+          )
+        : 0,
+    );
+  }, [props.defaultCheckInAt, props.defaultCheckOutAt, setValue]);
 
   const {
     mutate: modifyActivityCheckRecord,
@@ -73,6 +123,18 @@ function ModifyCheckRecordDialogInner(
               className="input input-bordered w-full invalid:input-error"
               required
               {...register("checkInAt", { valueAsDate: true })}
+            />
+            <div className="divider" />
+            <label className="label">
+              <span className="label-text">工時</span>
+            </label>
+            <input
+              type="number"
+              inputMode="decimal"
+              className="input input-bordered w-full invalid:input-error"
+              step="0.01"
+              required
+              {...register("workHours", { valueAsNumber: true })}
             />
             <label className="label">
               <span className="label-text">簽退時間</span>
