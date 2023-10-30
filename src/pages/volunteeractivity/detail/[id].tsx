@@ -169,8 +169,9 @@ export default function VolunteerActivityDetailPage() {
   };
 
   const ParticipantsCollapse = () => {
+    // use form here to prevent from re-rendering on first click
     return (
-      <div className="collapse collapse-arrow bg-base-200">
+      <form className="collapse collapse-arrow bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -200,7 +201,7 @@ export default function VolunteerActivityDetailPage() {
             ))}
           </ul>
         </div>
-      </div>
+      </form>
     );
   };
 

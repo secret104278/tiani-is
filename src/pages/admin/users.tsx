@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {users?.map((user) => (
+            {users?.toSorted()?.map((user) => (
               <tr key={user.id} className="hover">
                 <td>{user.name}</td>
                 <td>
