@@ -170,7 +170,7 @@ export default function VolunteerActivityDetailPage() {
 
   const ParticipantsCollapse = () => {
     return (
-      <div className="collapse-arrow collapse bg-base-200">
+      <div className="collapse collapse-arrow bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -292,6 +292,14 @@ export default function VolunteerActivityDetailPage() {
   );
 
   const ParticipateControl = () => {
+    if (isEnded)
+      return (
+        <button className="btn btn-disabled">
+          <UserPlusIcon className="h-4 w-4" />
+          已結束
+        </button>
+      );
+
     if (isParticipant)
       return (
         <>

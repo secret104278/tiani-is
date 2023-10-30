@@ -158,6 +158,14 @@ export default function Home() {
                 <div className="card-compact card w-full bg-base-200 shadow">
                   <div className="card-body">
                     <h2 className="card-title">{activity.title}</h2>
+                    <div className="flex items-center">
+                      <MapPinIcon className="mr-1 h-4 w-4" />
+                      <p>{activity.location}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <ClockIcon className="mr-1 h-4 w-4" />
+                      <p>{activity.startDateTime.toLocaleString()}</p>
+                    </div>
                   </div>
                 </div>
               </Link>
