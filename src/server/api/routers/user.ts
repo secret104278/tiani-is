@@ -60,4 +60,81 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
+
+  getUsers: protectedProcedure.input(z.object({})).query(async ({ ctx }) => {
+    // if (ctx.session.user.role !== "ADMIN") throw new Error("Permission denied");
+
+    return await ctx.db.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        role: true,
+      },
+    });
+  }),
+
+  getActivityReviewers: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx }) => {
+      return await ctx.db.activityReviewer.findMany({
+        select: {
+          userId: true,
+        },
+      });
+    }),
+
+  setIsAdmin: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isAdmin: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // if (ctx.session.user.role !== "ADMIN")
+      //   throw new Error("Permission denied");
+
+      return await ctx.db.user.update({
+        where: {
+          id: input.userId,
+        },
+        data: {
+          role: input.isAdmin ? "ADMIN" : "USER",
+        },
+      });
+    }),
+
+  setIsActivityReviewer: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isReviewer: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // if (ctx.session.user.role !== "ADMIN")
+      //   throw new Error("Permission denied");
+
+      if (!input.isReviewer)
+        await ctx.db.activityReviewer.deleteMany({
+          where: { userId: input.userId },
+        });
+      else {
+        await ctx.db.$transaction([
+          ctx.db.activityReviewer.upsert({
+            where: { userId: input.userId },
+            create: { userId: input.userId },
+            update: {},
+          }),
+          ctx.db.user.update({
+            where: {
+              id: input.userId,
+            },
+            data: {
+              role: "ADMIN",
+            },
+          }),
+        ]);
+      }
+    }),
 });
