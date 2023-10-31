@@ -1,9 +1,8 @@
 import { XMarkIcon } from "@heroicons/react/20/solid";
-import { isEmpty } from "lodash";
-import type { RefObject } from "react";
-import { useEffect, useRef } from "react";
+import { isEmpty, isNumber } from "lodash";
+import type { ForwardedRef } from "react";
+import { useEffect, useImperativeHandle, useRef } from "react";
 import { useGeolocation } from "react-use";
-import { api } from "~/utils/api";
 import {
   TIANI_GPS_CENTERS,
   TIANI_GPS_RADIUS_KM,
@@ -14,33 +13,18 @@ import CheckInMap from "./CheckInMap";
 import ReactiveButton from "./ReactiveButton";
 import ViewFocus from "./ViewFocus";
 
-export interface CheckInDialogProps {
-  activityId: number;
-  open: boolean;
-  onClose: () => void;
-  onCheckIn: () => void;
+interface InnerDialogProps {
+  checkInIsLoading?: boolean;
+  checkInError?: string;
+  onCheckIn: (latitude: number, longitude: number) => void;
 }
 
-const InnerModal = ({
-  dialogRef,
-  activityId,
+const InnerDialog = ({
+  checkInIsLoading,
+  checkInError,
   onCheckIn,
-}: {
-  dialogRef: RefObject<HTMLDialogElement>;
-  activityId: number;
-  onCheckIn: () => void;
-}) => {
+}: InnerDialogProps) => {
   const geoState = useGeolocation();
-  const {
-    mutate: checkInActivity,
-    isLoading: checkInActivityIsLoading,
-    error: checkInActivityError,
-  } = api.volunteerActivity.checkInActivity.useMutation({
-    onSuccess: () => {
-      dialogRef.current?.close();
-      onCheckIn();
-    },
-  });
 
   if (geoState.error)
     return <AlertWarning>{geoState.error.message}</AlertWarning>;
@@ -81,14 +65,16 @@ const InnerModal = ({
             disabled={
               geoState.loading || !isEmpty(geoState.error) || isOutOfRange
             }
-            loading={checkInActivityIsLoading}
-            error={checkInActivityError?.message}
-            onClick={() =>
-              checkInActivity({
-                activityId: activityId,
-                latitude: geoState.latitude ?? 0,
-                longitude: geoState.longitude ?? 0,
-              })
+            loading={checkInIsLoading}
+            error={checkInError}
+            onClick={
+              () =>
+                isNumber(geoState.latitude) &&
+                isNumber(geoState.longitude) &&
+                isFinite(geoState.latitude) &&
+                isFinite(geoState.longitude) &&
+                onCheckIn(geoState.latitude, geoState.longitude)
+              // onCheckIn(TIANI_GPS_CENTERS[0]![0], TIANI_GPS_CENTERS[0]![1])
             }
           >
             {geoState.loading
@@ -106,14 +92,19 @@ const InnerModal = ({
   );
 };
 
+export interface CheckInDialogProps extends InnerDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
 // 這裡用 open/onClose 是因為希望在 dialog 開起來之前，不要去執行裡面那些跟 useGeolocation 有關的 hook
-export default function CheckInDialog({
-  activityId,
-  open,
-  onClose,
-  onCheckIn,
-}: CheckInDialogProps) {
+export default function CheckInDialog(
+  { open, onClose, ...props }: CheckInDialogProps,
+  ref: ForwardedRef<HTMLDialogElement>,
+) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useImperativeHandle(ref, () => dialogRef.current!, []);
 
   useEffect(() => {
     if (open && dialogRef.current?.open === false)
@@ -127,13 +118,7 @@ export default function CheckInDialog({
 
   return (
     <dialog className="modal" ref={dialogRef}>
-      {open && (
-        <InnerModal
-          dialogRef={dialogRef}
-          activityId={activityId}
-          onCheckIn={onCheckIn}
-        />
-      )}
+      {open && <InnerDialog {...props} />}
     </dialog>
   );
 }

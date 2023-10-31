@@ -674,8 +674,8 @@ export const volunteerActivityRouter = createTRPCRouter({
           LEFT JOIN "VolunteerActivityCheckRecord" AS r1 ON r1. "userId" = pva. "A"
             AND r1. "activityId" = pva. "B"
             AND r1. "type" = 'CHECKOUT'
-          LEFT JOIN "VolunteerActivityCheckRecord" AS r2 ON r1. "userId" = r2. "userId"
-            AND r1. "activityId" = r2. "activityId"
+          LEFT JOIN "VolunteerActivityCheckRecord" AS r2 ON r2. "userId" = pva. "A"
+            AND r2. "activityId" = pva. "B"
             AND r2. "type" = 'CHECKIN'
           JOIN "User" ON pva. "A" = "User"."id"
         WHERE
