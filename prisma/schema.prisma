@@ -74,7 +74,8 @@ model User {
 
     activityReviewer ActivityReviewer?
 
-    volunteerActivityCheckIns VolunteerActivityCheckRecord[]
+    volunteerActivityCheckRecords VolunteerActivityCheckRecord[]
+    casualCheckRecords            CasualCheckRecord[]
 }
 
 model VerificationToken {
@@ -148,4 +149,18 @@ model VolunteerActivityCheckRecord {
     @@unique([userId, activityId, type])
     @@index([userId])
     @@index([activityId])
+}
+
+model CasualCheckRecord {
+    id     Int    @id @default(autoincrement())
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+
+    checkInAt  DateTime  @default(now())
+    checkOutAt DateTime?
+
+    latitude  Float?
+    longitude Float?
+
+    @@index([userId, checkInAt])
 }

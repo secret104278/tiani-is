@@ -1,19 +1,35 @@
 import {
+  ArrowDownOnSquareIcon,
   ClockIcon,
   MapPinIcon,
   PlusIcon,
   UsersIcon,
 } from "@heroicons/react/20/solid";
-import { isEmpty } from "lodash";
+import { isEmpty, isNil } from "lodash";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { api } from "~/utils/api";
 import { getActivityStatusText } from "~/utils/ui";
 
+const CasualCheckInDialog = dynamic(
+  () => import("~/components/CasualCheckInDialog"),
+  {
+    ssr: false,
+  },
+);
+
 export default function Home() {
   const [filterOrganizedByMe, setFilterOrganizedByMe] = useState(false);
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
+
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+  const {
+    data: latestCasualCheckIn,
+    isLoading: latestCasualCheckInIsLoading,
+    refetch: refetchLatestCasualCheckIn,
+  } = api.volunteerActivity.getLatestCasualCheckIn.useQuery({});
 
   const activitiesQuery =
     api.volunteerActivity.getAllActivitiesInfinite.useInfiniteQuery(
@@ -58,7 +74,53 @@ export default function Home() {
           </Link>
         </div>
       )}
-      <div className="flex flex-row">
+      <div className="flex flex-row justify-end">
+        <div className="card-compact card w-full shadow-lg">
+          <div className="card-body">
+            <h2 className="card-title">日常工作</h2>
+            <div className="flex items-center"></div>
+            {latestCasualCheckInIsLoading && <div className="loading" />}
+            {isEmpty(latestCasualCheckIn) && "今日尚未簽到"}
+            {!isEmpty(latestCasualCheckIn) && (
+              <div className="flex items-center">
+                <p>簽到：{latestCasualCheckIn.checkInAt.toLocaleString()}</p>
+              </div>
+            )}
+            {!isNil(latestCasualCheckIn?.checkOutAt) && (
+              <div className="flex items-center">
+                <p>簽退：{latestCasualCheckIn!.checkOutAt.toLocaleString()}</p>
+              </div>
+            )}
+            <div className="card-actions justify-end">
+              <button
+                className="btn btn-primary"
+                onClick={() => setCheckInDialogOpen(true)}
+              >
+                <ArrowDownOnSquareIcon className="h-4 w-4" />
+                {isEmpty(latestCasualCheckIn) && "簽到"}
+                {!isEmpty(latestCasualCheckIn) &&
+                latestCasualCheckIn.checkOutAt !== null
+                  ? "再次簽到"
+                  : "簽退"}
+              </button>
+            </div>
+          </div>
+        </div>
+        <CasualCheckInDialog
+          open={checkInDialogOpen}
+          onClose={() => setCheckInDialogOpen(false)}
+          onCheckInSuccess={() => void refetchLatestCasualCheckIn()}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <div className="flex flex-row justify-end space-x-4">
+          <Link href="/volunteeractivity/new" className="flex-shrink-0">
+            <div className="btn">
+              <PlusIcon className="h-4 w-4" />
+              建立新工作
+            </div>
+          </Link>
+        </div>
         <div className="flex flex-row flex-wrap">
           <label className="label cursor-pointer space-x-2">
             <span className="label-text">我發起的</span>
@@ -79,13 +141,6 @@ export default function Home() {
             />
           </label>
         </div>
-        <div className="grow" />
-        <Link href="/volunteeractivity/new" className="flex-shrink-0">
-          <div className="btn">
-            <PlusIcon className="h-4 w-4" />
-            建立新工作
-          </div>
-        </Link>
       </div>
       <div>
         {activitiesQuery.isLoading && (
@@ -112,7 +167,7 @@ export default function Home() {
                 href={`/volunteeractivity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
-                <div className="card card-compact w-full bg-accent text-accent-content shadow">
+                <div className="card-compact card w-full bg-accent text-accent-content shadow">
                   <div className="card-body">
                     <div className="flex flex-row items-center justify-between">
                       <h2 className="card-title">{activity.title}</h2>

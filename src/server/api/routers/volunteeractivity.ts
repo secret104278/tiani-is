@@ -520,6 +520,80 @@ export const volunteerActivityRouter = createTRPCRouter({
       }
     }),
 
+  casualCheckIn: protectedProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const isOutOfRange = !TIANI_GPS_CENTERS.some(
+        (center) =>
+          getDistance(input.latitude, input.longitude, center[0], center[1]) <=
+          TIANI_GPS_RADIUS_KM,
+      );
+      if (isOutOfRange) throw new Error("超出打卡範圍");
+
+      const now = new Date();
+      const taipeiTime = new Date(
+        new Date(
+          now.toLocaleString("en-US", { timeZone: "Asia/Taipei" }),
+        ).setHours(0, 0, 0, 0),
+      );
+
+      const latestCheck = await ctx.db.casualCheckRecord.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          checkInAt: {
+            gte: taipeiTime,
+          },
+        },
+        orderBy: {
+          checkInAt: "desc",
+        },
+      });
+
+      if (latestCheck?.checkOutAt === null) {
+        await ctx.db.casualCheckRecord.update({
+          where: {
+            id: latestCheck.id,
+          },
+          data: {
+            checkOutAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
+          },
+        });
+      } else {
+        await ctx.db.casualCheckRecord.create({
+          data: {
+            user: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+            checkInAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
+          },
+        });
+      }
+    }),
+
+  getLatestCasualCheckIn: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx }) => {
+      return await ctx.db.casualCheckRecord.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+        },
+        orderBy: {
+          checkInAt: "desc",
+        },
+      });
+    }),
+
   getWorkingStats: protectedProcedure
     .input(
       z.object({
