@@ -27,7 +27,7 @@ import type { OGMetaProps } from "~/utils/types";
 
 import { formatMilliseconds, getActivityStatusText } from "~/utils/ui";
 
-const CheckInModal = dynamic(() => import("~/components/CheckInModal"), {
+const CheckInDialog = dynamic(() => import("~/components/CheckInDialog"), {
   ssr: false,
 });
 
@@ -136,7 +136,7 @@ export default function VolunteerActivityDetailPage() {
   });
 
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
-  const [checkInModalOpen, setCheckInModalOpen] = useState(false);
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
 
   const leaveDialogRef = useRef<HTMLDialogElement>(null);
 
@@ -171,7 +171,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse collapse-arrow bg-base-200">
+      <form className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -373,7 +373,7 @@ export default function VolunteerActivityDetailPage() {
           <ReactiveButton
             className="btn btn-accent"
             disabled={isActivityNotYetForCheck || isActivityClosedForCheck}
-            onClick={() => setCheckInModalOpen(true)}
+            onClick={() => setCheckInDialogOpen(true)}
           >
             {isCheckIn ? (
               <ArrowDownOnSquareIcon className="h-4 w-4" />
@@ -382,10 +382,10 @@ export default function VolunteerActivityDetailPage() {
             )}
             {checkButtonLabel}
           </ReactiveButton>
-          <CheckInModal
+          <CheckInDialog
             activityId={activity.id}
-            open={checkInModalOpen}
-            onClose={() => setCheckInModalOpen(false)}
+            open={checkInDialogOpen}
+            onClose={() => setCheckInDialogOpen(false)}
             onCheckIn={() => void refetchCheckInData()}
           />
         </>

@@ -14,7 +14,7 @@ import CheckInMap from "./CheckInMap";
 import ReactiveButton from "./ReactiveButton";
 import ViewFocus from "./ViewFocus";
 
-export interface CheckInModalProps {
+export interface CheckInDialogProps {
   activityId: number;
   open: boolean;
   onClose: () => void;
@@ -107,12 +107,12 @@ const InnerModal = ({
 };
 
 // 這裡用 open/onClose 是因為希望在 dialog 開起來之前，不要去執行裡面那些跟 useGeolocation 有關的 hook
-export default function CheckInModal({
+export default function CheckInDialog({
   activityId,
   open,
   onClose,
   onCheckIn,
-}: CheckInModalProps) {
+}: CheckInDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
