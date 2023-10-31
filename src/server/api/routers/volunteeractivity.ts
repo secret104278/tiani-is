@@ -478,6 +478,8 @@ export const volunteerActivityRouter = createTRPCRouter({
           },
           update: {
             checkAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
           },
           create: {
             user: {
@@ -492,6 +494,8 @@ export const volunteerActivityRouter = createTRPCRouter({
             },
             type: VolunteerActivityCheckRecordType.CHECKOUT,
             checkAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
           },
         });
       } else {
@@ -509,6 +513,8 @@ export const volunteerActivityRouter = createTRPCRouter({
             },
             type: VolunteerActivityCheckRecordType.CHECKIN,
             checkAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
           },
         });
       }
