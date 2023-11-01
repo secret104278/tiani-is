@@ -1,4 +1,5 @@
 import { XMarkIcon } from "@heroicons/react/20/solid";
+import { isEmpty, isNumber } from "lodash";
 import type { ForwardedRef } from "react";
 import { useEffect, useImperativeHandle, useRef } from "react";
 import { useGeolocation } from "react-use";
@@ -61,18 +62,19 @@ const InnerDialog = ({
         <div className="modal-action">
           <ReactiveButton
             className="btn btn-primary"
-            // disabled={
-            //   // geoState.loading || !isEmpty(geoState.error) || isOutOfRange
-            // }
+            disabled={
+              geoState.loading || !isEmpty(geoState.error) || isOutOfRange
+            }
             loading={checkInIsLoading}
             error={checkInError}
-            onClick={() =>
-              // isNumber(geoState.latitude) &&
-              // isNumber(geoState.longitude) &&
-              // isFinite(geoState.latitude) &&
-              // isFinite(geoState.longitude) &&
-              // onCheckIn(geoState.latitude, geoState.longitude)
-              onCheckIn(TIANI_GPS_CENTERS[0]![0], TIANI_GPS_CENTERS[0]![1])
+            onClick={
+              () =>
+                isNumber(geoState.latitude) &&
+                isNumber(geoState.longitude) &&
+                isFinite(geoState.latitude) &&
+                isFinite(geoState.longitude) &&
+                onCheckIn(geoState.latitude, geoState.longitude)
+              // onCheckIn(TIANI_GPS_CENTERS[0]![0], TIANI_GPS_CENTERS[0]![1])
             }
           >
             {geoState.loading
