@@ -2,6 +2,7 @@ import { VolunteerActivityCheckRecordType, type Prisma } from "@prisma/client";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
 
+import moment from "moment-timezone";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
@@ -535,18 +536,17 @@ export const volunteerActivityRouter = createTRPCRouter({
       );
       if (isOutOfRange) throw new Error("超出打卡範圍");
 
-      const now = new Date();
-      const taipeiTime = new Date(
-        new Date(
-          now.toLocaleString("en-US", { timeZone: "Asia/Taipei" }),
-        ).setHours(0, 0, 0, 0),
-      );
+      const taipeiMoment = moment.tz("Asia/Taipei");
+      const now = taipeiMoment.clone().tz(moment.tz.guess()).toDate();
+
+      taipeiMoment.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+      const targetMoment = taipeiMoment.clone().tz(moment.tz.guess());
 
       const latestCheck = await ctx.db.casualCheckRecord.findFirst({
         where: {
           userId: ctx.session.user.id,
           checkInAt: {
-            gte: taipeiTime,
+            gte: targetMoment.toDate(),
           },
         },
         orderBy: {
@@ -584,9 +584,16 @@ export const volunteerActivityRouter = createTRPCRouter({
   getLatestCasualCheckIn: protectedProcedure
     .input(z.object({}))
     .query(async ({ ctx }) => {
+      const taipeiMoment = moment.tz("Asia/Taipei");
+      taipeiMoment.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+      const targetMoment = taipeiMoment.clone().tz(moment.tz.guess());
+
       return await ctx.db.casualCheckRecord.findFirst({
         where: {
           userId: ctx.session.user.id,
+          checkInAt: {
+            gte: targetMoment.toDate(),
+          },
         },
         orderBy: {
           checkInAt: "desc",
