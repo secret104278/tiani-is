@@ -615,8 +615,8 @@ export const volunteerActivityRouter = createTRPCRouter({
       )
         throw new Error("只有管理員可以查看其他人的工時");
 
-      async function getCheckInHistories() {
-        return await ctx.db.$queryRaw<CheckInHistory[]>`
+      function getActivityCheckHistories() {
+        return ctx.db.$queryRaw<CheckInHistory[]>`
         SELECT
           r1. "activityId",
           r1. "checkAt" AS checkOutAt,
@@ -636,10 +636,29 @@ export const volunteerActivityRouter = createTRPCRouter({
         `;
       }
 
-      const checkInHistories = await getCheckInHistories();
+      async function getCasualCheckHistories() {
+        return ctx.db.casualCheckRecord.findMany({
+          select: {
+            id: true,
+            checkInAt: true,
+            checkOutAt: true,
+          },
+          where: {
+            userId: input.userId ?? ctx.session.user.id,
+          },
+          orderBy: {
+            checkInAt: "desc",
+          },
+        });
+      }
 
-      const totalWorkingHours = sum(
-        checkInHistories.map(
+      const [activityCheckHistories, casualCheckHistories] = await Promise.all([
+        getActivityCheckHistories(),
+        getCasualCheckHistories(),
+      ]);
+
+      const activityWorkingHours = sum(
+        activityCheckHistories.map(
           (record) =>
             (record.checkoutat.getTime() - record.checkinat.getTime()) /
             1000 /
@@ -648,7 +667,25 @@ export const volunteerActivityRouter = createTRPCRouter({
         ),
       );
 
-      return { checkInHistories, totalWorkingHours };
+      const casualWorkingHours = sum(
+        casualCheckHistories
+          .filter((record) => !isNil(record.checkOutAt))
+          .map(
+            (record) =>
+              (record.checkOutAt!.getTime() - record.checkInAt.getTime()) /
+              1000 /
+              60 /
+              60,
+          ),
+      );
+
+      const totalWorkingHours = activityWorkingHours + casualWorkingHours;
+
+      return {
+        activityCheckHistories,
+        casualCheckHistories,
+        totalWorkingHours,
+      };
     }),
 
   modifyActivityCheckRecord: protectedProcedure
