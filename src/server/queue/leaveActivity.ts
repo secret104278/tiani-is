@@ -11,7 +11,11 @@ type LeaveActivityEvent = {
 };
 
 export const leaveActivityEventQueue: queueAsPromised<LeaveActivityEvent> =
-  fastq.promise(worker, 1);
+  fastq.promise(dummy, 1);
+
+function dummy(input: LeaveActivityEvent): Promise<void> {
+  return Promise.resolve();
+}
 
 async function worker(input: LeaveActivityEvent): Promise<void> {
   const activity = await db.volunteerActivity.findFirstOrThrow({
