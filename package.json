@@ -21,6 +21,7 @@
     "@trpc/next": "^10.37.1",
     "@trpc/react-query": "^10.37.1",
     "@trpc/server": "^10.37.1",
+    "@vercel/analytics": "^1.1.1",
     "fastq": "^1.15.0",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
