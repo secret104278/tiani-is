@@ -104,7 +104,7 @@ export default function WorkingStatsPage() {
             className={"tab" + (activeTab === "activity" ? " tab-active" : "")}
             onClick={() => setActiveTab("activity")}
           >
-            志工工作
+            主題工作
           </a>
           <a
             className={"tab" + (activeTab === "casual" ? " tab-active" : "")}
