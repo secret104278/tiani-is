@@ -20,7 +20,7 @@ const CasualCheckInDialog = dynamic(
   },
 );
 
-export default function Home() {
+export default function VolunteerHome() {
   const [filterOrganizedByMe, setFilterOrganizedByMe] = useState(false);
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
 
@@ -61,7 +61,7 @@ export default function Home() {
       </article>
       {!workingStatsIsLoading && (
         <div className="stats stats-vertical shadow-lg sm:stats-horizontal">
-          <Link href="/personal/workingstats">
+          <Link href="/volunteer/workingstats">
             <div className="stat">
               <div className="stat-figure text-primary">
                 <ClockIcon className="h-8 w-8" />
@@ -75,7 +75,7 @@ export default function Home() {
         </div>
       )}
       <div className="flex flex-row justify-end">
-        <div className="card-compact card w-full shadow-lg">
+        <div className="card card-compact w-full shadow-lg">
           <div className="card-body">
             <h2 className="card-title">日常工作</h2>
             <div className="flex items-center"></div>
@@ -114,7 +114,7 @@ export default function Home() {
       </div>
       <div className="flex flex-col space-y-2">
         <div className="flex flex-row justify-end space-x-4">
-          <Link href="/volunteeractivity/new" className="flex-shrink-0">
+          <Link href="/volunteer/activity/new" className="flex-shrink-0">
             <div className="btn">
               <PlusIcon className="h-4 w-4" />
               建立新工作
@@ -164,7 +164,7 @@ export default function Home() {
             {onGoingActivities?.map((activity) => (
               <Link
                 key={activity.id}
-                href={`/volunteeractivity/detail/${activity.id}`}
+                href={`/volunteer/activity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
                 <div className="card-compact card w-full bg-accent text-accent-content shadow">
@@ -206,7 +206,7 @@ export default function Home() {
             {endedActivities?.map((activity) => (
               <Link
                 key={activity.id}
-                href={`/volunteeractivity/detail/${activity.id}`}
+                href={`/volunteer/activity/detail/${activity.id}`}
                 style={{ textDecoration: "none" }}
               >
                 <div className="card-compact card w-full bg-base-200 shadow">

@@ -36,6 +36,7 @@
     "react-leaflet": "^4.2.1",
     "react-use": "^17.4.0",
     "superjson": "^1.13.1",
+    "theme-change": "^2.5.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

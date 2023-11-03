@@ -49,7 +49,7 @@ export default function WorkingStatsPage() {
                 key={history.activityId}
                 onClick={() =>
                   void router.push(
-                    `/volunteeractivity/detail/${history.activityId}`,
+                    `/volunteer/activity/detail/${history.activityId}`,
                   )
                 }
               >

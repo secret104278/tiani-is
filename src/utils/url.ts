@@ -7,4 +7,4 @@ export const getActivityDetailURL = ({
 }: {
   id: number;
   version: number;
-}) => `${BASE_URL}/volunteeractivity/detail/${id}?v=${version}`;
+}) => `${BASE_URL}/volunteer/activity/detail/${id}?v=${version}`;

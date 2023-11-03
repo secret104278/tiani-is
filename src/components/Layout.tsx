@@ -2,6 +2,7 @@ import { HomeIcon } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useSiteContext } from "~/context/SiteContext";
 import LineImage from "./LineImage";
 
 function UserAvatar() {
@@ -35,27 +36,28 @@ function UserAvatar() {
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
+  const { site } = useSiteContext();
 
   return (
     <>
       <div className="navbar mb-4 bg-base-100 shadow-md">
         <div className="navbar-start">
-          <Link href="/">
+          <Link href={`/${site}`}>
             <button className="btn btn-circle btn-ghost">
               <HomeIcon className="h-6 w-6" />
             </button>
           </Link>
         </div>
         <div className="navbar-center">
-          <Link href="/">
+          <Link href={`/${site}`}>
             <button className="btn btn-ghost text-xl normal-case">
-              天一志工隊
+              {site === "volunteer" ? "天一志工隊" : "義德班務網"}
             </button>
           </Link>
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown dropdown-end">
+            <div className="dropdown-end dropdown">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>
@@ -68,7 +70,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 </li>
                 {sessionData.user.role === "ADMIN" && (
                   <li>
-                    <Link href="/admin/users">帳號管理</Link>
+                    <Link href="/volunteer/admin/users">帳號管理</Link>
                   </li>
                 )}
                 <li>

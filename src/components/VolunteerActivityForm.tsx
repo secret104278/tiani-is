@@ -96,14 +96,14 @@ export default function VolunteerActivityForm({
     error: createActivityError,
     isLoading: createActivityIsLoading,
   } = api.volunteerActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/volunteeractivity/detail/${data.id}`),
+    onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isLoading: updateActivityIsLoading,
   } = api.volunteerActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/volunteeractivity/detail/${data.id}`),
+    onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
 
   const _hadleSubmit = (isDraft = false) => {

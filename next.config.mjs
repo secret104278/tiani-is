@@ -29,6 +29,21 @@ const config = {
       },
     ],
   },
+
+  redirects() {
+    return Promise.resolve([
+      {
+        source: "/",
+        destination: "/volunteer",
+        permanent: false,
+      },
+      {
+        source: "/volunteeractivity/:path*",
+        destination: "/volunteer/activity/:path*",
+        permanent: false,
+      },
+    ]);
+  },
 };
 
 export default withSentryConfig(

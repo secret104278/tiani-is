@@ -36,7 +36,7 @@ export default function VolunteerActivityCheckRecordPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/volunteeractivity/detail/${activity.id}`}>
+      <Link className="link" href={`/volunteer/activity/detail/${activity.id}`}>
         ← {activity?.title}
       </Link>
       <article className="prose">

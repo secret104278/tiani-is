@@ -156,7 +156,7 @@ export default function VolunteerActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/volunteeractivity/detail/${activity.id}?v=${activity.version}`,
+          `${window.location.origin}/volunteer/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
       >
@@ -261,7 +261,7 @@ export default function VolunteerActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <Link href={`/volunteeractivity/edit/${activity.id}`}>
+        <Link href={`/volunteer/activity/edit/${activity.id}`}>
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
             編輯
@@ -285,7 +285,7 @@ export default function VolunteerActivityDetailPage() {
         />
       </div>
       <ParticipantsCollapse />
-      <Link href={`/volunteeractivity/checkrecord/${activity.id}`}>
+      <Link href={`/volunteer/activity/checkrecord/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           打卡名單

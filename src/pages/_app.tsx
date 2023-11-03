@@ -11,6 +11,7 @@ import Layout from "~/components/Layout";
 
 import "leaflet/dist/leaflet.css";
 import SentrySetup from "~/components/SentrySetup";
+import { SiteProvider } from "~/context/SiteContext";
 import "~/styles/globals.css";
 import type { OGMetaProps } from "~/utils/types";
 
@@ -42,9 +43,11 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
       <SessionProvider session={session}>
         <AuthGaurd>
           <SentrySetup>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+            <SiteProvider>
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            </SiteProvider>
           </SentrySetup>
         </AuthGaurd>
       </SessionProvider>
