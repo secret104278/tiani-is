@@ -70,9 +70,7 @@ export default function PersonalAccountPage() {
         </div>
         <div>
           <label className="label">
-            <span className="label-text">
-              姓名（天一志工隊App裡顯示的名字）
-            </span>
+            <span className="label-text">姓名（APP 裡顯示的名字）</span>
           </label>
           <input
             type="text"

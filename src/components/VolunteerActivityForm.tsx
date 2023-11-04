@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import type { $Enums } from "@prisma/client";
+import type { VolunteerActivityStatus } from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { api } from "~/utils/api";
 import {
   VOLUNTEER_ACTIVITY_TOPICS,
@@ -12,6 +10,7 @@ import {
 } from "~/utils/ui";
 import { AlertWarning } from "./Alert";
 import ReactiveButton from "./ReactiveButton";
+import SelectWithCustomInput, { NestedSelect } from "./SelectWithCustomInput";
 
 type VolunteerActivityFormData = {
   title: string;
@@ -57,7 +56,7 @@ export default function VolunteerActivityForm({
     startDateTime: Date;
     endDateTime: Date;
     description: string | null;
-    status: $Enums.VolunteerActivityStatus;
+    status: VolunteerActivityStatus;
   };
 }) {
   let formDefaultValues: Partial<VolunteerActivityFormData> = {
@@ -83,12 +82,10 @@ export default function VolunteerActivityForm({
     };
   }
 
-  const { register, handleSubmit, control } =
-    useForm<VolunteerActivityFormData>({
-      defaultValues: formDefaultValues,
-      mode: "all",
-    });
-  const formTitleValue = useWatch({ control, name: "title" });
+  const { register, handleSubmit, watch } = useForm<VolunteerActivityFormData>({
+    defaultValues: formDefaultValues,
+    mode: "all",
+  });
 
   const router = useRouter();
   const {
@@ -106,7 +103,7 @@ export default function VolunteerActivityForm({
     onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
 
-  const _hadleSubmit = (isDraft = false) => {
+  const _handleSubmit = (isDraft = false) => {
     if (defaultActivity) {
       return handleSubmit((data) =>
         updateActivity({
@@ -139,127 +136,105 @@ export default function VolunteerActivityForm({
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   return (
-    <div>
-      <form className="form-control max-w-xs">
-        <div hidden={!isNil(defaultActivity)}>
-          <label className="label">
-            <span className="label-text">主題</span>
-          </label>
-          <select
-            className="select select-bordered w-full"
-            required
-            {...register("title")}
-          >
-            {VOLUNTEER_ACTIVITY_TOPICS.map((topic, i) => (
-              <optgroup key={i} label={topic.topic}>
-                {topic.options.map((option, j) => (
-                  <option key={j}>{option}</option>
-                ))}
-              </optgroup>
-            ))}
-            <optgroup label="其他">
-              <option>{VOLUNTEER_ACTIVITY_TOPIC_OTHER}</option>
-            </optgroup>
-          </select>
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text"></span>
-          </label>
-          <input
-            type="text"
-            hidden={!isNil(defaultActivity) || !titleIsOther(formTitleValue)}
-            className="input input-bordered w-full invalid:input-error"
-            {...register("titleOther")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">人數</span>
-          </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            className="input input-bordered w-full invalid:input-error"
-            required
-            {...register("headcount", { valueAsNumber: true })}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">地點</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full invalid:input-error"
-            required
-            {...register("location")}
-          />
-        </div>
-        <div className="divider"></div>
-        <div>
-          <label className="label">
-            <span className="label-text">開始時間</span>
-          </label>
-          <input
-            type="datetime-local"
-            className="input input-bordered w-full invalid:input-error"
-            required
-            {...register("startDateTime", { valueAsDate: true })}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">預估時數</span>
-          </label>
-          <input
-            type="number"
-            inputMode="decimal"
-            className="input input-bordered w-full invalid:input-error"
-            step="0.1"
-            required
-            {...register("duration", { valueAsNumber: true })}
-          />
-        </div>
-        <div className="divider"></div>
-        <div>
-          <label className="label">
-            <span className="label-text">補充說明</span>
-          </label>
-          <textarea
-            className="textarea textarea-bordered textarea-lg w-full"
-            {...register("description")}
-          ></textarea>
-        </div>
-        <div className="divider"></div>
-        {!isNil(createActivityError) && (
-          <AlertWarning>{createActivityError.message}</AlertWarning>
-        )}
-        {!isNil(updateActivityError) && (
-          <AlertWarning>{updateActivityError.message}</AlertWarning>
-        )}
-        <div className="flex flex-row justify-end space-x-4">
-          {canSaveDraft && (
-            <ReactiveButton
-              className="btn"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={_hadleSubmit(true)}
-              loading={createActivityIsLoading || updateActivityIsLoading}
-            >
-              保存草稿
-            </ReactiveButton>
-          )}
-
+    <form className="form-control max-w-xs">
+      <div hidden={!isNil(defaultActivity)}>
+        <label className="label">
+          <span className="label-text">主題</span>
+        </label>
+        <SelectWithCustomInput
+          selectProps={register("title")}
+          customInputProps={register("titleOther")}
+          showCustomInput={watch("title") === VOLUNTEER_ACTIVITY_TOPIC_OTHER}
+        >
+          <NestedSelect topics={VOLUNTEER_ACTIVITY_TOPICS} />
+        </SelectWithCustomInput>
+      </div>
+      <div>
+        <label className="label">
+          <span className="label-text">人數</span>
+        </label>
+        <input
+          type="number"
+          inputMode="numeric"
+          className="tiani-input"
+          required
+          {...register("headcount", { valueAsNumber: true })}
+        />
+      </div>
+      <div>
+        <label className="label">
+          <span className="label-text">地點</span>
+        </label>
+        <input
+          type="text"
+          className="tiani-input"
+          required
+          {...register("location")}
+        />
+      </div>
+      <div className="divider"></div>
+      <div>
+        <label className="label">
+          <span className="label-text">開始時間</span>
+        </label>
+        <input
+          type="datetime-local"
+          className="tiani-input"
+          required
+          {...register("startDateTime", { valueAsDate: true })}
+        />
+      </div>
+      <div>
+        <label className="label">
+          <span className="label-text">預估時數</span>
+        </label>
+        <input
+          type="number"
+          inputMode="decimal"
+          className="tiani-input"
+          step="0.1"
+          required
+          {...register("duration", { valueAsNumber: true })}
+        />
+      </div>
+      <div className="divider"></div>
+      <div>
+        <label className="label">
+          <span className="label-text">補充說明</span>
+        </label>
+        <textarea
+          className="textarea textarea-bordered textarea-lg w-full"
+          {...register("description")}
+        ></textarea>
+      </div>
+      <div className="divider"></div>
+      {!isNil(createActivityError) && (
+        <AlertWarning>{createActivityError.message}</AlertWarning>
+      )}
+      {!isNil(updateActivityError) && (
+        <AlertWarning>{updateActivityError.message}</AlertWarning>
+      )}
+      <div className="flex flex-row justify-end space-x-4">
+        {canSaveDraft && (
           <ReactiveButton
-            className="btn btn-primary"
+            className="btn"
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={_hadleSubmit()}
+            onClick={_handleSubmit(true)}
             loading={createActivityIsLoading || updateActivityIsLoading}
           >
-            送出
+            保存草稿
           </ReactiveButton>
-        </div>
-      </form>
-    </div>
+        )}
+
+        <ReactiveButton
+          className="btn btn-primary"
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onClick={_handleSubmit()}
+          loading={createActivityIsLoading || updateActivityIsLoading}
+        >
+          送出
+        </ReactiveButton>
+      </div>
+    </form>
   );
 }

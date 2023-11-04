@@ -1,4 +1,5 @@
-import { ClockIcon } from "@heroicons/react/20/solid";
+import { ClockIcon, PlusIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
 
 export default function YiDeClassHome() {
   return (
@@ -14,6 +15,14 @@ export default function YiDeClassHome() {
           <div className="stat-title">總開班時數</div>
           <div className="stat-value">1.02</div>
         </div>
+      </div>
+      <div className="flex flex-row justify-end space-x-4">
+        <Link href="/yideclass/activity/new" className="flex-shrink-0">
+          <div className="btn">
+            <PlusIcon className="h-4 w-4" />
+            建立新課程
+          </div>
+        </Link>
       </div>
     </div>
   );

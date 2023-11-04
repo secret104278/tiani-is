@@ -69,6 +69,7 @@ model User {
     role Role @default(USER)
 
     organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
+    organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")
 
     participatedVolunteerActivites VolunteerActivity[] @relation("ParticipatedVolunteerActivites")
 
@@ -76,6 +77,7 @@ model User {
 
     volunteerActivityCheckRecords VolunteerActivityCheckRecord[]
     casualCheckRecords            CasualCheckRecord[]
+    classActivityCheckRecord      ClassActivityCheckRecord[]
 }
 
 model VerificationToken {
@@ -125,10 +127,6 @@ model ActivityReviewer {
     userId String @unique
 }
 
-// model ActivityAdvertisingTarget {
-//     lineId String @id @unique
-// }
-
 enum VolunteerActivityCheckRecordType {
     CHECKIN
     CHECKOUT
@@ -163,4 +161,42 @@ model CasualCheckRecord {
     longitude Float?
 
     @@index([userId, checkInAt])
+}
+
+model ClassActivity {
+    id            Int      @id @default(autoincrement())
+    title         String
+    description   String?
+    location      String
+    startDateTime DateTime
+    endDateTime   DateTime
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organiser   User   @relation("OrganizedClassActivites", fields: [organiserId], references: [id])
+    organiserId String
+
+    version Int @default(1)
+
+    classActivityCheckIns ClassActivityCheckRecord[]
+
+    @@index([organiserId])
+    @@index([startDateTime])
+}
+
+model ClassActivityCheckRecord {
+    id      Int           @id @default(autoincrement())
+    user    User          @relation(fields: [userId], references: [id])
+    userId  String
+    class   ClassActivity @relation(fields: [classId], references: [id])
+    classId Int
+    checkAt DateTime      @default(now())
+
+    latitude  Float?
+    longitude Float?
+
+    @@unique([userId, classId])
+    @@index([userId])
+    @@index([classId])
 }
