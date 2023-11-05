@@ -1,4 +1,4 @@
-import type { VolunteerActivityStatus } from "@prisma/client";
+import type { VolunteerActivity } from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -6,7 +6,11 @@ import { api } from "~/utils/api";
 import {
   VOLUNTEER_ACTIVITY_TOPICS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
+  getCurrentDateTime,
   getDateTimeString,
+  getEndTime,
+  titleIsOther,
+  toDuration,
 } from "~/utils/ui";
 import { AlertWarning } from "./Alert";
 import ReactiveButton from "./ReactiveButton";
@@ -22,42 +26,10 @@ type VolunteerActivityFormData = {
   description: string;
 };
 
-const toDuration = (startDateTime: Date, endDateTime: Date) =>
-  (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
-
-const getEndTime = (startDateTime: Date, duration: number) =>
-  new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
-
-const getCurrentDateTime = (offset = 0) => {
-  const now = new Date();
-  const tzOffset = now.getTimezoneOffset();
-  const offsetMs = (-tzOffset + offset) * 60 * 1000;
-  const localTime = new Date(now.getTime() + offsetMs);
-  return localTime.toISOString().slice(0, 16);
-};
-
-const titleIsOther = (title: string) => {
-  for (const topic of VOLUNTEER_ACTIVITY_TOPICS) {
-    if (topic.options.includes(title)) {
-      return false;
-    }
-  }
-  return true;
-};
-
 export default function VolunteerActivityForm({
   defaultActivity,
 }: {
-  defaultActivity?: {
-    id: number;
-    title: string;
-    headcount: number;
-    location: string;
-    startDateTime: Date;
-    endDateTime: Date;
-    description: string | null;
-    status: VolunteerActivityStatus;
-  };
+  defaultActivity?: VolunteerActivity;
 }) {
   let formDefaultValues: Partial<VolunteerActivityFormData> = {
     title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],

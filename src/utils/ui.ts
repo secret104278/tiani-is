@@ -50,6 +50,66 @@ export const VOLUNTEER_ACTIVITY_TOPICS: VolunteerActivityTopics = [
   },
 ];
 
+export const CLASS_ACTIVITY_TITLES = [
+  "壇主清口當愿班",
+  "中級部",
+  "培訓班",
+  "大內新民班",
+  "天元新民班",
+  "天誠新民班",
+  "天宏新民班",
+  "何氏新民班",
+  "大內青年班",
+  "天元讀經班",
+  "燕巢讀經班",
+];
+
+export const CLASS_ACTIVITY_LOCATIONS = [
+  "天一聖道院",
+  "大內天智佛堂",
+  "歸仁天元佛堂",
+  "路竹天誠佛堂",
+  "燕巢天宏佛堂",
+  "燕巢何氏佛堂",
+];
+
+export const toDuration = (startDateTime: Date, endDateTime: Date) =>
+  (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
+
+export const getEndTime = (startDateTime: Date, duration: number) =>
+  new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
+
+export const getCurrentDateTime = (offset = 0) => {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset();
+  const offsetMs = (-tzOffset + offset) * 60 * 1000;
+  const localTime = new Date(now.getTime() + offsetMs);
+  return localTime.toISOString().slice(0, 16);
+};
+
+export const titleIsOther = (title: string) => {
+  for (const topic of VOLUNTEER_ACTIVITY_TOPICS) {
+    if (topic.options.includes(title)) {
+      return false;
+    }
+  }
+  for (const _title of CLASS_ACTIVITY_TITLES) {
+    if (_title === title) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const locationIsOther = (location: string) => {
+  for (const _location of CLASS_ACTIVITY_LOCATIONS) {
+    if (_location === location) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export function formatMilliseconds(milliseconds: number) {
   const seconds = Math.floor(milliseconds / 1000);
   const minutes = Math.floor(seconds / 60);

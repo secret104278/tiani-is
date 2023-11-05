@@ -72,11 +72,16 @@ export const volunteerActivityRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const orgActivity = await ctx.db.volunteerActivity.findUniqueOrThrow({
-        select: { status: true },
+        select: { status: true, organiserId: true },
         where: {
           id: input.id,
         },
       });
+
+      const isManager =
+        ctx.session.user.id === orgActivity.organiserId ||
+        ctx.session.user.role === "ADMIN";
+      if (!isManager) throw new Error("只有管理員可以修改活動");
 
       const res = await ctx.db.volunteerActivity.update({
         where: {

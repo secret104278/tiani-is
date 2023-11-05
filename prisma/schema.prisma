@@ -163,13 +163,19 @@ model CasualCheckRecord {
     @@index([userId, checkInAt])
 }
 
+enum ClassActivityStatus {
+    DRAFT
+    PUBLISHED
+}
+
 model ClassActivity {
-    id            Int      @id @default(autoincrement())
+    id            Int                 @id @default(autoincrement())
     title         String
     description   String?
     location      String
     startDateTime DateTime
     endDateTime   DateTime
+    status        ClassActivityStatus @default(PUBLISHED)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
