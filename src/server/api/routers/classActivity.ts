@@ -1,3 +1,4 @@
+import { isNil, sum } from "lodash";
 import { z } from "zod";
 import {
   TIANI_GPS_CENTERS,
@@ -248,5 +249,76 @@ export const classActivityRouter = createTRPCRouter({
           },
         },
       });
+    }),
+
+  getActivityCheckRecords: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.classActivityCheckRecord.findMany({
+        where: {
+          activityId: input.activityId,
+        },
+        include: {
+          user: true,
+        },
+      });
+    }),
+
+  getWorkingStats: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (
+        ctx.session.user.role !== "ADMIN" &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以查看其他人的工時");
+
+      const activityCheckHistories =
+        await ctx.db.classActivityCheckRecord.findMany({
+          select: {
+            activityId: true,
+            activity: {
+              select: {
+                title: true,
+                startDateTime: true,
+                endDateTime: true,
+              },
+            },
+            checkAt: true,
+          },
+          where: {
+            userId: input.userId ?? ctx.session.user.id,
+          },
+          orderBy: {
+            checkAt: "desc",
+          },
+        });
+
+      const activityWorkingHours = sum(
+        activityCheckHistories.map(
+          (record) =>
+            (record.activity.endDateTime.getTime() -
+              record.activity.startDateTime.getTime()) /
+            1000 /
+            60 /
+            60,
+        ),
+      );
+
+      const totalWorkingHours = activityWorkingHours;
+
+      return {
+        activityCheckHistories,
+        totalWorkingHours,
+      };
     }),
 });

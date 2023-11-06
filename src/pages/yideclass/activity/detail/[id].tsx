@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       ogMeta: {
-        ogTitle: `${res?.title}・${dateString}・義德課程網`,
+        ogTitle: `${res?.title}・${dateString}・義德班務網`,
       },
     },
   };
@@ -220,7 +220,7 @@ export default function ClassActivityDetailPage() {
 
       {isManager && <AdminPanel />}
       <div className="flex flex-col space-y-2 align-bottom">
-        <p>發起人：{activity.organiser.name}</p>
+        <p>壇務：{activity.organiser.name}</p>
 
         <div className="flex items-center">
           <MapPinIcon className="mr-1 h-4 w-4" />

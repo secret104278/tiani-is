@@ -1,8 +1,9 @@
-import { ClockIcon, PlusIcon } from "@heroicons/react/20/solid";
+import { PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ActivityCard } from "~/components/ActivityCard";
+import { HourStats } from "~/components/HourStats";
 import { Loading } from "~/components/Loading";
 import { api } from "~/utils/api";
 
@@ -18,7 +19,7 @@ export default function YiDeClassHome() {
   const activities = activitiesQuery.data?.pages?.flatMap((page) => page.items);
 
   const { data: workingStats, isLoading: workingStatsIsLoading } =
-    api.volunteerActivity.getWorkingStats.useQuery({});
+    api.classActivity.getWorkingStats.useQuery({});
 
   const onGoingActivities = activities?.filter(
     (activity) => activity.endDateTime > new Date(),
@@ -32,20 +33,19 @@ export default function YiDeClassHome() {
       <article className="prose">
         <h1>開班總覽</h1>
       </article>
-      <div className="stats stats-vertical shadow-lg sm:stats-horizontal">
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <ClockIcon className="h-8 w-8" />
-          </div>
-          <div className="stat-title">總開班時數</div>
-          <div className="stat-value">1.02</div>
-        </div>
-      </div>
+      {!workingStatsIsLoading && (
+        <Link href="/yideclass/workingstats" className="flex flex-col">
+          <HourStats
+            title="總開班時數"
+            totalWorkingHours={workingStats?.totalWorkingHours}
+          />
+        </Link>
+      )}
       <div className="flex flex-row justify-end space-x-4">
         <Link href="/yideclass/activity/new" className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
-            建立新課程
+            建立新簽到單
           </div>
         </Link>
       </div>
