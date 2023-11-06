@@ -7,6 +7,6 @@ export default {
   },
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
   daisyui: {
-    themes: ["autumn", "pastel"],
+    themes: ["autumn", "garden"],
   },
 } satisfies Config;

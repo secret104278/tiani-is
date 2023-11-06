@@ -215,6 +215,7 @@ export default function ClassActivityDetailPage() {
       <div className="flex items-center">
         <MapIcon className="mr-1 h-4 w-4" />
         <a
+          target="_blank"
           href={`https://maps.google.com/?q=@${location.gps[0]},${location.gps[1]}`}
         >
           地址：<a className="link">{location.address}</a>

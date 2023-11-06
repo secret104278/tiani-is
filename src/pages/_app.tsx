@@ -29,21 +29,22 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   else if (isVolunteer) siteIcon = "/volunteer_logo.png";
 
   let themeColor = "";
-  if (isYideclass) themeColor = "#d1c0d8";
+  if (isYideclass) themeColor = "#5c7f67";
   else if (isVolunteer) themeColor = "#d69c6c";
+
+  let siteTitle = "天一聖道院資訊系統";
+  if (isYideclass) siteTitle = "義德班務網";
+  else if (isVolunteer) siteTitle = "天一志工隊";
 
   return (
     <>
       <Head>
-        <title>{ogMeta?.ogTitle ?? "天一聖道院資訊系統"}</title>
-        <meta name="description" content="天一聖道院資訊系統" />
-        <meta
-          property="og:title"
-          content={ogMeta?.ogTitle ?? "天一聖道院資訊系統"}
-        ></meta>
+        <title>{ogMeta?.ogTitle ?? siteTitle}</title>
+        <meta name="description" content={`${siteTitle}・天一聖道院資訊系統`} />
+        <meta property="og:title" content={ogMeta?.ogTitle ?? siteTitle}></meta>
         <meta
           property="og:description"
-          content={ogMeta?.ogDescription ?? "天一聖道院資訊系統"}
+          content={ogMeta?.ogDescription ?? `${siteTitle}・天一聖道院資訊系統`}
         ></meta>
         <meta property="og:image" content={ogMeta?.ogImage ?? siteIcon}></meta>
         <meta name="theme-color" content={themeColor} />

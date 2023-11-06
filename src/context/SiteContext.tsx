@@ -30,7 +30,7 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     if (site === "volunteer")
       document.querySelector("html")?.setAttribute("data-theme", "autumn");
     else if (site === "yideclass")
-      document.querySelector("html")?.setAttribute("data-theme", "pastel");
+      document.querySelector("html")?.setAttribute("data-theme", "garden");
   }, [site]);
 
   return (
