@@ -2,7 +2,7 @@ import { exampleRouter } from "~/server/api/routers/example";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { classActivityRouter } from "./routers/classActivity";
 import { userRouter } from "./routers/user";
-import { volunteerActivityRouter } from "./routers/volunteerActivity";
+import { volunteerActivityRouter } from "./routers/volunteeractivity";
 
 /**
  * This is the primary router for your server.
