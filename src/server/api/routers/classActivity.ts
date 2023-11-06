@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  TIANI_GPS_CENTERS,
+  TIANI_GPS_RADIUS_KM,
+  getDistance,
+} from "~/utils/ui";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const classActivityRouter = createTRPCRouter({
@@ -108,5 +113,140 @@ export const classActivityRouter = createTRPCRouter({
       }
 
       return { items, nextCursor };
+    }),
+
+  getActivity: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const res = await ctx.db.classActivity.findUnique({
+        where: { id: input.id },
+        include: {
+          organiser: true,
+        },
+      });
+
+      const isManager =
+        res &&
+        (ctx.session.user.id === res.organiserId ||
+          ctx.session.user.role === "ADMIN");
+
+      if (res?.status !== "PUBLISHED" && !isManager) return { activity: null };
+
+      return { activity: res };
+    }),
+
+  deleteActivity: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.classActivity.delete({
+        where: { id: input.id },
+      });
+    }),
+
+  checkInActivity: protectedProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        activityId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const activity = await ctx.db.classActivity.findUniqueOrThrow({
+        where: { id: input.activityId },
+      });
+
+      const TWO_HOUR = 2 * 60 * 60 * 1000;
+      const now = new Date();
+      if (
+        now.getUTCMilliseconds() - activity.startDateTime.getUTCMilliseconds() <
+          -TWO_HOUR ||
+        now.getUTCMilliseconds() - activity.endDateTime.getUTCMilliseconds() >
+          TWO_HOUR
+      ) {
+        throw new Error("非課程時間，無法簽到");
+      }
+
+      const isOutOfRange = !TIANI_GPS_CENTERS.some(
+        (center) =>
+          getDistance(input.latitude, input.longitude, center[0], center[1]) <=
+          TIANI_GPS_RADIUS_KM,
+      );
+      if (isOutOfRange) throw new Error("超出打卡範圍");
+
+      const checkin = await ctx.db.classActivityCheckRecord.findFirst({
+        where: {
+          activityId: input.activityId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (checkin) {
+        await ctx.db.classActivityCheckRecord.upsert({
+          where: {
+            id: checkin.id,
+          },
+          update: {
+            checkAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
+          },
+          create: {
+            user: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+            activity: {
+              connect: {
+                id: input.activityId,
+              },
+            },
+
+            checkAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
+          },
+        });
+      } else {
+        await ctx.db.classActivityCheckRecord.create({
+          data: {
+            user: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+            activity: {
+              connect: {
+                id: input.activityId,
+              },
+            },
+            checkAt: now,
+            latitude: input.latitude,
+            longitude: input.longitude,
+          },
+        });
+      }
+    }),
+
+  getCheckInActivityHistory: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.classActivityCheckRecord.findUnique({
+        where: {
+          userId_activityId: {
+            userId: ctx.session.user.id,
+            activityId: input.activityId,
+          },
+        },
+      });
     }),
 });

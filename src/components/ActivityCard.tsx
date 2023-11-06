@@ -2,6 +2,7 @@ import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
 import { isNil } from "lodash";
 import Link from "next/link";
+import { useSiteContext } from "~/context/SiteContext";
 import { getActivityStatusText } from "~/utils/ui";
 
 export function ActivityCard({
@@ -22,14 +23,16 @@ export function ActivityCard({
   };
   isEnd?: boolean;
 }) {
+  const { site } = useSiteContext();
+
   if (isEnd)
     return (
       <Link
         key={activity.id}
-        href={`/volunteer/activity/detail/${activity.id}`}
+        href={`/${site}/activity/detail/${activity.id}`}
         style={{ textDecoration: "none" }}
       >
-        <div className="card card-compact w-full bg-base-200 shadow">
+        <div className="card-compact card w-full bg-base-200 shadow">
           <div className="card-body">
             <h2 className="card-title">{activity.title}</h2>
             <div className="flex items-center">
@@ -47,7 +50,7 @@ export function ActivityCard({
 
   return (
     <Link
-      href={`/volunteer/activity/detail/${activity.id}`}
+      href={`/${site}/activity/detail/${activity.id}`}
       style={{ textDecoration: "none" }}
     >
       <div className="card-compact card w-full bg-accent text-accent-content shadow">
