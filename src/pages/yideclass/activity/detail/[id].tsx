@@ -1,6 +1,7 @@
 import {
   ArrowDownOnSquareIcon,
   ClockIcon,
+  MapIcon,
   MapPinIcon,
   PencilSquareIcon,
   QueueListIcon,
@@ -20,7 +21,7 @@ import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
 
-import { getActivityStatusText } from "~/utils/ui";
+import { CLASS_ACTIVITY_LOCATION_MAP, getActivityStatusText } from "~/utils/ui";
 
 const ClassActivityCheckInDialog = dynamic(
   () => import("~/components/ClassActivityCheckInDialog"),
@@ -207,6 +208,21 @@ export default function ClassActivityDetailPage() {
     );
   };
 
+  const LocationAddress = () => {
+    const location = CLASS_ACTIVITY_LOCATION_MAP.get(activity.location);
+    if (isNil(location)) return null;
+    return (
+      <div className="flex items-center">
+        <MapIcon className="mr-1 h-4 w-4" />
+        <a
+          href={`https://maps.google.com/?q=@${location.gps[0]},${location.gps[1]}`}
+        >
+          地址：<a className="link">{location.address}</a>
+        </a>
+      </div>
+    );
+  };
+
   // Fetch and display the details of the book with the given ID
   return (
     <div className="flex flex-col space-y-4">
@@ -226,6 +242,7 @@ export default function ClassActivityDetailPage() {
           <MapPinIcon className="mr-1 h-4 w-4" />
           <p>地點：{activity.location}</p>
         </div>
+        <LocationAddress />
         <div className="flex items-center">
           <ClockIcon className="mr-1 h-4 w-4" />
           <p>開始：{activity.startDateTime.toLocaleString()}</p>

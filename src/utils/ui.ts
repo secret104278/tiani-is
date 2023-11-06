@@ -64,14 +64,51 @@ export const CLASS_ACTIVITY_TITLES = [
   "燕巢讀經班",
 ];
 
-export const CLASS_ACTIVITY_LOCATIONS = [
-  "天一聖道院",
-  "大內天智佛堂",
-  "歸仁天元佛堂",
-  "路竹天誠佛堂",
-  "燕巢天宏佛堂",
-  "燕巢何氏佛堂",
-];
+export const CLASS_ACTIVITY_LOCATION_MAP = new Map<
+  string,
+  { address: string; gps: [number, number] }
+>([
+  [
+    "天一聖道院",
+    {
+      address: "高雄市田寮區南安路175之25號",
+      gps: [22.863541598094525, 120.36627531051637],
+    },
+  ],
+  [
+    "大內天智佛堂",
+    { address: "台南市大內區頭社村84號之12", gps: [23.148347, 120.382657] },
+  ],
+  [
+    "歸仁天元佛堂",
+    { address: "台南市歸仁區大德一街56號", gps: [22.97244, 120.274495] },
+  ],
+  [
+    "路竹天誠佛堂",
+    {
+      address: "高雄市路竹區大同區513巷136號",
+      gps: [22.853570218630185, 120.27035478246502],
+    },
+  ],
+  [
+    "燕巢天宏佛堂",
+    {
+      address: "高雄市燕巢區尖山里後荷巷28號",
+      gps: [22.820083514588433, 120.37404664428475],
+    },
+  ],
+  [
+    "燕巢何氏佛堂",
+    {
+      address: "高雄市燕巢區尖山里後荷巷28號",
+      gps: [22.820083514588433, 120.37404664428475],
+    },
+  ],
+]);
+
+export const CLASS_ACTIVITY_LOCATIONS = Array.from(
+  CLASS_ACTIVITY_LOCATION_MAP.keys(),
+);
 
 export const toDuration = (startDateTime: Date, endDateTime: Date) =>
   (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
@@ -138,10 +175,11 @@ export function formatMilliseconds(milliseconds: number) {
 }
 
 export const TIANI_GPS_CENTERS: [number, number][] = [
-  [22.863541598094525, 120.36627531051637], // 天一
+  ...Array.from(CLASS_ACTIVITY_LOCATION_MAP.values()).map((v) => v.gps),
   [22.975141, 120.298921], // 歸仁
   [25.005224, 121.557164], // 文山
 ];
+
 export const TIANI_GPS_RADIUS_KM = 0.5;
 
 export function getDistance(
