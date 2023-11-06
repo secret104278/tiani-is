@@ -35,7 +35,7 @@ export default function ClassActivityCheckRecordPage() {
       <table className="table table-sm">
         <thead>
           <tr>
-            <th>學員</th>
+            <th>班員</th>
             <th>簽到</th>
           </tr>
         </thead>
