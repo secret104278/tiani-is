@@ -1,9 +1,10 @@
 import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
+import { isNil } from "lodash";
 import Link from "next/link";
 import { getActivityStatusText } from "~/utils/ui";
 
-export function VolunteerActivityCard({
+export function ActivityCard({
   activity,
   isEnd,
 }: {
@@ -11,10 +12,10 @@ export function VolunteerActivityCard({
     id: number;
     title: string;
     status: VolunteerActivityStatus;
-    _count: {
+    _count?: {
       participants: number;
     };
-    headcount: number;
+    headcount?: number;
     location: string;
     startDateTime: Date;
     endDateTime: Date;
@@ -57,15 +58,19 @@ export function VolunteerActivityCard({
               <div className="badge badge-outline">
                 {getActivityStatusText(activity.status)}
               </div>
-              {activity._count.participants >= activity.headcount && (
-                <div className="badge badge-primary">已額滿</div>
-              )}
+              {!isNil(activity._count) &&
+                !isNil(activity.headcount) &&
+                activity._count.participants >= activity.headcount && (
+                  <div className="badge badge-primary">已額滿</div>
+                )}
             </div>
           </div>
-          <div className="flex items-center">
-            <UsersIcon className="mr-1 h-4 w-4" />
-            <p>人數：{activity.headcount} 人</p>
-          </div>
+          {activity.headcount && (
+            <div className="flex items-center">
+              <UsersIcon className="mr-1 h-4 w-4" />
+              <p>人數：{activity.headcount} 人</p>
+            </div>
+          )}
           <div className="flex items-center">
             <MapPinIcon className="mr-1 h-4 w-4" />
             <p>地點：{activity.location}</p>

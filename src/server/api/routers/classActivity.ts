@@ -80,4 +80,33 @@ export const classActivityRouter = createTRPCRouter({
 
       return res;
     }),
+
+  getAllActivitiesInfinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(10),
+        cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const items = await ctx.db.classActivity.findMany({
+        orderBy: { startDateTime: "desc" },
+
+        take: input.limit + 1,
+        cursor: input.cursor
+          ? { startDateTime: input.cursor.startDateTime, id: input.cursor.id }
+          : undefined,
+      });
+
+      let nextCursor: typeof input.cursor | undefined = undefined;
+      if (items.length > input.limit) {
+        const nextItem = items.pop();
+        nextCursor = {
+          startDateTime: nextItem!.startDateTime,
+          id: nextItem!.id,
+        };
+      }
+
+      return { items, nextCursor };
+    }),
 });

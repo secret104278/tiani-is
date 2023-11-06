@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { api } from "~/utils/api";
+import { ActivityCard } from "../../components/ActivityCard";
 import { CasualCheckInCard } from "./../../components/CasualCheckInCard";
 import { HourStats } from "./../../components/HourStats";
 import { Loading } from "./../../components/Loading";
-import { VolunteerActivityCard } from "./../../components/VolunteerActivityCard";
 
 export default function VolunteerHome() {
   const [filterOrganizedByMe, setFilterOrganizedByMe] = useState(false);
@@ -90,17 +90,13 @@ export default function VolunteerHome() {
         >
           <div className="flex flex-col space-y-4">
             {onGoingActivities?.map((activity) => (
-              <VolunteerActivityCard key={activity.id} activity={activity} />
+              <ActivityCard key={activity.id} activity={activity} />
             ))}
           </div>
           {!isEmpty(endedActivities) && <div className="divider">已結束</div>}
           <div className="flex flex-col space-y-4">
             {endedActivities?.map((activity) => (
-              <VolunteerActivityCard
-                key={activity.id}
-                activity={activity}
-                isEnd
-              />
+              <ActivityCard key={activity.id} activity={activity} isEnd />
             ))}
           </div>
         </InfiniteScroll>
