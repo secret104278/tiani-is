@@ -41,15 +41,15 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
       </Head>
       <Analytics />
       <SessionProvider session={session}>
-        <AuthGaurd>
-          <SentrySetup>
-            <SiteProvider>
+        <SiteProvider>
+          <AuthGaurd>
+            <SentrySetup>
               <Layout>
                 <Component {...pageProps} />
               </Layout>
-            </SiteProvider>
-          </SentrySetup>
-        </AuthGaurd>
+            </SentrySetup>
+          </AuthGaurd>
+        </SiteProvider>
       </SessionProvider>
     </>
   );

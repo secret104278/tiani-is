@@ -1,6 +1,7 @@
 import { HomeIcon } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import LineImage from "./LineImage";
@@ -37,6 +38,7 @@ function UserAvatar() {
 export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
   const { site } = useSiteContext();
+  const router = useRouter();
 
   return (
     <>
@@ -51,13 +53,17 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="navbar-center">
           <Link href={`/${site}`}>
             <button className="btn btn-ghost text-xl normal-case">
-              {site === "volunteer" ? "天一志工隊" : "義德班務網"}
+              {router.pathname.startsWith("/auth")
+                ? "天一聖道院資訊系統"
+                : site === "volunteer"
+                ? "天一志工隊"
+                : "義德班務網"}
             </button>
           </Link>
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown-end dropdown">
+            <div className="dropdown dropdown-end">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>

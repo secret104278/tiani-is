@@ -3,6 +3,7 @@ import type { ClientSafeProvider, LiteralUnion } from "next-auth/react";
 import { getProviders, signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
+import { useSiteContext } from "~/context/SiteContext";
 
 export default function SinginPage({
   providers,
@@ -11,10 +12,11 @@ export default function SinginPage({
 }) {
   const lineProvider = providers.line;
   const router = useRouter();
+  const { site } = useSiteContext();
 
   const { status: authStatus } = useSession();
   if (authStatus === "authenticated") {
-    void router.push("/");
+    void router.push(`/${site}`);
   }
 
   const error = router.query.error && "無法進行登入";
