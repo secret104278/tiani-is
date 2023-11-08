@@ -252,8 +252,9 @@ export default function ClassActivityDetailPage() {
           <ClockIcon className="mr-1 h-4 w-4" />
           <p>結束：{activity.endDateTime.toLocaleString()}</p>
         </div>
-        <article className="prose">{activity.description}</article>
-
+        <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
+          {activity.description}
+        </article>
         <CheckInControl />
       </div>
     </div>

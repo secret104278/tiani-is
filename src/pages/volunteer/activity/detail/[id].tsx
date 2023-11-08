@@ -174,7 +174,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse collapse-arrow bg-base-200">
+      <form className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -426,7 +426,9 @@ export default function VolunteerActivityDetailPage() {
           <ClockIcon className="mr-1 h-4 w-4" />
           <p>結束：{activity.endDateTime.toLocaleString()}</p>
         </div>
-        <article className="prose">{activity.description}</article>
+        <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
+          {activity.description}
+        </article>
         <ParticipateControl />
         <CheckInControl />
       </div>
