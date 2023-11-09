@@ -234,6 +234,42 @@ export const classActivityRouter = createTRPCRouter({
       }
     }),
 
+  manualCheckInActivity: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const now = new Date();
+
+      await ctx.db.classActivityCheckRecord.upsert({
+        where: {
+          userId_activityId: {
+            userId: input.userId,
+            activityId: input.activityId,
+          },
+        },
+        update: {
+          checkAt: now,
+        },
+        create: {
+          user: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+          activity: {
+            connect: {
+              id: input.activityId,
+            },
+          },
+          checkAt: now,
+        },
+      });
+    }),
+
   getCheckInActivityHistory: protectedProcedure
     .input(
       z.object({

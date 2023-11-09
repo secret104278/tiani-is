@@ -62,8 +62,6 @@ export const userRouter = createTRPCRouter({
     }),
 
   getUsers: protectedProcedure.input(z.object({})).query(async ({ ctx }) => {
-    // if (ctx.session.user.role !== "ADMIN") throw new Error("Permission denied");
-
     return await ctx.db.user.findMany({
       select: {
         id: true,
@@ -72,6 +70,19 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
+
+  getUsersWithImage: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx }) => {
+      return await ctx.db.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          role: true,
+        },
+      });
+    }),
 
   getActivityReviewers: protectedProcedure
     .input(z.object({}))
