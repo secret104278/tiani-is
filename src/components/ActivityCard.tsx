@@ -1,6 +1,5 @@
 import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
-import { isNil } from "lodash";
 import Link from "next/link";
 import { useSiteContext } from "~/context/SiteContext";
 import { getActivityStatusText } from "~/utils/ui";
@@ -13,9 +12,9 @@ export function ActivityCard({
     id: number;
     title: string;
     status: VolunteerActivityStatus;
-    _count?: {
-      participants: number;
-    };
+    // _count?: {
+    //   participants: number;
+    // };
     headcount?: number;
     location: string;
     startDateTime: Date;
@@ -32,7 +31,7 @@ export function ActivityCard({
         href={`/${site}/activity/detail/${activity.id}`}
         style={{ textDecoration: "none" }}
       >
-        <div className="card-compact card w-full bg-base-200 shadow">
+        <div className="card card-compact w-full bg-base-200 shadow">
           <div className="card-body">
             <h2 className="card-title">{activity.title}</h2>
             <div className="flex items-center">
@@ -61,11 +60,11 @@ export function ActivityCard({
               <div className="badge badge-outline">
                 {getActivityStatusText(activity.status)}
               </div>
-              {!isNil(activity._count) &&
+              {/* {!isNil(activity._count) &&
                 !isNil(activity.headcount) &&
                 activity._count.participants >= activity.headcount && (
                   <div className="badge badge-primary">已額滿</div>
-                )}
+                )} */}
             </div>
           </div>
           {activity.headcount && (

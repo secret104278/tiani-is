@@ -209,13 +209,14 @@ export const volunteerActivityRouter = createTRPCRouter({
       }
 
       const items = await ctx.db.volunteerActivity.findMany({
-        include: {
-          _count: {
-            select: {
-              participants: true,
-            },
-          },
-        },
+        // TODO: too many cost to count participants
+        // include: {
+        //   _count: {
+        //     select: {
+        //       participants: true,
+        //     },
+        //   },
+        // },
 
         where: filters.length === 0 ? undefined : { OR: filters },
         orderBy: { startDateTime: "desc" },
