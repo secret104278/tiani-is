@@ -74,9 +74,9 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <li className="disabled">
                   <a>{sessionData.user.name}</a>
                 </li>
-                {sessionData.user.role === "ADMIN" && (
+                {sessionData.user.role.is_tiani_admin && (
                   <li>
-                    <Link href="/volunteer/admin/users">帳號管理</Link>
+                    <Link href="/admin/users">帳號管理</Link>
                   </li>
                 )}
                 <li>

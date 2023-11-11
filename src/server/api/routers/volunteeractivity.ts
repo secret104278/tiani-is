@@ -80,7 +80,7 @@ export const volunteerActivityRouter = createTRPCRouter({
 
       const isManager =
         ctx.session.user.id === orgActivity.organiserId ||
-        ctx.session.user.role === "ADMIN";
+        ctx.session.user.role.is_volunteer_admin;
       if (!isManager) throw new Error("只有管理員可以修改活動");
 
       const res = await ctx.db.volunteerActivity.update({
@@ -139,7 +139,7 @@ export const volunteerActivityRouter = createTRPCRouter({
       const isManager =
         res &&
         (ctx.session.user.id === res.organiserId ||
-          ctx.session.user.role === "ADMIN");
+          ctx.session.user.role.is_volunteer_admin);
 
       if (res?.status !== "PUBLISHED" && !isManager)
         return { activity: null, isParticipant: false };
@@ -202,7 +202,7 @@ export const volunteerActivityRouter = createTRPCRouter({
       }
 
       if (filters.length === 0) {
-        if (ctx.session.user.role !== "ADMIN") {
+        if (!ctx.session.user.role.is_volunteer_admin) {
           filters.push({ status: "PUBLISHED" });
           filters.push({ organiserId: ctx.session.user.id });
         }
@@ -302,8 +302,8 @@ export const volunteerActivityRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.session.user.role !== "ADMIN") {
-        throw new Error("Only admins can approve activities");
+      if (!ctx.session.user.role.is_tiani_admin) {
+        throw new Error("Only tiani admins can approve activities");
       }
 
       await ctx.db.volunteerActivity.update({
@@ -615,7 +615,7 @@ export const volunteerActivityRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       if (
-        ctx.session.user.role !== "ADMIN" &&
+        !ctx.session.user.role.is_volunteer_admin &&
         !isNil(input.userId) &&
         input.userId !== ctx.session.user.id
       )
@@ -708,17 +708,7 @@ export const volunteerActivityRouter = createTRPCRouter({
         throw new Error("簽退時間必須晚於簽到時間");
       }
 
-      const activity = await ctx.db.volunteerActivity.findUniqueOrThrow({
-        select: { organiserId: true },
-        where: { id: input.activityId },
-      });
-
-      if (
-        !(
-          ctx.session.user.role === "ADMIN" ||
-          ctx.session.user.id === activity.organiserId
-        )
-      )
+      if (!ctx.session.user.role.is_volunteer_admin)
         throw new Error("只有管理員可以修改打卡紀錄");
 
       const upsertCheckIn = ctx.db.volunteerActivityCheckRecord.upsert({

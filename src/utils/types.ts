@@ -1,3 +1,9 @@
+export interface UserRole {
+  is_tiani_admin: boolean;
+  is_volunteer_admin: boolean;
+  is_yideclass_admin: boolean;
+}
+
 export type VolunteerActivityTopics = VolunteerActivityTopic[];
 export interface VolunteerActivityTopic {
   topic: string;

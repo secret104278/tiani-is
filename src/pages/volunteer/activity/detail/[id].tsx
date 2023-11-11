@@ -151,7 +151,8 @@ export default function VolunteerActivityDetailPage() {
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   const isManager =
-    session?.user.role === "ADMIN" || session?.user.id == activity.organiserId;
+    session?.user.role.is_volunteer_admin ??
+    session?.user.id == activity.organiserId;
 
   const isEnded = activity.endDateTime <= new Date();
 
@@ -177,7 +178,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse-arrow collapse bg-base-200">
+      <form className="collapse collapse-arrow bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -224,7 +225,7 @@ export default function VolunteerActivityDetailPage() {
       );
 
     if (activity.status === "INREVIEW") {
-      if (session?.user.role === "USER")
+      if (!session?.user.role.is_tiani_admin)
         return (
           <ReactiveButton
             className="btn"
@@ -237,8 +238,7 @@ export default function VolunteerActivityDetailPage() {
             提醒審核
           </ReactiveButton>
         );
-
-      if (session?.user.role === "ADMIN")
+      else
         return (
           <ReactiveButton
             className="btn"

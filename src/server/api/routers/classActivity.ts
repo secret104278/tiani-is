@@ -64,7 +64,7 @@ export const classActivityRouter = createTRPCRouter({
 
       const isManager =
         ctx.session.user.id === orgActivity.organiserId ||
-        ctx.session.user.role === "ADMIN";
+        ctx.session.user.role.is_yideclass_admin;
       if (!isManager) throw new Error("只有管理員可以修改活動");
 
       const res = await ctx.db.classActivity.update({
@@ -133,7 +133,7 @@ export const classActivityRouter = createTRPCRouter({
       const isManager =
         res &&
         (ctx.session.user.id === res.organiserId ||
-          ctx.session.user.role === "ADMIN");
+          ctx.session.user.role.is_yideclass_admin);
 
       if (res?.status !== "PUBLISHED" && !isManager) return { activity: null };
 
@@ -242,6 +242,9 @@ export const classActivityRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_yideclass_admin)
+        throw new Error("只有管理員可以手動簽到");
+
       const now = new Date();
 
       await ctx.db.classActivityCheckRecord.upsert({
@@ -312,7 +315,7 @@ export const classActivityRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       if (
-        ctx.session.user.role !== "ADMIN" &&
+        !ctx.session.user.role.is_yideclass_admin &&
         !isNil(input.userId) &&
         input.userId !== ctx.session.user.id
       )

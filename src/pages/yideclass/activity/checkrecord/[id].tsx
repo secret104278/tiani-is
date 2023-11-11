@@ -5,10 +5,10 @@ import {
   PlusIcon,
 } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
-import { useForm } from "react-hook-form";
 import { AlertWarning } from "~/components/Alert";
 import Dialog from "~/components/Dialog";
 import ReactiveButton from "~/components/ReactiveButton";
@@ -19,10 +19,6 @@ function ManualClassActivityCheckRecordDialog({
 }: {
   activityId: number;
 }) {
-  const { register, handleSubmit } = useForm<{ userId: string }>({
-    mode: "all",
-  });
-
   const router = useRouter();
 
   const {
@@ -156,6 +152,8 @@ function ManualClassActivityCheckRecordDialog({
 }
 
 export default function ClassActivityCheckRecordPage() {
+  const { data: sessionData } = useSession();
+
   const router = useRouter();
   const { id } = router.query;
 
@@ -184,21 +182,23 @@ export default function ClassActivityCheckRecordPage() {
       <article className="prose">
         <h1>打卡名單</h1>
       </article>
-      <div className="flex justify-end">
-        <ReactiveButton
-          className="btn"
-          onClick={() => setCheckInDialogOpen(true)}
-        >
-          <PlusIcon className="h-4 w-4" />
-          手動打卡
-        </ReactiveButton>
-        <Dialog
-          open={checkInDialogOpen}
-          onClose={() => setCheckInDialogOpen(false)}
-        >
-          <ManualClassActivityCheckRecordDialog activityId={activity.id} />
-        </Dialog>
-      </div>
+      {sessionData?.user.role.is_yideclass_admin && (
+        <div className="flex justify-end">
+          <ReactiveButton
+            className="btn"
+            onClick={() => setCheckInDialogOpen(true)}
+          >
+            <PlusIcon className="h-4 w-4" />
+            手動打卡
+          </ReactiveButton>
+          <Dialog
+            open={checkInDialogOpen}
+            onClose={() => setCheckInDialogOpen(false)}
+          >
+            <ManualClassActivityCheckRecordDialog activityId={activity.id} />
+          </Dialog>
+        </div>
+      )}
       <table className="table table-sm">
         <thead>
           <tr>

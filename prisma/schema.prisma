@@ -53,8 +53,9 @@ model Session {
 }
 
 enum Role {
-    USER
-    ADMIN
+    TIANI_ADMIN
+    VOLUNTEER_ADMIN
+    YIDECLASS_ADMIN
 }
 
 model User {
@@ -66,7 +67,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
 
-    role Role @default(USER)
+    roles Role[] @default([])
 
     organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
     organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")

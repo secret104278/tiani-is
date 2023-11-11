@@ -1,6 +1,32 @@
+import { Role, type PrismaClient, type PrismaPromise } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+
+const handleSetAdmin =
+  (userId: string, role: Role, set: boolean) => async (tx: PrismaClient) => {
+    const user = await tx.user.findUniqueOrThrow({
+      select: { roles: true },
+      where: {
+        id: userId,
+      },
+    });
+
+    let newRoles: Role[] = [];
+    if (set) {
+      newRoles = [...user.roles, role];
+      newRoles = Array.from(new Set(newRoles));
+    } else newRoles = user.roles.filter((_role) => role !== _role);
+
+    await tx.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        roles: newRoles,
+      },
+    });
+  };
 
 export const userRouter = createTRPCRouter({
   getLineImage: protectedProcedure
@@ -66,7 +92,7 @@ export const userRouter = createTRPCRouter({
       select: {
         id: true,
         name: true,
-        role: true,
+        roles: true,
       },
     });
   }),
@@ -79,7 +105,7 @@ export const userRouter = createTRPCRouter({
           id: true,
           name: true,
           image: true,
-          role: true,
+          roles: true,
         },
       });
     }),
@@ -94,7 +120,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  setIsAdmin: protectedProcedure
+  setIsTianiAdmin: protectedProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -102,50 +128,73 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // if (ctx.session.user.role !== "ADMIN")
-      //   throw new Error("Permission denied");
+      if (!ctx.session.user.role.is_tiani_admin)
+        throw new Error("Permission denied");
 
-      return await ctx.db.user.update({
-        where: {
-          id: input.userId,
-        },
-        data: {
-          role: input.isAdmin ? "ADMIN" : "USER",
-        },
-      });
-    }),
+      const promises: PrismaPromise<unknown>[] = [];
 
-  setIsActivityReviewer: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        isReviewer: z.boolean(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      // if (ctx.session.user.role !== "ADMIN")
-      //   throw new Error("Permission denied");
-
-      if (!input.isReviewer)
-        await ctx.db.activityReviewer.deleteMany({
-          where: { userId: input.userId },
-        });
-      else {
-        await ctx.db.$transaction([
+      if (input.isAdmin)
+        promises.push(
           ctx.db.activityReviewer.upsert({
             where: { userId: input.userId },
             create: { userId: input.userId },
             update: {},
           }),
-          ctx.db.user.update({
-            where: {
-              id: input.userId,
-            },
-            data: {
-              role: "ADMIN",
-            },
+        );
+      else
+        promises.push(
+          ctx.db.activityReviewer.deleteMany({
+            where: { userId: input.userId },
           }),
-        ]);
-      }
+        );
+
+      promises.push(
+        ctx.db.user.update({
+          where: {
+            id: input.userId,
+          },
+          data: {
+            roles: input.isAdmin ? [Role.TIANI_ADMIN] : [],
+          },
+        }),
+      );
+
+      await ctx.db.$transaction(promises);
+    }),
+
+  setIsVolunteerAdmin: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isAdmin: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_tiani_admin)
+        throw new Error("Permission denied");
+
+      await ctx.db.$transaction(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        handleSetAdmin(input.userId, Role.VOLUNTEER_ADMIN, input.isAdmin),
+      );
+    }),
+
+  setIsYideclassAdmin: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isAdmin: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_tiani_admin)
+        throw new Error("Permission denied");
+
+      await ctx.db.$transaction(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        handleSetAdmin(input.userId, Role.YIDECLASS_ADMIN, input.isAdmin),
+      );
     }),
 });

@@ -101,7 +101,8 @@ export default function ClassActivityDetailPage() {
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   const isManager =
-    session?.user.role === "ADMIN" || session?.user.id == activity.organiserId;
+    session?.user.role.is_yideclass_admin ??
+    session?.user.id == activity.organiserId;
 
   const isEnded = activity.endDateTime <= new Date();
 

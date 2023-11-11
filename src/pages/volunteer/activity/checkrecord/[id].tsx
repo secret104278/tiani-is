@@ -1,5 +1,6 @@
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
@@ -10,6 +11,7 @@ import type { CheckRecord } from "~/utils/types";
 
 export default function VolunteerActivityCheckRecordPage() {
   const router = useRouter();
+  const { data: sessionData } = useSession();
   const { id } = router.query;
 
   const { data, isLoading, error } = api.volunteerActivity.getActivity.useQuery(
@@ -56,7 +58,7 @@ export default function VolunteerActivityCheckRecordPage() {
             <th>志工</th>
             <th>簽到</th>
             <th>簽退</th>
-            <th>補正</th>
+            {sessionData?.user.role.is_volunteer_admin && <th>補正</th>}
           </tr>
         </thead>
         <tbody>
@@ -81,17 +83,19 @@ export default function VolunteerActivityCheckRecordPage() {
                   </>
                 )}
               </td>
-              <td>
-                <button
-                  className="btn btn-sm"
-                  onClick={() => {
-                    setModifyRecord(record);
-                    modifyCheckRecordDialogRef.current?.showModal();
-                  }}
-                >
-                  <PencilSquareIcon className="h-4 w-4" />
-                </button>
-              </td>
+              {sessionData?.user.role.is_volunteer_admin && (
+                <td>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => {
+                      setModifyRecord(record);
+                      modifyCheckRecordDialogRef.current?.showModal();
+                    }}
+                  >
+                    <PencilSquareIcon className="h-4 w-4" />
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
