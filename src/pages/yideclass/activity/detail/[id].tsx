@@ -17,6 +17,7 @@ import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import ReactiveButton from "~/components/ReactiveButton";
+import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
@@ -67,6 +68,8 @@ export default function ClassActivityDetailPage() {
   const router = useRouter();
   const { id } = router.query;
 
+  const { site } = useSiteContext();
+
   const { data: session } = useSession();
 
   const { data, isLoading, error } = api.classActivity.getActivity.useQuery({
@@ -87,7 +90,7 @@ export default function ClassActivityDetailPage() {
     isLoading: deleteActivityIsLoading,
     isError: deleteActivityIsError,
   } = api.classActivity.deleteActivity.useMutation({
-    onSuccess: () => router.push(`/`),
+    onSuccess: () => router.push(`/${site}`),
   });
 
   const deleteDialogRef = useRef<HTMLDialogElement>(null);

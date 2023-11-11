@@ -21,6 +21,7 @@ import { AlertWarning } from "~/components/Alert";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import LineImage from "~/components/LineImage";
 import ReactiveButton from "~/components/ReactiveButton";
+import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
@@ -72,6 +73,8 @@ export default function VolunteerActivityDetailPage() {
   const router = useRouter();
   const { id } = router.query;
 
+  const { site } = useSiteContext();
+
   const { data: session } = useSession();
 
   const { data, isLoading, error, refetch } =
@@ -119,7 +122,7 @@ export default function VolunteerActivityDetailPage() {
     isLoading: deleteActivityIsLoading,
     isError: deleteActivityIsError,
   } = api.volunteerActivity.deleteActivity.useMutation({
-    onSuccess: () => router.push(`/`),
+    onSuccess: () => router.push(`/${site}`),
   });
 
   const {
