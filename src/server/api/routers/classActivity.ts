@@ -260,7 +260,7 @@ export const classActivityRouter = createTRPCRouter({
         create: {
           user: {
             connect: {
-              id: ctx.session.user.id,
+              id: input.userId,
             },
           },
           activity: {
