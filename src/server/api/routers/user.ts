@@ -1,4 +1,5 @@
 import { Role, type PrismaClient, type PrismaPromise } from "@prisma/client";
+import { isNil } from "lodash";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -83,6 +84,32 @@ export const userRouter = createTRPCRouter({
         data: {
           name: input.name,
           image: input.image,
+        },
+      });
+    }),
+
+  getUser: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_volunteer_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以查看其他人的資料");
+
+      return await ctx.db.user.findUnique({
+        select: {
+          id: true,
+          name: true,
+          roles: true,
+        },
+        where: {
+          id: input.userId ?? ctx.session.user.id,
         },
       });
     }),

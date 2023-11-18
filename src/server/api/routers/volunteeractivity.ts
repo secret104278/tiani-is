@@ -1,4 +1,8 @@
-import { VolunteerActivityCheckRecordType, type Prisma } from "@prisma/client";
+import {
+  PrismaClient,
+  VolunteerActivityCheckRecordType,
+  type Prisma,
+} from "@prisma/client";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
 
@@ -14,6 +18,22 @@ import {
   getDistance,
 } from "~/utils/ui";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+function getCasualCheckHistories(db: PrismaClient, userId: string) {
+  return db.casualCheckRecord.findMany({
+    select: {
+      id: true,
+      checkInAt: true,
+      checkOutAt: true,
+    },
+    where: {
+      userId: userId,
+    },
+    orderBy: {
+      checkInAt: "desc",
+    },
+  });
+}
 
 export const volunteerActivityRouter = createTRPCRouter({
   createActivity: protectedProcedure
@@ -607,6 +627,26 @@ export const volunteerActivityRouter = createTRPCRouter({
       });
     }),
 
+  getCasualCheckHistories: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_volunteer_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以查看其他人的工時");
+
+      return await getCasualCheckHistories(
+        ctx.db,
+        input.userId ?? ctx.session.user.id,
+      );
+    }),
+
   getWorkingStats: protectedProcedure
     .input(
       z.object({
@@ -642,25 +682,9 @@ export const volunteerActivityRouter = createTRPCRouter({
         `;
       }
 
-      async function getCasualCheckHistories() {
-        return ctx.db.casualCheckRecord.findMany({
-          select: {
-            id: true,
-            checkInAt: true,
-            checkOutAt: true,
-          },
-          where: {
-            userId: input.userId ?? ctx.session.user.id,
-          },
-          orderBy: {
-            checkInAt: "desc",
-          },
-        });
-      }
-
       const [activityCheckHistories, casualCheckHistories] = await Promise.all([
         getActivityCheckHistories(),
-        getCasualCheckHistories(),
+        getCasualCheckHistories(ctx.db, input.userId ?? ctx.session.user.id),
       ]);
 
       const activityWorkingHours = sum(
