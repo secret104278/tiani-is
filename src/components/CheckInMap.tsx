@@ -14,10 +14,13 @@ L.Marker.prototype.options.icon = L.icon({
 export default function CheckInMap({ children }: { children?: ReactNode }) {
   return (
     <MapContainer center={TIANI_GPS_CENTERS[0]} zoom={16} className="flex-grow">
-      <Circle
-        center={TIANI_GPS_CENTERS[0]!}
-        radius={TIANI_GPS_RADIUS_KM * 1000}
-      />
+      {TIANI_GPS_CENTERS.map((center, index) => (
+        <Circle
+          key={index}
+          center={center}
+          radius={TIANI_GPS_RADIUS_KM * 1000}
+        />
+      ))}
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

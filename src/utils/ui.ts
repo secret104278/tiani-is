@@ -94,14 +94,14 @@ export const CLASS_ACTIVITY_LOCATION_MAP = new Map<
     "燕巢天宏佛堂",
     {
       address: "高雄市燕巢區尖山里後荷巷28號",
-      gps: [22.820083514588433, 120.37404664428475],
+      gps: [22.823402, 120.369879],
     },
   ],
   [
     "燕巢何氏佛堂",
     {
       address: "高雄市燕巢區尖山里後荷巷28號",
-      gps: [22.820083514588433, 120.37404664428475],
+      gps: [22.823402, 120.369879],
     },
   ],
 ]);
@@ -180,7 +180,7 @@ export const TIANI_GPS_CENTERS: [number, number][] = [
   [25.005224, 121.557164], // 文山
 ];
 
-export const TIANI_GPS_RADIUS_KM = 0.5;
+export const TIANI_GPS_RADIUS_KM = 1.0;
 
 export function getDistance(
   lat1: number,
