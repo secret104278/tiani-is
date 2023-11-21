@@ -135,7 +135,7 @@ model VolunteerActivityCheckRecord {
     activity   VolunteerActivity @relation(fields: [activityId], references: [id])
     activityId Int
 
-    checkInAt  DateTime?
+    checkInAt  DateTime  @default(now())
     checkOutAt DateTime?
 
     checkInLatitude   Float?
@@ -156,8 +156,10 @@ model CasualCheckRecord {
     checkInAt  DateTime  @default(now())
     checkOutAt DateTime?
 
-    latitude  Float?
-    longitude Float?
+    checkInLatitude   Float?
+    checkInLongitude  Float?
+    checkOutLatitude  Float?
+    checkOutLongitude Float?
 
     @@index([userId, checkInAt])
 }
