@@ -17,18 +17,18 @@ export interface OGMetaProps {
 }
 
 export interface CheckInHistory {
-  checkinat: Date;
-  checkoutat: Date;
+  checkInAt: Date;
+  checkOutAt: Date;
   activityId: number;
   title: string;
   startDateTime: Date;
 }
 
 export interface CheckRecord {
-  checkinat?: Date;
-  checkoutat?: Date;
+  checkInAt?: Date;
+  checkOutAt?: Date;
   userName: string;
   userId: string;
   activityId: number;
-  photo?: string;
+  // photo?: string;
 }

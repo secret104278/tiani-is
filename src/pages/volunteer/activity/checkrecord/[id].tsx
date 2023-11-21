@@ -49,8 +49,8 @@ export default function VolunteerActivityCheckRecordPage() {
         userName={modifyRecord?.userName ?? ""}
         userId={modifyRecord?.userId ?? ""}
         activityId={activity.id}
-        defaultCheckInAt={modifyRecord?.checkinat}
-        defaultCheckOutAt={modifyRecord?.checkoutat}
+        defaultCheckInAt={modifyRecord?.checkInAt}
+        defaultCheckOutAt={modifyRecord?.checkOutAt}
       />
       <table className="table table-sm">
         <thead>
@@ -66,20 +66,20 @@ export default function VolunteerActivityCheckRecordPage() {
             <tr key={record.userId}>
               <td>{record.userName}</td>
               <td>
-                {record.checkinat && (
+                {record.checkInAt && (
                   <>
-                    {record.checkinat.toLocaleDateString()}
+                    {record.checkInAt.toLocaleDateString()}
                     <br />
-                    {record.checkinat.toLocaleTimeString()}
+                    {record.checkInAt.toLocaleTimeString()}
                   </>
                 )}
               </td>
               <td>
-                {record.checkoutat && (
+                {record.checkOutAt && (
                   <>
-                    {record.checkoutat.toLocaleDateString()}
+                    {record.checkOutAt.toLocaleDateString()}
                     <br />
-                    {record.checkoutat.toLocaleTimeString()}
+                    {record.checkOutAt.toLocaleTimeString()}
                   </>
                 )}
               </td>

@@ -35,16 +35,16 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   if (isYideclass) siteTitle = "義德班務網";
   else if (isVolunteer) siteTitle = "天一志工隊";
 
-  return (
-    <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content text-center">
-        <div className="max-w-md">
-          <h1 className="text-5xl font-bold">⚒️ 維護中 ⚒️</h1>
-          <p className="py-6">天一聖道院資訊系統</p>
-        </div>
-      </div>
-    </div>
-  );
+  // return (
+  //   <div className="hero min-h-screen bg-base-200">
+  //     <div className="hero-content text-center">
+  //       <div className="max-w-md">
+  //         <h1 className="text-5xl font-bold">⚒️ 維護中 ⚒️</h1>
+  //         <p className="py-6">天一聖道院資訊系統</p>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 
   return (
     <>

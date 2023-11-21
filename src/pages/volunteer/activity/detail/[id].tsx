@@ -178,7 +178,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse collapse-arrow bg-base-200">
+      <form className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -351,7 +351,8 @@ export default function VolunteerActivityDetailPage() {
 
   const CheckInControl = () => {
     const isCheckIn = isNil(checkInData);
-    const alreadyCheckOut = !isNil(checkInData?.checkout?.checkAt);
+    const alreadyCheckOut =
+      !isNil(checkInData) && !isNil(checkInData.checkOutAt);
 
     const isActivityNotYetForCheck =
       new Date().getTime() <=
@@ -366,8 +367,7 @@ export default function VolunteerActivityDetailPage() {
     if (isActivityClosedForCheck) checkButtonLabel = " （工作已結束）";
     if (alreadyCheckOut)
       checkButtonLabel = ` （已工作 ${formatMilliseconds(
-        checkInData!.checkout!.checkAt.getTime() -
-          checkInData!.checkin.checkAt.getTime(),
+        checkInData.checkOutAt!.getTime() - checkInData.checkOutAt!.getTime(),
       )}）`;
 
     if (isCheckIn) checkButtonLabel = `簽到${checkButtonLabel}`;

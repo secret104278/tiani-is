@@ -1,8 +1,4 @@
-import {
-  PrismaClient,
-  VolunteerActivityCheckRecordType,
-  type Prisma,
-} from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
 
@@ -428,31 +424,14 @@ export const volunteerActivityRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const [checkin, checkout] = await Promise.all([
-        ctx.db.volunteerActivityCheckRecord.findUnique({
-          where: {
-            userId_activityId_type: {
-              userId: ctx.session.user.id,
-              activityId: input.activityId,
-              type: VolunteerActivityCheckRecordType.CHECKIN,
-            },
+      return ctx.db.volunteerActivityCheckRecord.findUnique({
+        where: {
+          userId_activityId: {
+            userId: ctx.session.user.id,
+            activityId: input.activityId,
           },
-        }),
-        ctx.db.volunteerActivityCheckRecord.findUnique({
-          where: {
-            userId_activityId_type: {
-              userId: ctx.session.user.id,
-              activityId: input.activityId,
-              type: VolunteerActivityCheckRecordType.CHECKOUT,
-            },
-          },
-        }),
-      ]);
-
-      if (!isNil(checkin)) {
-        return { checkin, checkout };
-      }
-      return null;
+        },
+      });
     }),
 
   checkInActivity: protectedProcedure
@@ -490,23 +469,18 @@ export const volunteerActivityRouter = createTRPCRouter({
         where: {
           activityId: input.activityId,
           userId: ctx.session.user.id,
-          type: VolunteerActivityCheckRecordType.CHECKIN,
         },
       });
 
       if (checkin) {
         await ctx.db.volunteerActivityCheckRecord.upsert({
           where: {
-            userId_activityId_type: {
-              userId: ctx.session.user.id,
-              activityId: input.activityId,
-              type: VolunteerActivityCheckRecordType.CHECKOUT,
-            },
+            id: checkin.id,
           },
           update: {
-            checkAt: now,
-            latitude: input.latitude,
-            longitude: input.longitude,
+            checkOutAt: now,
+            checkOutLatitude: input.latitude,
+            checkOutLongitude: input.longitude,
           },
           create: {
             user: {
@@ -519,10 +493,10 @@ export const volunteerActivityRouter = createTRPCRouter({
                 id: input.activityId,
               },
             },
-            type: VolunteerActivityCheckRecordType.CHECKOUT,
-            checkAt: now,
-            latitude: input.latitude,
-            longitude: input.longitude,
+
+            checkOutAt: now,
+            checkOutLatitude: input.latitude,
+            checkOutLongitude: input.longitude,
           },
         });
       } else {
@@ -538,10 +512,9 @@ export const volunteerActivityRouter = createTRPCRouter({
                 id: input.activityId,
               },
             },
-            type: VolunteerActivityCheckRecordType.CHECKIN,
-            checkAt: now,
-            latitude: input.latitude,
-            longitude: input.longitude,
+            checkInAt: now,
+            checkInLatitude: input.latitude,
+            checkInLongitude: input.longitude,
           },
         });
       }
@@ -664,19 +637,16 @@ export const volunteerActivityRouter = createTRPCRouter({
       function getActivityCheckHistories() {
         return ctx.db.$queryRaw<CheckInHistory[]>`
         SELECT
-          r1. "activityId",
-          r1. "checkAt" AS checkOutAt,
-          r2. "checkAt" AS checkInAt,
+          vacr. "activityId",
+          vacr. "checkOutAt",
+          vacr. "checkInAt",
           va. "title",
           va. "startDateTime"
         FROM
-          "VolunteerActivityCheckRecord" AS r1
-          JOIN "VolunteerActivityCheckRecord" AS r2 ON r1. "userId" = r2. "userId"
-            AND r1. "activityId" = r2. "activityId"
-            AND r1. "type" = 'CHECKOUT'
-            AND r2. "type" = 'CHECKIN'
-          JOIN "VolunteerActivity" AS va ON r1. "activityId" = va.id
-          WHERE r1. "userId" = ${input.userId ?? ctx.session.user.id}
+          "VolunteerActivityCheckRecord" AS vacr
+          JOIN "VolunteerActivity" AS va ON vacr. "activityId" = va.id
+        WHERE
+          vacr. "userId" = ${input.userId ?? ctx.session.user.id}
         ORDER BY
           va. "startDateTime" DESC;
         `;
@@ -690,7 +660,7 @@ export const volunteerActivityRouter = createTRPCRouter({
       const activityWorkingHours = sum(
         activityCheckHistories.map(
           (record) =>
-            (record.checkoutat.getTime() - record.checkinat.getTime()) /
+            (record.checkOutAt.getTime() - record.checkInAt.getTime()) /
             1000 /
             60 /
             60,
@@ -735,12 +705,11 @@ export const volunteerActivityRouter = createTRPCRouter({
       if (!ctx.session.user.role.is_volunteer_admin)
         throw new Error("只有管理員可以修改打卡紀錄");
 
-      const upsertCheckIn = ctx.db.volunteerActivityCheckRecord.upsert({
+      await ctx.db.volunteerActivityCheckRecord.upsert({
         where: {
-          userId_activityId_type: {
+          userId_activityId: {
             userId: input.userId,
             activityId: input.activityId,
-            type: VolunteerActivityCheckRecordType.CHECKIN,
           },
         },
         create: {
@@ -754,42 +723,15 @@ export const volunteerActivityRouter = createTRPCRouter({
               id: input.activityId,
             },
           },
-          type: VolunteerActivityCheckRecordType.CHECKIN,
-          checkAt: input.checkInAt,
+
+          checkInAt: input.checkInAt,
+          checkOutAt: input.checkOutAt,
         },
         update: {
-          checkAt: input.checkInAt,
+          checkInAt: input.checkInAt,
+          checkOutAt: input.checkOutAt,
         },
       });
-
-      const upsertCheckOut = ctx.db.volunteerActivityCheckRecord.upsert({
-        where: {
-          userId_activityId_type: {
-            userId: input.userId,
-            activityId: input.activityId,
-            type: VolunteerActivityCheckRecordType.CHECKOUT,
-          },
-        },
-        create: {
-          user: {
-            connect: {
-              id: input.userId,
-            },
-          },
-          activity: {
-            connect: {
-              id: input.activityId,
-            },
-          },
-          type: VolunteerActivityCheckRecordType.CHECKOUT,
-          checkAt: input.checkOutAt,
-        },
-        update: {
-          checkAt: input.checkOutAt,
-        },
-      });
-
-      await ctx.db.$transaction([upsertCheckIn, upsertCheckOut]);
     }),
 
   getActivityCheckRecords: protectedProcedure
@@ -803,18 +745,13 @@ export const volunteerActivityRouter = createTRPCRouter({
         SELECT
           pva. "A" AS "userId",
           pva. "B" AS "activityId",
-          r1. "checkAt" AS checkOutAt,
-          r2. "checkAt" AS checkInAt,
-          name AS "userName",
-          image
+          vacr. "checkInAt",
+          vacr. "checkOutAt",
+          name AS "userName"
         FROM
           "_ParticipatedVolunteerActivites" AS pva
-          LEFT JOIN "VolunteerActivityCheckRecord" AS r1 ON r1. "userId" = pva. "A"
-            AND r1. "activityId" = pva. "B"
-            AND r1. "type" = 'CHECKOUT'
-          LEFT JOIN "VolunteerActivityCheckRecord" AS r2 ON r2. "userId" = pva. "A"
-            AND r2. "activityId" = pva. "B"
-            AND r2. "type" = 'CHECKIN'
+          LEFT JOIN "VolunteerActivityCheckRecord" AS vacr ON vacr. "userId" = pva. "A"
+            AND vacr. "activityId" = pva. "B"
           JOIN "User" ON pva. "A" = "User"."id"
         WHERE
           pva. "B" = ${input.activityId};
