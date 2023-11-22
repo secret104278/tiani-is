@@ -1,18 +1,19 @@
 import { isFinite, isNumber, round } from "lodash";
-import { useRouter } from "next/router";
 import type { ForwardedRef } from "react";
 import { forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { api } from "~/utils/api";
 import { getDateTimeString } from "~/utils/ui";
 import ReactiveButton from "./ReactiveButton";
 
 export interface ModifyCheckRecordDialogProps {
   userName: string;
-  userId: string;
-  activityId: number;
+
   defaultCheckInAt?: Date;
   defaultCheckOutAt?: Date;
+
+  onConfirm?: (checkInAt: Date, checkOutAt: Date) => void;
+  isLoading?: boolean;
+  error?: string;
 }
 
 interface ModifyCheckRecordDialogForm {
@@ -26,8 +27,6 @@ function ModifyCheckRecordDialogInner(
   props: ModifyCheckRecordDialogProps,
   ref: ForwardedRef<HTMLDialogElement>,
 ) {
-  const router = useRouter();
-
   const { register, handleSubmit, setValue, watch } =
     useForm<ModifyCheckRecordDialogForm>({ mode: "all" });
 
@@ -98,14 +97,6 @@ function ModifyCheckRecordDialogInner(
     );
   }, [props.defaultCheckInAt, props.defaultCheckOutAt, setValue]);
 
-  const {
-    mutate: modifyActivityCheckRecord,
-    isLoading: modifyActivityCheckRecordIsLoading,
-    error: modifyActivityCheckRecordError,
-  } = api.volunteerActivity.modifyActivityCheckRecord.useMutation({
-    onSuccess: () => router.reload(),
-  });
-
   return (
     <dialog ref={ref} className="modal">
       <div className="modal-box">
@@ -153,16 +144,15 @@ function ModifyCheckRecordDialogInner(
             <ReactiveButton
               className="btn btn-primary"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={handleSubmit((data) =>
-                modifyActivityCheckRecord({
-                  activityId: props.activityId,
-                  userId: props.userId,
-                  checkInAt: data.checkInAt as Date,
-                  checkOutAt: data.checkOutAt as Date,
-                }),
+              onClick={handleSubmit(
+                (data) =>
+                  props.onConfirm?.(
+                    data.checkInAt as Date,
+                    data.checkOutAt as Date,
+                  ),
               )}
-              loading={modifyActivityCheckRecordIsLoading}
-              error={modifyActivityCheckRecordError?.message}
+              loading={props.isLoading}
+              error={props.error}
             >
               確認
             </ReactiveButton>

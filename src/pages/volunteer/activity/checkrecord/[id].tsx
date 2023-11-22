@@ -21,15 +21,29 @@ export default function VolunteerActivityCheckRecordPage() {
   );
   const { activity } = data ?? {};
 
-  const { data: checkRecords, isLoading: isLoadingCheckRecords } =
-    api.volunteerActivity.getActivityCheckRecords.useQuery({
-      activityId: Number(id),
-    });
+  const {
+    data: checkRecords,
+    isLoading: isLoadingCheckRecords,
+    refetch: refetchCheckRecords,
+  } = api.volunteerActivity.getActivityCheckRecords.useQuery({
+    activityId: Number(id),
+  });
 
   const modifyCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
   const [modifyRecord, setModifyRecord] = useState<CheckRecord | undefined>(
     undefined,
   );
+
+  const {
+    mutate: modifyActivityCheckRecord,
+    isLoading: modifyActivityCheckRecordIsLoading,
+    error: modifyActivityCheckRecordError,
+  } = api.volunteerActivity.modifyActivityCheckRecord.useMutation({
+    onSuccess: () => {
+      void refetchCheckRecords();
+      modifyCheckRecordDialogRef.current?.close();
+    },
+  });
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading || isLoadingCheckRecords)
@@ -47,10 +61,18 @@ export default function VolunteerActivityCheckRecordPage() {
       <ModifyCheckRecordDialog
         ref={modifyCheckRecordDialogRef}
         userName={modifyRecord?.userName ?? ""}
-        userId={modifyRecord?.userId ?? ""}
-        activityId={activity.id}
         defaultCheckInAt={modifyRecord?.checkInAt}
         defaultCheckOutAt={modifyRecord?.checkOutAt}
+        onConfirm={(checkInAt, checkOutAt) => {
+          modifyActivityCheckRecord({
+            activityId: activity.id,
+            userId: modifyRecord?.userId ?? "",
+            checkInAt: checkInAt,
+            checkOutAt: checkOutAt,
+          });
+        }}
+        isLoading={modifyActivityCheckRecordIsLoading}
+        error={modifyActivityCheckRecordError?.message}
       />
       <table className="table table-sm">
         <thead>

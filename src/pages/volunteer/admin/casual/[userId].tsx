@@ -1,3 +1,4 @@
+import { PencilSquareIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -54,6 +55,17 @@ export default function AdminCasualUserEdit() {
                 <td>{history.checkInAt.toLocaleDateString()}</td>
                 <td>{history.checkInAt.toLocaleTimeString()}</td>
                 <td>{history.checkOutAt?.toLocaleTimeString()}</td>
+                <td>
+                  <button
+                    className="btn btn-sm"
+                    // onClick={() => {
+                    //   setModifyRecord(record);
+                    //   modifyCheckRecordDialogRef.current?.showModal();
+                    // }}
+                  >
+                    <PencilSquareIcon className="h-4 w-4" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
