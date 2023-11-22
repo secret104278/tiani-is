@@ -1,13 +1,23 @@
-import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { PencilSquareIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
+import { ModifyCheckRecordDialog } from "~/components/ModifyCheckRecordDialog";
+import ReactiveButton from "~/components/ReactiveButton";
 import { api } from "~/utils/api";
 
 export default function AdminCasualUserEdit() {
   const router = useRouter();
   const { userId } = router.query;
+
+  const modifyCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
+  const [modifyRecord, setModifyRecord] = useState<
+    { id: number; checkInAt: Date; checkOutAt: Date | null } | undefined
+  >(undefined);
+
+  const manualCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
 
   const {
     data: user,
@@ -19,8 +29,31 @@ export default function AdminCasualUserEdit() {
     data: casualCheckHistories,
     isLoading: casualCheckHistoriesIsLoading,
     error: casualCheckHistoriesError,
+    refetch: refetchCasualCheckHistories,
   } = api.volunteerActivity.getCasualCheckHistories.useQuery({
     userId: String(userId),
+  });
+
+  const {
+    mutate: modifyCasualCheckRecord,
+    isLoading: modifyCasualCheckRecordIsLoading,
+    error: modifyCasualCheckRecordError,
+  } = api.volunteerActivity.modifyCasualCheckRecord.useMutation({
+    onSuccess: () => {
+      void refetchCasualCheckHistories();
+      modifyCheckRecordDialogRef.current?.close();
+    },
+  });
+
+  const {
+    mutate: manualCasualCheckRecord,
+    isLoading: manualCasualCheckRecordIsLoading,
+    error: manualCasualCheckRecordError,
+  } = api.volunteerActivity.manualCasualCheckRecord.useMutation({
+    onSuccess: () => {
+      void refetchCasualCheckHistories();
+      manualCheckRecordDialogRef.current?.close();
+    },
   });
 
   if (casualCheckHistoriesIsLoading || userIsLoading)
@@ -39,6 +72,46 @@ export default function AdminCasualUserEdit() {
       <article className="prose">
         <h1>{user.name}</h1>
       </article>
+      <div className="flex justify-end">
+        <ReactiveButton
+          className="btn"
+          onClick={() => manualCheckRecordDialogRef.current?.showModal()}
+        >
+          <PlusIcon className="h-4 w-4" />
+          手動打卡
+        </ReactiveButton>
+        <ModifyCheckRecordDialog
+          ref={manualCheckRecordDialogRef}
+          userName={user.name ?? ""}
+          defaultCheckInAt={new Date()}
+          onConfirm={(checkInAt, checkOutAt) => {
+            manualCasualCheckRecord({
+              userId: user.id,
+              checkInAt: checkInAt,
+              checkOutAt: checkOutAt,
+            });
+          }}
+          isLoading={manualCasualCheckRecordIsLoading}
+          error={manualCasualCheckRecordError?.message}
+        />
+      </div>
+      <ModifyCheckRecordDialog
+        ref={modifyCheckRecordDialogRef}
+        userName={user.name ?? ""}
+        defaultCheckInAt={modifyRecord?.checkInAt}
+        defaultCheckOutAt={modifyRecord?.checkOutAt ?? undefined}
+        onConfirm={(checkInAt, checkOutAt) => {
+          modifyRecord &&
+            modifyCasualCheckRecord({
+              id: modifyRecord.id,
+              userId: user.id,
+              checkInAt: checkInAt,
+              checkOutAt: checkOutAt,
+            });
+        }}
+        isLoading={modifyCasualCheckRecordIsLoading}
+        error={modifyCasualCheckRecordError?.message}
+      />
       <div className="overflow-x-auto">
         <table className="table table-sm">
           <thead>
@@ -58,10 +131,10 @@ export default function AdminCasualUserEdit() {
                 <td>
                   <button
                     className="btn btn-sm"
-                    // onClick={() => {
-                    //   setModifyRecord(record);
-                    //   modifyCheckRecordDialogRef.current?.showModal();
-                    // }}
+                    onClick={() => {
+                      setModifyRecord(history);
+                      modifyCheckRecordDialogRef.current?.showModal();
+                    }}
                   >
                     <PencilSquareIcon className="h-4 w-4" />
                   </button>

@@ -734,6 +734,79 @@ export const volunteerActivityRouter = createTRPCRouter({
       });
     }),
 
+  modifyCasualCheckRecord: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        userId: z.string(),
+        checkInAt: z.date(),
+        checkOutAt: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_volunteer_admin)
+        throw new Error("只有管理員可以修改打卡紀錄");
+
+      if (input.checkInAt > input.checkOutAt) {
+        throw new Error("簽退時間必須晚於簽到時間");
+      }
+
+      if (input.checkInAt.getTime() == input.checkOutAt.getTime()) {
+        await ctx.db.casualCheckRecord.delete({
+          where: {
+            id: input.id,
+          },
+        });
+        return;
+      }
+
+      await ctx.db.casualCheckRecord.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          user: {
+            connect: {
+              id: input.userId,
+            },
+          },
+
+          checkInAt: input.checkInAt,
+          checkOutAt: input.checkOutAt,
+        },
+      });
+    }),
+
+  manualCasualCheckRecord: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        checkInAt: z.date(),
+        checkOutAt: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_volunteer_admin)
+        throw new Error("只有管理員可以修改打卡紀錄");
+
+      if (input.checkInAt >= input.checkOutAt) {
+        throw new Error("簽退時間必須晚於簽到時間");
+      }
+
+      await ctx.db.casualCheckRecord.create({
+        data: {
+          user: {
+            connect: {
+              id: input.userId,
+            },
+          },
+
+          checkInAt: input.checkInAt,
+          checkOutAt: input.checkOutAt,
+        },
+      });
+    }),
+
   getActivityCheckRecords: protectedProcedure
     .input(
       z.object({
