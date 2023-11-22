@@ -647,6 +647,7 @@ export const volunteerActivityRouter = createTRPCRouter({
           JOIN "VolunteerActivity" AS va ON vacr. "activityId" = va.id
         WHERE
           vacr. "userId" = ${input.userId ?? ctx.session.user.id}
+          AND vacr. "checkOutAt" IS NOT NULL
         ORDER BY
           va. "startDateTime" DESC;
         `;
