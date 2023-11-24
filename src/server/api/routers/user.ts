@@ -1,8 +1,9 @@
 import { Role, type PrismaClient, type PrismaPromise } from "@prisma/client";
-import { isNil } from "lodash";
+import { isEmpty, isNil } from "lodash";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { trimString } from "~/utils/ui";
 
 const handleSetAdmin =
   (userId: string, role: Role, set: boolean) => async (tx: PrismaClient) => {
@@ -84,6 +85,26 @@ export const userRouter = createTRPCRouter({
         data: {
           name: input.name,
           image: input.image,
+        },
+      });
+    }),
+
+  createUser: protectedProcedure
+    .input(
+      z.object({
+        username: z.preprocess(trimString, z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_tiani_admin)
+        throw new Error("只有管理員可以新增帳戶");
+
+      if (isEmpty(input.username)) throw new Error("姓名不可為空");
+
+      return await ctx.db.user.create({
+        data: {
+          name: input.username,
+          roles: [],
         },
       });
     }),

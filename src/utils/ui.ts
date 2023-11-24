@@ -221,3 +221,6 @@ export const getDateTimeString = (date: Date) => {
   const localTime = new Date(date.getTime() + offsetMs);
   return localTime.toISOString().slice(0, 16);
 };
+
+export const trimString = (u: unknown) =>
+  typeof u === "string" ? u.trim() : u;
