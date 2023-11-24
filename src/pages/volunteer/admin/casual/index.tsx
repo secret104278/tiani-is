@@ -1,21 +1,67 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import {
+  endOfMonth,
+  endOfToday,
+  endOfWeek,
+  startOfMonth,
+  startOfToday,
+  startOfWeek,
+} from "date-fns";
 import { includes, isEmpty, sortBy } from "lodash";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AlertWarning } from "~/components/Alert";
 import { api } from "~/utils/api";
 
+type DateRange = "all" | "today" | "thisWeek" | "thisMonth";
+
 export default function AdminCasualUserList() {
+  const [start, setStart] = useState<Date | undefined>(undefined);
+  const [end, setEnd] = useState<Date | undefined>(undefined);
+
   const router = useRouter();
   const {
     data: users,
     isLoading: usersIsLoading,
     error: usersError,
-  } = api.user.getUsers.useQuery({});
+  } = api.volunteerActivity.getUsersByCasual.useQuery({
+    start: start,
+    end: end,
+  });
 
-  const { register, watch } = useForm<{ username: string }>({
+  const { register, watch } = useForm<{
+    username: string;
+    dateRange: DateRange;
+  }>({
+    defaultValues: {
+      dateRange: "all",
+    },
     mode: "all",
   });
+
+  const dateRange = watch("dateRange");
+  useEffect(() => {
+    const today = new Date();
+    switch (dateRange) {
+      case "all":
+        setStart(undefined);
+        setEnd(undefined);
+        break;
+      case "today":
+        setStart(startOfToday());
+        setEnd(endOfToday());
+        break;
+      case "thisWeek":
+        setStart(startOfWeek(today, { weekStartsOn: 1 }));
+        setEnd(endOfWeek(today, { weekStartsOn: 1 }));
+        break;
+      case "thisMonth":
+        setStart(startOfMonth(today));
+        setEnd(endOfMonth(today));
+        break;
+    }
+  }, [dateRange]);
 
   if (usersIsLoading) return <div className="loading" />;
   if (!isEmpty(usersError))
@@ -36,6 +82,15 @@ export default function AdminCasualUserList() {
         className="tiani-input"
         {...register("username")}
       />
+      <select
+        className="select select-bordered w-full"
+        {...register("dateRange")}
+      >
+        <option value="all">全部日期</option>
+        <option value="today">本日</option>
+        <option value="thisWeek">本週</option>
+        <option value="thisMonth">本月</option>
+      </select>
       <div className="divider" />
       <div className="overflow-x-auto">
         <table className="table">

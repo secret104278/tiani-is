@@ -1,4 +1,4 @@
-import { PrismaClient, type Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
 
@@ -830,5 +830,53 @@ export const volunteerActivityRouter = createTRPCRouter({
         WHERE
           pva. "B" = ${input.activityId};
         `;
+    }),
+
+  getUsersByCasual: protectedProcedure
+    .input(
+      z.object({
+        start: z.date().optional(),
+        end: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_volunteer_admin)
+        throw new Error("只有管理員可以查看工時");
+
+      if (isNil(input.start) && isNil(input.end)) {
+        return await ctx.db.user.findMany({
+          select: {
+            id: true,
+            name: true,
+          },
+        });
+      }
+
+      return await ctx.db.$queryRaw<
+        {
+          id: string;
+          name: string;
+        }[]
+      >`
+        SELECT
+          u.id,
+          u.name
+        FROM
+          "User" u
+          JOIN "CasualCheckRecord" c ON u.id = c. "userId"
+        WHERE
+          ${
+            isNil(input.start)
+              ? Prisma.sql`true`
+              : Prisma.sql`c. "checkInAt" >= ${input.start}`
+          } AND ${
+            isNil(input.end)
+              ? Prisma.sql`true`
+              : Prisma.sql`c. "checkInAt" <= ${input.end}`
+          }
+        GROUP BY
+          u.id,
+          u.name;
+      `;
     }),
 });
