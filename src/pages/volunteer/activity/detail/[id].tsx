@@ -13,27 +13,21 @@ import {
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { AlertWarning } from "~/components/Alert";
-import { ConfirmDialog } from "~/components/ConfirmDialog";
+import VolunteerActivityCheckInDialogContent from "~/components/CheckInDialog/VolunteerActivityCheckInDialogContent";
 import LineImage from "~/components/LineImage";
 import ReactiveButton from "~/components/ReactiveButton";
+import ConfirmDialog from "~/components/utils/ConfirmDialog";
+import Dialog from "~/components/utils/Dialog";
 import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
 
 import { formatMilliseconds, getActivityStatusText } from "~/utils/ui";
-
-const ActivityCheckInDialog = dynamic(
-  () => import("~/components/ActivityCheckInDialog"),
-  {
-    ssr: false,
-  },
-);
 
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
@@ -141,10 +135,9 @@ export default function VolunteerActivityDetailPage() {
     onSuccess: () => refetch(),
   });
 
-  const deleteDialogRef = useRef<HTMLDialogElement>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
-
-  const leaveDialogRef = useRef<HTMLDialogElement>(null);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
@@ -274,17 +267,18 @@ export default function VolunteerActivityDetailPage() {
           className="btn btn-warning"
           loading={deleteActivityIsLoading}
           isError={deleteActivityIsError}
-          onClick={() => void deleteDialogRef.current?.showModal()}
+          onClick={() => setDeleteDialogOpen(true)}
         >
           <TrashIcon className="h-4 w-4" />
           撤銷
         </ReactiveButton>
         <ConfirmDialog
+          show={deleteDialogOpen}
+          closeModal={() => setDeleteDialogOpen(false)}
           title="確認撤銷"
           content="工作撤銷後就無法復原囉！"
           confirmText="撤銷"
           onConfirm={() => deleteActivity({ id: activity.id })}
-          ref={deleteDialogRef}
         />
       </div>
       <ParticipantsCollapse />
@@ -312,7 +306,7 @@ export default function VolunteerActivityDetailPage() {
         <>
           <ReactiveButton
             className="btn btn-secondary"
-            onClick={() => void leaveDialogRef.current?.showModal()}
+            onClick={() => setLeaveDialogOpen(true)}
             loading={leaveActivityIsLoading}
             isError={leaveActivityIsError}
           >
@@ -320,10 +314,11 @@ export default function VolunteerActivityDetailPage() {
             取消報名
           </ReactiveButton>
           <ConfirmDialog
+            show={leaveDialogOpen}
+            closeModal={() => setLeaveDialogOpen(false)}
             title="取消報名"
             content="確定要取消報名嗎？"
             onConfirm={() => leaveActivity({ activityId: activity.id })}
-            ref={leaveDialogRef}
           />
         </>
       );
@@ -388,12 +383,16 @@ export default function VolunteerActivityDetailPage() {
             )}
             {checkButtonLabel}
           </ReactiveButton>
-          <ActivityCheckInDialog
-            activityId={activity.id}
-            open={checkInDialogOpen}
-            onClose={() => setCheckInDialogOpen(false)}
-            onCheckInSuccess={() => void refetchCheckInData()}
-          />
+          <Dialog
+            title="定位打卡"
+            show={checkInDialogOpen}
+            closeModal={() => setCheckInDialogOpen(false)}
+          >
+            <VolunteerActivityCheckInDialogContent
+              activityId={activity.id}
+              onCheckInSuccess={() => void refetchCheckInData()}
+            />
+          </Dialog>
         </>
       );
   };

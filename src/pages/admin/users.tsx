@@ -6,11 +6,11 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AlertWarning } from "~/components/Alert";
-import Dialog from "~/components/Dialog";
 import ReactiveButton from "~/components/ReactiveButton";
+import Dialog from "~/components/utils/Dialog";
 import { api } from "~/utils/api";
 
-function CreateUserDialog() {
+function CreateUserDialogContent() {
   const router = useRouter();
 
   const {
@@ -23,7 +23,6 @@ function CreateUserDialog() {
 
   return (
     <>
-      <h3 className="text-lg font-bold">新增帳號</h3>
       <AlertWarning>
         新增帳號僅限用於道親沒有 Line 帳號也沒有使用 3C
         產品，且短期內也不會嘗試使用。
@@ -105,10 +104,11 @@ export default function AdminUsersPage() {
           新增帳號
         </ReactiveButton>
         <Dialog
-          open={createUserDialogOpen}
-          onClose={() => setCreateUserDialogOpen(false)}
+          title="新增帳號"
+          show={createUserDialogOpen}
+          closeModal={() => setCreateUserDialogOpen(false)}
         >
-          <CreateUserDialog />
+          <CreateUserDialogContent />
         </Dialog>
       </div>
       <div className="overflow-x-auto">

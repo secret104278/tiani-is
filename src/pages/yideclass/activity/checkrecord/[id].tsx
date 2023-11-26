@@ -10,8 +10,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
-import Dialog from "~/components/Dialog";
 import ReactiveButton from "~/components/ReactiveButton";
+import Dialog from "~/components/utils/Dialog";
 import { api } from "~/utils/api";
 
 function ManualClassActivityCheckRecordDialog({
@@ -54,7 +54,6 @@ function ManualClassActivityCheckRecordDialog({
 
   return (
     <>
-      <h3 className="text-lg font-bold">手動打卡</h3>
       <form className="flex flex-col space-y-4">
         <div>
           <label className="label">
@@ -192,8 +191,9 @@ export default function ClassActivityCheckRecordPage() {
             手動打卡
           </ReactiveButton>
           <Dialog
-            open={checkInDialogOpen}
-            onClose={() => setCheckInDialogOpen(false)}
+            title="手動打卡"
+            show={checkInDialogOpen}
+            closeModal={() => setCheckInDialogOpen(false)}
           >
             <ManualClassActivityCheckRecordDialog activityId={activity.id} />
           </Dialog>
