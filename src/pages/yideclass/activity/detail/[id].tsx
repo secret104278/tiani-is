@@ -10,26 +10,20 @@ import {
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { AlertWarning } from "~/components/Alert";
-import { ConfirmDialog } from "~/components/ConfirmDialog";
+import ClassActivityCheckInDialogContent from "~/components/CheckInDialog/ClassActivityCheckInDialogContent";
 import ReactiveButton from "~/components/ReactiveButton";
+import ConfirmDialog from "~/components/utils/ConfirmDialog";
+import Dialog from "~/components/utils/Dialog";
 import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
 
 import { CLASS_ACTIVITY_LOCATION_MAP, getActivityStatusText } from "~/utils/ui";
-
-const ClassActivityCheckInDialog = dynamic(
-  () => import("~/components/ClassActivityCheckInDialog"),
-  {
-    ssr: false,
-  },
-);
 
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
@@ -93,8 +87,8 @@ export default function ClassActivityDetailPage() {
     onSuccess: () => router.push(`/${site}`),
   });
 
-  const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
@@ -150,17 +144,18 @@ export default function ClassActivityDetailPage() {
           className="btn btn-warning"
           loading={deleteActivityIsLoading}
           isError={deleteActivityIsError}
-          onClick={() => void deleteDialogRef.current?.showModal()}
+          onClick={() => setDeleteDialogOpen(true)}
         >
           <TrashIcon className="h-4 w-4" />
           撤銷
         </ReactiveButton>
         <ConfirmDialog
+          show={deleteDialogOpen}
+          closeModal={() => setDeleteDialogOpen(false)}
           title="確認撤銷"
           content="課程撤銷後就無法復原囉！"
           confirmText="撤銷"
           onConfirm={() => deleteActivity({ id: activity.id })}
-          ref={deleteDialogRef}
         />
       </div>
 
@@ -202,12 +197,16 @@ export default function ClassActivityDetailPage() {
           <ArrowDownOnSquareIcon className="h-4 w-4" />
           {checkButtonLabel}
         </ReactiveButton>
-        <ClassActivityCheckInDialog
-          activityId={activity.id}
-          open={checkInDialogOpen}
-          onClose={() => setCheckInDialogOpen(false)}
-          onCheckInSuccess={() => void refetchCheckInData()}
-        />
+        <Dialog
+          title="定位打卡"
+          show={checkInDialogOpen}
+          closeModal={() => setCheckInDialogOpen(false)}
+        >
+          <ClassActivityCheckInDialogContent
+            activityId={activity.id}
+            onCheckInSuccess={() => void refetchCheckInData()}
+          />
+        </Dialog>
       </>
     );
   };

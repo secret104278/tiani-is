@@ -1,4 +1,5 @@
 docker run -d \
+	--restart=always \
 	--name tiani-is-postgres \
 	-e POSTGRES_PASSWORD=mysecretpassword \
 	-e PGDATA=/var/lib/postgresql/data/pgdata \

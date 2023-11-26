@@ -1,15 +1,9 @@
 import { ArrowDownOnSquareIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
-import dynamic from "next/dynamic";
 import { useState } from "react";
 import { api } from "~/utils/api";
-
-const CasualCheckInDialog = dynamic(
-  () => import("~/components/CasualCheckInDialog"),
-  {
-    ssr: false,
-  },
-);
+import CasualCheckInDialogContent from "./CheckInDialog/CasualCheckInDialogContent";
+import Dialog from "./utils/Dialog";
 
 export function CasualCheckInCard() {
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
@@ -52,11 +46,15 @@ export function CasualCheckInCard() {
           </div>
         </div>
       </div>
-      <CasualCheckInDialog
-        open={checkInDialogOpen}
-        onClose={() => setCheckInDialogOpen(false)}
-        onCheckInSuccess={() => void refetchLatestCasualCheckIn()}
-      />
+      <Dialog
+        title="定位打卡"
+        show={checkInDialogOpen}
+        closeModal={() => setCheckInDialogOpen(false)}
+      >
+        <CasualCheckInDialogContent
+          onCheckInSuccess={() => void refetchLatestCasualCheckIn()}
+        />
+      </Dialog>
     </div>
   );
 }
