@@ -1,4 +1,5 @@
 import type { VolunteerActivityStatus } from "@prisma/client";
+import { addHours } from "date-fns";
 import type { VolunteerActivityTopics } from "./types";
 
 export const getActivityStatusText = (status: VolunteerActivityStatus) => {
@@ -224,3 +225,21 @@ export const getDateTimeString = (date: Date) => {
 
 export const trimString = (u: unknown) =>
   typeof u === "string" ? u.trim() : u;
+
+export const activityIsStarted = (startDateTime: Date, now?: Date) => {
+  return addHours(startDateTime, -1) <= (now ?? new Date());
+};
+
+export const activityIsEnded = (endDateTime: Date, now?: Date) => {
+  return addHours(endDateTime, 1) <= (now ?? new Date());
+};
+
+export const activityIsOnGoing = (
+  startDateTime: Date,
+  endDateTime: Date,
+  now?: Date,
+) => {
+  return (
+    activityIsStarted(startDateTime, now) && !activityIsEnded(endDateTime, now)
+  );
+};

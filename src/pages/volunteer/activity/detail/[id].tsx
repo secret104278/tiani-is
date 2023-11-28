@@ -27,7 +27,12 @@ import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
 
-import { formatMilliseconds, getActivityStatusText } from "~/utils/ui";
+import {
+  activityIsEnded,
+  activityIsStarted,
+  formatMilliseconds,
+  getActivityStatusText,
+} from "~/utils/ui";
 
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
@@ -147,7 +152,7 @@ export default function VolunteerActivityDetailPage() {
     session?.user.role.is_volunteer_admin ??
     session?.user.id == activity.organiserId;
 
-  const isEnded = activity.endDateTime <= new Date();
+  const isEnded = activityIsEnded(activity.endDateTime);
 
   const ShareLineBtn = () => {
     return (
@@ -349,16 +354,12 @@ export default function VolunteerActivityDetailPage() {
     const alreadyCheckOut =
       !isNil(checkInData) && !isNil(checkInData.checkOutAt);
 
-    const isActivityNotYetForCheck =
-      new Date().getTime() <=
-      activity.startDateTime.getTime() - 2 * 60 * 60 * 1000;
-    const isActivityClosedForCheck =
-      new Date().getTime() >=
-      activity.endDateTime.getTime() + 2 * 60 * 60 * 1000;
+    const isActivityNotYetForCheck = !activityIsStarted(activity.startDateTime);
+    const isActivityClosedForCheck = activityIsEnded(activity.endDateTime);
 
     let checkButtonLabel = "";
     if (isActivityNotYetForCheck)
-      checkButtonLabel = " （工作開始前 2 小時開放打卡）";
+      checkButtonLabel = " （工作開始前 1 小時開放打卡）";
     if (isActivityClosedForCheck) checkButtonLabel = " （工作已結束）";
     if (alreadyCheckOut)
       checkButtonLabel = ` （已工作 ${formatMilliseconds(

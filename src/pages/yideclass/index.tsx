@@ -7,6 +7,7 @@ import { ActivityCard } from "~/components/ActivityCard";
 import { HourStats } from "~/components/HourStats";
 import { Loading } from "~/components/Loading";
 import { api } from "~/utils/api";
+import { activityIsEnded } from "~/utils/ui";
 
 export default function YiDeClassHome() {
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
@@ -27,10 +28,10 @@ export default function YiDeClassHome() {
     api.classActivity.getWorkingStats.useQuery({});
 
   const onGoingActivities = activities?.filter(
-    (activity) => activity.endDateTime > new Date(),
+    (activity) => !activityIsEnded(activity.endDateTime),
   );
-  const endedActivities = activities?.filter(
-    (activity) => activity.endDateTime <= new Date(),
+  const endedActivities = activities?.filter((activity) =>
+    activityIsEnded(activity.endDateTime),
   );
 
   return (

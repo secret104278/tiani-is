@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { api } from "~/utils/api";
+import { activityIsEnded } from "~/utils/ui";
 import { ActivityCard } from "../../components/ActivityCard";
 import { CasualCheckInCard } from "./../../components/CasualCheckInCard";
 import { HourStats } from "./../../components/HourStats";
@@ -30,10 +31,10 @@ export default function VolunteerHome() {
     api.volunteerActivity.getWorkingStats.useQuery({});
 
   const onGoingActivities = activities?.filter(
-    (activity) => activity.endDateTime > new Date(),
+    (activity) => !activityIsEnded(activity.endDateTime),
   );
-  const endedActivities = activities?.filter(
-    (activity) => activity.endDateTime <= new Date(),
+  const endedActivities = activities?.filter((activity) =>
+    activityIsEnded(activity.endDateTime),
   );
 
   return (

@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   TIANI_GPS_CENTERS,
   TIANI_GPS_RADIUS_KM,
+  activityIsOnGoing,
   getDistance,
 } from "~/utils/ui";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -172,13 +173,9 @@ export const classActivityRouter = createTRPCRouter({
         where: { id: input.activityId },
       });
 
-      const TWO_HOUR = 2 * 60 * 60 * 1000;
       const now = new Date();
       if (
-        now.getUTCMilliseconds() - activity.startDateTime.getUTCMilliseconds() <
-          -TWO_HOUR ||
-        now.getUTCMilliseconds() - activity.endDateTime.getUTCMilliseconds() >
-          TWO_HOUR
+        !activityIsOnGoing(activity.startDateTime, activity.endDateTime, now)
       ) {
         throw new Error("非課程時間，無法簽到");
       }

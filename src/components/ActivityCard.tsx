@@ -2,7 +2,7 @@ import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
 import Link from "next/link";
 import { useSiteContext } from "~/context/SiteContext";
-import { getActivityStatusText } from "~/utils/ui";
+import { getActivityStatusText, toDuration } from "~/utils/ui";
 
 export function ActivityCard({
   activity,
@@ -31,7 +31,7 @@ export function ActivityCard({
         href={`/${site}/activity/detail/${activity.id}`}
         style={{ textDecoration: "none" }}
       >
-        <div className="card card-compact w-full bg-base-200 shadow">
+        <div className="card-compact card w-full bg-base-200 shadow">
           <div className="card-body">
             <h2 className="card-title">{activity.title}</h2>
             <div className="flex items-center">
@@ -83,7 +83,13 @@ export function ActivityCard({
           </div>
           <div className="flex items-center">
             <ClockIcon className="mr-1 h-4 w-4" />
-            <p>結束：{activity.endDateTime.toLocaleString()}</p>
+            <p>
+              預估時數：
+              {toDuration(
+                activity.startDateTime,
+                activity.endDateTime,
+              ).toPrecision(2)}
+            </p>
           </div>
         </div>
       </div>

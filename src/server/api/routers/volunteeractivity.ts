@@ -11,6 +11,7 @@ import type { CheckInHistory, CheckRecord } from "~/utils/types";
 import {
   TIANI_GPS_CENTERS,
   TIANI_GPS_RADIUS_KM,
+  activityIsOnGoing,
   getDistance,
 } from "~/utils/ui";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -447,15 +448,11 @@ export const volunteerActivityRouter = createTRPCRouter({
         where: { id: input.activityId },
       });
 
-      const TWO_HOUR = 2 * 60 * 60 * 1000;
       const now = new Date();
       if (
-        now.getUTCMilliseconds() - activity.startDateTime.getUTCMilliseconds() <
-          -TWO_HOUR ||
-        now.getUTCMilliseconds() - activity.endDateTime.getUTCMilliseconds() >
-          TWO_HOUR
+        !activityIsOnGoing(activity.startDateTime, activity.endDateTime, now)
       ) {
-        throw new Error("非活動時間，無法簽到");
+        throw new Error("非工作時間，無法簽到");
       }
 
       const isOutOfRange = !TIANI_GPS_CENTERS.some(

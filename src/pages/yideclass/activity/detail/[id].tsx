@@ -23,7 +23,12 @@ import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps } from "~/utils/types";
 
-import { CLASS_ACTIVITY_LOCATION_MAP, getActivityStatusText } from "~/utils/ui";
+import {
+  CLASS_ACTIVITY_LOCATION_MAP,
+  activityIsEnded,
+  activityIsStarted,
+  getActivityStatusText,
+} from "~/utils/ui";
 
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
@@ -98,7 +103,7 @@ export default function ClassActivityDetailPage() {
     session?.user.role.is_yideclass_admin ??
     session?.user.id == activity.organiserId;
 
-  const isEnded = activity.endDateTime <= new Date();
+  const isEnded = activityIsEnded(activity.endDateTime);
 
   const ShareLineBtn = () => {
     return (
@@ -172,17 +177,13 @@ export default function ClassActivityDetailPage() {
   const CheckInControl = () => {
     const alreadyCheckIn = !isNil(checkInData);
 
-    const isActivityNotYetForCheck =
-      new Date().getTime() <=
-      activity.startDateTime.getTime() - 2 * 60 * 60 * 1000;
-    const isActivityClosedForCheck =
-      new Date().getTime() >=
-      activity.endDateTime.getTime() + 2 * 60 * 60 * 1000;
+    const isActivityNotYetForCheck = !activityIsStarted(activity.startDateTime);
+    const isActivityClosedForCheck = activityIsEnded(activity.endDateTime);
 
     let checkButtonLabel = "";
     if (alreadyCheckIn) checkButtonLabel = " （已完成簽到）";
     else if (isActivityNotYetForCheck)
-      checkButtonLabel = " （課程開始前 2 小時開放打卡）";
+      checkButtonLabel = " （課程開始前 1 小時開放打卡）";
     else if (isActivityClosedForCheck) checkButtonLabel = " （課程已結束）";
 
     checkButtonLabel = `簽到${checkButtonLabel}`;
