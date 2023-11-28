@@ -31,7 +31,7 @@ export function ActivityCard({
         href={`/${site}/activity/detail/${activity.id}`}
         style={{ textDecoration: "none" }}
       >
-        <div className="card-compact card w-full bg-base-200 shadow">
+        <div className="card card-compact w-full bg-base-200 shadow">
           <div className="card-body">
             <h2 className="card-title">{activity.title}</h2>
             <div className="flex items-center">
@@ -84,7 +84,7 @@ export function ActivityCard({
           <div className="flex items-center">
             <ClockIcon className="mr-1 h-4 w-4" />
             <p>
-              預估時數：
+              {site === "volunteer" ? "預估時數：" : "開班時數："}
               {toDuration(
                 activity.startDateTime,
                 activity.endDateTime,

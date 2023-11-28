@@ -28,6 +28,7 @@ import {
   activityIsEnded,
   activityIsStarted,
   getActivityStatusText,
+  toDuration,
 } from "~/utils/ui";
 
 export const getServerSideProps: GetServerSideProps<{
@@ -254,7 +255,13 @@ export default function ClassActivityDetailPage() {
         </div>
         <div className="flex items-center">
           <ClockIcon className="mr-1 h-4 w-4" />
-          <p>結束：{activity.endDateTime.toLocaleString()}</p>
+          <p>
+            開班時數：
+            {toDuration(
+              activity.startDateTime,
+              activity.endDateTime,
+            ).toPrecision(2)}
+          </p>
         </div>
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
