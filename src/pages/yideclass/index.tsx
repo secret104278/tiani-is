@@ -1,6 +1,7 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
 import Link from "next/link";
+import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ActivityCard } from "~/components/ActivityCard";
 import { HourStats } from "~/components/HourStats";
@@ -8,9 +9,13 @@ import { Loading } from "~/components/Loading";
 import { api } from "~/utils/api";
 
 export default function YiDeClassHome() {
+  const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
+
   const activitiesQuery =
     api.classActivity.getAllActivitiesInfinite.useInfiniteQuery(
-      {},
+      {
+        participatedByMe: filterParticipatedByMe,
+      },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
@@ -48,6 +53,17 @@ export default function YiDeClassHome() {
             建立新簽到單
           </div>
         </Link>
+      </div>
+      <div className="flex flex-row flex-wrap">
+        <label className="label cursor-pointer space-x-2">
+          <span className="label-text">我參加的</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-primary"
+            checked={filterParticipatedByMe}
+            onChange={() => setFilterParticipatedByMe((prev) => !prev)}
+          />
+        </label>
       </div>
       <div>
         {activitiesQuery.isLoading && <Loading />}

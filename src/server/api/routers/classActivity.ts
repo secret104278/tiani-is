@@ -1,3 +1,4 @@
+import { type Prisma } from "@prisma/client";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
 import {
@@ -90,12 +91,22 @@ export const classActivityRouter = createTRPCRouter({
   getAllActivitiesInfinite: protectedProcedure
     .input(
       z.object({
+        participatedByMe: z.boolean().optional(),
+
         limit: z.number().min(1).max(100).default(10),
         cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const filters: Prisma.ClassActivityWhereInput[] = [];
+      if (input.participatedByMe) {
+        filters.push({
+          classActivityCheckIns: { some: { userId: ctx.session.user.id } },
+        });
+      }
+
       const items = await ctx.db.classActivity.findMany({
+        where: filters.length === 0 ? undefined : { OR: filters },
         orderBy: { startDateTime: "desc" },
 
         take: input.limit + 1,
