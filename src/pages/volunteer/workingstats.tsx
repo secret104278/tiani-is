@@ -57,10 +57,10 @@ export default function WorkingStatsPage() {
                 <td>
                   {history.checkInAt.toLocaleDateString()}
                   <br />
-                  {history.checkOutAt.toLocaleTimeString()}
+                  {history.checkInAt.toLocaleTimeString()}
                 </td>
                 <td>
-                  {history.checkInAt.toLocaleDateString()}
+                  {history.checkOutAt.toLocaleDateString()}
                   <br />
                   {history.checkOutAt.toLocaleTimeString()}
                 </td>
