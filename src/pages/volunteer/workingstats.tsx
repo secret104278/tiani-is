@@ -7,9 +7,7 @@ export default function WorkingStatsPage() {
   const router = useRouter();
 
   const { data: workingStats, isLoading: workingStatsIsLoading } =
-    api.volunteerActivity.getWorkingStats.useQuery({
-      userId: "clnr9sf1j0000mn08xrb21rea",
-    });
+    api.volunteerActivity.getWorkingStats.useQuery({});
 
   const [activeTab, setActiveTab] = useState<"all" | "activity" | "casual">(
     "all",

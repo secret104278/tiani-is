@@ -8,6 +8,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { includes, isEmpty, sortBy } from "lodash";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,9 +17,34 @@ import { api } from "~/utils/api";
 
 type DateRange = "all" | "today" | "thisWeek" | "thisMonth";
 
+const getStartAndEnd = (dateRange: DateRange) => {
+  const today = new Date();
+  switch (dateRange) {
+    case "all":
+      return [undefined, undefined];
+    case "today":
+      return [startOfToday(), endOfToday()];
+    case "thisWeek":
+      return [
+        startOfWeek(today, { weekStartsOn: 1 }),
+        endOfWeek(today, { weekStartsOn: 1 }),
+      ];
+    case "thisMonth":
+      return [startOfMonth(today), endOfMonth(today)];
+    default:
+      return [undefined, undefined];
+  }
+};
+
 export default function AdminCasualUserList() {
-  const [start, setStart] = useState<Date | undefined>(undefined);
-  const [end, setEnd] = useState<Date | undefined>(undefined);
+  let dateRange = useSearchParams().get("dateRange") as DateRange;
+  if (!["all", "today", "thisWeek", "thisMonth"].includes(dateRange))
+    dateRange = "all";
+
+  const [defaultStart, defaultEnd] = getStartAndEnd(dateRange);
+
+  const [start, setStart] = useState<Date | undefined>(defaultStart);
+  const [end, setEnd] = useState<Date | undefined>(defaultEnd);
 
   const router = useRouter();
   const {
@@ -30,38 +56,17 @@ export default function AdminCasualUserList() {
     end: end,
   });
 
+  useEffect(() => {
+    const [newStart, newEnd] = getStartAndEnd(dateRange);
+    setStart(newStart);
+    setEnd(newEnd);
+  }, [dateRange]);
+
   const { register, watch } = useForm<{
     username: string;
-    dateRange: DateRange;
   }>({
-    defaultValues: {
-      dateRange: "all",
-    },
     mode: "all",
   });
-
-  const dateRange = watch("dateRange");
-  useEffect(() => {
-    const today = new Date();
-    switch (dateRange) {
-      case "all":
-        setStart(undefined);
-        setEnd(undefined);
-        break;
-      case "today":
-        setStart(startOfToday());
-        setEnd(endOfToday());
-        break;
-      case "thisWeek":
-        setStart(startOfWeek(today, { weekStartsOn: 1 }));
-        setEnd(endOfWeek(today, { weekStartsOn: 1 }));
-        break;
-      case "thisMonth":
-        setStart(startOfMonth(today));
-        setEnd(endOfMonth(today));
-        break;
-    }
-  }, [dateRange]);
 
   if (usersIsLoading) return <div className="loading" />;
   if (!isEmpty(usersError))
@@ -84,7 +89,10 @@ export default function AdminCasualUserList() {
       />
       <select
         className="select select-bordered w-full"
-        {...register("dateRange")}
+        defaultValue={dateRange}
+        onChange={(e) => {
+          void router.replace(`?dateRange=${e.target.value}`);
+        }}
       >
         <option value="all">全部日期</option>
         <option value="today">本日</option>

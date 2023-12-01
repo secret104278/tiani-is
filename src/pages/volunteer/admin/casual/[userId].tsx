@@ -1,6 +1,5 @@
 import { PencilSquareIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
@@ -66,9 +65,9 @@ export default function AdminCasualUserEdit() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href="/volunteer/admin/casual">
+      <div className="link" onClick={() => router.back()}>
         ← 日常工作管理
-      </Link>
+      </div>
       <article className="prose">
         <h1>{user.name}</h1>
       </article>
