@@ -177,7 +177,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse-arrow collapse bg-base-200">
+      <form className="collapse collapse-arrow bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -287,7 +287,6 @@ export default function VolunteerActivityDetailPage() {
           onConfirm={() => deleteActivity({ id: activity.id })}
         />
       </div>
-      <ParticipantsCollapse />
       <Link href={`/volunteer/activity/checkrecord/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
@@ -410,8 +409,8 @@ export default function VolunteerActivityDetailPage() {
         {isParticipant && <div className="badge badge-neutral">已報名</div>}
         {!isManager && <ShareLineBtn />}
       </div>
-      {!isManager && isParticipant && <ParticipantsCollapse />}
       {isManager && <AdminPanel />}
+      <ParticipantsCollapse />
       <div className="flex flex-col space-y-2 align-bottom">
         <p>發起人：{activity.organiser.name}</p>
         <div className="flex items-center">
