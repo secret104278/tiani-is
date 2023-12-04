@@ -7,7 +7,7 @@ import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { leaveActivityEventQueue } from "~/server/queue/leaveActivity";
 import { participateActivityEventQueue } from "~/server/queue/participateActivity";
 import { reviewActivityNotificationEventQueue } from "~/server/queue/reviewActivityNotification";
-import type { CheckInHistory, CheckRecord } from "~/utils/types";
+import type { ActivityCheckInHistory, CheckRecord } from "~/utils/types";
 import {
   TIANI_GPS_CENTERS,
   TIANI_GPS_RADIUS_KM,
@@ -632,7 +632,7 @@ export const volunteerActivityRouter = createTRPCRouter({
         throw new Error("只有管理員可以查看其他人的工時");
 
       function getActivityCheckHistories() {
-        return ctx.db.$queryRaw<CheckInHistory[]>`
+        return ctx.db.$queryRaw<ActivityCheckInHistory[]>`
         SELECT
           vacr. "activityId",
           vacr. "checkOutAt",
@@ -829,7 +829,7 @@ export const volunteerActivityRouter = createTRPCRouter({
         `;
     }),
 
-  getUsersByCasual: protectedProcedure
+  getUsersByCheckIn: protectedProcedure
     .input(
       z.object({
         start: z.date().optional(),
@@ -861,6 +861,7 @@ export const volunteerActivityRouter = createTRPCRouter({
         FROM
           "User" u
           JOIN "CasualCheckRecord" c ON u.id = c. "userId"
+          JOIN "VolunteerActivityCheckRecord" v ON u.id = v. "userId"
         WHERE
           ${
             isNil(input.start)

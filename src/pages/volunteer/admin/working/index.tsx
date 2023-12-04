@@ -51,7 +51,7 @@ export default function AdminCasualUserList() {
     data: users,
     isLoading: usersIsLoading,
     error: usersError,
-  } = api.volunteerActivity.getUsersByCasual.useQuery({
+  } = api.volunteerActivity.getUsersByCheckIn.useQuery({
     start: start,
     end: end,
   });
@@ -75,7 +75,7 @@ export default function AdminCasualUserList() {
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
-        <h1>日常工作管理</h1>
+        <h1>工作管理</h1>
       </article>
       <div className="divider">
         <MagnifyingGlassIcon className="h-8 w-8" />
@@ -122,7 +122,7 @@ export default function AdminCasualUserList() {
                   key={user.id}
                   className="hover hover:cursor-pointer"
                   onClick={() =>
-                    void router.push(`/volunteer/admin/casual/${user.id}`)
+                    void router.push(`/volunteer/admin/working/${user.id}`)
                   }
                 >
                   <td>{user.name}</td>

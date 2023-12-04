@@ -81,7 +81,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 )}
                 {sessionData.user.role.is_volunteer_admin && (
                   <li>
-                    <Link href="/volunteer/admin/casual">日常工作管理</Link>
+                    <Link href="/volunteer/admin/working">工作管理</Link>
                   </li>
                 )}
                 <li>
