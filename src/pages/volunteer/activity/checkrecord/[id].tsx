@@ -1,11 +1,14 @@
-import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { PencilSquareIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
+import ManualVolunteerActivityRegisterDialogContent from "~/components/CheckInDialog/ManualVolunteerActivityRegisterDialogContent";
 import { ModifyCheckRecordDialog } from "~/components/ModifyCheckRecordDialog";
+import ReactiveButton from "~/components/ReactiveButton";
+import Dialog from "~/components/utils/Dialog";
 import { api } from "~/utils/api";
 import type { CheckRecord } from "~/utils/types";
 
@@ -34,6 +37,9 @@ export default function VolunteerActivityCheckRecordPage() {
     undefined,
   );
 
+  const [manualRegisterDialogOpen, setManualRegisterDialogOpen] =
+    useState(false);
+
   const {
     mutate: modifyActivityCheckRecord,
     isLoading: modifyActivityCheckRecordIsLoading,
@@ -58,6 +64,24 @@ export default function VolunteerActivityCheckRecordPage() {
       <article className="prose">
         <h1>打卡名單</h1>
       </article>
+      <div className="flex justify-end">
+        <ReactiveButton
+          className="btn"
+          onClick={() => setManualRegisterDialogOpen(true)}
+        >
+          <PlusIcon className="h-4 w-4" />
+          手動報名
+        </ReactiveButton>
+        <Dialog
+          title="手動報名"
+          show={manualRegisterDialogOpen}
+          closeModal={() => setManualRegisterDialogOpen(false)}
+        >
+          <ManualVolunteerActivityRegisterDialogContent
+            activityId={activity.id}
+          />
+        </Dialog>
+      </div>
       <ModifyCheckRecordDialog
         ref={modifyCheckRecordDialogRef}
         userName={modifyRecord?.userName ?? ""}

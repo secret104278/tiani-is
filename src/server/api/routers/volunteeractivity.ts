@@ -369,15 +369,23 @@ export const volunteerActivityRouter = createTRPCRouter({
     .input(
       z.object({
         activityId: z.number(),
+        userId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id &&
+        !ctx.session.user.role.is_volunteer_admin
+      )
+        throw new Error("只有管理員可以代報名");
+
       await ctx.db.volunteerActivity.update({
         where: { id: input.activityId },
         data: {
           participants: {
             connect: {
-              id: ctx.session.user.id,
+              id: input.userId ?? ctx.session.user.id,
             },
           },
         },

@@ -66,7 +66,7 @@ export default function Dialog({
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <DialogTransition>
-              <DialogHeadless.Panel className="w-full max-w-md transform space-y-4 overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <DialogHeadless.Panel className="w-full max-w-md transform space-y-4 rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <div className="flex flex-row items-center">
                   <DialogHeadless.Title
                     as="h3"
