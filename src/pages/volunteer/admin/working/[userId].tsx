@@ -3,6 +3,7 @@ import { isEmpty, isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { AlertWarning } from "~/components/Alert";
+import { HourStats } from "~/components/HourStats";
 import { ModifyCheckRecordDialog } from "~/components/ModifyCheckRecordDialog";
 import ReactiveButton from "~/components/ReactiveButton";
 import WorkingStatsPanel from "~/components/WorkingStatsPanel";
@@ -145,6 +146,10 @@ export default function AdminCasualUserEdit() {
         }}
         isLoading={modifyActivityCheckRecordIsLoading}
         error={modifyActivityCheckRecordError?.message}
+      />
+      <HourStats
+        title="總服務小時"
+        totalWorkingHours={workingStats?.totalWorkingHours}
       />
       {workingStats && (
         <WorkingStatsPanel
