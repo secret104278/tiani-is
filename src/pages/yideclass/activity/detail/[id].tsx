@@ -237,9 +237,9 @@ export default function ClassActivityDetailPage() {
     return (
       <>
         <ReactiveButton
-          className="btn btn-accent"
+          className="btn btn-secondary"
           onClick={() => setLeaveDialogOpen(true)}
-          disabled={isLeaved ?? isEnded}
+          disabled={!!isLeaved || isEnded}
           loading={manualTakeLeaveIsLoading}
           error={manualTakeLeaveError?.message}
         >
