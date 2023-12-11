@@ -79,6 +79,7 @@ model User {
     volunteerActivityCheckRecords VolunteerActivityCheckRecord[]
     casualCheckRecords            CasualCheckRecord[]
     classActivityCheckRecord      ClassActivityCheckRecord[]
+    classActivityLeaveRecord      ClassActivityLeaveRecord[]
 }
 
 model VerificationToken {
@@ -186,7 +187,8 @@ model ClassActivity {
 
     version Int @default(1)
 
-    classActivityCheckIns ClassActivityCheckRecord[]
+    classActivityCheckIns    ClassActivityCheckRecord[]
+    ClassActivityLeaveRecord ClassActivityLeaveRecord[]
 
     @@index([organiserId])
     @@index([startDateTime])
@@ -202,6 +204,18 @@ model ClassActivityCheckRecord {
 
     latitude  Float?
     longitude Float?
+
+    @@unique([userId, activityId])
+    @@index([userId])
+    @@index([activityId])
+}
+
+model ClassActivityLeaveRecord {
+    id         Int           @id @default(autoincrement())
+    user       User          @relation(fields: [userId], references: [id])
+    userId     String
+    activity   ClassActivity @relation(fields: [activityId], references: [id])
+    activityId Int
 
     @@unique([userId, activityId])
     @@index([userId])

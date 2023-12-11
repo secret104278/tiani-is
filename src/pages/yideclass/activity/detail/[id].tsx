@@ -1,5 +1,6 @@
 import {
   ArrowDownOnSquareIcon,
+  ArrowRightOnRectangleIcon,
   ClockIcon,
   MapIcon,
   MapPinIcon,
@@ -83,6 +84,10 @@ export default function ClassActivityDetailPage() {
       activityId: Number(id),
     });
 
+  const { data: isLeaved } = api.classActivity.isLeaved.useQuery({
+    activityId: Number(id),
+  });
+
   const [shareBtnLoading, setShareBtnLoading] = useState(false);
 
   const {
@@ -93,8 +98,17 @@ export default function ClassActivityDetailPage() {
     onSuccess: () => router.push(`/${site}`),
   });
 
+  const {
+    mutate: manualTakeLeave,
+    isLoading: manualTakeLeaveIsLoading,
+    error: manualTakeLeaveError,
+  } = api.classActivity.takeLeave.useMutation({
+    onSuccess: () => router.reload(),
+  });
+
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
@@ -171,6 +185,12 @@ export default function ClassActivityDetailPage() {
           打卡名單
         </button>
       </Link>
+      <Link href={`/yideclass/activity/leaverecord/${activity.id}`}>
+        <button className="btn w-full">
+          <QueueListIcon className="h-4 w-4" />
+          請假名單
+        </button>
+      </Link>
       <div className="divider" />
     </>
   );
@@ -209,6 +229,43 @@ export default function ClassActivityDetailPage() {
             onCheckInSuccess={() => void refetchCheckInData()}
           />
         </Dialog>
+      </>
+    );
+  };
+
+  const LeaveControl = () => {
+    return (
+      <>
+        <ReactiveButton
+          className="btn btn-accent"
+          onClick={() => setLeaveDialogOpen(true)}
+          disabled={isLeaved ?? isEnded}
+          loading={manualTakeLeaveIsLoading}
+          error={manualTakeLeaveError?.message}
+        >
+          <ArrowRightOnRectangleIcon className="h-4 w-4" />
+          {isLeaved ? "已請假" : "請假"}
+        </ReactiveButton>
+        <ConfirmDialog
+          show={leaveDialogOpen}
+          closeModal={() => setLeaveDialogOpen(false)}
+          title="確認請假"
+          content={
+            <article className="prose">
+              是否確定要請
+              <br />
+              <span className="font-bold">
+                {activity.startDateTime.toLocaleString()}
+                <br />
+                <span className="text-lg">{activity.title}</span>
+              </span>
+              <br />
+              的假？
+            </article>
+          }
+          confirmText="請假"
+          onConfirm={() => manualTakeLeave({ activityId: activity.id })}
+        />
       </>
     );
   };
@@ -267,6 +324,7 @@ export default function ClassActivityDetailPage() {
           {activity.description}
         </article>
         <CheckInControl />
+        <LeaveControl />
       </div>
     </div>
   );

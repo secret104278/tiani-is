@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import Dialog from "./Dialog";
 
 export default function ConfirmDialog({
@@ -12,7 +13,7 @@ export default function ConfirmDialog({
   closeModal: () => void;
 
   title: string;
-  content?: string;
+  content?: ReactElement | string;
   confirmText?: string;
   onConfirm: () => void;
 }) {

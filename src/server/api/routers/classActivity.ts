@@ -368,4 +368,88 @@ export const classActivityRouter = createTRPCRouter({
         totalWorkingHours,
       };
     }),
+
+  takeLeave: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        activityId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_yideclass_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以幫別人請假");
+
+      const userId = input.userId ?? ctx.session.user.id;
+
+      await ctx.db.classActivityLeaveRecord.upsert({
+        where: {
+          userId_activityId: {
+            userId: userId,
+            activityId: input.activityId,
+          },
+        },
+        update: {},
+        create: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          activity: {
+            connect: {
+              id: input.activityId,
+            },
+          },
+        },
+      });
+    }),
+
+  getActivityLeaveRecords: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.classActivityLeaveRecord.findMany({
+        include: {
+          user: true,
+        },
+        where: {
+          activityId: input.activityId,
+        },
+      });
+    }),
+
+  isLeaved: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_yideclass_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以查看別人是否請假");
+
+      const leaveRecord = await ctx.db.classActivityLeaveRecord.findUnique({
+        where: {
+          userId_activityId: {
+            userId: input.userId ?? ctx.session.user.id,
+            activityId: input.activityId,
+          },
+        },
+      });
+
+      return !isNil(leaveRecord);
+    }),
 });
