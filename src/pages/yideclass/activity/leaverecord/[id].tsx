@@ -1,4 +1,4 @@
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { ArchiveBoxXMarkIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -25,8 +25,17 @@ export default function ClassActivityLeaveRecordPage() {
     data: leaveRecords,
     isLoading: leaveRecordsIsLoading,
     error: leaveRecordsError,
+    refetch: refetchLeaveRecords,
   } = api.classActivity.getActivityLeaveRecords.useQuery({
     activityId: Number(id),
+  });
+
+  const {
+    mutate: cancelLeave,
+    isLoading: cancelLeaveIsLoading,
+    error: cancelLeaveError,
+  } = api.classActivity.cancelLeave.useMutation({
+    onSuccess: () => refetchLeaveRecords(),
   });
 
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
@@ -64,16 +73,34 @@ export default function ClassActivityLeaveRecordPage() {
           </Dialog>
         </div>
       )}
+      {cancelLeaveIsLoading && <div className="loading"></div>}
+      {cancelLeaveError && (
+        <AlertWarning>{cancelLeaveError.message}</AlertWarning>
+      )}
       <table className="table table-sm">
         <thead>
           <tr>
             <th>班員</th>
+            <th>取消</th>
           </tr>
         </thead>
         <tbody>
           {leaveRecords?.map((record) => (
             <tr key={record.userId}>
               <td>{record.user.name}</td>
+              <td>
+                <ReactiveButton
+                  className="btn btn-sm"
+                  onClick={() =>
+                    cancelLeave({
+                      activityId: activity.id,
+                      userId: record.userId,
+                    })
+                  }
+                >
+                  <ArchiveBoxXMarkIcon className="h-4 w-4" />
+                </ReactiveButton>
+              </td>
             </tr>
           ))}
         </tbody>
