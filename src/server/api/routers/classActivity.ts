@@ -409,6 +409,31 @@ export const classActivityRouter = createTRPCRouter({
       });
     }),
 
+  cancelLeave: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        activityId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_yideclass_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以幫別人取消請假");
+
+      const userId = input.userId ?? ctx.session.user.id;
+
+      await ctx.db.classActivityLeaveRecord.deleteMany({
+        where: {
+          userId: userId,
+          activityId: input.activityId,
+        },
+      });
+    }),
+
   getActivityLeaveRecords: protectedProcedure
     .input(
       z.object({

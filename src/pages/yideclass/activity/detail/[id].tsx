@@ -84,7 +84,11 @@ export default function ClassActivityDetailPage() {
       activityId: Number(id),
     });
 
-  const { data: isLeaved } = api.classActivity.isLeaved.useQuery({
+  const {
+    data: isLeaved,
+    isLoading: isLeavedIsLoading,
+    error: isLeavedError,
+  } = api.classActivity.isLeaved.useQuery({
     activityId: Number(id),
   });
 
@@ -99,10 +103,18 @@ export default function ClassActivityDetailPage() {
   });
 
   const {
-    mutate: manualTakeLeave,
-    isLoading: manualTakeLeaveIsLoading,
-    error: manualTakeLeaveError,
+    mutate: takeLeave,
+    isLoading: takeLeaveIsLoading,
+    error: takeLeaveError,
   } = api.classActivity.takeLeave.useMutation({
+    onSuccess: () => router.reload(),
+  });
+
+  const {
+    mutate: cancelLeave,
+    isLoading: cancelLeaveIsLoading,
+    error: cancelLeaveError,
+  } = api.classActivity.cancelLeave.useMutation({
     onSuccess: () => router.reload(),
   });
 
@@ -234,17 +246,34 @@ export default function ClassActivityDetailPage() {
   };
 
   const LeaveControl = () => {
+    if (isLeavedIsLoading) return <div className="loading"></div>;
+    if (!isNil(isLeavedError))
+      return <AlertWarning>{isLeavedError.message}</AlertWarning>;
+
+    if (isLeaved)
+      return (
+        <ReactiveButton
+          className="btn btn-secondary"
+          onClick={() => cancelLeave({ activityId: activity.id })}
+          disabled={isEnded}
+          loading={cancelLeaveIsLoading}
+          error={cancelLeaveError?.message}
+        >
+          取消請假
+        </ReactiveButton>
+      );
+
     return (
       <>
         <ReactiveButton
           className="btn btn-secondary"
           onClick={() => setLeaveDialogOpen(true)}
-          disabled={!!isLeaved || isEnded}
-          loading={manualTakeLeaveIsLoading}
-          error={manualTakeLeaveError?.message}
+          disabled={isEnded}
+          loading={takeLeaveIsLoading}
+          error={takeLeaveError?.message}
         >
           <ArrowRightOnRectangleIcon className="h-4 w-4" />
-          {isLeaved ? "已請假" : "請假"}
+          請假
         </ReactiveButton>
         <ConfirmDialog
           show={leaveDialogOpen}
@@ -264,7 +293,7 @@ export default function ClassActivityDetailPage() {
             </article>
           }
           confirmText="請假"
-          onConfirm={() => manualTakeLeave({ activityId: activity.id })}
+          onConfirm={() => takeLeave({ activityId: activity.id })}
         />
       </>
     );
