@@ -281,15 +281,13 @@ export default function ClassActivityDetailPage() {
           title="確認請假"
           content={
             <article className="prose">
-              是否確定要請
-              <br />
               <span className="font-bold">
                 {activity.startDateTime.toLocaleString()}
                 <br />
                 <span className="text-lg">{activity.title}</span>
               </span>
               <br />
-              的假？
+              是否確定要請假？
             </article>
           }
           confirmText="請假"
