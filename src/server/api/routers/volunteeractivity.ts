@@ -858,13 +858,16 @@ export const volunteerActivityRouter = createTRPCRouter({
           name: string;
         }[]
       >`
+      SELECT DISTINCT
+        id,
+        name
+      FROM (
         SELECT
           u.id,
           u.name
         FROM
           "User" u
           JOIN "CasualCheckRecord" c ON u.id = c. "userId"
-          JOIN "VolunteerActivityCheckRecord" v ON u.id = v. "userId"
         WHERE
           ${
             isNil(input.start)
@@ -875,9 +878,23 @@ export const volunteerActivityRouter = createTRPCRouter({
               ? Prisma.sql`true`
               : Prisma.sql`c. "checkInAt" <= ${input.end}`
           }
-        GROUP BY
+        UNION
+        SELECT
           u.id,
-          u.name;
+          u.name
+        FROM
+          "User" u
+          JOIN "VolunteerActivityCheckRecord" v ON u.id = v. "userId"
+        WHERE
+          ${
+            isNil(input.start)
+              ? Prisma.sql`true`
+              : Prisma.sql`v. "checkInAt" >= ${input.start}`
+          } AND ${
+            isNil(input.end)
+              ? Prisma.sql`true`
+              : Prisma.sql`v. "checkInAt" <= ${input.end}`
+          }) AS combined_results;
       `;
     }),
 });
