@@ -102,7 +102,7 @@ export const classActivityRouter = createTRPCRouter({
       const filters: Prisma.ClassActivityWhereInput[] = [];
       if (input.participatedByMe) {
         filters.push({
-          classActivityCheckIns: { some: { userId: ctx.session.user.id } },
+          classActivityCheckRecords: { some: { userId: ctx.session.user.id } },
         });
       }
 
@@ -495,7 +495,8 @@ export const classActivityRouter = createTRPCRouter({
         include: {
           _count: {
             select: {
-              classActivityCheckIns: true,
+              classActivityCheckRecords: true,
+              classActivityLeaveRecords: true,
             },
           },
         },

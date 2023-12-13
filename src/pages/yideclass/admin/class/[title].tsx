@@ -33,6 +33,7 @@ export default function YiDeAdminClassDetail() {
             <tr>
               <th>日期</th>
               <th>開班人數</th>
+              <th>請假人數</th>
             </tr>
           </thead>
           <tbody>
@@ -49,7 +50,8 @@ export default function YiDeAdminClassDetail() {
                   }
                 >
                   <td>{activity.startDateTime.toLocaleDateString()}</td>
-                  <td>{activity._count.classActivityCheckIns}</td>
+                  <td>{activity._count.classActivityCheckRecords}</td>
+                  <td>{activity._count.classActivityLeaveRecords}</td>
                 </tr>
               ))}
           </tbody>

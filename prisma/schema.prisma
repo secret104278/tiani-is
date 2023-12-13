@@ -187,8 +187,8 @@ model ClassActivity {
 
     version Int @default(1)
 
-    classActivityCheckIns    ClassActivityCheckRecord[]
-    ClassActivityLeaveRecord ClassActivityLeaveRecord[]
+    classActivityCheckRecords ClassActivityCheckRecord[]
+    classActivityLeaveRecords ClassActivityLeaveRecord[]
 
     @@index([title])
     @@index([organiserId])
