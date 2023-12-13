@@ -84,6 +84,11 @@ export default function Layout({ children }: { children: ReactNode }) {
                     <Link href="/volunteer/admin/working">工作管理</Link>
                   </li>
                 )}
+                {sessionData.user.role.is_yideclass_admin && (
+                  <li>
+                    <Link href="/yideclass/admin/class">班務管理</Link>
+                  </li>
+                )}
                 <li>
                   <Link href="/personal/account">個人資料</Link>
                 </li>

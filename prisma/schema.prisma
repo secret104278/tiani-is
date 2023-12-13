@@ -190,6 +190,7 @@ model ClassActivity {
     classActivityCheckIns    ClassActivityCheckRecord[]
     ClassActivityLeaveRecord ClassActivityLeaveRecord[]
 
+    @@index([title])
     @@index([organiserId])
     @@index([startDateTime])
 }

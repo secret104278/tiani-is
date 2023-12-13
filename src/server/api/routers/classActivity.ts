@@ -477,4 +477,28 @@ export const classActivityRouter = createTRPCRouter({
 
       return !isNil(leaveRecord);
     }),
+
+  getActivitiesByTitle: protectedProcedure
+    .input(
+      z.object({
+        title: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_yideclass_admin)
+        throw new Error("只有管理員可以");
+
+      return await ctx.db.classActivity.findMany({
+        where: {
+          title: input.title,
+        },
+        include: {
+          _count: {
+            select: {
+              classActivityCheckIns: true,
+            },
+          },
+        },
+      });
+    }),
 });
