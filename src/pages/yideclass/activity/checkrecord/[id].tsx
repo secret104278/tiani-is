@@ -9,6 +9,7 @@ import ManualClassActivityCheckInDialogContent from "~/components/CheckInDialog/
 import ReactiveButton from "~/components/ReactiveButton";
 import Dialog from "~/components/utils/Dialog";
 import { api } from "~/utils/api";
+import { formatDate } from "~/utils/ui";
 
 export default function ClassActivityCheckRecordPage() {
   const { data: sessionData } = useSession();
@@ -71,7 +72,7 @@ export default function ClassActivityCheckRecordPage() {
             <tr key={record.userId}>
               <td>{record.user.name}</td>
               <td>
-                {record.checkAt.toLocaleDateString()}
+                {formatDate(record.checkAt)}
                 <br />
                 {record.checkAt.toLocaleTimeString()}
               </td>

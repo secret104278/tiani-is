@@ -1,5 +1,6 @@
 import type { VolunteerActivityStatus } from "@prisma/client";
-import { addHours } from "date-fns";
+import { addHours, format } from "date-fns";
+import { zhCN } from "date-fns/locale";
 import type { VolunteerActivityTopics } from "./types";
 
 export const getActivityStatusText = (status: VolunteerActivityStatus) => {
@@ -243,3 +244,9 @@ export const activityIsOnGoing = (
     activityIsStarted(startDateTime, now) && !activityIsEnded(endDateTime, now)
   );
 };
+
+export const DEFAULT_LOCALE = zhCN;
+export const formatDate = (date: Date) =>
+  format(date, "yyyy/MM/dd (eeeee)", {
+    locale: DEFAULT_LOCALE,
+  });

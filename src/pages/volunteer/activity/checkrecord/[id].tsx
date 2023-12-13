@@ -11,6 +11,7 @@ import ReactiveButton from "~/components/ReactiveButton";
 import Dialog from "~/components/utils/Dialog";
 import { api } from "~/utils/api";
 import type { CheckRecord } from "~/utils/types";
+import { formatDate } from "~/utils/ui";
 
 export default function VolunteerActivityCheckRecordPage() {
   const router = useRouter();
@@ -114,7 +115,7 @@ export default function VolunteerActivityCheckRecordPage() {
               <td>
                 {record.checkInAt && (
                   <>
-                    {record.checkInAt.toLocaleDateString()}
+                    {formatDate(record.checkInAt)}
                     <br />
                     {record.checkInAt.toLocaleTimeString()}
                   </>
@@ -123,7 +124,7 @@ export default function VolunteerActivityCheckRecordPage() {
               <td>
                 {record.checkOutAt && (
                   <>
-                    {record.checkOutAt.toLocaleDateString()}
+                    {formatDate(record.checkOutAt)}
                     <br />
                     {record.checkOutAt.toLocaleTimeString()}
                   </>

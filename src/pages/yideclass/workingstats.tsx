@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { api } from "~/utils/api";
+import { formatDate } from "~/utils/ui";
 
 export default function WorkingStatsPage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function WorkingStatsPage() {
           >
             <td>{history.activity.title}</td>
             <td>
-              {history.checkAt.toLocaleDateString()}
+              {formatDate(history.checkAt)}
               <br />
               {history.checkAt.toLocaleTimeString()}
             </td>

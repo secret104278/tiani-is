@@ -6,4 +6,8 @@
   .tiani-input {
     @apply input input-bordered w-full invalid:input-error;
   }
+
+  .table {
+    @apply whitespace-nowrap;
+  }
 }

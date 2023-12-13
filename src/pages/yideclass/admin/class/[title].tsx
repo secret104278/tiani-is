@@ -2,6 +2,7 @@ import { isEmpty, sortBy } from "lodash";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
 import { api } from "~/utils/api";
+import { formatDate } from "~/utils/ui";
 
 export default function YiDeAdminClassDetail() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function YiDeAdminClassDetail() {
                     )
                   }
                 >
-                  <td>{activity.startDateTime.toLocaleDateString()}</td>
+                  <td>{formatDate(activity.startDateTime)}</td>
                   <td>{activity._count.classActivityCheckRecords}</td>
                   <td>{activity._count.classActivityLeaveRecords}</td>
                 </tr>

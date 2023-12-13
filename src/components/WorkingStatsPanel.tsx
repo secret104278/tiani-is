@@ -7,6 +7,7 @@ import type {
   ActivityCheckInHistory,
   CasualCheckInHistory,
 } from "~/utils/types";
+import { formatDate } from "~/utils/ui";
 
 export default function WorkingStatsPanel({
   workingStats,
@@ -69,7 +70,7 @@ export default function WorkingStatsPanel({
               )
             }
           >
-            <td>{history.checkInAt.toLocaleDateString()}</td>
+            <td>{formatDate(history.checkInAt)}</td>
             <td>{history.title}</td>
             <td>{history.checkInAt.toLocaleTimeString()}</td>
             <td>{history.checkOutAt?.toLocaleTimeString()}</td>
@@ -104,7 +105,7 @@ export default function WorkingStatsPanel({
               )
             }
           >
-            <td>{history.checkInAt.toLocaleDateString()}</td>
+            <td>{formatDate(history.checkInAt)}</td>
             <td>{history.title}</td>
             <td>{history.checkInAt.toLocaleTimeString()}</td>
             <td>{history.checkOutAt.toLocaleTimeString()}</td>
@@ -142,7 +143,7 @@ export default function WorkingStatsPanel({
             })}
             key={history.id}
           >
-            <td>{history.checkInAt.toLocaleDateString()}</td>
+            <td>{formatDate(history.checkInAt)}</td>
             <td>{history.checkInAt.toLocaleTimeString()}</td>
             <td>{history.checkOutAt?.toLocaleTimeString()}</td>
             {isAdmin && (
@@ -164,7 +165,7 @@ export default function WorkingStatsPanel({
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-center">
-        <div className="tabs tabs-boxed">
+        <div className="tabs-boxed tabs">
           <a
             className={"tab" + (activeTab === "all" ? " tab-active" : "")}
             onClick={() => setActiveTab("all")}
