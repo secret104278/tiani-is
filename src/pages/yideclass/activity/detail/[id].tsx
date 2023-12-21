@@ -28,6 +28,7 @@ import {
   CLASS_ACTIVITY_LOCATION_MAP,
   activityIsEnded,
   activityIsStarted,
+  formatDateTime,
   getActivityStatusText,
   toDuration,
 } from "~/utils/ui";
@@ -282,7 +283,7 @@ export default function ClassActivityDetailPage() {
           content={
             <article className="prose">
               <span className="font-bold">
-                {activity.startDateTime.toLocaleString()}
+                {formatDateTime(activity.startDateTime)}
                 <br />
                 <span className="text-lg">{activity.title}</span>
               </span>
@@ -335,16 +336,13 @@ export default function ClassActivityDetailPage() {
         <LocationAddress />
         <div className="flex items-center">
           <ClockIcon className="mr-1 h-4 w-4" />
-          <p>開始：{activity.startDateTime.toLocaleString()}</p>
+          <p>開始：{formatDateTime(activity.startDateTime)}</p>
         </div>
         <div className="flex items-center">
           <ClockIcon className="mr-1 h-4 w-4" />
           <p>
             開班時數：
-            {toDuration(
-              activity.startDateTime,
-              activity.endDateTime,
-            ).toPrecision(2)}
+            {toDuration(activity.startDateTime, activity.endDateTime)}
           </p>
         </div>
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">

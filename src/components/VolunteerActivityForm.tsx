@@ -8,9 +8,9 @@ import {
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   getCurrentDateTime,
   getDateTimeString,
+  getDurationHour,
   getEndTime,
   titleIsOther,
-  toDuration,
 } from "~/utils/ui";
 import { AlertWarning } from "./Alert";
 import ReactiveButton from "./ReactiveButton";
@@ -46,7 +46,7 @@ export default function VolunteerActivityForm({
       headcount: defaultActivity.headcount,
       location: defaultActivity.location,
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
-      duration: toDuration(
+      duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
       ),

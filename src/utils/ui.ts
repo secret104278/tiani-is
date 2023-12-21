@@ -1,6 +1,6 @@
 import type { VolunteerActivityStatus } from "@prisma/client";
-import { addHours, format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { addHours, format, formatDuration, intervalToDuration } from "date-fns";
+import { zhTW } from "date-fns/locale";
 import type { VolunteerActivityTopics } from "./types";
 
 export const getActivityStatusText = (status: VolunteerActivityStatus) => {
@@ -111,9 +111,6 @@ export const CLASS_ACTIVITY_LOCATION_MAP = new Map<
 export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
-
-export const toDuration = (startDateTime: Date, endDateTime: Date) =>
-  (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
 
 export const getEndTime = (startDateTime: Date, duration: number) =>
   new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
@@ -245,8 +242,25 @@ export const activityIsOnGoing = (
   );
 };
 
-export const DEFAULT_LOCALE = zhCN;
+export const DEFAULT_LOCALE = zhTW;
 export const formatDate = (date: Date) =>
   format(date, "yyyy/MM/dd (eeeee)", {
     locale: DEFAULT_LOCALE,
   });
+
+export const formatDateTime = (date: Date) =>
+  format(date, "yyyy/MM/dd (eeeee) aaaa hh:mm", {
+    locale: DEFAULT_LOCALE,
+  });
+
+export const toDuration = (startDateTime: Date, endDateTime: Date) =>
+  formatDuration(
+    intervalToDuration({
+      start: startDateTime,
+      end: endDateTime,
+    }),
+    { locale: DEFAULT_LOCALE },
+  );
+
+export const getDurationHour = (startDateTime: Date, endDateTime: Date) =>
+  (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;

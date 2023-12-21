@@ -30,6 +30,7 @@ import type { OGMetaProps } from "~/utils/types";
 import {
   activityIsEnded,
   activityIsStarted,
+  formatDateTime,
   formatMilliseconds,
   getActivityStatusText,
   toDuration,
@@ -423,16 +424,13 @@ export default function VolunteerActivityDetailPage() {
         </div>
         <div className="flex items-center">
           <ClockIcon className="mr-1 h-4 w-4" />
-          <p>開始：{activity.startDateTime.toLocaleString()}</p>
+          <p>開始：{formatDateTime(activity.startDateTime)}</p>
         </div>
         <div className="flex items-center">
           <ClockIcon className="mr-1 h-4 w-4" />
           <p>
             預估時數：
-            {toDuration(
-              activity.startDateTime,
-              activity.endDateTime,
-            ).toPrecision(2)}
+            {toDuration(activity.startDateTime, activity.endDateTime)}
           </p>
         </div>
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">

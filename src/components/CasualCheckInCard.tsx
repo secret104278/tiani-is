@@ -2,6 +2,7 @@ import { ArrowDownOnSquareIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
 import { useState } from "react";
 import { api } from "~/utils/api";
+import { formatDateTime } from "~/utils/ui";
 import CasualCheckInDialogContent from "./CheckInDialog/CasualCheckInDialogContent";
 import Dialog from "./utils/Dialog";
 
@@ -15,7 +16,7 @@ export function CasualCheckInCard() {
 
   return (
     <div>
-      <div className="card-compact card w-full shadow-lg">
+      <div className="card card-compact w-full shadow-lg">
         <div className="card-body">
           <h2 className="card-title">日常工作</h2>
           <div className="flex items-center"></div>
@@ -23,12 +24,12 @@ export function CasualCheckInCard() {
           {isEmpty(latestCasualCheckIn) && "今日尚未簽到"}
           {!isEmpty(latestCasualCheckIn) && (
             <div className="flex items-center">
-              <p>簽到：{latestCasualCheckIn.checkInAt.toLocaleString()}</p>
+              <p>簽到：{formatDateTime(latestCasualCheckIn.checkInAt)}</p>
             </div>
           )}
           {!isNil(latestCasualCheckIn?.checkOutAt) && (
             <div className="flex items-center">
-              <p>簽退：{latestCasualCheckIn!.checkOutAt.toLocaleString()}</p>
+              <p>簽退：{formatDateTime(latestCasualCheckIn!.checkOutAt)}</p>
             </div>
           )}
           <div className="card-actions justify-end">
