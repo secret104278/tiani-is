@@ -264,3 +264,16 @@ export const toDuration = (startDateTime: Date, endDateTime: Date) =>
 
 export const getDurationHour = (startDateTime: Date, endDateTime: Date) =>
   (endDateTime.getTime() - startDateTime.getTime()) / 60 / 60 / 1000;
+
+export enum Site {
+  Volunteer = "volunteer",
+  Yideclass = "yideclass",
+  Etogether = "etogether",
+}
+
+export const urlBaseToSite = (urlBase?: string): Site => {
+  if (urlBase === "volunteer") return Site.Volunteer;
+  else if (urlBase === "yideclass") return Site.Yideclass;
+  else if (urlBase === "etogether") return Site.Etogether;
+  else return Site.Volunteer;
+};

@@ -2,7 +2,12 @@ import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
 import Link from "next/link";
 import { useSiteContext } from "~/context/SiteContext";
-import { formatDateTime, getActivityStatusText, toDuration } from "~/utils/ui";
+import {
+  Site,
+  formatDateTime,
+  getActivityStatusText,
+  toDuration,
+} from "~/utils/ui";
 
 export function ActivityCard({
   activity,
@@ -84,7 +89,7 @@ export function ActivityCard({
           <div className="flex items-center">
             <ClockIcon className="mr-1 h-4 w-4" />
             <p>
-              {site === "volunteer" ? "預估時數：" : "開班時數："}
+              {site === Site.Volunteer ? "預估時數：" : "開班時數："}
               {toDuration(activity.startDateTime, activity.endDateTime)}
             </p>
           </div>

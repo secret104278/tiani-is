@@ -14,26 +14,32 @@ import SentrySetup from "~/components/SentrySetup";
 import { SiteProvider } from "~/context/SiteContext";
 import "~/styles/globals.css";
 import type { OGMetaProps } from "~/utils/types";
+import { Site, urlBaseToSite } from "~/utils/ui";
 
 const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   Component,
   pageProps: { session, ogMeta, ...pageProps },
 }) => {
   const router = useRouter();
-  const isYideclass = router.pathname.split("/")[1] === "yideclass";
-  const isVolunteer = router.pathname.split("/")[1] === "volunteer";
+  // FIXME: use site context
+  const site = urlBaseToSite(router.pathname.split("/")[1]);
 
   let siteIcon = "/logo512.png";
-  if (isYideclass) siteIcon = "/yideclass_logo.png";
-  else if (isVolunteer) siteIcon = "/volunteer_logo.png";
-
-  let themeColor = "";
-  if (isYideclass) themeColor = "#5c7f67";
-  else if (isVolunteer) themeColor = "#d69c6c";
-
+  let siteColor = "";
   let siteTitle = "天一聖道院資訊系統";
-  if (isYideclass) siteTitle = "義德班務網";
-  else if (isVolunteer) siteTitle = "天一志工隊";
+
+  switch (site) {
+    case Site.Yideclass:
+      siteIcon = "/yideclass_logo.png";
+      siteColor = "#5c7f67";
+      siteTitle = "義德班務網";
+      break;
+    case Site.Volunteer:
+      siteIcon = "/volunteer_logo.png";
+      siteColor = "#d69c6c";
+      siteTitle = "天一志工隊";
+      break;
+  }
 
   // return (
   //   <div className="hero min-h-screen bg-base-200">
@@ -57,7 +63,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
           content={ogMeta?.ogDescription ?? `${siteTitle}・天一聖道院資訊系統`}
         ></meta>
         <meta property="og:image" content={ogMeta?.ogImage ?? siteIcon}></meta>
-        <meta name="theme-color" content={themeColor} />
+        <meta name="theme-color" content={siteColor} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {/* <Analytics /> */}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
+import { Site } from "~/utils/ui";
 import LineImage from "./LineImage";
 
 function UserAvatar() {
@@ -55,7 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <button className="btn btn-ghost text-xl normal-case">
               {router.pathname.startsWith("/auth")
                 ? "天一聖道院資訊系統"
-                : site === "volunteer"
+                : site === Site.Volunteer
                 ? "天一志工隊"
                 : "義德班務網"}
             </button>
@@ -63,7 +64,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown dropdown-end">
+            <div className="dropdown-end dropdown">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>

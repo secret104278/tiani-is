@@ -1,8 +1,7 @@
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-
-type Site = "volunteer" | "yideclass";
+import { Site, urlBaseToSite } from "~/utils/ui";
 
 // Define the context type
 type SiteContextType = {
@@ -17,19 +16,17 @@ const SiteContext = createContext<SiteContextType | undefined>(undefined);
 export const SiteProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const [site, setSite] = useState<Site>(
-    router.pathname.split("/")[1] === "yideclass" ? "yideclass" : "volunteer",
+    urlBaseToSite(router.pathname.split("/")[1]),
   );
 
   useEffect(() => {
-    const base = router.pathname.split("/")[1];
-    if (base === "volunteer") setSite("volunteer");
-    else if (base === "yideclass") setSite("yideclass");
+    setSite(urlBaseToSite(router.pathname.split("/")[1]));
   }, [router.pathname]);
 
   useEffect(() => {
-    if (site === "volunteer")
+    if (site === Site.Volunteer)
       document.querySelector("html")?.setAttribute("data-theme", "autumn");
-    else if (site === "yideclass")
+    else if (site === Site.Yideclass)
       document.querySelector("html")?.setAttribute("data-theme", "garden");
   }, [site]);
 
