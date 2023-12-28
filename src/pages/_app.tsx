@@ -10,11 +10,12 @@ import Layout from "~/components/Layout";
 
 import "leaflet/dist/leaflet.css";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import SentrySetup from "~/components/SentrySetup";
 import { SiteProvider } from "~/context/SiteContext";
 import "~/styles/globals.css";
 import type { OGMetaProps } from "~/utils/types";
-import { Site, urlBaseToSite } from "~/utils/ui";
+import { Site, siteToTitle, urlBaseToSite } from "~/utils/ui";
 
 const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   Component,
@@ -24,20 +25,36 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   // FIXME: use site context
   const site = urlBaseToSite(router.pathname.split("/")[1]);
 
+  useEffect(() => {
+    switch (site) {
+      case Site.Yideclass:
+        document.documentElement.setAttribute("data-theme", "garden");
+        break;
+      case Site.Volunteer:
+        document.documentElement.setAttribute("data-theme", "autumn");
+        break;
+      case Site.Etogether:
+        document.documentElement.setAttribute("data-theme", "fantasy");
+        break;
+    }
+  }, [site]);
+
   let siteIcon = "/logo512.png";
   let siteColor = "";
-  let siteTitle = "天一聖道院資訊系統";
+  const siteTitle = siteToTitle(site);
 
   switch (site) {
     case Site.Yideclass:
       siteIcon = "/yideclass_logo.png";
       siteColor = "#5c7f67";
-      siteTitle = "義德班務網";
       break;
     case Site.Volunteer:
       siteIcon = "/volunteer_logo.png";
       siteColor = "#d69c6c";
-      siteTitle = "天一志工隊";
+      break;
+    case Site.Etogether:
+      siteIcon = "/etogether_logo.png";
+      siteColor = "#6d0c75";
       break;
   }
 

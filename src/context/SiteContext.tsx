@@ -23,13 +23,6 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     setSite(urlBaseToSite(router.pathname.split("/")[1]));
   }, [router.pathname]);
 
-  useEffect(() => {
-    if (site === Site.Volunteer)
-      document.querySelector("html")?.setAttribute("data-theme", "autumn");
-    else if (site === Site.Yideclass)
-      document.querySelector("html")?.setAttribute("data-theme", "garden");
-  }, [site]);
-
   return (
     <SiteContext.Provider value={{ site, setSite }}>
       {children}

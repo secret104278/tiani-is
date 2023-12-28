@@ -284,3 +284,16 @@ export const userComparator = (
 ) => {
   return !!a.name && !!b.name ? a.name.localeCompare(b.name, "zh-Hant-TW") : 0;
 };
+
+export const siteToTitle = (site: Site) => {
+  switch (site) {
+    case Site.Volunteer:
+      return "天一志工隊";
+    case Site.Yideclass:
+      return "義德班務網";
+    case Site.Etogether:
+      return "活動e起來";
+    default:
+      return "天一聖道院資訊系統";
+  }
+};

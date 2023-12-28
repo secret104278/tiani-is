@@ -1,6 +1,7 @@
 import { exampleRouter } from "~/server/api/routers/example";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { classActivityRouter } from "./routers/classActivity";
+import { etogetherActivityRouter } from "./routers/etogetherActivity";
 import { userRouter } from "./routers/user";
 import { volunteerActivityRouter } from "./routers/volunteeractivity";
 
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   example: exampleRouter,
   volunteerActivity: volunteerActivityRouter,
   classActivity: classActivityRouter,
+  etogetherActivity: etogetherActivityRouter,
   user: userRouter,
 });
 

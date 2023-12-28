@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
-import { Site } from "~/utils/ui";
+import { siteToTitle } from "~/utils/ui";
 import LineImage from "./LineImage";
 
 function UserAvatar() {
@@ -56,9 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <button className="btn btn-ghost text-xl normal-case">
               {router.pathname.startsWith("/auth")
                 ? "天一聖道院資訊系統"
-                : site === Site.Volunteer
-                ? "天一志工隊"
-                : "義德班務網"}
+                : siteToTitle(site)}
             </button>
           </Link>
         </div>

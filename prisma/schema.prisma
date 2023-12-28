@@ -56,6 +56,7 @@ enum Role {
     TIANI_ADMIN
     VOLUNTEER_ADMIN
     YIDECLASS_ADMIN
+    ETOGETHER_ADMIN
 }
 
 model User {
@@ -71,6 +72,7 @@ model User {
 
     organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
     organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")
+    organizedEtogetherActivites EtogetherActivity[] @relation("OrganizedEtogetherActivites")
 
     participatedVolunteerActivites VolunteerActivity[] @relation("ParticipatedVolunteerActivites")
 
@@ -80,8 +82,10 @@ model User {
     casualCheckRecords            CasualCheckRecord[]
     classActivityCheckRecord      ClassActivityCheckRecord[]
     classActivityLeaveRecord      ClassActivityLeaveRecord[]
+    classMemberEnrollments        ClassMemberEnrollment[]
 
-    classMemberEnrollments ClassMemberEnrollment[]
+    etogetherActivityRegisters    EtogetherActivityRegister[]
+    etogetherActivityCheckRecords EtogetherActivityCheckRecord[]
 }
 
 model VerificationToken {
@@ -234,4 +238,113 @@ model ClassMemberEnrollment {
 
     @@unique([userId, classTitle])
     @@index([classTitle])
+}
+
+enum EtogetherActivityStatus {
+    DRAFT
+    PUBLISHED
+}
+
+model EtogetherActivitySubgroup {
+    id          Int     @id @default(autoincrement())
+    title       String
+    description String?
+
+    etogetherActivity   EtogetherActivity @relation(fields: [etogetherActivityId], references: [id])
+    etogetherActivityId Int
+
+    registers            EtogetherActivityRegister[]
+    externalRegisters    ExternalEtogetherActivityRegister[]
+    checkRecords         EtogetherActivityCheckRecord[]
+    externalCheckRecords ExternalEtogetherActivityCheckRecord[]
+}
+
+model EtogetherActivity {
+    id            Int                         @id @default(autoincrement())
+    title         String
+    description   String?
+    location      String
+    startDateTime DateTime
+    endDateTime   DateTime
+    subgroups     EtogetherActivitySubgroup[]
+    status        EtogetherActivityStatus     @default(PUBLISHED)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organiser   User   @relation("OrganizedEtogetherActivites", fields: [organiserId], references: [id])
+    organiserId String
+
+    version Int @default(1)
+
+    // classActivityCheckRecords ClassActivityCheckRecord[]
+    // classActivityLeaveRecords ClassActivityLeaveRecord[]
+    registers            EtogetherActivityRegister[]
+    externalRegisters    ExternalEtogetherActivityRegister[]
+    checkRecords         EtogetherActivityCheckRecord[]
+    externalCheckRecords ExternalEtogetherActivityCheckRecord[]
+
+    @@index([title])
+    @@index([organiserId])
+    @@index([startDateTime])
+}
+
+model EtogetherActivityRegister {
+    id Int @id @default(autoincrement())
+
+    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
+    activityId Int
+
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+
+    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
+    subgroupId Int
+
+    externalRegisters ExternalEtogetherActivityRegister[]
+}
+
+model ExternalEtogetherActivityRegister {
+    id Int @id @default(autoincrement())
+
+    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
+    activityId Int
+
+    username String
+
+    mainRegister   EtogetherActivityRegister @relation(fields: [mainRegisterId], references: [id])
+    mainRegisterId Int
+
+    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
+    subgroupId Int
+}
+
+model EtogetherActivityCheckRecord {
+    id Int @id @default(autoincrement())
+
+    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
+    activityId Int
+
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+
+    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
+    subgroupId Int
+
+    externalCheckRecords ExternalEtogetherActivityCheckRecord[]
+}
+
+model ExternalEtogetherActivityCheckRecord {
+    id Int @id @default(autoincrement())
+
+    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
+    activityId Int
+
+    username String
+
+    mainCheckRecord   EtogetherActivityCheckRecord @relation(fields: [mainCheckRecordId], references: [id])
+    mainCheckRecordId Int
+
+    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
+    subgroupId Int
 }
