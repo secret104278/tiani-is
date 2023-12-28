@@ -57,6 +57,9 @@ export const authOptions: NextAuthOptions = {
           is_yideclass_admin:
             (user as User).roles.includes(Role.YIDECLASS_ADMIN) ||
             (user as User).roles.includes(Role.TIANI_ADMIN),
+          is_etogether_admin:
+            (user as User).roles.includes(Role.ETOGETHER_ADMIN) ||
+            (user as User).roles.includes(Role.TIANI_ADMIN),
         },
       },
     }),

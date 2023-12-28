@@ -129,6 +129,18 @@ export const volunteerActivityRouter = createTRPCRouter({
   deleteActivity: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      const orgActivity = await ctx.db.volunteerActivity.findUniqueOrThrow({
+        select: { status: true, organiserId: true },
+        where: {
+          id: input.id,
+        },
+      });
+
+      const isManager =
+        ctx.session.user.id === orgActivity.organiserId ||
+        ctx.session.user.role.is_volunteer_admin;
+      if (!isManager) throw new Error("只有管理員可以刪除活動");
+
       return await ctx.db.volunteerActivity.delete({
         where: { id: input.id },
       });
