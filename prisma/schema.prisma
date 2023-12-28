@@ -302,6 +302,8 @@ model EtogetherActivityRegister {
     subgroupId Int
 
     externalRegisters ExternalEtogetherActivityRegister[]
+
+    @@unique([userId, activityId])
 }
 
 model ExternalEtogetherActivityRegister {
@@ -331,7 +333,12 @@ model EtogetherActivityCheckRecord {
     subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
     subgroupId Int
 
+    latitude  Float?
+    longitude Float?
+
     externalCheckRecords ExternalEtogetherActivityCheckRecord[]
+
+    @@unique([userId, activityId])
 }
 
 model ExternalEtogetherActivityCheckRecord {

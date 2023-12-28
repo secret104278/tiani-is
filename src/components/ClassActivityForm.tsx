@@ -178,7 +178,7 @@ export default function ClassActivityForm({
           <span className="label-text">補充說明</span>
         </label>
         <textarea
-          className="textarea textarea-bordered textarea-lg w-full"
+          className="textarea textarea-bordered w-full"
           {...register("description")}
         ></textarea>
       </div>

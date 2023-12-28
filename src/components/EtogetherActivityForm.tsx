@@ -1,7 +1,7 @@
 import type { ClassActivity } from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { api } from "~/utils/api";
 import {
   getCurrentDateTime,
@@ -18,7 +18,7 @@ interface EtogetherActivityFormData {
   startDateTime: Date | string;
   duration: number;
   description: string;
-  //   subgroup: { asd: string }[];
+  subgroups: { title: string; description: string }[];
 }
 
 export default function EtogetherActivityForm({
@@ -44,9 +44,14 @@ export default function EtogetherActivityForm({
     };
   }
 
-  const { register, handleSubmit, watch } = useForm<EtogetherActivityFormData>({
-    defaultValues: formDefaultValues,
-    mode: "all",
+  const { register, handleSubmit, control } =
+    useForm<EtogetherActivityFormData>({
+      defaultValues: formDefaultValues,
+      mode: "all",
+    });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "subgroups",
   });
 
   const router = useRouter();
@@ -76,6 +81,7 @@ export default function EtogetherActivityForm({
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
           isDraft: isDraft,
+          // TODO: update subgroups
         }),
       );
     }
@@ -88,6 +94,7 @@ export default function EtogetherActivityForm({
         endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
         isDraft: isDraft,
+        subgroups: data.subgroups,
       }),
     );
   };
@@ -145,12 +152,61 @@ export default function EtogetherActivityForm({
         />
       </div>
       <div className="divider"></div>
+      <div className="space-y-4">
+        {fields.map((field, index) => (
+          <div
+            className="card card-bordered card-compact border-2"
+            key={field.id}
+          >
+            <div className="card-body">
+              <label className="label">
+                <span className="label-text">分組主題</span>
+              </label>
+              <input
+                required
+                type="text"
+                className="tiani-input"
+                {...register(`subgroups.${index}.title`)}
+              />
+              <label className="label">
+                <span className="label-text">分組說明</span>
+              </label>
+              <textarea
+                className="textarea textarea-bordered w-full"
+                {...register(`subgroups.${index}.description`)}
+              ></textarea>
+              <div className="card-actions justify-end">
+                <button
+                  className="btn btn-primary"
+                  onClick={(e) => {
+                    void e.preventDefault();
+                    remove(index);
+                  }}
+                >
+                  移除
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <button
+          className="btn"
+          onClick={(e) => {
+            void e.preventDefault();
+            append({ title: "", description: "" });
+          }}
+        >
+          新增分組
+        </button>
+      </div>
+      <div className="divider"></div>
       <div>
         <label className="label">
           <span className="label-text">補充說明</span>
         </label>
         <textarea
-          className="textarea textarea-bordered textarea-lg w-full"
+          className="textarea textarea-bordered w-full"
           {...register("description")}
         ></textarea>
       </div>
