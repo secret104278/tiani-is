@@ -1,4 +1,5 @@
 import { type Prisma } from "@prisma/client";
+import { isNil } from "lodash";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -51,6 +52,12 @@ export const etogetherActivityRouter = createTRPCRouter({
         startDateTime: z.date(),
         endDateTime: z.date(),
         isDraft: z.boolean().optional(),
+        subgroups: z.array(
+          z.object({
+            title: z.string(),
+            description: z.string().nullable(),
+          }),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -61,6 +68,7 @@ export const etogetherActivityRouter = createTRPCRouter({
           location: input.location,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
+          subgroups: { create: input.subgroups },
           status: input.isDraft ? "DRAFT" : "PUBLISHED",
           organiser: {
             connect: {
@@ -132,6 +140,7 @@ export const etogetherActivityRouter = createTRPCRouter({
         where: { id: input.id },
         include: {
           organiser: true,
+          subgroups: true,
         },
       });
 
@@ -162,6 +171,120 @@ export const etogetherActivityRouter = createTRPCRouter({
 
       return await ctx.db.classActivity.delete({
         where: { id: input.id },
+      });
+    }),
+
+  registerActivity: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        subgroupId: z.number(),
+        externals: z.array(
+          z.object({ username: z.string().min(1), subgroupId: z.number() }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(async (db) => {
+        const mainRegister = await db.etogetherActivityRegister.create({
+          data: {
+            activityId: input.id,
+            subgroupId: input.subgroupId,
+            userId: ctx.session.user.id,
+          },
+        });
+
+        await db.externalEtogetherActivityRegister.createMany({
+          data: input.externals.map((e) => ({
+            activityId: input.id,
+            subgroupId: e.subgroupId,
+            username: e.username,
+            mainRegisterId: mainRegister.id,
+          })),
+        });
+      });
+    }),
+
+  getRegister: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id &&
+        !ctx.session.user.role.is_etogether_admin
+      ) {
+        throw new Error("只有管理員可以查看別人的報名");
+      }
+
+      return await ctx.db.etogetherActivityRegister.findUnique({
+        where: {
+          userId_activityId: {
+            activityId: input.activityId,
+            userId: input.userId ?? ctx.session.user.id,
+          },
+        },
+        include: {
+          externalRegisters: true,
+        },
+      });
+    }),
+
+  checkInActivity: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+        latitude: z.number(),
+        longitude: z.number(),
+        subgroupId: z.number(),
+        externals: z.array(
+          z.object({ username: z.string().min(1), subgroupId: z.number() }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(async (db) => {
+        const mainCheckRecord = await db.etogetherActivityCheckRecord.create({
+          data: {
+            activityId: input.activityId,
+            subgroupId: input.subgroupId,
+            userId: ctx.session.user.id,
+
+            latitude: input.latitude,
+            longitude: input.longitude,
+          },
+        });
+
+        await db.externalEtogetherActivityCheckRecord.createMany({
+          data: input.externals.map((e) => ({
+            activityId: input.activityId,
+            subgroupId: e.subgroupId,
+            username: e.username,
+            mainCheckRecordId: mainCheckRecord.id,
+          })),
+        });
+      });
+    }),
+
+  getCheckRecord: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        activityId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.etogetherActivityCheckRecord.findUnique({
+        where: {
+          userId_activityId: {
+            userId: ctx.session.user.id,
+            activityId: input.activityId,
+          },
+        },
       });
     }),
 });

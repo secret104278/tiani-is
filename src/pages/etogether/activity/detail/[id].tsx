@@ -1,4 +1,5 @@
 import {
+  ArrowDownOnSquareIcon,
   ClockIcon,
   MapPinIcon,
   PencilSquareIcon,
@@ -12,8 +13,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { AlertWarning } from "~/components/Alert";
+import EtogetherActivityCheckInDialogContent from "~/components/CheckInDialog/EtogetherActivityCheckInDialogContent";
+import EtogetherActivityRegisterDialogContent from "~/components/DialogContents/EtogetherActivityRegisterDialogContent";
 import ReactiveButton from "~/components/ReactiveButton";
 import ConfirmDialog from "~/components/utils/ConfirmDialog";
+import Dialog from "~/components/utils/Dialog";
 import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
@@ -21,6 +25,7 @@ import type { OGMetaProps } from "~/utils/types";
 
 import {
   activityIsEnded,
+  activityIsStarted,
   formatDateTime,
   getActivityStatusText,
   toDuration,
@@ -75,10 +80,15 @@ export default function EtogetherActivityDetailPage() {
 
   const { activity } = data ?? {};
 
-  // const { data: checkInData, refetch: refetchCheckInData } =
-  //   api.classActivity.getCheckInActivityHistory.useQuery({
-  //     activityId: Number(id),
-  //   });
+  const { data: checkRecordData, refetch: refetchCheckRecordData } =
+    api.etogetherActivity.getCheckRecord.useQuery({
+      activityId: Number(id),
+    });
+
+  const { data: registerData, refetch: refetchRegisterData } =
+    api.etogetherActivity.getRegister.useQuery({
+      activityId: Number(id),
+    });
 
   const [shareBtnLoading, setShareBtnLoading] = useState(false);
 
@@ -90,9 +100,9 @@ export default function EtogetherActivityDetailPage() {
     onSuccess: () => router.push(`/${site}`),
   });
 
+  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
@@ -179,97 +189,75 @@ export default function EtogetherActivityDetailPage() {
     </>
   );
 
-  // const CheckInControl = () => {
-  //   const alreadyCheckIn = !isNil(checkInData);
+  const RegisterControl = () => {
+    return (
+      <>
+        <ReactiveButton
+          className="btn btn-accent"
+          onClick={() => setRegisterDialogOpen(true)}
+        >
+          <ArrowDownOnSquareIcon className="h-4 w-4" />
+          報名
+        </ReactiveButton>
+        <Dialog
+          title={`${activity.title} 報名`}
+          show={registerDialogOpen}
+          closeModal={() => setRegisterDialogOpen(false)}
+        >
+          <EtogetherActivityRegisterDialogContent
+            activityId={activity.id}
+            subgroups={activity.subgroups}
+          />
+        </Dialog>
+      </>
+    );
+  };
 
-  //   const isActivityNotYetForCheck = !activityIsStarted(activity.startDateTime);
-  //   const isActivityClosedForCheck = activityIsEnded(activity.endDateTime);
+  const CheckInControl = () => {
+    if (isNil(registerData)) return null;
 
-  //   let checkButtonLabel = "";
-  //   if (alreadyCheckIn) checkButtonLabel = " （已完成簽到）";
-  //   else if (isActivityNotYetForCheck)
-  //     checkButtonLabel = " （課程開始前 1 小時開放打卡）";
-  //   else if (isActivityClosedForCheck) checkButtonLabel = " （課程已結束）";
+    const alreadyCheckIn = !isNil(checkRecordData);
 
-  //   checkButtonLabel = `簽到${checkButtonLabel}`;
+    const isActivityNotYetForCheck = !activityIsStarted(activity.startDateTime);
+    const isActivityClosedForCheck = activityIsEnded(activity.endDateTime);
 
-  //   return (
-  //     <>
-  //       <ReactiveButton
-  //         className="btn btn-accent"
-  //         disabled={isActivityNotYetForCheck || isActivityClosedForCheck}
-  //         onClick={() => setCheckInDialogOpen(true)}
-  //       >
-  //         <ArrowDownOnSquareIcon className="h-4 w-4" />
-  //         {checkButtonLabel}
-  //       </ReactiveButton>
-  //       <Dialog
-  //         title="定位打卡"
-  //         show={checkInDialogOpen}
-  //         closeModal={() => setCheckInDialogOpen(false)}
-  //       >
-  //         <ClassActivityCheckInDialogContent
-  //           activityId={activity.id}
-  //           onCheckInSuccess={() => void refetchCheckInData()}
-  //         />
-  //       </Dialog>
-  //     </>
-  //   );
-  // };
+    let checkButtonLabel = "";
+    if (alreadyCheckIn) checkButtonLabel = " （已完成簽到）";
+    else if (isActivityNotYetForCheck)
+      checkButtonLabel = " （活動開始前 1 小時開放打卡）";
+    else if (isActivityClosedForCheck) checkButtonLabel = " （活動已結束）";
 
-  // const LeaveControl = () => {
-  //   if (isLeavedIsLoading) return <div className="loading"></div>;
-  //   if (!isNil(isLeavedError))
-  //     return <AlertWarning>{isLeavedError.message}</AlertWarning>;
+    checkButtonLabel = `簽到${checkButtonLabel}`;
 
-  //   if (isLeaved)
-  //     return (
-  //       <ReactiveButton
-  //         className="btn btn-secondary"
-  //         onClick={() => cancelLeave({ activityId: activity.id })}
-  //         disabled={isEnded}
-  //         loading={cancelLeaveIsLoading}
-  //         error={cancelLeaveError?.message}
-  //       >
-  //         取消請假
-  //       </ReactiveButton>
-  //     );
+    return (
+      <>
+        <ReactiveButton
+          className="btn btn-accent"
+          disabled={isActivityNotYetForCheck || isActivityClosedForCheck}
+          onClick={() => setCheckInDialogOpen(true)}
+        >
+          <ArrowDownOnSquareIcon className="h-4 w-4" />
+          {checkButtonLabel}
+        </ReactiveButton>
+        <Dialog
+          title="定位打卡"
+          show={checkInDialogOpen}
+          closeModal={() => setCheckInDialogOpen(false)}
+        >
+          <EtogetherActivityCheckInDialogContent
+            activityId={activity.id}
+            subgroupId={registerData.subgroupId}
+            externals={registerData.externalRegisters.map((r) => ({
+              username: r.username,
+              subgroupId: r.subgroupId,
+            }))}
+            onCheckInSuccess={() => void refetchCheckRecordData()}
+          />
+        </Dialog>
+      </>
+    );
+  };
 
-  //   return (
-  //     <>
-  //       <ReactiveButton
-  //         className="btn btn-secondary"
-  //         onClick={() => setLeaveDialogOpen(true)}
-  //         disabled={isEnded}
-  //         loading={takeLeaveIsLoading}
-  //         error={takeLeaveError?.message}
-  //       >
-  //         <ArrowRightOnRectangleIcon className="h-4 w-4" />
-  //         請假
-  //       </ReactiveButton>
-  //       <ConfirmDialog
-  //         show={leaveDialogOpen}
-  //         closeModal={() => setLeaveDialogOpen(false)}
-  //         title="確認請假"
-  //         content={
-  //           <article className="prose">
-  //             <span className="font-bold">
-  //               {formatDateTime(activity.startDateTime)}
-  //               <br />
-  //               <span className="text-lg">{activity.title}</span>
-  //             </span>
-  //             <br />
-  //             是否確定要請假？
-  //           </article>
-  //         }
-  //         confirmText="請假"
-  //         onConfirm={() => takeLeave({ activityId: activity.id })}
-  //       />
-  //     </>
-  //   );
-  // };
-
-  // Fetch and display the details of the book with the given ID
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
@@ -299,11 +287,22 @@ export default function EtogetherActivityDetailPage() {
             {toDuration(activity.startDateTime, activity.endDateTime)}
           </p>
         </div>
+        {activity.subgroups.map((subgroup) => (
+          <div
+            key={subgroup.id}
+            className="card card-bordered card-compact shadow-sm"
+          >
+            <div className="card-body">
+              <p>分組 - {subgroup.title}</p>
+              <p>{subgroup.description}</p>
+            </div>
+          </div>
+        ))}
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
-        {/* <CheckInControl />
-        <LeaveControl /> */}
+        <RegisterControl />
+        <CheckInControl />
       </div>
     </div>
   );
