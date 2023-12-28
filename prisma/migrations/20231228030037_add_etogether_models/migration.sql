@@ -2,7 +2,7 @@
 CREATE TYPE "EtogetherActivityStatus" AS ENUM ('DRAFT', 'PUBLISHED');
 
 -- AlterEnum
-ALTER TYPE "Role" ADD VALUE 'ETOGETHER_ADMIN';
+ALTER TYPE "Role" ADD VALUE IF NOT EXISTS 'ETOGETHER_ADMIN';
 
 -- CreateTable
 CREATE TABLE "EtogetherActivitySubgroup" (
