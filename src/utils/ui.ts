@@ -277,3 +277,16 @@ export const urlBaseToSite = (urlBase?: string): Site => {
   else if (urlBase === "etogether") return Site.Etogether;
   else return Site.Volunteer;
 };
+
+export const siteToTitle = (site: Site) => {
+  switch (site) {
+    case Site.Volunteer:
+      return "天一志工隊";
+    case Site.Yideclass:
+      return "義德班務網";
+    case Site.Etogether:
+      return "活動e起來";
+    default:
+      return "天一聖道院資訊系統";
+  }
+};
