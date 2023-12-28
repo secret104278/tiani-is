@@ -54,14 +54,14 @@ export default function EtogetherActivityForm({
     mutate: createActivity,
     error: createActivityError,
     isLoading: createActivityIsLoading,
-  } = api.classActivity.createActivity.useMutation({
+  } = api.etogetherActivity.createActivity.useMutation({
     onSuccess: (data) => router.push(`/etogether/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isLoading: updateActivityIsLoading,
-  } = api.classActivity.updateActivity.useMutation({
+  } = api.etogetherActivity.updateActivity.useMutation({
     onSuccess: (data) => router.push(`/etogether/activity/detail/${data.id}`),
   });
 
