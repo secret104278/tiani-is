@@ -179,23 +179,39 @@ export const etogetherActivityRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         subgroupId: z.number(),
-        externals: z.array(
+        externalRegisters: z.array(
           z.object({ username: z.string().min(1), subgroupId: z.number() }),
         ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.$transaction(async (db) => {
-        const mainRegister = await db.etogetherActivityRegister.create({
-          data: {
+        const mainRegister = await db.etogetherActivityRegister.upsert({
+          where: {
+            userId_activityId: {
+              userId: ctx.session.user.id,
+              activityId: input.id,
+            },
+          },
+          update: {
+            subgroupId: input.subgroupId,
+          },
+          create: {
             activityId: input.id,
             subgroupId: input.subgroupId,
             userId: ctx.session.user.id,
           },
         });
 
+        // FIXME: deal with already checkin
+        await db.externalEtogetherActivityRegister.deleteMany({
+          where: {
+            mainRegisterId: mainRegister.id,
+          },
+        });
+
         await db.externalEtogetherActivityRegister.createMany({
-          data: input.externals.map((e) => ({
+          data: input.externalRegisters.map((e) => ({
             activityId: input.id,
             subgroupId: e.subgroupId,
             username: e.username,
@@ -229,7 +245,12 @@ export const etogetherActivityRouter = createTRPCRouter({
           },
         },
         include: {
-          externalRegisters: true,
+          subgroup: true,
+          externalRegisters: {
+            include: {
+              subgroup: true,
+            },
+          },
         },
       });
     }),
@@ -248,11 +269,29 @@ export const etogetherActivityRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.$transaction(async (db) => {
-        const mainCheckRecord = await db.etogetherActivityCheckRecord.create({
+        const mainRegister = await db.etogetherActivityRegister.findUnique({
+          where: {
+            userId_activityId: {
+              userId: ctx.session.user.id,
+              activityId: input.activityId,
+            },
+          },
+          include: {
+            externalRegisters: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+
+        if (!mainRegister) {
+          throw new Error("尚未報名");
+        }
+
+        await db.etogetherActivityCheckRecord.create({
           data: {
-            activityId: input.activityId,
-            subgroupId: input.subgroupId,
-            userId: ctx.session.user.id,
+            registerId: mainRegister.id,
 
             latitude: input.latitude,
             longitude: input.longitude,
@@ -260,11 +299,8 @@ export const etogetherActivityRouter = createTRPCRouter({
         });
 
         await db.externalEtogetherActivityCheckRecord.createMany({
-          data: input.externals.map((e) => ({
-            activityId: input.activityId,
-            subgroupId: e.subgroupId,
-            username: e.username,
-            mainCheckRecordId: mainCheckRecord.id,
+          data: mainRegister.externalRegisters.map((e) => ({
+            registerId: e.id,
           })),
         });
       });
@@ -278,11 +314,19 @@ export const etogetherActivityRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.etogetherActivityCheckRecord.findUnique({
+      return await ctx.db.etogetherActivityRegister.findUnique({
         where: {
           userId_activityId: {
-            userId: ctx.session.user.id,
+            userId: input.userId ?? ctx.session.user.id,
             activityId: input.activityId,
+          },
+        },
+        select: {
+          checkRecord: true,
+          externalRegisters: {
+            select: {
+              checkRecord: true,
+            },
           },
         },
       });

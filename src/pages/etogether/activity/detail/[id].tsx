@@ -3,9 +3,10 @@ import {
   ClockIcon,
   MapPinIcon,
   PencilSquareIcon,
-  QueueListIcon,
   TrashIcon,
+  UserGroupIcon,
 } from "@heroicons/react/20/solid";
+import classNames from "classnames";
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
@@ -84,11 +85,12 @@ export default function EtogetherActivityDetailPage() {
     api.etogetherActivity.getCheckRecord.useQuery({
       activityId: Number(id),
     });
+  const alreadyCheckIn = !isNil(checkRecordData?.checkRecord);
 
-  const { data: registerData, refetch: refetchRegisterData } =
-    api.etogetherActivity.getRegister.useQuery({
-      activityId: Number(id),
-    });
+  const { data: registerData } = api.etogetherActivity.getRegister.useQuery({
+    activityId: Number(id),
+  });
+  const alreadyRegister = !isNil(registerData);
 
   const [shareBtnLoading, setShareBtnLoading] = useState(false);
 
@@ -109,8 +111,8 @@ export default function EtogetherActivityDetailPage() {
   if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
 
   const isManager =
-    session?.user.role.is_etogether_admin ??
-    session?.user.id == activity.organiserId;
+    !!session?.user.role.is_etogether_admin ||
+    session?.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
@@ -139,7 +141,7 @@ export default function EtogetherActivityDetailPage() {
 
   const AdminPanel = () => (
     <>
-      <div className="divider">課程管理</div>
+      <div className="divider">活動管理</div>
       <div className="flex flex-row justify-end">
         <div className="badge badge-primary">
           {getActivityStatusText(activity.status)}
@@ -173,7 +175,7 @@ export default function EtogetherActivityDetailPage() {
         />
       </div>
 
-      <Link href={`/etogether/activity/checkrecord/${activity.id}`}>
+      {/* <Link href={`/etogether/activity/checkrecord/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           打卡名單
@@ -184,20 +186,54 @@ export default function EtogetherActivityDetailPage() {
           <QueueListIcon className="h-4 w-4" />
           請假名單
         </button>
-      </Link>
+      </Link> */}
       <div className="divider" />
     </>
   );
 
+  const RegisterContent = () => {
+    if (!alreadyRegister) return null;
+
+    return (
+      <div className="card card-bordered card-compact shadow-sm">
+        <div className="card-body">
+          <p className="font-bold">我的報名表</p>
+          <p>
+            {session?.user.name}：{registerData.subgroup.title}
+          </p>
+          {registerData.externalRegisters.map((r) => (
+            <p key={r.id}>
+              {r.username}：{r.subgroup.title}
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const RegisterControl = () => {
+    if (alreadyCheckIn) return null;
+
     return (
       <>
         <ReactiveButton
-          className="btn btn-accent"
+          className={classNames({
+            btn: true,
+            "btn-accent": !alreadyRegister,
+          })}
           onClick={() => setRegisterDialogOpen(true)}
         >
-          <ArrowDownOnSquareIcon className="h-4 w-4" />
-          報名
+          {alreadyRegister ? (
+            <>
+              <PencilSquareIcon className="h-4 w-4" />
+              修改報名
+            </>
+          ) : (
+            <>
+              <ArrowDownOnSquareIcon className="h-4 w-4" />
+              報名
+            </>
+          )}
         </ReactiveButton>
         <Dialog
           title={`${activity.title} 報名`}
@@ -207,6 +243,7 @@ export default function EtogetherActivityDetailPage() {
           <EtogetherActivityRegisterDialogContent
             activityId={activity.id}
             subgroups={activity.subgroups}
+            defaultValues={alreadyRegister ? registerData : undefined}
           />
         </Dialog>
       </>
@@ -214,26 +251,26 @@ export default function EtogetherActivityDetailPage() {
   };
 
   const CheckInControl = () => {
-    if (isNil(registerData)) return null;
-
-    const alreadyCheckIn = !isNil(checkRecordData);
+    if (!alreadyRegister) return null;
 
     const isActivityNotYetForCheck = !activityIsStarted(activity.startDateTime);
     const isActivityClosedForCheck = activityIsEnded(activity.endDateTime);
 
-    let checkButtonLabel = "";
-    if (alreadyCheckIn) checkButtonLabel = " （已完成簽到）";
+    let checkButtonLabel = "簽到";
+    if (alreadyCheckIn) checkButtonLabel = "已完成簽到";
     else if (isActivityNotYetForCheck)
-      checkButtonLabel = " （活動開始前 1 小時開放打卡）";
-    else if (isActivityClosedForCheck) checkButtonLabel = " （活動已結束）";
-
-    checkButtonLabel = `簽到${checkButtonLabel}`;
+      checkButtonLabel = "活動開始前 1 小時開放簽到";
+    else if (isActivityClosedForCheck) checkButtonLabel = "活動已結束";
 
     return (
       <>
         <ReactiveButton
           className="btn btn-accent"
-          disabled={isActivityNotYetForCheck || isActivityClosedForCheck}
+          disabled={
+            isActivityNotYetForCheck ||
+            isActivityClosedForCheck ||
+            alreadyCheckIn
+          }
           onClick={() => setCheckInDialogOpen(true)}
         >
           <ArrowDownOnSquareIcon className="h-4 w-4" />
@@ -287,20 +324,27 @@ export default function EtogetherActivityDetailPage() {
             {toDuration(activity.startDateTime, activity.endDateTime)}
           </p>
         </div>
+        <div className="flex items-center">
+          <UserGroupIcon className="mr-1 h-4 w-4" />
+          <p>分組：</p>
+        </div>
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className="card card-bordered card-compact shadow-sm"
+            className="card card-bordered card-compact ml-4 shadow-sm"
           >
             <div className="card-body">
-              <p>分組 - {subgroup.title}</p>
-              <p>{subgroup.description}</p>
+              <p className="font-bold">{subgroup.title}</p>
+              <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
+                {subgroup.description}
+              </article>
             </div>
           </div>
         ))}
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
+        <RegisterContent />
         <RegisterControl />
         <CheckInControl />
       </div>

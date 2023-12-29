@@ -1,12 +1,13 @@
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../ReactiveButton";
 
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 
 interface EtogetherActivityRegisterFormData {
   subgroupId: number;
-  externals: {
+  externalRegisters: {
     username: string;
     subgroupId: number;
   }[];
@@ -15,22 +16,26 @@ interface EtogetherActivityRegisterFormData {
 export default function EtogetherActivityRegisterDialogContent({
   activityId,
   subgroups,
+  defaultValues,
 }: {
   activityId: number;
   subgroups: {
     id: number;
     title: string;
   }[];
+  defaultValues?: EtogetherActivityRegisterFormData;
 }) {
+  const { data: session } = useSession();
   const router = useRouter();
 
   const { register, handleSubmit, control } =
     useForm<EtogetherActivityRegisterFormData>({
       mode: "all",
+      defaultValues,
     });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "externals",
+    name: "externalRegisters",
   });
 
   const {
@@ -45,11 +50,14 @@ export default function EtogetherActivityRegisterDialogContent({
     <form className="flex flex-col space-y-4">
       <div>
         <label className="label">
-          <span className="label-text">分組</span>
+          <span className="label-text">姓名：{session?.user.name}</span>
         </label>
-        <div>
+        <div className="flex flex-row space-x-1">
+          <label className="label">
+            <span className="label-text">分組</span>
+          </label>
           <select
-            className="select select-bordered"
+            className="select select-bordered select-sm"
             required
             {...register("subgroupId", { valueAsNumber: true })}
           >
@@ -61,41 +69,45 @@ export default function EtogetherActivityRegisterDialogContent({
           </select>
         </div>
       </div>
-      <div className="divider"></div>
+      <div className="divider">其他夥伴</div>
       {fields.map((field, index) => (
         <div
           className="card card-bordered card-compact border-2"
           key={field.id}
         >
           <div className="card-body">
-            <label className="label">
-              <span className="label-text">姓名</span>
-            </label>
-            <input
-              required
-              type="text"
-              className="tiani-input"
-              {...register(`externals.${index}.username`)}
-            />
-            <label className="label">
-              <span className="label-text">分組</span>
-            </label>
-            <select
-              className="select select-bordered"
-              required
-              {...register(`externals.${index}.subgroupId`, {
-                valueAsNumber: true,
-              })}
-            >
-              {subgroups.map((subgroup) => (
-                <option key={subgroup.id} value={subgroup.id}>
-                  {subgroup.title}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-row space-x-1">
+              <label className="label">
+                <span className="label-text">姓名</span>
+              </label>
+              <input
+                required
+                type="text"
+                className="tiani-input-inline"
+                {...register(`externalRegisters.${index}.username`)}
+              />
+            </div>
+            <div className="flex flex-row space-x-1">
+              <label className="label">
+                <span className="label-text">分組</span>
+              </label>
+              <select
+                className="select select-bordered select-sm"
+                required
+                {...register(`externalRegisters.${index}.subgroupId`, {
+                  valueAsNumber: true,
+                })}
+              >
+                {subgroups.map((subgroup) => (
+                  <option key={subgroup.id} value={subgroup.id}>
+                    {subgroup.title}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="card-actions justify-end">
               <button
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
                 onClick={(e) => {
                   void e.preventDefault();
                   remove(index);
@@ -111,7 +123,7 @@ export default function EtogetherActivityRegisterDialogContent({
         className="btn"
         onClick={(e) => {
           void e.preventDefault();
-          append({ username: "", subgroupId: -1 });
+          append({ username: "", subgroupId: subgroups?.[0]?.id ?? -1 });
         }}
       >
         新增夥伴
