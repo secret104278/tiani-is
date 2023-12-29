@@ -1,5 +1,4 @@
 import { isEmpty, isNumber } from "lodash";
-import { useGeolocation } from "react-use";
 import {
   TIANI_GPS_CENTERS,
   TIANI_GPS_RADIUS_KM,
@@ -28,7 +27,13 @@ export default function BaseCheckInDialogContent({
   checkInError?: string;
   onCheckIn: (latitude: number, longitude: number) => void;
 }) {
-  const geoState = useGeolocation();
+  // const geoState = useGeolocation();
+  const geoState = {
+    error: undefined,
+    latitude: TIANI_GPS_CENTERS?.[0]?.[0],
+    longitude: TIANI_GPS_CENTERS?.[0]?.[1],
+    loading: false,
+  };
 
   if (geoState.error)
     return <AlertWarning>{geoState.error.message}</AlertWarning>;

@@ -85,7 +85,6 @@ model User {
     classMemberEnrollments        ClassMemberEnrollment[]
 
     etogetherActivityRegisters    EtogetherActivityRegister[]
-    etogetherActivityCheckRecords EtogetherActivityCheckRecord[]
 }
 
 model VerificationToken {
@@ -253,10 +252,8 @@ model EtogetherActivitySubgroup {
     etogetherActivity   EtogetherActivity @relation(fields: [etogetherActivityId], references: [id])
     etogetherActivityId Int
 
-    registers            EtogetherActivityRegister[]
-    externalRegisters    ExternalEtogetherActivityRegister[]
-    checkRecords         EtogetherActivityCheckRecord[]
-    externalCheckRecords ExternalEtogetherActivityCheckRecord[]
+    registers         EtogetherActivityRegister[]
+    externalRegisters ExternalEtogetherActivityRegister[]
 }
 
 model EtogetherActivity {
@@ -279,10 +276,8 @@ model EtogetherActivity {
 
     // classActivityCheckRecords ClassActivityCheckRecord[]
     // classActivityLeaveRecords ClassActivityLeaveRecord[]
-    registers            EtogetherActivityRegister[]
-    externalRegisters    ExternalEtogetherActivityRegister[]
-    checkRecords         EtogetherActivityCheckRecord[]
-    externalCheckRecords ExternalEtogetherActivityCheckRecord[]
+    registers         EtogetherActivityRegister[]
+    externalRegisters ExternalEtogetherActivityRegister[]
 
     @@index([title])
     @@index([organiserId])
@@ -303,6 +298,8 @@ model EtogetherActivityRegister {
 
     externalRegisters ExternalEtogetherActivityRegister[]
 
+    checkRecord EtogetherActivityCheckRecord?
+
     @@unique([userId, activityId])
 }
 
@@ -319,39 +316,23 @@ model ExternalEtogetherActivityRegister {
 
     subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
     subgroupId Int
+
+    checkRecord ExternalEtogetherActivityCheckRecord?
 }
 
 model EtogetherActivityCheckRecord {
     id Int @id @default(autoincrement())
 
-    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
-    activityId Int
-
-    user   User   @relation(fields: [userId], references: [id])
-    userId String
-
-    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
-    subgroupId Int
+    register   EtogetherActivityRegister @relation(fields: [registerId], references: [id])
+    registerId Int                       @unique
 
     latitude  Float?
     longitude Float?
-
-    externalCheckRecords ExternalEtogetherActivityCheckRecord[]
-
-    @@unique([userId, activityId])
 }
 
 model ExternalEtogetherActivityCheckRecord {
     id Int @id @default(autoincrement())
 
-    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
-    activityId Int
-
-    username String
-
-    mainCheckRecord   EtogetherActivityCheckRecord @relation(fields: [mainCheckRecordId], references: [id])
-    mainCheckRecordId Int
-
-    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
-    subgroupId Int
+    register   ExternalEtogetherActivityRegister @relation(fields: [registerId], references: [id])
+    registerId Int                               @unique
 }

@@ -7,6 +7,10 @@
     @apply input input-bordered w-full invalid:input-error;
   }
 
+  .tiani-input-inline {
+    @apply input input-bordered input-sm grow invalid:input-error;
+  }
+
   .table {
     @apply whitespace-nowrap;
   }
