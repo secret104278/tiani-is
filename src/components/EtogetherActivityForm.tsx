@@ -1,4 +1,4 @@
-import type { ClassActivity } from "@prisma/client";
+import type { EtogetherActivity } from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -24,7 +24,7 @@ interface EtogetherActivityFormData {
 export default function EtogetherActivityForm({
   defaultActivity,
 }: {
-  defaultActivity?: ClassActivity;
+  defaultActivity?: EtogetherActivity;
 }) {
   let formDefaultValues: Partial<EtogetherActivityFormData> = {
     title: "",
