@@ -1,6 +1,6 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Role } from "@prisma/client";
-import { isEmpty, sortBy } from "lodash";
+import { isEmpty } from "lodash";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { AlertWarning } from "~/components/Alert";
 import ReactiveButton from "~/components/ReactiveButton";
 import Dialog from "~/components/utils/Dialog";
 import { api } from "~/utils/api";
+import { userComparator } from "~/utils/ui";
 
 function CreateUserDialogContent() {
   const router = useRouter();
@@ -115,7 +116,7 @@ export default function AdminUsersPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>姓名</th>
+              <th className="tiani-table-pin-col">姓名</th>
               <th>
                 最高
                 <br />
@@ -134,9 +135,9 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {sortBy(users, "id").map((user) => (
+            {users?.sort(userComparator)?.map((user) => (
               <tr key={user.id} className="hover">
-                <td>{user.name}</td>
+                <td className="tiani-table-pin-col">{user.name}</td>
                 <td>
                   <input
                     type="checkbox"

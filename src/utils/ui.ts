@@ -277,3 +277,10 @@ export const urlBaseToSite = (urlBase?: string): Site => {
   else if (urlBase === "etogether") return Site.Etogether;
   else return Site.Volunteer;
 };
+
+export const userComparator = (
+  a: { name: string | null },
+  b: { name: string | null },
+) => {
+  return !!a.name && !!b.name ? a.name.localeCompare(b.name, "zh-Hant-TW") : 0;
+};

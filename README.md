@@ -4,7 +4,7 @@ docker run -d \
 	-e POSTGRES_PASSWORD=mysecretpassword \
 	-e PGDATA=/var/lib/postgresql/data/pgdata \
 	-v $PWD/prisma/pgdata:/var/lib/postgresql/data \
-    -p 5432:5432 \
+    -p 15432:5432 \
 	postgres
 
 # Create T3 App
