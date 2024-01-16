@@ -502,4 +502,88 @@ export const classActivityRouter = createTRPCRouter({
         },
       });
     }),
+
+  enrollClass: protectedProcedure
+    .input(
+      z.object({
+        classTitle: z.string(),
+        userId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_yideclass_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以幫別人註冊課程");
+
+      const userId = input.userId ?? ctx.session.user.id;
+      await ctx.db.classMemberEnrollment.upsert({
+        where: {
+          userId_classTitle: {
+            userId,
+            classTitle: input.classTitle,
+          },
+        },
+        update: {},
+        create: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          classTitle: input.classTitle,
+        },
+      });
+    }),
+
+  unenrollClass: protectedProcedure
+    .input(
+      z.object({
+        classTitle: z.string(),
+        userId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (
+        !ctx.session.user.role.is_yideclass_admin &&
+        !isNil(input.userId) &&
+        input.userId !== ctx.session.user.id
+      )
+        throw new Error("只有管理員可以幫別人取消註冊課程");
+
+      const userId = input.userId ?? ctx.session.user.id;
+      await ctx.db.classMemberEnrollment.deleteMany({
+        where: {
+          userId,
+          classTitle: input.classTitle,
+        },
+      });
+    }),
+
+  getClassMemberEnrollments: protectedProcedure
+    .input(
+      z.object({
+        classTitle: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.session.user.role.is_yideclass_admin)
+        throw new Error("只有管理員可以查看課程報名名單");
+
+      return await ctx.db.classMemberEnrollment.findMany({
+        where: {
+          classTitle: input.classTitle,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+    }),
 });

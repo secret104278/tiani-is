@@ -1,4 +1,5 @@
 import { isEmpty, sortBy } from "lodash";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
 import { api } from "~/utils/api";
@@ -23,11 +24,14 @@ export default function YiDeAdminClassDetail() {
   return (
     <div className="flex flex-col space-y-4">
       <div className="link" onClick={() => router.back()}>
-        ← 工作管理
+        ← 上一頁
       </div>
       <article className="prose">
         <h1>{title}</h1>
       </article>
+      <Link href={`/yideclass/admin/class/enroll/${String(title)}`}>
+        <button className="btn">班員管理</button>
+      </Link>
       <div className="overflow-x-auto">
         <table className="table">
           <thead>
