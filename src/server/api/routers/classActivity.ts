@@ -1,5 +1,5 @@
 import { type Prisma } from "@prisma/client";
-import { isNil, sum } from "lodash";
+import { difference, isNil, sum, union } from "lodash";
 import { z } from "zod";
 import {
   TIANI_GPS_CENTERS,
@@ -488,18 +488,57 @@ export const classActivityRouter = createTRPCRouter({
       if (!ctx.session.user.role.is_yideclass_admin)
         throw new Error("只有管理員可以");
 
-      return await ctx.db.classActivity.findMany({
-        where: {
-          title: input.title,
-        },
-        include: {
-          _count: {
-            select: {
-              classActivityCheckRecords: true,
-              classActivityLeaveRecords: true,
+      const [enrollments, classActivities] = await Promise.all([
+        await ctx.db.classMemberEnrollment.findMany({
+          where: {
+            classTitle: input.title,
+          },
+          select: {
+            userId: true,
+          },
+        }),
+        await ctx.db.classActivity.findMany({
+          where: {
+            title: input.title,
+          },
+          include: {
+            classActivityCheckRecords: {
+              select: {
+                userId: true,
+              },
+            },
+            classActivityLeaveRecords: {
+              select: {
+                userId: true,
+              },
             },
           },
-        },
+        }),
+      ]);
+
+      const enrolledUserIds = enrollments.map((e) => e.userId);
+
+      return classActivities.map((activity) => {
+        const checkedInUserIds = activity.classActivityCheckRecords.map(
+          (record) => record.userId,
+        );
+        const leavedUserIds = activity.classActivityLeaveRecords.map(
+          (record) => record.userId,
+        );
+
+        const checkInUserCount = checkedInUserIds.length;
+        const leaveUserCount = leavedUserIds.length;
+        const absentUserCount = difference(
+          enrolledUserIds,
+          union(checkedInUserIds, leavedUserIds),
+        ).length;
+
+        return {
+          ...activity,
+          checkInUserCount,
+          leaveUserCount,
+          absentUserCount,
+        };
       });
     }),
 
