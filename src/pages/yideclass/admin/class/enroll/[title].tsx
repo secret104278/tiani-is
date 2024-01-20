@@ -43,7 +43,7 @@ export default function YiDeAdminClassDetail() {
     error: classMemberEnrollmentsError,
     refetch: classMemberEnrollmentsRefetch,
   } = api.classActivity.getClassMemberEnrollments.useQuery({
-    classTitle: title as string,
+    classTitle: String(title),
   });
 
   const enrolledUserIds =
@@ -73,11 +73,17 @@ export default function YiDeAdminClassDetail() {
   return (
     <div className="flex flex-col space-y-4">
       <div className="link" onClick={() => router.back()}>
-        ← 工作管理
+        ← 上一頁
       </div>
       <article className="prose">
         <h1>{title} 班員管理</h1>
       </article>
+      <div className="stats shadow">
+        <div className="stat">
+          <div className="stat-title">目前班員數</div>
+          <div className="stat-value">{classMemberEnrollments?.length}</div>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="table">
           <thead>

@@ -17,7 +17,18 @@ export default function YiDeAdminClassDetail() {
     title: String(title),
   });
 
-  if (activitiesIsLoading) return <div className="loading" />;
+  const {
+    data: classMemberEnrollments,
+    isLoading: classMemberEnrollmentsIsLoading,
+    error: classMemberEnrollmentsError,
+  } = api.classActivity.getClassMemberEnrollments.useQuery({
+    classTitle: String(title),
+  });
+
+  if (activitiesIsLoading || classMemberEnrollmentsIsLoading)
+    return <div className="loading" />;
+  if (!isEmpty(classMemberEnrollmentsError))
+    return <AlertWarning>{classMemberEnrollmentsError.message}</AlertWarning>;
   if (!isEmpty(activitiesError))
     return <AlertWarning>{activitiesError.message}</AlertWarning>;
 
@@ -32,6 +43,12 @@ export default function YiDeAdminClassDetail() {
       <Link href={`/yideclass/admin/class/enroll/${String(title)}`}>
         <button className="btn">班員管理</button>
       </Link>
+      <div className="stats shadow">
+        <div className="stat">
+          <div className="stat-title">目前班員數</div>
+          <div className="stat-value">{classMemberEnrollments?.length}</div>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="table">
           <thead>
