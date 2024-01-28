@@ -1,15 +1,6 @@
 {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.organizeImports": true
-    },
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "driver": "PostgreSQL",
-            "connectString": "postgresql://postgres:mysecretpassword@localhost:5432/mydb",
-            "name": "TIANI-IS"
-        }
-    ]
+        "source.organizeImports": "explicit"
+    }
 }
