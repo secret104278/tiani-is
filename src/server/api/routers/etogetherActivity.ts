@@ -17,7 +17,7 @@ export const etogetherActivityRouter = createTRPCRouter({
       const filters: Prisma.EtogetherActivityWhereInput[] = [];
       if (input.participatedByMe) {
         filters.push({
-          checkRecords: { some: { userId: ctx.session.user.id } },
+          registers: { some: { userId: ctx.session.user.id } },
         });
       }
 

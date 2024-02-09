@@ -9,6 +9,7 @@ import { AlertWarning } from "../Alert";
 import ReactiveButton from "../ReactiveButton";
 
 import dynamic from "next/dynamic";
+import { useGeolocation } from "react-use";
 
 const ViewFocus = dynamic(() => import("~/components/ViewFocus"), {
   ssr: false,
@@ -27,13 +28,21 @@ export default function BaseCheckInDialogContent({
   checkInError?: string;
   onCheckIn: (latitude: number, longitude: number) => void;
 }) {
-  // const geoState = useGeolocation();
-  const geoState = {
-    error: undefined,
-    latitude: TIANI_GPS_CENTERS?.[0]?.[0],
-    longitude: TIANI_GPS_CENTERS?.[0]?.[1],
-    loading: false,
-  };
+  let geoState = useGeolocation();
+  if (process.env.NODE_ENV === "development") {
+    geoState = {
+      error: undefined,
+      latitude: TIANI_GPS_CENTERS.at(0)!.at(0)!,
+      longitude: TIANI_GPS_CENTERS.at(0)!.at(1)!,
+      loading: false,
+      accuracy: null,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+      timestamp: null,
+    };
+  }
 
   if (geoState.error)
     return <AlertWarning>{geoState.error.message}</AlertWarning>;

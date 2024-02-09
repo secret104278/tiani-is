@@ -6,7 +6,6 @@ import {
   TrashIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
-import classNames from "classnames";
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
@@ -191,50 +190,44 @@ export default function EtogetherActivityDetailPage() {
     </>
   );
 
-  const RegisterContent = () => {
-    if (!alreadyRegister) return null;
-
-    return (
-      <div className="card card-bordered card-compact shadow-sm">
-        <div className="card-body">
-          <p className="font-bold">我的報名表</p>
-          <p>
-            {session?.user.name}：{registerData.subgroup.title}
-          </p>
-          {registerData.externalRegisters.map((r) => (
-            <p key={r.id}>
-              {r.username}：{r.subgroup.title}
-            </p>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   const RegisterControl = () => {
-    if (alreadyCheckIn) return null;
-
     return (
       <>
-        <ReactiveButton
-          className={classNames({
-            btn: true,
-            "btn-accent": !alreadyRegister,
-          })}
-          onClick={() => setRegisterDialogOpen(true)}
-        >
-          {alreadyRegister ? (
-            <>
-              <PencilSquareIcon className="h-4 w-4" />
-              修改報名
-            </>
-          ) : (
-            <>
-              <ArrowDownOnSquareIcon className="h-4 w-4" />
-              報名
-            </>
-          )}
-        </ReactiveButton>
+        {alreadyRegister && (
+          <div className="card card-bordered card-compact shadow-sm">
+            <div className="card-body">
+              <p className="font-bold">我的報名表</p>
+              <p>
+                {session?.user.name}：{registerData.subgroup.title}
+              </p>
+              {registerData.externalRegisters.map((r) => (
+                <p key={r.id}>
+                  {r.username}：{r.subgroup.title}
+                </p>
+              ))}
+              {!alreadyCheckIn && (
+                <div className="card-actions justify-end">
+                  <ReactiveButton
+                    className="btn"
+                    onClick={() => setRegisterDialogOpen(true)}
+                  >
+                    <PencilSquareIcon className="h-4 w-4" />
+                    修改報名
+                  </ReactiveButton>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {!alreadyRegister && (
+          <ReactiveButton
+            className="btn btn-accent"
+            onClick={() => setRegisterDialogOpen(true)}
+          >
+            <ArrowDownOnSquareIcon className="h-4 w-4" />
+            報名
+          </ReactiveButton>
+        )}
         <Dialog
           title={`${activity.title} 報名`}
           show={registerDialogOpen}
@@ -344,7 +337,6 @@ export default function EtogetherActivityDetailPage() {
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
-        <RegisterContent />
         <RegisterControl />
         <CheckInControl />
       </div>
