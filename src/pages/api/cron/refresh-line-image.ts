@@ -17,16 +17,20 @@ export default async function handler(
   });
   await Promise.all(
     map(users, async (user) => {
-      const imageURL = await getLineImageURL(db, user.id);
-      if (isNil(imageURL)) return;
-      if (imageURL === user.image) return;
+      try {
+        const imageURL = await getLineImageURL(db, user.id);
+        if (isNil(imageURL)) return;
+        if (imageURL === user.image) return;
 
-      console.info(`Updating ${user.name}'s image`);
+        console.info(`Updating ${user.name}'s image`);
 
-      await db.user.update({
-        where: { id: user.id },
-        data: { image: imageURL },
-      });
+        await db.user.update({
+          where: { id: user.id },
+          data: { image: imageURL },
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }),
   );
 
