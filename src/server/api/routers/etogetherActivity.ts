@@ -331,4 +331,45 @@ export const etogetherActivityRouter = createTRPCRouter({
         },
       });
     }),
+
+  getActivityWithRegistrations: protectedProcedure
+    .input(z.object({ activityId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const activity = await ctx.db.etogetherActivity.findUniqueOrThrow({
+        select: { organiserId: true },
+        where: { id: input.activityId },
+      });
+
+      if (
+        !(
+          ctx.session.user.id === activity.organiserId ||
+          ctx.session.user.role.is_etogether_admin
+        )
+      ) {
+        throw new Error("只有管理員可以查看報名");
+      }
+
+      return await ctx.db.etogetherActivity.findUniqueOrThrow({
+        where: { id: input.activityId },
+        include: {
+          registers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              checkRecord: true,
+            },
+          },
+          externalRegisters: {
+            include: {
+              checkRecord: true,
+            },
+          },
+          subgroups: true,
+        },
+      });
+    }),
 });

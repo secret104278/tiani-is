@@ -3,6 +3,7 @@ import {
   ClockIcon,
   MapPinIcon,
   PencilSquareIcon,
+  QueueListIcon,
   TrashIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
@@ -173,19 +174,12 @@ export default function EtogetherActivityDetailPage() {
           onConfirm={() => deleteActivity({ id: activity.id })}
         />
       </div>
-
-      {/* <Link href={`/etogether/activity/checkrecord/${activity.id}`}>
+      <Link href={`/etogether/activity/registration/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
-          打卡名單
+          報名名單
         </button>
       </Link>
-      <Link href={`/etogether/activity/leaverecord/${activity.id}`}>
-        <button className="btn w-full">
-          <QueueListIcon className="h-4 w-4" />
-          請假名單
-        </button>
-      </Link> */}
       <div className="divider" />
     </>
   );

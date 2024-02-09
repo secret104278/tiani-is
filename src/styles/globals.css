@@ -8,7 +8,7 @@
   }
 
   .tiani-input-inline {
-    @apply input input-bordered input-sm grow invalid:input-error;
+    @apply input input-bordered grow invalid:input-error;
   }
 
   .table {
