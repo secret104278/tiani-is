@@ -3,7 +3,7 @@ import { isEmpty, isNil } from "lodash";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { refreshLineToken } from "~/utils/server";
+import { getLineImageURL } from "~/utils/server";
 import { trimString } from "~/utils/ui";
 
 const handleSetAdmin =
@@ -32,74 +32,9 @@ const handleSetAdmin =
   };
 
 export const userRouter = createTRPCRouter({
-  getLineImage: protectedProcedure
-    .input(z.object({}))
-    .query(async ({ ctx }) => {
-      const user = await ctx.db.user.findUniqueOrThrow({
-        where: {
-          id: ctx.session.user.id,
-        },
-        select: {
-          accounts: {
-            select: {
-              id: true,
-              provider: true,
-              providerAccountId: true,
-              access_token: true,
-              expires_at: true,
-              refresh_token: true,
-            },
-          },
-        },
-      });
-
-      for (const account of user.accounts) {
-        if (account.provider !== "line") {
-          continue;
-        }
-
-        let accessToken = account.access_token;
-
-        if (
-          account.refresh_token &&
-          account.expires_at &&
-          account.expires_at * 1000 < Date.now()
-        ) {
-          const {
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-            expiresIn: newExpiresIn,
-          } = await refreshLineToken(account.refresh_token);
-
-          await ctx.db.account.update({
-            where: {
-              id: account.id,
-            },
-            data: {
-              access_token: newAccessToken,
-              refresh_token: newRefreshToken,
-              expires_at: Math.floor(Date.now() / 1000) + newExpiresIn,
-            },
-          });
-
-          accessToken = newAccessToken;
-        }
-
-        const res = await fetch("https://api.line.me/v2/profile", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const profile = await res.json();
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return String(profile.pictureUrl);
-      }
-
-      return undefined;
-    }),
+  getLineImage: protectedProcedure.input(z.object({})).query(({ ctx }) => {
+    return getLineImageURL(ctx.db, ctx.session.user.id);
+  }),
 
   updateUserProfile: protectedProcedure
     .input(

@@ -35,6 +35,8 @@ export const env = createEnv({
     // Add ` on ID and SECRET if you want to make sure they're not empty
     LINE_CLIENT_ID: z.string(),
     LINE_CLIENT_SECRET: z.string(),
+
+    CRON_SECRET: z.string().optional(),
   },
 
   /**
@@ -61,6 +63,7 @@ export const env = createEnv({
     PUBLIC_DOMAIN: "tiani-is.vercel.app",
     LINE_CLIENT_ID: process.env.LINE_CLIENT_ID,
     LINE_CLIENT_SECRET: process.env.LINE_CLIENT_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
