@@ -13,10 +13,12 @@ type LeaveActivityEvent = {
 export const leaveActivityEventQueue: queueAsPromised<LeaveActivityEvent> =
   fastq.promise(dummy, 1);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function dummy(input: LeaveActivityEvent): Promise<void> {
   return Promise.resolve();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function worker(input: LeaveActivityEvent): Promise<void> {
   const activity = await db.volunteerActivity.findFirstOrThrow({
     select: { organiserId: true, title: true, id: true, version: true },

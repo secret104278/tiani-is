@@ -1,6 +1,7 @@
 import type { BuiltInProviderType } from "next-auth/providers";
 import type { ClientSafeProvider, LiteralUnion } from "next-auth/react";
 import { getProviders, signIn, useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
 import { useSiteContext } from "~/context/SiteContext";
@@ -35,8 +36,11 @@ export default function SinginPage({
               })
             }
           >
-            <img
+            <Image
               style={{ display: "block" }}
+              alt="line"
+              height={32}
+              width={32}
               src="https://authjs.dev/img/providers/line.svg"
             />
             透過 {lineProvider.name} 登入

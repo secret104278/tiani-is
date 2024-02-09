@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Site, urlBaseToSite } from "~/utils/ui";
+import { urlBaseToSite, type Site } from "~/utils/ui";
 
 // Define the context type
 type SiteContextType = {
