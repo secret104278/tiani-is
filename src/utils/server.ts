@@ -1,7 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import { env } from "~/env.mjs";
 
-export const refreshLineToken = async (refreshToken: string) => {
+const refreshLineToken = async (refreshToken: string) => {
   const res = await fetch("https://api.line.me/oauth2/v2.1/token", {
     method: "POST",
     headers: {
@@ -49,6 +49,8 @@ export const refreshLineToken = async (refreshToken: string) => {
 };
 
 export const getLineImageURL = async (db: PrismaClient, userId: string) => {
+  await refreshLineTokenIfNeed(db, userId);
+
   const user = await db.user.findUniqueOrThrow({
     where: {
       id: userId,
@@ -56,12 +58,8 @@ export const getLineImageURL = async (db: PrismaClient, userId: string) => {
     select: {
       accounts: {
         select: {
-          id: true,
           provider: true,
-          providerAccountId: true,
           access_token: true,
-          expires_at: true,
-          refresh_token: true,
         },
       },
     },
@@ -72,8 +70,40 @@ export const getLineImageURL = async (db: PrismaClient, userId: string) => {
       continue;
     }
 
-    let accessToken = account.access_token;
+    const res = await fetch("https://api.line.me/v2/profile", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${account.access_token}`,
+      },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const profile = await res.json();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return String(profile.pictureUrl);
+  }
+
+  return undefined;
+};
+
+export const refreshLineTokenIfNeed = async (
+  db: PrismaClient,
+  userId: string,
+) => {
+  const accounts = await db.account.findMany({
+    where: {
+      userId,
+      provider: "line",
+    },
+    select: {
+      id: true,
+      access_token: true,
+      expires_at: true,
+      refresh_token: true,
+    },
+  });
+
+  for (const account of accounts) {
     if (
       account.refresh_token &&
       account.expires_at &&
@@ -95,22 +125,6 @@ export const getLineImageURL = async (db: PrismaClient, userId: string) => {
           expires_at: Math.floor(Date.now() / 1000) + newExpiresIn,
         },
       });
-
-      accessToken = newAccessToken;
     }
-
-    const res = await fetch("https://api.line.me/v2/profile", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const profile = await res.json();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return String(profile.pictureUrl);
   }
-
-  return undefined;
 };
