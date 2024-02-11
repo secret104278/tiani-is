@@ -23,6 +23,14 @@ export const refreshLineToken = async (refreshToken: string) => {
     token_type: string;
   };
 
+  if (!res.ok) {
+    throw new Error(
+      `Failed to refresh token: ${res.status} ${
+        res.statusText
+      } ${await res.text()}`,
+    );
+  }
+
   const data = (await res.json()) as RefreshTokenResponse;
 
   if (data.token_type !== "Bearer") {

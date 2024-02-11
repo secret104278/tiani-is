@@ -1,5 +1,6 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { Role, type User } from "@prisma/client";
+import { isNil } from "lodash";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
@@ -44,6 +45,27 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/signin",
   },
   callbacks: {
+    signIn: async ({ account }) => {
+      if (isNil(account)) return false;
+
+      if (account.provider === "line") {
+        await db.account.update({
+          where: {
+            provider_providerAccountId: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          },
+          data: {
+            refresh_token: account.refresh_token,
+            access_token: account.access_token,
+            expires_at: account.expires_at,
+          },
+        });
+      }
+
+      return true;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
