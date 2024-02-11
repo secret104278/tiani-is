@@ -22,6 +22,8 @@ export default function EtogetherRegistrationPage() {
   if (isLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
+  const totalRegisters =
+    activity.registers.length + activity.externalRegisters.length;
   const userBySubgroup: Record<number, { name: string; checked: boolean }[]> =
     {};
   for (const register of activity.registers) {
@@ -64,6 +66,12 @@ export default function EtogetherRegistrationPage() {
       <article className="prose">
         <h1>報名名單</h1>
       </article>
+      <div className="stats shadow">
+        <div className="stat">
+          <div className="stat-title">總報名人數</div>
+          <div className="stat-value">{totalRegisters}</div>
+        </div>
+      </div>
       {/* <div className="flex justify-end">
         <ReactiveButton
           className="btn"
