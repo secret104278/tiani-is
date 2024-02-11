@@ -1,6 +1,7 @@
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { AlertWarning } from "~/components/Alert";
+import EtogetherActivityForm from "~/components/EtogetherActivityForm";
 import { api } from "~/utils/api";
 
 export default function EtogetherActivityPage() {
@@ -28,7 +29,7 @@ export default function EtogetherActivityPage() {
         <h1>{activity.title}</h1>
       </article>
 
-      {/* <EtogetherActivityForm defaultActivity={activity} /> */}
+      <EtogetherActivityForm defaultActivity={activity} />
     </div>
   );
 }

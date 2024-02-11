@@ -94,6 +94,12 @@ export const etogetherActivityRouter = createTRPCRouter({
         startDateTime: z.date(),
         endDateTime: z.date(),
         isDraft: z.boolean().optional(),
+        subgroups: z.array(
+          z.object({
+            title: z.string(),
+            description: z.string().nullable(),
+          }),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -119,7 +125,8 @@ export const etogetherActivityRouter = createTRPCRouter({
           location: input.location,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
-          status: input.isDraft ? "DRAFT" : undefined,
+          subgroups: { create: input.subgroups },
+          status: input.isDraft ? "DRAFT" : "PUBLISHED",
           version: {
             increment: 1,
           },

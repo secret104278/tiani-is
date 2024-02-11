@@ -1,5 +1,8 @@
-import type { EtogetherActivity } from "@prisma/client";
-import { isNil } from "lodash";
+import type {
+  EtogetherActivity,
+  EtogetherActivitySubgroup,
+} from "@prisma/client";
+import { defaults, isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useFieldArray, useForm } from "react-hook-form";
 import { api } from "~/utils/api";
@@ -24,7 +27,9 @@ interface EtogetherActivityFormData {
 export default function EtogetherActivityForm({
   defaultActivity,
 }: {
-  defaultActivity?: EtogetherActivity;
+  defaultActivity?: EtogetherActivity & {
+    subgroups: EtogetherActivitySubgroup[];
+  };
 }) {
   let formDefaultValues: Partial<EtogetherActivityFormData> = {
     title: "",
@@ -40,6 +45,10 @@ export default function EtogetherActivityForm({
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
       ),
+      subgroups:
+        defaultActivity.subgroups.map((g) =>
+          defaults(g, { description: "" }),
+        ) ?? [],
       description: defaultActivity.description ?? "",
     };
   }
@@ -81,7 +90,7 @@ export default function EtogetherActivityForm({
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
           isDraft: isDraft,
-          // TODO: update subgroups
+          subgroups: data.subgroups,
         }),
       );
     }
