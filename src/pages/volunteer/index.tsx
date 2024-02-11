@@ -6,9 +6,9 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { api } from "~/utils/api";
 import { activityIsEnded } from "~/utils/ui";
 import { ActivityCard } from "../../components/ActivityCard";
+import { Loading } from "../../components/utils/Loading";
 import { CasualCheckInCard } from "./../../components/CasualCheckInCard";
 import { HourStats } from "./../../components/HourStats";
-import { Loading } from "./../../components/Loading";
 
 export default function VolunteerHome() {
   const [filterOrganizedByMe, setFilterOrganizedByMe] = useState(false);

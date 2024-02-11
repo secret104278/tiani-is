@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ActivityCard } from "~/components/ActivityCard";
-import { Loading } from "~/components/Loading";
+import { Loading } from "~/components/utils/Loading";
 import { api } from "~/utils/api";
 import { activityIsEnded } from "~/utils/ui";
 

@@ -4,18 +4,18 @@ import {
   TIANI_GPS_RADIUS_KM,
   getDistance,
 } from "~/utils/ui";
-import { AlertWarning } from "../Alert";
+import { AlertWarning } from "../../utils/Alert";
 
-import ReactiveButton from "../ReactiveButton";
+import ReactiveButton from "../../utils/ReactiveButton";
 
 import dynamic from "next/dynamic";
 import { useGeolocation } from "react-use";
 
-const ViewFocus = dynamic(() => import("~/components/ViewFocus"), {
+const ViewFocus = dynamic(() => import("~/components/Map/ViewFocus"), {
   ssr: false,
 });
 
-const CheckInMap = dynamic(() => import("~/components/CheckInMap"), {
+const CheckInMap = dynamic(() => import("~/components/Map/CheckInMap"), {
   ssr: false,
 });
 

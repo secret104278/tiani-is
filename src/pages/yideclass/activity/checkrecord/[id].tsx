@@ -4,10 +4,10 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { AlertWarning } from "~/components/Alert";
-import ManualClassActivityCheckInDialogContent from "~/components/CheckInDialog/ManualClassActivityCheckInDialogContent";
-import ReactiveButton from "~/components/ReactiveButton";
+import ManualClassActivityCheckInDialogContent from "~/components/DialogContent/CheckIn/ManualClassActivityCheckInDialogContent";
+import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
+import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 import { formatDate } from "~/utils/ui";
 

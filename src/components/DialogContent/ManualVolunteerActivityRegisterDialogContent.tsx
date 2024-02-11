@@ -2,8 +2,8 @@ import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { api } from "~/utils/api";
-import ReactiveButton from "../ReactiveButton";
 import UserCombobox, { type UserComboboxSelected } from "../UserCombobox";
+import ReactiveButton from "../utils/ReactiveButton";
 
 export default function ManualVolunteerActivityRegisterDialogContent({
   activityId,

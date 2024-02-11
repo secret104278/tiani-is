@@ -3,7 +3,7 @@ import { isEmpty, isNil } from "lodash";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import { formatDateTime } from "~/utils/ui";
-import CasualCheckInDialogContent from "./CheckInDialog/CasualCheckInDialogContent";
+import CasualCheckInDialogContent from "./DialogContent/CheckIn/CasualCheckInDialogContent";
 import Dialog from "./utils/Dialog";
 
 export function CasualCheckInCard() {

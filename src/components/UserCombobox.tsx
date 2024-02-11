@@ -2,7 +2,7 @@ import { Combobox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Fragment, useState } from "react";
 import { api } from "~/utils/api";
-import { AlertWarning } from "./Alert";
+import { AlertWarning } from "./utils/Alert";
 
 export type UserComboboxSelected = {
   name: string | null;

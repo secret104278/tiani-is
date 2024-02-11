@@ -3,7 +3,7 @@ import type { ForwardedRef } from "react";
 import { forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { getDateTimeString } from "~/utils/ui";
-import ReactiveButton from "./ReactiveButton";
+import ReactiveButton from "./utils/ReactiveButton";
 
 export interface ModifyCheckRecordDialogProps {
   userName: string;

@@ -3,7 +3,7 @@ import type { ClientSafeProvider, LiteralUnion } from "next-auth/react";
 import { getProviders, signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { AlertWarning } from "~/components/Alert";
+import { AlertWarning } from "~/components/utils/Alert";
 import { useSiteContext } from "~/context/SiteContext";
 
 export default function SinginPage({

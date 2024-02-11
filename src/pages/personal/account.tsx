@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import LineImage from "~/components/LineImage";
-import ReactiveButton from "~/components/ReactiveButton";
+import LineImage from "~/components/utils/LineImage";
+import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
 export default function PersonalAccountPage() {

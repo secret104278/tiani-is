@@ -1,7 +1,7 @@
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { AlertWarning } from "~/components/Alert";
-import VolunteerActivityForm from "~/components/VolunteerActivityForm";
+import VolunteerActivityForm from "~/components/Form/VolunteerActivityForm";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
 export default function EditVolunteerActivityPage() {

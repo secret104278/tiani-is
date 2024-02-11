@@ -1,5 +1,5 @@
 import { api } from "~/utils/api";
-import { useDialogContext } from "../utils/Dialog";
+import { useDialogContext } from "../../utils/Dialog";
 import BaseCheckInDialogContent from "./BaseCheckInDialogContent";
 
 export default function CasualCheckInDialogContent({

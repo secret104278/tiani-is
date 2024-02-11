@@ -5,13 +5,13 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 
 import Head from "next/head";
-import AuthGaurd from "~/components/AuthGuard";
-import Layout from "~/components/Layout";
+import AuthGaurd from "~/components/System/AuthGuard";
+import Layout from "~/components/System/Layout";
 
 import "leaflet/dist/leaflet.css";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import SentrySetup from "~/components/SentrySetup";
+import SentrySetup from "~/components/System/SentrySetup";
 import { SiteProvider } from "~/context/SiteContext";
 import "~/styles/globals.css";
 import type { OGMetaProps } from "~/utils/types";

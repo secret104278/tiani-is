@@ -2,11 +2,11 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
-import { AlertWarning } from "~/components/Alert";
 import { HourStats } from "~/components/HourStats";
 import { ModifyCheckRecordDialog } from "~/components/ModifyCheckRecordDialog";
-import ReactiveButton from "~/components/ReactiveButton";
 import WorkingStatsPanel from "~/components/WorkingStatsPanel";
+import { AlertWarning } from "~/components/utils/Alert";
+import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
 export default function AdminCasualUserEdit() {

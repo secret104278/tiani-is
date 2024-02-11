@@ -2,7 +2,7 @@ import { BarsArrowDownIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isString } from "lodash";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { AlertWarning } from "~/components/Alert";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 import { userComparator } from "~/utils/ui";
 

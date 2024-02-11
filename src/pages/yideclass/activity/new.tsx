@@ -1,4 +1,4 @@
-import ClassActivityForm from "~/components/ClassActivityForm";
+import ClassActivityForm from "~/components/Form/ClassActivityForm";
 
 export default function NewClassActivityPage() {
   return (

@@ -1,4 +1,4 @@
-import VolunteerActivityForm from "~/components/VolunteerActivityForm";
+import VolunteerActivityForm from "~/components/Form/VolunteerActivityForm";
 
 export default function NewVolunteerActivityPage() {
   return (

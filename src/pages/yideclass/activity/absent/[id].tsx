@@ -1,7 +1,7 @@
 import { isEmpty, isNil, isString } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { AlertWarning } from "~/components/Alert";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
 export default function ClassActivityAbsentPage() {

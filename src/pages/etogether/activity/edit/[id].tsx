@@ -1,7 +1,7 @@
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { AlertWarning } from "~/components/Alert";
-import EtogetherActivityForm from "~/components/EtogetherActivityForm";
+import EtogetherActivityForm from "~/components/Form/EtogetherActivityForm";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
 export default function EtogetherActivityPage() {

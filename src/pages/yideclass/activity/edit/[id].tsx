@@ -1,7 +1,7 @@
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { AlertWarning } from "~/components/Alert";
-import ClassActivityForm from "~/components/ClassActivityForm";
+import ClassActivityForm from "~/components/Form/ClassActivityForm";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
 export default function EditClassActivityPage() {

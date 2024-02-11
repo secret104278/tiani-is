@@ -14,8 +14,8 @@ import {
   locationIsOther,
   titleIsOther,
 } from "~/utils/ui";
-import { AlertWarning } from "./Alert";
-import ReactiveButton from "./ReactiveButton";
+import { AlertWarning } from "../utils/Alert";
+import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
 
 interface ClassActivityFormData {

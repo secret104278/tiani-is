@@ -5,9 +5,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { AlertWarning } from "~/components/Alert";
-import ReactiveButton from "~/components/ReactiveButton";
+import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
+import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 import { userComparator } from "~/utils/ui";
 

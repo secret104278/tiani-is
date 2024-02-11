@@ -1,4 +1,4 @@
-import EtogetherActivityForm from "~/components/EtogetherActivityForm";
+import EtogetherActivityForm from "~/components/Form/EtogetherActivityForm";
 
 export default function NewClassActivityPage() {
   return (

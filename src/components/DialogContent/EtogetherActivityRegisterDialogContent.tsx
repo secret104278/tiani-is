@@ -1,5 +1,5 @@
 import { useFieldArray, useForm } from "react-hook-form";
-import ReactiveButton from "../ReactiveButton";
+import ReactiveButton from "../utils/ReactiveButton";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";

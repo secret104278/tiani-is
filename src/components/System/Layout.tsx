@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { siteToTitle } from "~/utils/ui";
-import LineImage from "./LineImage";
+import LineImage from "../utils/LineImage";
 
 function UserAvatar() {
   const { data: sessionData } = useSession();
@@ -62,7 +62,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown-end dropdown">
+            <div className="dropdown dropdown-end">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>

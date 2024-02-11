@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { AlertWarning } from "~/components/Alert";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
 type DateRange = "all" | "today" | "thisWeek" | "thisMonth";

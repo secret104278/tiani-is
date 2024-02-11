@@ -1,8 +1,8 @@
 import { api } from "~/utils/api";
-import { useDialogContext } from "../utils/Dialog";
+import { useDialogContext } from "../../utils/Dialog";
 import BaseCheckInDialogContent from "./BaseCheckInDialogContent";
 
-export default function VolunteerActivityCheckInDialogContent({
+export default function ClassActivityCheckInDialogContent({
   activityId,
   onCheckInSuccess,
 }: {
@@ -15,7 +15,7 @@ export default function VolunteerActivityCheckInDialogContent({
     mutate: checkInActivity,
     isLoading: checkInActivityIsLoading,
     error: checkInActivityError,
-  } = api.volunteerActivity.checkInActivity.useMutation({
+  } = api.classActivity.checkInActivity.useMutation({
     onSuccess: () => {
       onCheckInSuccess?.();
       closeModal();

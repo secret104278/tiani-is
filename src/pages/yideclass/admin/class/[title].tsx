@@ -1,7 +1,7 @@
 import { isEmpty, sortBy } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { AlertWarning } from "~/components/Alert";
+import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 import { formatDate } from "~/utils/ui";
 

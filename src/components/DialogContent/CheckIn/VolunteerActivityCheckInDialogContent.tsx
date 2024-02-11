@@ -1,19 +1,12 @@
 import { api } from "~/utils/api";
-import { useDialogContext } from "../utils/Dialog";
+import { useDialogContext } from "../../utils/Dialog";
 import BaseCheckInDialogContent from "./BaseCheckInDialogContent";
 
-export default function EtogetherActivityCheckInDialogContent({
+export default function VolunteerActivityCheckInDialogContent({
   activityId,
-  subgroupId,
-  externals,
   onCheckInSuccess,
 }: {
   activityId: number;
-  subgroupId: number;
-  externals: {
-    username: string;
-    subgroupId: number;
-  }[];
   onCheckInSuccess?: () => void;
 }) {
   const { closeModal } = useDialogContext();
@@ -22,7 +15,7 @@ export default function EtogetherActivityCheckInDialogContent({
     mutate: checkInActivity,
     isLoading: checkInActivityIsLoading,
     error: checkInActivityError,
-  } = api.etogetherActivity.checkInActivity.useMutation({
+  } = api.volunteerActivity.checkInActivity.useMutation({
     onSuccess: () => {
       onCheckInSuccess?.();
       closeModal();
@@ -32,13 +25,7 @@ export default function EtogetherActivityCheckInDialogContent({
   return (
     <BaseCheckInDialogContent
       onCheckIn={(latitude, longitude) =>
-        checkInActivity({
-          activityId,
-          subgroupId,
-          externals,
-          latitude,
-          longitude,
-        })
+        checkInActivity({ activityId, latitude, longitude })
       }
       checkInIsLoading={checkInActivityIsLoading}
       checkInError={checkInActivityError?.message}

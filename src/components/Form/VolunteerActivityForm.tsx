@@ -1,66 +1,62 @@
-import type {
-  EtogetherActivity,
-  EtogetherActivitySubgroup,
-} from "@prisma/client";
-import { defaults, isNil } from "lodash";
+import type { VolunteerActivity } from "@prisma/client";
+import { isNil } from "lodash";
 import { useRouter } from "next/router";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { api } from "~/utils/api";
 import {
+  VOLUNTEER_ACTIVITY_TOPICS,
+  VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
   getEndTime,
+  titleIsOther,
 } from "~/utils/ui";
-import { AlertWarning } from "./Alert";
-import ReactiveButton from "./ReactiveButton";
+import { AlertWarning } from "../utils/Alert";
+import ReactiveButton from "../utils/ReactiveButton";
+import SelectWithCustomInput, { NestedSelect } from "./SelectWithCustomInput";
 
-interface EtogetherActivityFormData {
+type VolunteerActivityFormData = {
   title: string;
+  titleOther: string;
+  headcount: number;
   location: string;
   startDateTime: Date | string;
   duration: number;
   description: string;
-  subgroups: { title: string; description: string }[];
-}
+};
 
-export default function EtogetherActivityForm({
+export default function VolunteerActivityForm({
   defaultActivity,
 }: {
-  defaultActivity?: EtogetherActivity & {
-    subgroups: EtogetherActivitySubgroup[];
-  };
+  defaultActivity?: VolunteerActivity;
 }) {
-  let formDefaultValues: Partial<EtogetherActivityFormData> = {
-    title: "",
+  let formDefaultValues: Partial<VolunteerActivityFormData> = {
+    title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],
     startDateTime: getCurrentDateTime(),
     description: "",
   };
   if (defaultActivity) {
+    const defaultTitleIsOther = titleIsOther(defaultActivity.title);
     formDefaultValues = {
-      title: defaultActivity.title,
+      title: defaultTitleIsOther
+        ? VOLUNTEER_ACTIVITY_TOPIC_OTHER
+        : defaultActivity.title,
+      titleOther: defaultTitleIsOther ? defaultActivity.title : "",
+      headcount: defaultActivity.headcount,
       location: defaultActivity.location,
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
       ),
-      subgroups:
-        defaultActivity.subgroups.map((g) =>
-          defaults(g, { description: "" }),
-        ) ?? [],
       description: defaultActivity.description ?? "",
     };
   }
 
-  const { register, handleSubmit, control } =
-    useForm<EtogetherActivityFormData>({
-      defaultValues: formDefaultValues,
-      mode: "all",
-    });
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "subgroups",
+  const { register, handleSubmit, watch } = useForm<VolunteerActivityFormData>({
+    defaultValues: formDefaultValues,
+    mode: "all",
   });
 
   const router = useRouter();
@@ -68,15 +64,15 @@ export default function EtogetherActivityForm({
     mutate: createActivity,
     error: createActivityError,
     isLoading: createActivityIsLoading,
-  } = api.etogetherActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/etogether/activity/detail/${data.id}`),
+  } = api.volunteerActivity.createActivity.useMutation({
+    onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isLoading: updateActivityIsLoading,
-  } = api.etogetherActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/etogether/activity/detail/${data.id}`),
+  } = api.volunteerActivity.updateActivity.useMutation({
+    onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
 
   const _handleSubmit = (isDraft = false) => {
@@ -84,26 +80,26 @@ export default function EtogetherActivityForm({
       return handleSubmit((data) =>
         updateActivity({
           id: defaultActivity.id,
-          title: data.title,
+          title: titleIsOther(data.title) ? data.titleOther : data.title,
+          headcount: data.headcount,
           location: data.location,
           startDateTime: data.startDateTime as Date,
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
           isDraft: isDraft,
-          subgroups: data.subgroups,
         }),
       );
     }
 
     return handleSubmit((data) =>
       createActivity({
-        title: data.title,
+        title: titleIsOther(data.title) ? data.titleOther : data.title,
+        headcount: data.headcount,
         location: data.location,
         startDateTime: data.startDateTime as Date,
         endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
         isDraft: isDraft,
-        subgroups: data.subgroups,
       }),
     );
   };
@@ -113,15 +109,28 @@ export default function EtogetherActivityForm({
 
   return (
     <form className="form-control max-w-xs">
-      <div>
+      <div hidden={!isNil(defaultActivity)}>
         <label className="label">
           <span className="label-text">主題</span>
         </label>
+        <SelectWithCustomInput
+          selectProps={register("title")}
+          customInputProps={register("titleOther")}
+          showCustomInput={watch("title") === VOLUNTEER_ACTIVITY_TOPIC_OTHER}
+        >
+          <NestedSelect topics={VOLUNTEER_ACTIVITY_TOPICS} />
+        </SelectWithCustomInput>
+      </div>
+      <div>
+        <label className="label">
+          <span className="label-text">人數</span>
+        </label>
         <input
-          type="text"
+          type="number"
+          inputMode="numeric"
           className="tiani-input"
           required
-          {...register("title")}
+          {...register("headcount", { valueAsNumber: true })}
         />
       </div>
       <div>
@@ -159,55 +168,6 @@ export default function EtogetherActivityForm({
           required
           {...register("duration", { valueAsNumber: true })}
         />
-      </div>
-      <div className="divider"></div>
-      <div className="space-y-4">
-        {fields.map((field, index) => (
-          <div
-            className="card card-bordered card-compact border-2"
-            key={field.id}
-          >
-            <div className="card-body">
-              <label className="label">
-                <span className="label-text">分組主題</span>
-              </label>
-              <input
-                required
-                type="text"
-                className="tiani-input"
-                {...register(`subgroups.${index}.title`)}
-              />
-              <label className="label">
-                <span className="label-text">分組說明</span>
-              </label>
-              <textarea
-                className="textarea textarea-bordered w-full"
-                {...register(`subgroups.${index}.description`)}
-              ></textarea>
-              <div className="card-actions justify-end">
-                <button
-                  className="btn btn-primary"
-                  onClick={(e) => {
-                    void e.preventDefault();
-                    remove(index);
-                  }}
-                >
-                  移除
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        <button
-          className="btn"
-          onClick={(e) => {
-            void e.preventDefault();
-            append({ title: "", description: "" });
-          }}
-        >
-          新增分組
-        </button>
       </div>
       <div className="divider"></div>
       <div>
