@@ -83,7 +83,7 @@ export default function EtogetherActivityForm({
     if (defaultActivity) {
       return handleSubmit((data) =>
         updateActivity({
-          id: defaultActivity.id,
+          activityId: defaultActivity.id,
           title: data.title,
           location: data.location,
           startDateTime: data.startDateTime as Date,

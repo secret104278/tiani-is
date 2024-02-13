@@ -8,17 +8,17 @@ import {
 } from "./utils";
 
 export const activityManageProcedure = buildActivityManageProcedure(
-  Site.Yideclass,
+  Site.Etogether,
 );
 
 export const activityRepresentableProcedure =
-  buildActivityRepresentableProcedure(Site.Yideclass);
+  buildActivityRepresentableProcedure(Site.Etogether);
 
 export const activityPublishedOnlyProcedure =
-  buildActivityPublishedOnlyProcedure(Site.Yideclass);
+  buildActivityPublishedOnlyProcedure(Site.Etogether);
 
-export const adminProcedure = buildAdminProcedure(Site.Yideclass);
+export const adminProcedure = buildAdminProcedure(Site.Etogether);
 
 export const representableProcedure = buildRepresentableProcedure(
-  Site.Yideclass,
+  Site.Etogether,
 );

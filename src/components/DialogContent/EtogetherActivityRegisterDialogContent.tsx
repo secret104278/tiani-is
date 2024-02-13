@@ -135,7 +135,7 @@ export default function EtogetherActivityRegisterDialogContent({
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={handleSubmit((data) => {
           void registerActivity({
-            id: activityId,
+            activityId,
             ...data,
           });
         })}

@@ -73,13 +73,13 @@ export default function EtogetherActivityDetailPage() {
 
   const { data: session } = useSession();
 
-  const { data, isLoading, error } = api.etogetherActivity.getActivity.useQuery(
-    {
-      id: Number(id),
-    },
-  );
-
-  const { activity } = data ?? {};
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.etogetherActivity.getActivity.useQuery({
+    activityId: Number(id),
+  });
 
   const { data: checkRecordData, refetch: refetchCheckRecordData } =
     api.etogetherActivity.getCheckRecord.useQuery({
@@ -106,8 +106,9 @@ export default function EtogetherActivityDetailPage() {
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading) return <div className="loading"></div>;
+  if (!isNil(activityError))
+    return <AlertWarning>{activityError.message}</AlertWarning>;
+  if (activityIsLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
 
   const isManager =
@@ -171,7 +172,7 @@ export default function EtogetherActivityDetailPage() {
           title="確認撤銷"
           content="活動撤銷後就無法復原囉！"
           confirmText="撤銷"
-          onConfirm={() => deleteActivity({ id: activity.id })}
+          onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
       <Link href={`/etogether/activity/registration/${activity.id}`}>

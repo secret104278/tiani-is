@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { etogetherActivityRouter } from "./routers/etogetherActivity";
+import { etogetherRouter } from "./routers/etogether";
 import { userRouter } from "./routers/user";
 import { volunteerActivityRouter } from "./routers/volunteeractivity";
 import { yideclassRouter } from "./routers/yideclass";
@@ -12,7 +12,7 @@ import { yideclassRouter } from "./routers/yideclass";
 export const appRouter = createTRPCRouter({
   volunteerActivity: volunteerActivityRouter,
   classActivity: yideclassRouter,
-  etogetherActivity: etogetherActivityRouter,
+  etogetherActivity: etogetherRouter,
   user: userRouter,
 });
 
