@@ -165,21 +165,27 @@ export default function WorkingStatsPanel({
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-center">
-        <div className="tabs-boxed tabs">
+        <div className="tabs tabs-boxed">
           <a
-            className={"tab" + (activeTab === "all" ? " tab-active" : "")}
+            className={classNames("tab", {
+              "tab-active": activeTab === "all",
+            })}
             onClick={() => setActiveTab("all")}
           >
             全部
           </a>
           <a
-            className={"tab" + (activeTab === "activity" ? " tab-active" : "")}
+            className={classNames("tab", {
+              "tab-active": activeTab === "activity",
+            })}
             onClick={() => setActiveTab("activity")}
           >
             主題工作
           </a>
           <a
-            className={"tab" + (activeTab === "casual" ? " tab-active" : "")}
+            className={classNames("tab", {
+              "tab-active": activeTab === "casual",
+            })}
             onClick={() => setActiveTab("casual")}
           >
             日常工作
