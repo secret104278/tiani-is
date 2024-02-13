@@ -198,7 +198,7 @@ export default function VolunteerActivityDetailPage() {
                   </div>
                 ) : (
                   <div className="avatar placeholder mr-2">
-                    <div className="w-8 rounded-full bg-neutral-focus text-neutral-content">
+                    <div className="bg-neutral-focus w-8 rounded-full text-neutral-content">
                       <span>{participant.name?.charAt(0)}</span>
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export default function VolunteerActivityDetailPage() {
           title="確認撤銷"
           content="工作撤銷後就無法復原囉！"
           confirmText="撤銷"
-          onConfirm={() => deleteActivity({ id: activity.id })}
+          onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
       <Link href={`/volunteer/activity/checkrecord/${activity.id}`}>

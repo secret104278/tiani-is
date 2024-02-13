@@ -79,7 +79,7 @@ export default function VolunteerActivityForm({
     if (defaultActivity) {
       return handleSubmit((data) =>
         updateActivity({
-          id: defaultActivity.id,
+          activityId: defaultActivity.id,
           title: titleIsOther(data.title) ? data.titleOther : data.title,
           headcount: data.headcount,
           location: data.location,

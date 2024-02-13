@@ -27,7 +27,8 @@ export default function VolunteerActivityCheckRecordPage() {
 
   const {
     data: checkRecords,
-    isLoading: isLoadingCheckRecords,
+    isLoading: checkRecordsIsLoading,
+    error: checkRecordsError,
     refetch: refetchCheckRecords,
   } = api.volunteerActivity.getActivityCheckRecords.useQuery({
     activityId: Number(id),
@@ -42,10 +43,10 @@ export default function VolunteerActivityCheckRecordPage() {
     useState(false);
 
   const {
-    mutate: modifyActivityCheckRecord,
-    isLoading: modifyActivityCheckRecordIsLoading,
-    error: modifyActivityCheckRecordError,
-  } = api.volunteerActivity.modifyActivityCheckRecord.useMutation({
+    mutate: managerCheckInActivity,
+    isLoading: managerCheckInActivityIsLoading,
+    error: managerCheckInActivityError,
+  } = api.volunteerActivity.managerCheckInActivity.useMutation({
     onSuccess: () => {
       void refetchCheckRecords();
       modifyCheckRecordDialogRef.current?.close();
@@ -53,7 +54,9 @@ export default function VolunteerActivityCheckRecordPage() {
   });
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading || isLoadingCheckRecords)
+  if (!isNil(checkRecordsError))
+    return <AlertWarning>{checkRecordsError.message}</AlertWarning>;
+  if (isLoading || checkRecordsIsLoading)
     return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
@@ -85,19 +88,19 @@ export default function VolunteerActivityCheckRecordPage() {
       </div>
       <ModifyCheckRecordDialog
         ref={modifyCheckRecordDialogRef}
-        userName={modifyRecord?.userName ?? ""}
+        userName={modifyRecord?.user.name ?? ""}
         defaultCheckInAt={modifyRecord?.checkInAt}
-        defaultCheckOutAt={modifyRecord?.checkOutAt}
+        defaultCheckOutAt={modifyRecord?.checkOutAt ?? undefined}
         onConfirm={(checkInAt, checkOutAt) => {
-          modifyActivityCheckRecord({
+          managerCheckInActivity({
             activityId: activity.id,
-            userId: modifyRecord?.userId ?? "",
+            userId: modifyRecord?.user.id ?? "",
             checkInAt: checkInAt,
             checkOutAt: checkOutAt,
           });
         }}
-        isLoading={modifyActivityCheckRecordIsLoading}
-        error={modifyActivityCheckRecordError?.message}
+        isLoading={managerCheckInActivityIsLoading}
+        error={managerCheckInActivityError?.message}
       />
       <table className="table table-sm">
         <thead>
@@ -110,8 +113,8 @@ export default function VolunteerActivityCheckRecordPage() {
         </thead>
         <tbody>
           {checkRecords?.map((record) => (
-            <tr key={record.userId}>
-              <td>{record.userName}</td>
+            <tr key={record.user.id}>
+              <td>{record.user.name}</td>
               <td>
                 {record.checkInAt && (
                   <>

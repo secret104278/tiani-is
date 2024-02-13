@@ -3,11 +3,21 @@ import classNames from "classnames";
 import { isNil, sortBy } from "lodash";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import type {
-  ActivityCheckInHistory,
-  CasualCheckInHistory,
-} from "~/utils/types";
+
 import { formatDate } from "~/utils/ui";
+
+interface ActivityCheckInHistory {
+  checkInAt: Date;
+  checkOutAt: Date | null;
+  activityId: number;
+  activity: { title: string; startDateTime: Date };
+}
+
+interface CasualCheckInHistory {
+  id: number;
+  checkInAt: Date;
+  checkOutAt: Date | null;
+}
 
 export default function WorkingStatsPanel({
   workingStats,
@@ -35,7 +45,7 @@ export default function WorkingStatsPanel({
       ...(workingStats?.activityCheckHistories.map((history) => ({
         checkInAt: history.checkInAt,
         checkOutAt: history.checkOutAt,
-        title: history.title,
+        title: history.activity.title,
         activityId: history.activityId,
       })) ?? []),
       ...(workingStats?.casualCheckHistories.map((history) => ({
@@ -106,9 +116,9 @@ export default function WorkingStatsPanel({
             }
           >
             <td>{formatDate(history.checkInAt)}</td>
-            <td>{history.title}</td>
+            <td>{history.activity.title}</td>
             <td>{history.checkInAt.toLocaleTimeString()}</td>
-            <td>{history.checkOutAt.toLocaleTimeString()}</td>
+            <td>{history.checkOutAt?.toLocaleTimeString()}</td>
             {isAdmin && (
               <td>
                 <button
@@ -165,7 +175,7 @@ export default function WorkingStatsPanel({
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-center">
-        <div className="tabs tabs-boxed">
+        <div className="tabs-boxed tabs">
           <a
             className={classNames("tab", {
               "tab-active": activeTab === "all",

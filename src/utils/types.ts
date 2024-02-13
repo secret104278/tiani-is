@@ -17,25 +17,12 @@ export interface OGMetaProps {
   ogImage?: string | null;
 }
 
-export interface ActivityCheckInHistory {
-  checkInAt: Date;
-  checkOutAt: Date;
+export interface CheckRecord {
+  user: {
+    name: string | null;
+    id: string;
+  };
   activityId: number;
-  title: string;
-  startDateTime: Date;
-}
-
-export interface CasualCheckInHistory {
-  id: number;
   checkInAt: Date;
   checkOutAt: Date | null;
-}
-
-export interface CheckRecord {
-  checkInAt?: Date;
-  checkOutAt?: Date;
-  userName: string;
-  userId: string;
-  activityId: number;
-  // photo?: string;
 }

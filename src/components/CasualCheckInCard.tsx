@@ -12,7 +12,7 @@ export function CasualCheckInCard() {
     data: latestCasualCheckIn,
     isLoading: latestCasualCheckInIsLoading,
     refetch: refetchLatestCasualCheckIn,
-  } = api.volunteerActivity.getLatestCasualCheckIn.useQuery({});
+  } = api.volunteerActivity.getLatestCasualCheckIn.useQuery();
 
   return (
     <div>

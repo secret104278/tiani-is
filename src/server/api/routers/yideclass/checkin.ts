@@ -4,37 +4,28 @@ import { z } from "zod";
 import { activityIsOnGoing, isOutOfRange } from "~/utils/ui";
 import {
   activityManageProcedure,
-  activityPublishedOnlyProcedure,
   activityRepresentableProcedure,
   representableProcedure,
 } from "../../procedures/yideclass";
 import { createTRPCRouter } from "../../trpc";
 
 export const checkinRouter = createTRPCRouter({
-  checkInActivity: activityPublishedOnlyProcedure
+  checkInActivity: activityRepresentableProcedure
     .input(
       z.object({
         latitude: z.number().optional(),
         longitude: z.number().optional(),
-        userId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const now = new Date();
 
-      const activity = await ctx.db.classActivity.findUniqueOrThrow({
-        where: { id: input.activityId },
-        select: { organiserId: true, startDateTime: true, endDateTime: true },
-      });
+      if (!ctx.isManager) {
+        const activity = await ctx.db.classActivity.findUniqueOrThrow({
+          where: { id: input.activityId },
+          select: { startDateTime: true, endDateTime: true },
+        });
 
-      const isManager =
-        ctx.session.user.id === activity.organiserId ||
-        ctx.session.user.role.is_yideclass_admin;
-
-      if (!(isManager || input.userId === ctx.session.user.id))
-        throw new Error("只有管理員或本人可以進行此操作");
-
-      if (!isManager) {
         if (
           !activityIsOnGoing(activity.startDateTime, activity.endDateTime, now)
         )
@@ -50,7 +41,7 @@ export const checkinRouter = createTRPCRouter({
       return await ctx.db.classActivityCheckRecord.upsert({
         where: {
           userId_activityId: {
-            userId: ctx.session.user.id,
+            userId: ctx.input.userId,
             activityId: input.activityId,
           },
         },
@@ -62,7 +53,7 @@ export const checkinRouter = createTRPCRouter({
         create: {
           user: {
             connect: {
-              id: ctx.session.user.id,
+              id: ctx.input.userId,
             },
           },
           activity: {

@@ -52,10 +52,10 @@ export default function AdminCasualUserEdit() {
   });
 
   const {
-    mutate: modifyActivityCheckRecord,
-    isLoading: modifyActivityCheckRecordIsLoading,
-    error: modifyActivityCheckRecordError,
-  } = api.volunteerActivity.modifyActivityCheckRecord.useMutation({
+    mutate: managerCheckInActivity,
+    isLoading: managerCheckInActivityIsLoading,
+    error: managerCheckInActivityError,
+  } = api.volunteerActivity.managerCheckInActivity.useMutation({
     onSuccess: () => {
       void refetchWorkingStats();
       modifyActivityCheckRecordDialogRef.current?.close();
@@ -137,15 +137,15 @@ export default function AdminCasualUserEdit() {
         defaultCheckOutAt={activityCheckRecord?.checkOutAt ?? undefined}
         onConfirm={(checkInAt, checkOutAt) => {
           activityCheckRecord &&
-            modifyActivityCheckRecord({
+            managerCheckInActivity({
               activityId: activityCheckRecord.activityId,
               userId: user.id,
               checkInAt: checkInAt,
               checkOutAt: checkOutAt,
             });
         }}
-        isLoading={modifyActivityCheckRecordIsLoading}
-        error={modifyActivityCheckRecordError?.message}
+        isLoading={managerCheckInActivityIsLoading}
+        error={managerCheckInActivityError?.message}
       />
       <HourStats
         title="總服務小時"
