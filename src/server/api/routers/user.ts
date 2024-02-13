@@ -1,13 +1,13 @@
 import { Role, type PrismaClient, type PrismaPromise } from "@prisma/client";
-import { isEmpty, isNil } from "lodash";
+import { type ITXClientDenyList } from "@prisma/client/runtime/library";
 import { z } from "zod";
-
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getLineImageURL } from "~/utils/server";
-import { trimString } from "~/utils/ui";
+import { adminProcedure, representableProcedure } from "../procedures/tiani";
 
 const handleSetAdmin =
-  (userId: string, role: Role, set: boolean) => async (tx: PrismaClient) => {
+  (userId: string, role: Role, set: boolean) =>
+  async (tx: Omit<PrismaClient, ITXClientDenyList>) => {
     const user = await tx.user.findUniqueOrThrow({
       select: { roles: true },
       where: {
@@ -32,7 +32,7 @@ const handleSetAdmin =
   };
 
 export const userRouter = createTRPCRouter({
-  getLineImage: protectedProcedure.input(z.object({})).query(({ ctx }) => {
+  getLineImage: protectedProcedure.query(({ ctx }) => {
     return getLineImageURL(ctx.db, ctx.session.user.id);
   }),
 
@@ -55,86 +55,45 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  createUser: protectedProcedure
+  createUser: adminProcedure
     .input(
       z.object({
-        username: z.preprocess(trimString, z.string()),
+        username: z.string().trim().min(1),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      if (!ctx.session.user.role.is_tiani_admin)
-        throw new Error("只有管理員可以新增帳戶");
-
-      if (isEmpty(input.username)) throw new Error("姓名不可為空");
-
-      return await ctx.db.user.create({
+    .mutation(({ ctx, input }) =>
+      ctx.db.user.create({
         data: {
           name: input.username,
           roles: [],
         },
-      });
-    }),
-
-  getUser: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string().nullish(),
       }),
-    )
-    .query(async ({ ctx, input }) => {
-      if (
-        !ctx.session.user.role.is_volunteer_admin &&
-        !isNil(input.userId) &&
-        input.userId !== ctx.session.user.id
-      )
-        throw new Error("只有管理員可以查看其他人的資料");
+    ),
 
-      return await ctx.db.user.findUnique({
-        select: {
-          id: true,
-          name: true,
-          roles: true,
-        },
-        where: {
-          id: input.userId ?? ctx.session.user.id,
-        },
-      });
-    }),
-
-  getUsers: protectedProcedure.input(z.object({})).query(async ({ ctx }) => {
-    return await ctx.db.user.findMany({
+  getUser: representableProcedure.query(({ ctx }) =>
+    ctx.db.user.findUnique({
       select: {
         id: true,
         name: true,
         roles: true,
       },
-    });
-  }),
-
-  getUsersWithImage: protectedProcedure
-    .input(z.object({}))
-    .query(async ({ ctx }) => {
-      return await ctx.db.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          roles: true,
-        },
-      });
+      where: {
+        id: ctx.input.userId,
+      },
     }),
+  ),
 
-  getActivityReviewers: protectedProcedure
-    .input(z.object({}))
-    .query(async ({ ctx }) => {
-      return await ctx.db.activityReviewer.findMany({
-        select: {
-          userId: true,
-        },
-      });
+  getUsers: adminProcedure.query(async ({ ctx }) =>
+    ctx.db.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        roles: true,
+      },
     }),
+  ),
 
-  setIsTianiAdmin: protectedProcedure
+  setIsTianiAdmin: adminProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -142,9 +101,6 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (!ctx.session.user.role.is_tiani_admin)
-        throw new Error("Permission denied");
-
       const promises: PrismaPromise<unknown>[] = [];
 
       if (input.isAdmin)
@@ -176,39 +132,29 @@ export const userRouter = createTRPCRouter({
       await ctx.db.$transaction(promises);
     }),
 
-  setIsVolunteerAdmin: protectedProcedure
+  setIsVolunteerAdmin: adminProcedure
     .input(
       z.object({
         userId: z.string(),
         isAdmin: z.boolean(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      if (!ctx.session.user.role.is_tiani_admin)
-        throw new Error("Permission denied");
-
-      await ctx.db.$transaction(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+    .mutation(({ ctx, input }) =>
+      ctx.db.$transaction(
         handleSetAdmin(input.userId, Role.VOLUNTEER_ADMIN, input.isAdmin),
-      );
-    }),
+      ),
+    ),
 
-  setIsYideclassAdmin: protectedProcedure
+  setIsYideclassAdmin: adminProcedure
     .input(
       z.object({
         userId: z.string(),
         isAdmin: z.boolean(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      if (!ctx.session.user.role.is_tiani_admin)
-        throw new Error("Permission denied");
-
-      await ctx.db.$transaction(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+    .mutation(({ ctx, input }) =>
+      ctx.db.$transaction(
         handleSetAdmin(input.userId, Role.YIDECLASS_ADMIN, input.isAdmin),
-      );
-    }),
+      ),
+    ),
 });

@@ -103,7 +103,7 @@ export default function AdminUsersPage() {
     isLoading: usersIsLoading,
     error: usersError,
     refetch: usersRefetch,
-  } = api.user.getUsers.useQuery({});
+  } = api.user.getUsers.useQuery();
 
   const { mutate: setIsTianiAdmin } = api.user.setIsTianiAdmin.useMutation({
     onSettled: () => usersRefetch(),

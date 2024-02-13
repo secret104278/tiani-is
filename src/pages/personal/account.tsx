@@ -24,12 +24,9 @@ export default function PersonalAccountPage() {
     data: lineImage,
     isFetching: getLineImageIsFetching,
     refetch: getLineImage,
-  } = api.user.getLineImage.useQuery(
-    {},
-    {
-      enabled: false,
-    },
-  );
+  } = api.user.getLineImage.useQuery(undefined, {
+    enabled: false,
+  });
 
   if (!sessionData) {
     return <span className="loading loading-ring loading-md"></span>;

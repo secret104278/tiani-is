@@ -80,7 +80,7 @@ export const buildActivityPublishedOnlyProcedure = (site: Site) =>
     return next();
   });
 
-export const buildAdminProcedure = (site: Site) =>
+export const buildAdminProcedure = (site: Site | "tiani") =>
   t.procedure.use(enforceUserIsAuthed).use(({ ctx, next }) => {
     if (!ctx.session.user.role[`is_${site}_admin`])
       throw new Error("只有管理員可以進行此操作");
@@ -88,7 +88,7 @@ export const buildAdminProcedure = (site: Site) =>
     return next();
   });
 
-export const buildRepresentableProcedure = (site: Site) =>
+export const buildRepresentableProcedure = (site: Site | "tiani") =>
   t.procedure
     .use(enforceUserIsAuthed)
     .input(z.object({ userId: z.string().optional() }))

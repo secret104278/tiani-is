@@ -22,7 +22,7 @@ export default function UserCombobox({
     data: users,
     isLoading: usersIsLoading,
     error: usersError,
-  } = api.user.getUsers.useQuery({});
+  } = api.user.getUsers.useQuery();
 
   const filteredPeople =
     (query === ""

@@ -35,7 +35,7 @@ export default function YiDeAdminClassDetail() {
     data: users,
     isLoading: usersIsLoading,
     error: usersError,
-  } = api.user.getUsers.useQuery({});
+  } = api.user.getUsers.useQuery();
 
   const {
     data: classMemberEnrollments,

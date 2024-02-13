@@ -228,9 +228,6 @@ export const getDateTimeString = (date: Date) => {
   return localTime.toISOString().slice(0, 16);
 };
 
-export const trimString = (u: unknown) =>
-  typeof u === "string" ? u.trim() : u;
-
 export const activityIsStarted = (startDateTime: Date, now?: Date) => {
   return addHours(startDateTime, -1) <= (now ?? new Date());
 };
