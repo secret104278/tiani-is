@@ -1,4 +1,8 @@
-import { CheckIcon } from "@heroicons/react/20/solid";
+import {
+  CheckBadgeIcon,
+  CheckIcon,
+  QueueListIcon,
+} from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -24,6 +28,12 @@ export default function EtogetherRegistrationPage() {
 
   const totalRegisters =
     activity.registers.length + activity.externalRegisters.length;
+  const totalCheckRecords =
+    activity.registers.filter((register) => !isNil(register.checkRecord))
+      .length +
+    activity.externalRegisters.filter(
+      (register) => !isNil(register.checkRecord),
+    ).length;
   const userBySubgroup: Record<number, { name: string; checked: boolean }[]> =
     {};
   for (const register of activity.registers) {
@@ -68,6 +78,16 @@ export default function EtogetherRegistrationPage() {
       </article>
       <div className="stats shadow">
         <div className="stat">
+          <div className="stat-figure text-secondary">
+            <CheckBadgeIcon className="h-8 w-8" />
+          </div>
+          <div className="stat-title">總報到人數</div>
+          <div className="stat-value text-secondary">{totalCheckRecords}</div>
+        </div>
+        <div className="stat">
+          <div className="stat-figure">
+            <QueueListIcon className="h-8 w-8" />
+          </div>
           <div className="stat-title">總報名人數</div>
           <div className="stat-value">{totalRegisters}</div>
         </div>

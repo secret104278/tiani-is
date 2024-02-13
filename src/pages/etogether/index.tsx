@@ -1,5 +1,6 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -9,6 +10,8 @@ import { api } from "~/utils/api";
 import { activityIsEnded } from "~/utils/ui";
 
 export default function EtogetherHome() {
+  const { data: session } = useSession();
+
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
 
   const activitiesQuery =
@@ -35,14 +38,16 @@ export default function EtogetherHome() {
       <article className="prose">
         <h1>活動總覽</h1>
       </article>
-      <div className="flex flex-row justify-end space-x-4">
-        <Link href="/etogether/activity/new" className="flex-shrink-0">
-          <div className="btn">
-            <PlusIcon className="h-4 w-4" />
-            建立新活動
-          </div>
-        </Link>
-      </div>
+      {session?.user.role.is_etogether_admin && (
+        <div className="flex flex-row justify-end space-x-4">
+          <Link href="/etogether/activity/new" className="flex-shrink-0">
+            <div className="btn">
+              <PlusIcon className="h-4 w-4" />
+              建立新活動
+            </div>
+          </Link>
+        </div>
+      )}
       <div className="flex flex-row flex-wrap">
         <label className="label cursor-pointer space-x-2">
           <span className="label-text">我參加的</span>
