@@ -1,7 +1,10 @@
-import { differenceInHours } from "date-fns";
 import { isNil, sum } from "lodash";
 import { z } from "zod";
-import { activityIsOnGoing, isOutOfRange } from "~/utils/ui";
+import {
+  activityIsOnGoing,
+  differenceInHoursNoRound,
+  isOutOfRange,
+} from "~/utils/ui";
 import {
   activityManageProcedure,
   activityRepresentableProcedure,
@@ -117,7 +120,7 @@ export const checkinRouter = createTRPCRouter({
 
     const totalWorkingHours = sum(
       activityCheckHistories.map((record) =>
-        differenceInHours(
+        differenceInHoursNoRound(
           record.activity.endDateTime,
           record.activity.startDateTime,
         ),

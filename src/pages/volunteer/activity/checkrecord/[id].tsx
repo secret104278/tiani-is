@@ -3,9 +3,10 @@ import { isNil } from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import ManualVolunteerActivityRegisterDialogContent from "~/components/DialogContent/ManualVolunteerActivityRegisterDialogContent";
-import { ModifyCheckRecordDialog } from "~/components/ModifyCheckRecordDialog";
+import ModifyCheckRecordDialogContent from "~/components/DialogContent/ModifyCheckRecordDialogContent";
+
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
@@ -34,7 +35,8 @@ export default function VolunteerActivityCheckRecordPage() {
     activityId: Number(id),
   });
 
-  const modifyCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
+  const [modifyCheckRecordDialogOpen, setModifyCheckRecordDialogOpen] =
+    useState(false);
   const [modifyRecord, setModifyRecord] = useState<CheckRecord | undefined>(
     undefined,
   );
@@ -49,7 +51,7 @@ export default function VolunteerActivityCheckRecordPage() {
   } = api.volunteerActivity.managerCheckInActivity.useMutation({
     onSuccess: () => {
       void refetchCheckRecords();
-      modifyCheckRecordDialogRef.current?.close();
+      setModifyCheckRecordDialogOpen(false);
     },
   });
 
@@ -86,22 +88,28 @@ export default function VolunteerActivityCheckRecordPage() {
           />
         </Dialog>
       </div>
-      <ModifyCheckRecordDialog
-        ref={modifyCheckRecordDialogRef}
-        userName={modifyRecord?.user.name ?? ""}
-        defaultCheckInAt={modifyRecord?.checkInAt}
-        defaultCheckOutAt={modifyRecord?.checkOutAt ?? undefined}
-        onConfirm={(checkInAt, checkOutAt) => {
-          managerCheckInActivity({
-            activityId: activity.id,
-            userId: modifyRecord?.user.id ?? "",
-            checkInAt: checkInAt,
-            checkOutAt: checkOutAt,
-          });
-        }}
-        isLoading={managerCheckInActivityIsLoading}
-        error={managerCheckInActivityError?.message}
-      />
+
+      <Dialog
+        title="補正紀錄"
+        show={modifyCheckRecordDialogOpen}
+        closeModal={() => setModifyCheckRecordDialogOpen(false)}
+      >
+        <ModifyCheckRecordDialogContent
+          userName={modifyRecord?.user.name ?? ""}
+          defaultCheckInAt={modifyRecord?.checkInAt}
+          defaultCheckOutAt={modifyRecord?.checkOutAt ?? undefined}
+          onConfirm={(checkInAt, checkOutAt) => {
+            managerCheckInActivity({
+              activityId: activity.id,
+              userId: modifyRecord?.user.id ?? "",
+              checkInAt: checkInAt,
+              checkOutAt: checkOutAt,
+            });
+          }}
+          isLoading={managerCheckInActivityIsLoading}
+          error={managerCheckInActivityError?.message}
+        />
+      </Dialog>
       <table className="table table-sm">
         <thead>
           <tr>
@@ -139,7 +147,7 @@ export default function VolunteerActivityCheckRecordPage() {
                     className="btn btn-sm"
                     onClick={() => {
                       setModifyRecord(record);
-                      modifyCheckRecordDialogRef.current?.showModal();
+                      setModifyCheckRecordDialogOpen(true);
                     }}
                   >
                     <PencilSquareIcon className="h-4 w-4" />

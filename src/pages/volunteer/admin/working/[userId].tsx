@@ -1,11 +1,13 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty, isNil } from "lodash";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import ModifyCheckRecordDialogContent from "~/components/DialogContent/ModifyCheckRecordDialogContent";
 import { HourStats } from "~/components/HourStats";
-import { ModifyCheckRecordDialog } from "~/components/ModifyCheckRecordDialog";
+
 import WorkingStatsPanel from "~/components/WorkingStatsPanel";
 import { AlertWarning } from "~/components/utils/Alert";
+import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
@@ -13,17 +15,24 @@ export default function AdminCasualUserEdit() {
   const router = useRouter();
   const { userId } = router.query;
 
-  const modifyCasualCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
+  const [
+    modifyCasualCheckRecordDialogOpen,
+    setModifyCasualCheckRecordDialogOpen,
+  ] = useState(false);
   const [casualCheckRecord, setCasualCheckRecord] = useState<
     { id: number; checkInAt: Date; checkOutAt: Date | null } | undefined
   >(undefined);
 
-  const modifyActivityCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
+  const [
+    modifyActivityCheckRecordDialogOpen,
+    setModifyActivityCheckRecordDialogOpen,
+  ] = useState(false);
   const [activityCheckRecord, setActivityCheckRecord] = useState<
     { activityId: number; checkInAt: Date; checkOutAt: Date | null } | undefined
   >(undefined);
 
-  const manualCheckRecordDialogRef = useRef<HTMLDialogElement>(null);
+  const [manualCheckRecordDialogOpen, setManualCheckRecordDialogOpen] =
+    useState(false);
 
   const {
     data: user,
@@ -47,7 +56,7 @@ export default function AdminCasualUserEdit() {
   } = api.volunteerActivity.modifyCasualCheckRecord.useMutation({
     onSuccess: () => {
       void refetchWorkingStats();
-      modifyCasualCheckRecordDialogRef.current?.close();
+      setModifyCasualCheckRecordDialogOpen(false);
     },
   });
 
@@ -58,7 +67,7 @@ export default function AdminCasualUserEdit() {
   } = api.volunteerActivity.managerCheckInActivity.useMutation({
     onSuccess: () => {
       void refetchWorkingStats();
-      modifyActivityCheckRecordDialogRef.current?.close();
+      setModifyActivityCheckRecordDialogOpen(false);
     },
   });
 
@@ -69,7 +78,7 @@ export default function AdminCasualUserEdit() {
   } = api.volunteerActivity.manualCasualCheckRecord.useMutation({
     onSuccess: () => {
       void refetchWorkingStats();
-      manualCheckRecordDialogRef.current?.close();
+      setManualCheckRecordDialogOpen(false);
     },
   });
 
@@ -92,61 +101,77 @@ export default function AdminCasualUserEdit() {
       <div className="flex justify-end">
         <ReactiveButton
           className="btn"
-          onClick={() => manualCheckRecordDialogRef.current?.showModal()}
+          onClick={() => setManualCheckRecordDialogOpen(true)}
         >
           <PlusIcon className="h-4 w-4" />
           手動日常打卡
         </ReactiveButton>
-        <ModifyCheckRecordDialog
-          ref={manualCheckRecordDialogRef}
-          userName={user.name ?? ""}
-          defaultCheckInAt={new Date()}
-          onConfirm={(checkInAt, checkOutAt) => {
-            manualCasualCheckRecord({
-              userId: user.id,
-              checkInAt: checkInAt,
-              checkOutAt: checkOutAt,
-            });
-          }}
-          isLoading={manualCasualCheckRecordIsLoading}
-          error={manualCasualCheckRecordError?.message}
-        />
+        <Dialog
+          title="補正紀錄"
+          show={manualCheckRecordDialogOpen}
+          closeModal={() => setManualCheckRecordDialogOpen(false)}
+        >
+          <ModifyCheckRecordDialogContent
+            userName={user.name ?? ""}
+            defaultCheckInAt={new Date()}
+            onConfirm={(checkInAt, checkOutAt) => {
+              manualCasualCheckRecord({
+                userId: user.id,
+                checkInAt: checkInAt,
+                checkOutAt: checkOutAt,
+              });
+            }}
+            isLoading={manualCasualCheckRecordIsLoading}
+            error={manualCasualCheckRecordError?.message}
+          />
+        </Dialog>
       </div>
-      <ModifyCheckRecordDialog
-        ref={modifyCasualCheckRecordDialogRef}
-        userName={user.name ?? ""}
-        defaultCheckInAt={casualCheckRecord?.checkInAt}
-        defaultCheckOutAt={casualCheckRecord?.checkOutAt ?? undefined}
-        onConfirm={(checkInAt, checkOutAt) => {
-          casualCheckRecord &&
-            modifyCasualCheckRecord({
-              id: casualCheckRecord.id,
-              userId: user.id,
-              checkInAt: checkInAt,
-              checkOutAt: checkOutAt,
-            });
-        }}
-        isLoading={modifyCasualCheckRecordIsLoading}
-        error={modifyCasualCheckRecordError?.message}
-      />
 
-      <ModifyCheckRecordDialog
-        ref={modifyActivityCheckRecordDialogRef}
-        userName={user.name ?? ""}
-        defaultCheckInAt={activityCheckRecord?.checkInAt}
-        defaultCheckOutAt={activityCheckRecord?.checkOutAt ?? undefined}
-        onConfirm={(checkInAt, checkOutAt) => {
-          activityCheckRecord &&
-            managerCheckInActivity({
-              activityId: activityCheckRecord.activityId,
-              userId: user.id,
-              checkInAt: checkInAt,
-              checkOutAt: checkOutAt,
-            });
-        }}
-        isLoading={managerCheckInActivityIsLoading}
-        error={managerCheckInActivityError?.message}
-      />
+      <Dialog
+        title="補正紀錄"
+        show={modifyCasualCheckRecordDialogOpen}
+        closeModal={() => setModifyCasualCheckRecordDialogOpen(false)}
+      >
+        <ModifyCheckRecordDialogContent
+          userName={user.name ?? ""}
+          defaultCheckInAt={casualCheckRecord?.checkInAt}
+          defaultCheckOutAt={casualCheckRecord?.checkOutAt ?? undefined}
+          onConfirm={(checkInAt, checkOutAt) => {
+            casualCheckRecord &&
+              modifyCasualCheckRecord({
+                id: casualCheckRecord.id,
+                userId: user.id,
+                checkInAt: checkInAt,
+                checkOutAt: checkOutAt,
+              });
+          }}
+          isLoading={modifyCasualCheckRecordIsLoading}
+          error={modifyCasualCheckRecordError?.message}
+        />
+      </Dialog>
+      <Dialog
+        title="補正紀錄"
+        show={modifyActivityCheckRecordDialogOpen}
+        closeModal={() => setModifyActivityCheckRecordDialogOpen(false)}
+      >
+        <ModifyCheckRecordDialogContent
+          userName={user.name ?? ""}
+          defaultCheckInAt={activityCheckRecord?.checkInAt}
+          defaultCheckOutAt={activityCheckRecord?.checkOutAt ?? undefined}
+          onConfirm={(checkInAt, checkOutAt) => {
+            activityCheckRecord &&
+              managerCheckInActivity({
+                activityId: activityCheckRecord.activityId,
+                userId: user.id,
+                checkInAt: checkInAt,
+                checkOutAt: checkOutAt,
+              });
+          }}
+          isLoading={managerCheckInActivityIsLoading}
+          error={managerCheckInActivityError?.message}
+        />
+      </Dialog>
+
       <HourStats
         title="總服務小時"
         totalWorkingHours={workingStats?.totalWorkingHours}
@@ -157,11 +182,11 @@ export default function AdminCasualUserEdit() {
           isAdmin
           onModifyCasualCheckRecord={(history) => {
             setCasualCheckRecord(history);
-            modifyCasualCheckRecordDialogRef.current?.showModal();
+            setModifyCasualCheckRecordDialogOpen(true);
           }}
           onModifyActivityCheckRecord={(history) => {
             setActivityCheckRecord(history);
-            modifyActivityCheckRecordDialogRef.current?.showModal();
+            setModifyActivityCheckRecordDialogOpen(true);
           }}
         />
       )}

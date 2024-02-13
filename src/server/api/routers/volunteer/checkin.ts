@@ -1,8 +1,11 @@
-import { differenceInHours } from "date-fns";
 import { isNil, sum } from "lodash";
 import moment from "moment-timezone";
 import { z } from "zod";
-import { activityIsOnGoing, isOutOfRange } from "~/utils/ui";
+import {
+  activityIsOnGoing,
+  differenceInHoursNoRound,
+  isOutOfRange,
+} from "~/utils/ui";
 import {
   activityRepresentableProcedure,
   representableProcedure,
@@ -173,7 +176,7 @@ export const checkinRouter = createTRPCRouter({
 
     const activityWorkingHours = sum(
       activityCheckHistories.map((record) =>
-        differenceInHours(record.checkOutAt!, record.checkInAt),
+        differenceInHoursNoRound(record.checkOutAt!, record.checkInAt),
       ),
     );
 
@@ -181,7 +184,7 @@ export const checkinRouter = createTRPCRouter({
       casualCheckHistories
         .filter((record) => !isNil(record.checkOutAt))
         .map((record) =>
-          differenceInHours(record.checkOutAt!, record.checkInAt),
+          differenceInHoursNoRound(record.checkOutAt!, record.checkInAt),
         ),
     );
 

@@ -1,5 +1,12 @@
 import type { VolunteerActivityStatus } from "@prisma/client";
-import { addHours, format, formatDuration, intervalToDuration } from "date-fns";
+import {
+  addHours,
+  differenceInMilliseconds,
+  format,
+  formatDuration,
+  intervalToDuration,
+} from "date-fns";
+import { millisecondsInHour } from "date-fns/constants";
 import { zhTW } from "date-fns/locale";
 import type { VolunteerActivityTopics } from "./types";
 
@@ -301,3 +308,6 @@ export const siteToTitle = (site: Site) => {
       return "天一聖道院資訊系統";
   }
 };
+
+export const differenceInHoursNoRound = (dateLeft: Date, dateRight: Date) =>
+  differenceInMilliseconds(dateLeft, dateRight) / millisecondsInHour;
