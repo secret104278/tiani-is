@@ -1,0 +1,141 @@
+import { differenceInHours } from "date-fns";
+import { isNil, sum } from "lodash";
+import { z } from "zod";
+import { activityIsOnGoing, isOutOfRange } from "~/utils/ui";
+import {
+  activityManageProcedure,
+  activityPublishedOnlyProcedure,
+  activityRepresentableProcedure,
+  representableProcedure,
+} from "../../procedures/yideclass";
+import { createTRPCRouter } from "../../trpc";
+
+export const checkinRouter = createTRPCRouter({
+  checkInActivity: activityPublishedOnlyProcedure
+    .input(
+      z.object({
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        userId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const now = new Date();
+
+      const activity = await ctx.db.classActivity.findUniqueOrThrow({
+        where: { id: input.activityId },
+        select: { organiserId: true, startDateTime: true, endDateTime: true },
+      });
+
+      const isManager =
+        ctx.session.user.id === activity.organiserId ||
+        ctx.session.user.role.is_yideclass_admin;
+
+      if (!(isManager || input.userId === ctx.session.user.id))
+        throw new Error("只有管理員或本人可以進行此操作");
+
+      if (!isManager) {
+        if (
+          !activityIsOnGoing(activity.startDateTime, activity.endDateTime, now)
+        )
+          throw new Error("非課程時間，無法簽到");
+
+        if (isNil(input.latitude) || isNil(input.longitude))
+          throw new Error("無法取得位置資訊");
+
+        if (isOutOfRange(input.latitude, input.longitude))
+          throw new Error("超出打卡範圍");
+      }
+
+      return await ctx.db.classActivityCheckRecord.upsert({
+        where: {
+          userId_activityId: {
+            userId: ctx.session.user.id,
+            activityId: input.activityId,
+          },
+        },
+        update: {
+          checkAt: now,
+          longitude: input.longitude,
+          latitude: input.latitude,
+        },
+        create: {
+          user: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+          activity: {
+            connect: {
+              id: input.activityId,
+            },
+          },
+          checkAt: now,
+          longitude: input.longitude,
+          latitude: input.latitude,
+        },
+      });
+    }),
+
+  isCheckedIn: activityRepresentableProcedure.query(async ({ ctx, input }) => {
+    const checkRecord = await ctx.db.classActivityCheckRecord.findUnique({
+      select: { id: true },
+      where: {
+        userId_activityId: {
+          userId: ctx.input.userId,
+          activityId: input.activityId,
+        },
+      },
+    });
+
+    return !isNil(checkRecord);
+  }),
+
+  getActivityCheckRecords: activityManageProcedure.query(({ ctx, input }) =>
+    ctx.db.classActivityCheckRecord.findMany({
+      where: {
+        activityId: input.activityId,
+      },
+      include: {
+        user: true,
+      },
+    }),
+  ),
+
+  getWorkingStats: representableProcedure.query(async ({ ctx }) => {
+    const activityCheckHistories =
+      await ctx.db.classActivityCheckRecord.findMany({
+        select: {
+          activityId: true,
+          activity: {
+            select: {
+              title: true,
+              startDateTime: true,
+              endDateTime: true,
+            },
+          },
+          checkAt: true,
+        },
+        where: {
+          userId: ctx.input.userId,
+        },
+        orderBy: {
+          checkAt: "desc",
+        },
+      });
+
+    const totalWorkingHours = sum(
+      activityCheckHistories.map((record) =>
+        differenceInHours(
+          record.activity.endDateTime,
+          record.activity.startDateTime,
+        ),
+      ),
+    );
+
+    return {
+      activityCheckHistories,
+      totalWorkingHours,
+    };
+  }),
+});

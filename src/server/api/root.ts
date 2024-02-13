@@ -1,9 +1,8 @@
-import { exampleRouter } from "~/server/api/routers/example";
 import { createTRPCRouter } from "~/server/api/trpc";
-import { classActivityRouter } from "./routers/classActivity";
 import { etogetherActivityRouter } from "./routers/etogetherActivity";
 import { userRouter } from "./routers/user";
 import { volunteerActivityRouter } from "./routers/volunteeractivity";
+import { yideclassRouter } from "./routers/yideclass";
 
 /**
  * This is the primary router for your server.
@@ -11,9 +10,8 @@ import { volunteerActivityRouter } from "./routers/volunteeractivity";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  example: exampleRouter,
   volunteerActivity: volunteerActivityRouter,
-  classActivity: classActivityRouter,
+  classActivity: yideclassRouter,
   etogetherActivity: etogetherActivityRouter,
   user: userRouter,
 });

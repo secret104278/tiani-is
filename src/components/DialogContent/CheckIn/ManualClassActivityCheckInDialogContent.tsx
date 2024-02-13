@@ -13,10 +13,10 @@ export default function ManualClassActivityCheckInDialogContent({
   const router = useRouter();
 
   const {
-    mutate: manualCheckInActivity,
-    isLoading: manualCheckInActivityIsLoading,
-    error: manualCheckInActivityError,
-  } = api.classActivity.manualCheckInActivity.useMutation({
+    mutate: checkInActivity,
+    isLoading: checkInActivityIsLoading,
+    error: checkInActivityError,
+  } = api.classActivity.checkInActivity.useMutation({
     onSuccess: () => router.reload(),
   });
 
@@ -35,11 +35,11 @@ export default function ManualClassActivityCheckInDialogContent({
       <ReactiveButton
         className="btn btn-primary"
         disabled={isNil(selected)}
-        loading={manualCheckInActivityIsLoading}
-        error={manualCheckInActivityError?.message}
+        loading={checkInActivityIsLoading}
+        error={checkInActivityError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={() =>
-          selected && manualCheckInActivity({ activityId, userId: selected.id })
+          selected && checkInActivity({ activityId, userId: selected.id })
         }
       >
         送出

@@ -17,20 +17,29 @@ export default function ClassActivityCheckRecordPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data, isLoading, error } = api.classActivity.getActivity.useQuery({
-    id: Number(id),
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.classActivity.getActivity.useQuery({
+    activityId: Number(id),
   });
-  const { activity } = data ?? {};
 
-  const { data: checkRecords, isLoading: isLoadingCheckRecords } =
-    api.classActivity.getActivityCheckRecords.useQuery({
-      activityId: Number(id),
-    });
+  const {
+    data: checkRecords,
+    isLoading: checkRecordsIsLoading,
+    error: checkRecordsError,
+  } = api.classActivity.getActivityCheckRecords.useQuery({
+    activityId: Number(id),
+  });
 
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
 
-  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading || isLoadingCheckRecords)
+  if (!isNil(activityError))
+    return <AlertWarning>{activityError.message}</AlertWarning>;
+  if (!isNil(checkRecordsError))
+    return <AlertWarning>{checkRecordsError.message}</AlertWarning>;
+  if (activityIsLoading || checkRecordsIsLoading)
     return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 

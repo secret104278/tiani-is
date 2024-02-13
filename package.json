@@ -38,6 +38,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-leaflet": "^4.2.1",
     "react-use": "^17.4.0",
+    "sharp": "^0.33.2",
     "superjson": "^1.13.1",
     "theme-change": "^2.5.0",
     "zod": "^3.22.4"

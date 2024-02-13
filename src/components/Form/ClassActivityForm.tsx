@@ -87,7 +87,7 @@ export default function ClassActivityForm({
     if (defaultActivity) {
       return handleSubmit((data) =>
         updateActivity({
-          id: defaultActivity.id,
+          activityId: defaultActivity.id,
           title: titleIsOther(data.title) ? data.titleOther : data.title,
           location: locationIsOther(data.location)
             ? data.locationOther

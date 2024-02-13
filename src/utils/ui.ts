@@ -210,6 +210,13 @@ export function getDistance(
   return distance;
 }
 
+export const isOutOfRange = (latitude: number, longitude: number) =>
+  !TIANI_GPS_CENTERS.some(
+    (center) =>
+      getDistance(latitude, longitude, center[0], center[1]) <=
+      TIANI_GPS_RADIUS_KM,
+  );
+
 function degToRad(deg: number) {
   return deg * (Math.PI / 180);
 }

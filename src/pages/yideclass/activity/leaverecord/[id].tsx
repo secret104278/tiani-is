@@ -16,10 +16,13 @@ export default function ClassActivityLeaveRecordPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data, isLoading, error } = api.classActivity.getActivity.useQuery({
-    id: Number(id),
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.classActivity.getActivity.useQuery({
+    activityId: Number(id),
   });
-  const { activity } = data ?? {};
 
   const {
     data: leaveRecords,
@@ -40,10 +43,11 @@ export default function ClassActivityLeaveRecordPage() {
 
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
 
-  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
+  if (!isNil(activityError))
+    return <AlertWarning>{activityError.message}</AlertWarning>;
   if (!isNil(leaveRecordsError))
     return <AlertWarning>{leaveRecordsError.message}</AlertWarning>;
-  if (isLoading || leaveRecordsIsLoading)
+  if (activityIsLoading || leaveRecordsIsLoading)
     return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 

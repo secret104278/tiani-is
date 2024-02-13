@@ -74,14 +74,16 @@ export default function ClassActivityDetailPage() {
 
   const { data: session } = useSession();
 
-  const { data, isLoading, error } = api.classActivity.getActivity.useQuery({
-    id: Number(id),
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.classActivity.getActivity.useQuery({
+    activityId: Number(id),
   });
 
-  const { activity } = data ?? {};
-
-  const { data: checkInData, refetch: refetchCheckInData } =
-    api.classActivity.getCheckInActivityHistory.useQuery({
+  const { data: isCheckedIn, refetch: refetchIsCheckedIn } =
+    api.classActivity.isCheckedIn.useQuery({
       activityId: Number(id),
     });
 
@@ -123,8 +125,9 @@ export default function ClassActivityDetailPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
-  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading) return <div className="loading"></div>;
+  if (!isNil(activityError))
+    return <AlertWarning>{activityError.message}</AlertWarning>;
+  if (activityIsLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   const isManager =
@@ -188,7 +191,7 @@ export default function ClassActivityDetailPage() {
           title="確認撤銷"
           content="課程撤銷後就無法復原囉！"
           confirmText="撤銷"
-          onConfirm={() => deleteActivity({ id: activity.id })}
+          onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
 
@@ -215,13 +218,11 @@ export default function ClassActivityDetailPage() {
   );
 
   const CheckInControl = () => {
-    const alreadyCheckIn = !isNil(checkInData);
-
     const isActivityNotYetForCheck = !activityIsStarted(activity.startDateTime);
     const isActivityClosedForCheck = activityIsEnded(activity.endDateTime);
 
     let checkButtonLabel = "";
-    if (alreadyCheckIn) checkButtonLabel = " （已完成簽到）";
+    if (isCheckedIn) checkButtonLabel = " （已完成簽到）";
     else if (isActivityNotYetForCheck)
       checkButtonLabel = " （課程開始前 1 小時開放打卡）";
     else if (isActivityClosedForCheck) checkButtonLabel = " （課程已結束）";
@@ -245,7 +246,7 @@ export default function ClassActivityDetailPage() {
         >
           <ClassActivityCheckInDialogContent
             activityId={activity.id}
-            onCheckInSuccess={() => void refetchCheckInData()}
+            onCheckInSuccess={() => void refetchIsCheckedIn()}
           />
         </Dialog>
       </>

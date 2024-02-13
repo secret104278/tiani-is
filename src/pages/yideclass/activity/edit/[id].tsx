@@ -8,17 +8,19 @@ export default function EditClassActivityPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data, isLoading, error } = api.classActivity.getActivity.useQuery({
-    id: Number(id),
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.classActivity.getActivity.useQuery({
+    activityId: Number(id),
   });
 
-  const { activity } = data ?? {};
-
-  if (!isNil(error)) {
-    return <AlertWarning>{error.message}</AlertWarning>;
+  if (!isNil(activityError)) {
+    return <AlertWarning>{activityError.message}</AlertWarning>;
   }
 
-  if (isLoading) return <div className="loading"></div>;
+  if (activityIsLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   return (

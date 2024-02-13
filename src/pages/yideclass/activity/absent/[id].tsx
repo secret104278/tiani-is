@@ -8,10 +8,13 @@ export default function ClassActivityAbsentPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data, isLoading, error } = api.classActivity.getActivity.useQuery({
-    id: Number(id),
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.classActivity.getActivity.useQuery({
+    activityId: Number(id),
   });
-  const { activity } = data ?? {};
 
   const {
     data: leaveRecords,
@@ -40,7 +43,8 @@ export default function ClassActivityAbsentPage() {
     { enabled: isString(activity?.title) && !isEmpty(activity?.title) },
   );
 
-  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
+  if (!isNil(activityError))
+    return <AlertWarning>{activityError.message}</AlertWarning>;
   if (!isNil(leaveRecordsError))
     return <AlertWarning>{leaveRecordsError.message}</AlertWarning>;
   if (!isNil(checkRecordsError))
@@ -48,7 +52,7 @@ export default function ClassActivityAbsentPage() {
   if (!isNil(classMemberEnrollmentsError))
     return <AlertWarning>{classMemberEnrollmentsError.message}</AlertWarning>;
   if (
-    isLoading ||
+    activityIsLoading ||
     leaveRecordsIsLoading ||
     checkRecordsIsLoading ||
     classMemberEnrollmentsIsLoading
