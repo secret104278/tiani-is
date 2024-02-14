@@ -31,6 +31,7 @@ import {
   activityIsEnded,
   activityIsStarted,
   formatDateTime,
+  formatDateTitle,
   formatMilliseconds,
   getActivityStatusText,
   toDuration,
@@ -39,31 +40,20 @@ import {
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
 }> = async (context) => {
-  const res = await db.volunteerActivity.findFirst({
+  const res = await db.volunteerActivity.findUniqueOrThrow({
     select: {
       title: true,
       startDateTime: true,
     },
     where: { id: Number(context.query.id) },
   });
-  let dateString = "";
-  if (!isNil(res)) {
-    // since the server my run in different location,
-    // and the timestamp is stored in DB is in UTC,
-    // so convert it to Asia/Taipei when server side rendering
-    const d = new Date(
-      res.startDateTime.toLocaleString("en-US", { timeZone: "Asia/Taipei" }),
-    );
-    dateString = `${d.getMonth() + 1}月${d.getDate()}日 ${d
-      .getHours()
-      .toString()
-      .padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
-  }
 
   return {
     props: {
       ogMeta: {
-        ogTitle: `${res?.title}・${dateString}・天一志工隊`,
+        ogTitle: `${res.title}・${formatDateTitle(
+          res.startDateTime,
+        )}・天一志工隊`,
         ogDescription: `有新的志工工作需要協助，快來報名吧！`,
       },
     },
@@ -178,7 +168,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse collapse-arrow bg-base-200">
+      <form className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名

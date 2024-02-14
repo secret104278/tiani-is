@@ -254,6 +254,19 @@ export const activityIsOnGoing = (
 };
 
 export const DEFAULT_LOCALE = zhTW;
+
+export const formatDateTitle = (date: Date) =>
+  format(
+    // since the server my run in different location,
+    // and the timestamp is stored in DB is in UTC,
+    // so convert it to Asia/Taipei when server side rendering
+    new Date(date.toLocaleString("en-US", { timeZone: "Asia/Taipei" })),
+    "LLLdo(eeeee) hh:mm",
+    {
+      locale: DEFAULT_LOCALE,
+    },
+  );
+
 export const formatDate = (date: Date) =>
   format(date, "yyyy/MM/dd (eeeee)", {
     locale: DEFAULT_LOCALE,

@@ -28,6 +28,7 @@ import {
   activityIsEnded,
   activityIsStarted,
   formatDateTime,
+  formatDateTitle,
   getActivityStatusText,
   toDuration,
 } from "~/utils/ui";
@@ -35,31 +36,19 @@ import {
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
 }> = async (context) => {
-  const res = await db.etogetherActivity.findFirst({
+  const res = await db.etogetherActivity.findUniqueOrThrow({
     select: {
       title: true,
       startDateTime: true,
     },
     where: { id: Number(context.query.id) },
   });
-  let dateString = "";
-  if (!isNil(res)) {
-    // since the server my run in different location,
-    // and the timestamp is stored in DB is in UTC,
-    // so convert it to Asia/Taipei when server side rendering
-    const d = new Date(
-      res.startDateTime.toLocaleString("en-US", { timeZone: "Asia/Taipei" }),
-    );
-    dateString = `${d.getMonth() + 1}月${d.getDate()}日 ${d
-      .getHours()
-      .toString()
-      .padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
-  }
-
   return {
     props: {
       ogMeta: {
-        ogTitle: `${res?.title}・${dateString}・活動e起來`,
+        ogTitle: `${res.title}・${formatDateTitle(
+          res.startDateTime,
+        )}・活動e起來`,
       },
     },
   };
