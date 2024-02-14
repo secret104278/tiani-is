@@ -36,6 +36,9 @@ export const env = createEnv({
     LINE_CLIENT_ID: z.string(),
     LINE_CLIENT_SECRET: z.string(),
 
+    LINE_NOTIFY_CLIENT_ID: z.string(),
+    LINE_NOTIFY_CLIENT_SECRET: z.string(),
+
     CRON_SECRET: z.string().optional(),
   },
 
@@ -64,6 +67,8 @@ export const env = createEnv({
     LINE_CLIENT_ID: process.env.LINE_CLIENT_ID,
     LINE_CLIENT_SECRET: process.env.LINE_CLIENT_SECRET,
     CRON_SECRET: process.env.CRON_SECRET,
+    LINE_NOTIFY_CLIENT_ID: process.env.LINE_NOTIFY_CLIENT_ID,
+    LINE_NOTIFY_CLIENT_SECRET: process.env.LINE_NOTIFY_CLIENT_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

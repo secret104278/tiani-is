@@ -1,11 +1,13 @@
-import { HomeIcon } from "@heroicons/react/20/solid";
+import { BellAlertIcon, HomeIcon } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
+import { api } from "~/utils/api";
 import { siteToTitle } from "~/utils/ui";
 import LineImage from "../utils/LineImage";
+import LineNotifySetupTutorialDialog from "../utils/LineNotifySetupTutorialDialog";
 
 function UserAvatar() {
   const { data: sessionData } = useSession();
@@ -29,7 +31,7 @@ function UserAvatar() {
 
   return (
     <div className="avatar placeholder">
-      <div className="w-10 rounded-full bg-neutral-focus text-neutral-content">
+      <div className="bg-neutral-focus w-10 rounded-full text-neutral-content">
         <span>{sessionData.user.name}</span>
       </div>
     </div>
@@ -40,6 +42,9 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
   const { site } = useSiteContext();
   const router = useRouter();
+
+  const { data: hasLineNotify } = api.user.hasLineNotify.useQuery({});
+  const [showLineNotifySetup, setShowLineNotifySetup] = useState(false);
 
   return (
     <>
@@ -68,7 +73,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               </label>
               <ul
                 tabIndex={0}
-                className="menu dropdown-content rounded-box z-[1] mt-3 w-52 bg-base-100 p-2 shadow-xl outline outline-1 outline-base-200"
+                className="menu dropdown-content z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow-xl outline outline-1 outline-base-200"
               >
                 <li className="disabled">
                   <a>{sessionData.user.name}</a>
@@ -100,6 +105,28 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <div className="mx-auto max-w-xl px-4 pb-16">{children}</div>
+
+      {hasLineNotify === false && (
+        <>
+          <LineNotifySetupTutorialDialog
+            show={showLineNotifySetup}
+            closeModal={() => null}
+            onConfirm={() =>
+              void router.push(
+                `/api/line/notify/auth?redirect=${router.asPath}`,
+              )
+            }
+          ></LineNotifySetupTutorialDialog>
+          <button
+            className="btn fixed bottom-8 right-8 rounded-full border-none bg-[#00C300] text-[#fff] drop-shadow-2xl hover:bg-[#00C300]"
+            onClick={() => setShowLineNotifySetup(true)}
+          >
+            <BellAlertIcon className="h-5 w-5 animate-bounce" />
+            設定 Line 通知
+          </button>
+        </>
+      )}
+
       {/* <div className="container mx-auto w-full px-4"></div> */}
     </>
   );

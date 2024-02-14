@@ -1,5 +1,6 @@
 import { Role, type PrismaClient, type PrismaPromise } from "@prisma/client";
 import { type ITXClientDenyList } from "@prisma/client/runtime/library";
+import { isNil } from "lodash";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getLineImageURL } from "~/utils/server";
@@ -157,4 +158,13 @@ export const userRouter = createTRPCRouter({
         handleSetAdmin(input.userId, Role.YIDECLASS_ADMIN, input.isAdmin),
       ),
     ),
+
+  hasLineNotify: representableProcedure.query(async ({ ctx }) => {
+    const res = await ctx.db.lineNotify.findUnique({
+      where: {
+        userId: ctx.input.userId,
+      },
+    });
+    return !isNil(res);
+  }),
 });

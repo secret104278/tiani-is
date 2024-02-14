@@ -60,13 +60,14 @@ enum Role {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String      @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?     @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
+    lineNotify    LineNotify?
 
     roles Role[] @default([])
 
@@ -84,7 +85,16 @@ model User {
     classActivityLeaveRecord      ClassActivityLeaveRecord[]
     classMemberEnrollments        ClassMemberEnrollment[]
 
-    etogetherActivityRegisters    EtogetherActivityRegister[]
+    etogetherActivityRegisters EtogetherActivityRegister[]
+}
+
+model LineNotify {
+    id          Int    @id @default(autoincrement())
+    userId      String
+    user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    accessToken String
+
+    @@unique([userId])
 }
 
 model VerificationToken {

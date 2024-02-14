@@ -2,7 +2,7 @@ import type { queueAsPromised } from "fastq";
 import * as fastq from "fastq";
 import { getActivityDetailURL } from "~/utils/url";
 import { db } from "../db";
-import { bot } from "../line";
+import { pushNotification } from "../linenotify";
 
 type LeaveActivityEvent = {
   activityId: number;
@@ -10,7 +10,7 @@ type LeaveActivityEvent = {
 };
 
 export const leaveActivityEventQueue: queueAsPromised<LeaveActivityEvent> =
-  fastq.promise(dummy, 1);
+  fastq.promise(worker, 1);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function dummy(input: LeaveActivityEvent): Promise<void> {
@@ -19,62 +19,35 @@ function dummy(input: LeaveActivityEvent): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function worker(input: LeaveActivityEvent): Promise<void> {
-  const activity = await db.volunteerActivity.findUniqueOrThrow({
-    select: { organiserId: true, title: true, id: true, version: true },
-    where: { id: input.activityId },
-  });
-
-  const organizer = await db.user.findUniqueOrThrow({
-    select: {
-      name: true,
-      accounts: {
-        select: { providerAccountId: true },
-        where: { provider: "line" },
+  const [activity, user] = await Promise.all([
+    db.volunteerActivity.findUniqueOrThrow({
+      select: {
+        organiserId: true,
+        organiser: { select: { name: true } },
+        title: true,
+        id: true,
+        version: true,
       },
-    },
-    where: {
-      id: activity.organiserId,
-    },
-  });
-
-  const user = await db.user.findUniqueOrThrow({
-    select: {
-      name: true,
-      accounts: {
-        select: { providerAccountId: true },
-        where: { provider: "line" },
-      },
-    },
-    where: { id: input.userId },
-  });
+      where: { id: input.activityId },
+    }),
+    db.user.findUniqueOrThrow({
+      select: { name: true },
+      where: { id: input.userId },
+    }),
+  ]);
 
   await Promise.all([
-    ...user.accounts.map((account) =>
-      bot.pushMessage({
-        to: account.providerAccountId,
-        messages: [
-          {
-            type: "text",
-            text: `你取消報名了 ${organizer.name} 主辦的志工工作 ${
-              activity.title
-            }！\n${getActivityDetailURL(activity)}`,
-          },
-        ],
-      }),
+    pushNotification(
+      input.userId,
+      `你取消報名了 ${activity.organiser.name} 主辦的志工工作 ${
+        activity.title
+      }！\n${getActivityDetailURL(activity)}`,
     ),
-
-    ...organizer.accounts.map((account) =>
-      bot.pushMessage({
-        to: account.providerAccountId,
-        messages: [
-          {
-            type: "text",
-            text: `${user.name} 取消報名了你主辦的志工工作 ${
-              activity.title
-            }！\n${getActivityDetailURL(activity)}`,
-          },
-        ],
-      }),
+    pushNotification(
+      activity.organiserId,
+      `${user.name} 取消報名了你主辦的志工工作 ${
+        activity.title
+      }！\n${getActivityDetailURL(activity)}`,
     ),
   ]);
 }
