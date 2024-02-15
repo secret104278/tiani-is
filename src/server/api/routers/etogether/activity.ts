@@ -21,6 +21,7 @@ export const activityRouter = createTRPCRouter({
           z.object({
             title: z.string(),
             description: z.string().nullable(),
+            displayColorCode: z.string().length(7).nullable(),
           }),
         ),
       }),
@@ -72,6 +73,7 @@ export const activityRouter = createTRPCRouter({
           z.object({
             title: z.string(),
             description: z.string().nullable(),
+            displayColorCode: z.string().length(7).nullable(),
           }),
         ),
       }),

@@ -2,7 +2,7 @@ import type {
   EtogetherActivity,
   EtogetherActivitySubgroup,
 } from "@prisma/client";
-import { defaults, isNil } from "lodash";
+import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useFieldArray, useForm } from "react-hook-form";
 import { api } from "~/utils/api";
@@ -21,7 +21,11 @@ interface EtogetherActivityFormData {
   startDateTime: Date | string;
   duration: number;
   description: string;
-  subgroups: { title: string; description: string }[];
+  subgroups: {
+    title: string;
+    description: string | null;
+    displayColorCode: string | null;
+  }[];
 }
 
 export default function EtogetherActivityForm({
@@ -45,10 +49,7 @@ export default function EtogetherActivityForm({
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
       ),
-      subgroups:
-        defaultActivity.subgroups.map((g) =>
-          defaults(g, { description: "" }),
-        ) ?? [],
+      subgroups: defaultActivity.subgroups ?? [],
       description: defaultActivity.description ?? "",
     };
   }
@@ -184,6 +185,15 @@ export default function EtogetherActivityForm({
                 className="textarea textarea-bordered w-full"
                 {...register(`subgroups.${index}.description`)}
               ></textarea>
+              <div className="flex flex-row items-center">
+                <label className="label">
+                  <span className="label-text">背景顏色</span>
+                </label>
+                <input
+                  type="color"
+                  {...register(`subgroups.${index}.displayColorCode`)}
+                />
+              </div>
               <div className="card-actions justify-end">
                 <button
                   className="btn btn-primary"
@@ -203,7 +213,7 @@ export default function EtogetherActivityForm({
           className="btn"
           onClick={(e) => {
             void e.preventDefault();
-            append({ title: "", description: "" });
+            append({ title: "", description: null, displayColorCode: null });
           }}
         >
           新增分組

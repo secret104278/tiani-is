@@ -255,9 +255,10 @@ enum EtogetherActivityStatus {
 }
 
 model EtogetherActivitySubgroup {
-    id          Int     @id @default(autoincrement())
-    title       String
-    description String?
+    id               Int     @id @default(autoincrement())
+    title            String
+    description      String?
+    displayColorCode String?
 
     etogetherActivity   EtogetherActivity @relation(fields: [etogetherActivityId], references: [id])
     etogetherActivityId Int

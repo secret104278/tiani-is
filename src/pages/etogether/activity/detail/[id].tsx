@@ -308,10 +308,18 @@ export default function EtogetherActivityDetailPage() {
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className="card card-bordered card-compact ml-4 shadow-sm"
+            className={`card card-bordered card-compact ml-4 shadow-sm`}
+            style={
+              !isNil(subgroup.displayColorCode)
+                ? {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    backgroundColor: subgroup.displayColorCode,
+                  }
+                : undefined
+            }
           >
             <div className="card-body">
-              <p className="font-bold">{subgroup.title}</p>
+              <h5 className="card-title">{subgroup.title}</h5>
               <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
                 {subgroup.description}
               </article>
