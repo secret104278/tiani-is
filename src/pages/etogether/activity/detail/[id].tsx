@@ -6,6 +6,7 @@ import {
   QueueListIcon,
   TrashIcon,
   UserGroupIcon,
+  UserMinusIcon,
 } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
@@ -76,9 +77,10 @@ export default function EtogetherActivityDetailPage() {
     });
   const alreadyCheckIn = !isNil(checkRecordData?.checkRecord);
 
-  const { data: registerData } = api.etogetherActivity.getRegister.useQuery({
-    activityId: Number(id),
-  });
+  const { data: registerData, refetch: refetchRegisterData } =
+    api.etogetherActivity.getRegister.useQuery({
+      activityId: Number(id),
+    });
   const alreadyRegister = !isNil(registerData);
 
   const [shareBtnLoading, setShareBtnLoading] = useState(false);
@@ -91,9 +93,18 @@ export default function EtogetherActivityDetailPage() {
     onSuccess: () => router.push(`/${site}`),
   });
 
+  const {
+    mutate: unregisterActivity,
+    isLoading: unregisterActivityIsLoading,
+    error: unregisterActivityError,
+  } = api.etogetherActivity.unregisterActivity.useMutation({
+    onSuccess: () => refetchRegisterData(),
+  });
+
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   if (!isNil(activityError))
     return <AlertWarning>{activityError.message}</AlertWarning>;
@@ -178,7 +189,7 @@ export default function EtogetherActivityDetailPage() {
     return (
       <>
         {alreadyRegister && (
-          <div className="card card-bordered card-compact shadow-sm">
+          <div className="card-compact card card-bordered shadow-sm">
             <div className="card-body">
               <p className="font-bold">我的報名表</p>
               <p>
@@ -198,6 +209,24 @@ export default function EtogetherActivityDetailPage() {
                     <PencilSquareIcon className="h-4 w-4" />
                     修改報名
                   </ReactiveButton>
+                  <ReactiveButton
+                    className="btn btn-error"
+                    onClick={() => setLeaveDialogOpen(true)}
+                    loading={unregisterActivityIsLoading}
+                    error={unregisterActivityError?.message}
+                  >
+                    <UserMinusIcon className="h-4 w-4" />
+                    取消報名
+                  </ReactiveButton>
+                  <ConfirmDialog
+                    show={leaveDialogOpen}
+                    closeModal={() => setLeaveDialogOpen(false)}
+                    title="取消報名"
+                    content="確定要取消報名嗎？"
+                    onConfirm={() =>
+                      unregisterActivity({ activityId: activity.id })
+                    }
+                  />
                 </div>
               )}
             </div>
@@ -308,7 +337,7 @@ export default function EtogetherActivityDetailPage() {
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className={`card card-bordered card-compact ml-4 shadow-sm`}
+            className={`card-compact card card-bordered ml-4 shadow-sm`}
             style={
               !isNil(subgroup.displayColorCode)
                 ? {

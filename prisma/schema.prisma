@@ -322,7 +322,7 @@ model ExternalEtogetherActivityRegister {
 
     username String
 
-    mainRegister   EtogetherActivityRegister @relation(fields: [mainRegisterId], references: [id])
+    mainRegister   EtogetherActivityRegister @relation(fields: [mainRegisterId], references: [id], onDelete: Cascade)
     mainRegisterId Int
 
     subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])

@@ -22,6 +22,7 @@ interface EtogetherActivityFormData {
   duration: number;
   description: string;
   subgroups: {
+    id: number | null;
     title: string;
     description: string | null;
     displayColorCode: string | null;
@@ -213,7 +214,12 @@ export default function EtogetherActivityForm({
           className="btn"
           onClick={(e) => {
             void e.preventDefault();
-            append({ title: "", description: null, displayColorCode: null });
+            append({
+              id: null,
+              title: "",
+              description: null,
+              displayColorCode: null,
+            });
           }}
         >
           新增分組

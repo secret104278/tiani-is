@@ -7,6 +7,7 @@ import {
   PencilSquareIcon,
   QueueListIcon,
   TrashIcon,
+  UserMinusIcon,
   UserPlusIcon,
   UsersIcon,
 } from "@heroicons/react/20/solid";
@@ -301,12 +302,12 @@ export default function VolunteerActivityDetailPage() {
       return (
         <>
           <ReactiveButton
-            className="btn btn-secondary"
+            className="btn btn-error"
             onClick={() => setLeaveDialogOpen(true)}
             loading={leaveActivityIsLoading}
             isError={leaveActivityIsError}
           >
-            <UserPlusIcon className="h-4 w-4" />
+            <UserMinusIcon className="h-4 w-4" />
             取消報名
           </ReactiveButton>
           <ConfirmDialog

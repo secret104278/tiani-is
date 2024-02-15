@@ -1,4 +1,5 @@
 import { type Prisma } from "@prisma/client";
+import { isNumber, omit } from "lodash";
 import { z } from "zod";
 import {
   activityManageProcedure,
@@ -71,6 +72,7 @@ export const activityRouter = createTRPCRouter({
         isDraft: z.boolean().optional(),
         subgroups: z.array(
           z.object({
+            id: z.number().nullable(),
             title: z.string(),
             description: z.string().nullable(),
             displayColorCode: z.string().length(7).nullable(),
@@ -79,22 +81,56 @@ export const activityRouter = createTRPCRouter({
       }),
     )
     .mutation(({ ctx, input }) =>
-      ctx.db.etogetherActivity.update({
-        where: {
-          id: input.activityId,
-        },
-        data: {
-          title: input.title,
-          description: input.description,
-          location: input.location,
-          startDateTime: input.startDateTime,
-          endDateTime: input.endDateTime,
-          subgroups: { create: input.subgroups },
-          status: input.isDraft ? "DRAFT" : "PUBLISHED",
-          version: {
-            increment: 1,
+      ctx.db.$transaction(async (db) => {
+        await db.etogetherActivitySubgroup.deleteMany({
+          where: {
+            etogetherActivityId: input.activityId,
+            NOT: {
+              id: {
+                in: input.subgroups
+                  .map((subgroup) => subgroup.id)
+                  .filter(isNumber),
+              },
+            },
           },
-        },
+        });
+
+        await db.etogetherActivitySubgroup.createMany({
+          data: input.subgroups
+            .filter((subgroup) => !isNumber(subgroup.id))
+            .map((subgroup) => ({
+              ...omit(subgroup, "id"),
+              etogetherActivityId: input.activityId,
+            })),
+        });
+
+        await Promise.all(
+          input.subgroups
+            .filter((subgroup) => isNumber(subgroup.id))
+            .map((subgroup) =>
+              db.etogetherActivitySubgroup.update({
+                where: { id: subgroup.id! },
+                data: omit(subgroup, "id"),
+              }),
+            ),
+        );
+
+        return await db.etogetherActivity.update({
+          where: {
+            id: input.activityId,
+          },
+          data: {
+            title: input.title,
+            description: input.description,
+            location: input.location,
+            startDateTime: input.startDateTime,
+            endDateTime: input.endDateTime,
+            status: input.isDraft ? "DRAFT" : "PUBLISHED",
+            version: {
+              increment: 1,
+            },
+          },
+        });
       }),
     ),
 

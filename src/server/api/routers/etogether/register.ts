@@ -53,6 +53,18 @@ export const registerRouter = createTRPCRouter({
       }),
     ),
 
+  unregisterActivity: activityPublishedOnlyProcedure.mutation(
+    ({ ctx, input }) =>
+      ctx.db.etogetherActivityRegister.delete({
+        where: {
+          userId_activityId: {
+            userId: ctx.session.user.id,
+            activityId: input.activityId,
+          },
+        },
+      }),
+  ),
+
   getRegister: representableProcedure
     .input(
       z.object({
