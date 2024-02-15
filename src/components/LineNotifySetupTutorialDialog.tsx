@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Dialog from "./Dialog";
+import Dialog from "./utils/Dialog";
 
 export default function LineNotifySetupTutorialDialog({
   show,
@@ -17,11 +17,12 @@ export default function LineNotifySetupTutorialDialog({
       </p>
       <div className="flex w-full flex-col items-center">
         <Image
-          className="max-h-[60vh] w-auto shadow-xl"
+          className="max-h-[50vh] w-auto shadow-xl"
           src="/line_notify_tutorial.jpg"
           alt="Line Notify 教學圖片"
           width={1179}
           height={2556}
+          placeholder="blur"
         />
       </div>
       <form method="dialog" className="flex justify-end space-x-2">

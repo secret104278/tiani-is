@@ -2,9 +2,9 @@ import * as jose from "jose";
 import { get, isNil, isString } from "lodash";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getCsrfToken } from "next-auth/react";
-import { env } from "~/env.mjs";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import { LINE_NOTIFY_CALLBACK_URL } from "~/utils/server";
 
 export default async function handler(
   req: NextApiRequest,
@@ -45,10 +45,7 @@ export default async function handler(
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: new URL(
-        "/api/line/notify/callback",
-        env.NEXTAUTH_URL,
-      ).toString(),
+      redirect_uri: LINE_NOTIFY_CALLBACK_URL,
       client_id: process.env.LINE_NOTIFY_CLIENT_ID,
       client_secret: process.env.LINE_NOTIFY_CLIENT_SECRET,
     } as Record<string, string>),

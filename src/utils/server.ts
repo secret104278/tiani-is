@@ -128,3 +128,10 @@ export const refreshLineTokenIfNeed = async (
     }
   }
 };
+
+export const LINE_NOTIFY_CALLBACK_URL = new URL(
+  "/api/line/notify/callback",
+  `${env.NODE_ENV === "production" ? "https://" : "http://"}${
+    env.PUBLIC_DOMAIN
+  }`,
+).toString();

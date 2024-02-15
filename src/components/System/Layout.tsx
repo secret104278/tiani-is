@@ -6,8 +6,8 @@ import { useState, type ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
 import { siteToTitle } from "~/utils/ui";
+import LineNotifySetupTutorialDialog from "../LineNotifySetupTutorialDialog";
 import LineImage from "../utils/LineImage";
-import LineNotifySetupTutorialDialog from "../utils/LineNotifySetupTutorialDialog";
 
 function UserAvatar() {
   const { data: sessionData } = useSession();
