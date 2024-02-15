@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useState, type ReactNode } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
-import { siteToTitle } from "~/utils/ui";
+import { IS_LINE_NOTIFY_ENABLED, siteToTitle } from "~/utils/ui";
 import LineNotifySetupTutorialDialog from "../LineNotifySetupTutorialDialog";
 import LineImage from "../utils/LineImage";
 
@@ -106,7 +106,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </div>
       <div className="mx-auto max-w-xl px-4 pb-16">{children}</div>
 
-      {hasLineNotify === false && (
+      {IS_LINE_NOTIFY_ENABLED && hasLineNotify === false && (
         <>
           <LineNotifySetupTutorialDialog
             show={showLineNotifySetup}

@@ -119,6 +119,8 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
 
+export const IS_LINE_NOTIFY_ENABLED = false;
+
 export const getEndTime = (startDateTime: Date, duration: number) =>
   new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
 
