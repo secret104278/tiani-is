@@ -4,7 +4,12 @@ import { isNil } from "lodash";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getLineImageURL } from "~/utils/server";
-import { adminProcedure, representableProcedure } from "../procedures/tiani";
+import {
+  adminProcedure,
+  allAdminProcedure,
+  allAdminRepresentableProcedure,
+  representableProcedure,
+} from "../procedures/tiani";
 
 const handleSetAdmin =
   (userId: string, role: Role, set: boolean) =>
@@ -71,7 +76,7 @@ export const userRouter = createTRPCRouter({
       }),
     ),
 
-  getUser: representableProcedure.query(({ ctx }) =>
+  getUser: allAdminRepresentableProcedure.query(({ ctx }) =>
     ctx.db.user.findUnique({
       select: {
         id: true,
@@ -84,7 +89,7 @@ export const userRouter = createTRPCRouter({
     }),
   ),
 
-  getUsers: adminProcedure.query(async ({ ctx }) =>
+  getUsers: allAdminProcedure.query(async ({ ctx }) =>
     ctx.db.user.findMany({
       select: {
         id: true,
