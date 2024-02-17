@@ -1,4 +1,5 @@
 import { type PrismaClient } from "@prisma/client";
+import { isNil } from "lodash";
 import { env } from "~/env.mjs";
 
 const refreshLineToken = async (refreshToken: string) => {
@@ -84,6 +85,16 @@ export const getLineImageURL = async (db: PrismaClient, userId: string) => {
   }
 
   return undefined;
+};
+
+export const refreshLineImage = async (db: PrismaClient, userId: string) => {
+  const imageURL = await getLineImageURL(db, userId);
+  if (isNil(imageURL)) return;
+
+  await db.user.update({
+    where: { id: userId },
+    data: { image: imageURL },
+  });
 };
 
 export const refreshLineTokenIfNeed = async (

@@ -11,6 +11,7 @@ import LineProvider from "next-auth/providers/line";
 
 import { env } from "~/env.mjs";
 import { db } from "~/server/db";
+import { refreshLineImage } from "~/utils/server";
 import type { UserRole } from "~/utils/types";
 
 /**
@@ -45,7 +46,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/signin",
   },
   callbacks: {
-    signIn: async ({ account }) => {
+    signIn: async ({ user, account }) => {
       if (isNil(account)) return false;
 
       if (account.provider === "line") {
@@ -62,6 +63,8 @@ export const authOptions: NextAuthOptions = {
             expires_at: account.expires_at,
           },
         });
+
+        void refreshLineImage(db, user.id);
       }
 
       return true;

@@ -1,8 +1,8 @@
-import { isNil, map } from "lodash";
+import { map } from "lodash";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { env } from "~/env.mjs";
 import { db } from "~/server/db";
-import { getLineImageURL } from "~/utils/server";
+import { refreshLineImage } from "~/utils/server";
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,16 +18,8 @@ export default async function handler(
   await Promise.all(
     map(users, async (user) => {
       try {
-        const imageURL = await getLineImageURL(db, user.id);
-        if (isNil(imageURL)) return;
-        if (imageURL === user.image) return;
-
         console.info(`Updating ${user.name}'s image`);
-
-        await db.user.update({
-          where: { id: user.id },
-          data: { image: imageURL },
-        });
+        await refreshLineImage(db, user.id);
       } catch (e) {
         console.error(e);
       }
