@@ -68,13 +68,15 @@ enum SortedType {
   IS_TIANI_ADMIN,
   IS_VOLUNTEER_ADMIN,
   IS_YIDECLASS_ADMIN,
+  IS_ETOGETHER_ADMIN,
 }
 
 const getComparator = (sortedType: SortedType) => {
   type User = { name: string | null; roles: Role[] };
 
   const rolesComparator = (role: Role) => (a: User, b: User) =>
-    Number(b.roles.includes(role)) - Number(a.roles.includes(role));
+    Number(b.roles.includes(role) || b.roles.includes(Role.TIANI_ADMIN)) -
+    Number(a.roles.includes(role) || a.roles.includes(Role.TIANI_ADMIN));
 
   switch (sortedType) {
     case SortedType.NAME:
@@ -92,6 +94,11 @@ const getComparator = (sortedType: SortedType) => {
     case SortedType.IS_YIDECLASS_ADMIN:
       return (a: User, b: User) => {
         const result = rolesComparator(Role.YIDECLASS_ADMIN)(a, b);
+        return result !== 0 ? result : userComparator(a, b);
+      };
+    case SortedType.IS_ETOGETHER_ADMIN:
+      return (a: User, b: User) => {
+        const result = rolesComparator(Role.ETOGETHER_ADMIN)(a, b);
         return result !== 0 ? result : userComparator(a, b);
       };
   }
@@ -114,6 +121,10 @@ export default function AdminUsersPage() {
     });
   const { mutate: setIsYideclassAdmin } =
     api.user.setIsYideclassAdmin.useMutation({
+      onSettled: () => usersRefetch(),
+    });
+  const { mutate: setIsEtogetherAdmin } =
+    api.user.setIsEtogetherAdmin.useMutation({
       onSettled: () => usersRefetch(),
     });
 
@@ -202,6 +213,19 @@ export default function AdminUsersPage() {
                   )}
                 </div>
               </th>
+              <th>
+                <div
+                  className="flex cursor-pointer"
+                  onClick={() => setSortedType(SortedType.IS_ETOGETHER_ADMIN)}
+                >
+                  活動e起來
+                  <br />
+                  管理者
+                  {sortedType === SortedType.IS_ETOGETHER_ADMIN && (
+                    <BarsArrowDownIcon className="ml-1 w-4" />
+                  )}
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -246,6 +270,20 @@ export default function AdminUsersPage() {
                       setIsYideclassAdmin({
                         userId: user.id,
                         isAdmin: !user.roles.includes(Role.YIDECLASS_ADMIN),
+                      })
+                    }
+                  />
+                </td>
+                <td>
+                  <input
+                    type="checkbox"
+                    disabled={user.roles.includes(Role.TIANI_ADMIN)}
+                    checked={user.roles.includes(Role.ETOGETHER_ADMIN)}
+                    className="checkbox"
+                    onClick={() =>
+                      setIsEtogetherAdmin({
+                        userId: user.id,
+                        isAdmin: !user.roles.includes(Role.ETOGETHER_ADMIN),
                       })
                     }
                   />

@@ -164,6 +164,19 @@ export const userRouter = createTRPCRouter({
       ),
     ),
 
+  setIsEtogetherAdmin: adminProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isAdmin: z.boolean(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.db.$transaction(
+        handleSetAdmin(input.userId, Role.ETOGETHER_ADMIN, input.isAdmin),
+      ),
+    ),
+
   hasLineNotify: representableProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.lineNotify.findUnique({
       where: {
