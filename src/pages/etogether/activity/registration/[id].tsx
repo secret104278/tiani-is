@@ -126,15 +126,25 @@ export default function EtogetherRegistrationPage() {
           <div className="stat-value">{totalRegisters}</div>
         </div>
       </div>
-      {/* <div className="flex justify-end">
-        <ReactiveButton
-          className="btn"
-          //   onClick={() => setManualRegisterDialogOpen(true)}
-        >
-          <PlusIcon className="h-4 w-4" />
-          手動報名
-        </ReactiveButton>
-      </div> */}
+      <Dialog
+        title="報名表"
+        show={!isNil(dialogRegister)}
+        closeModal={() => setDialogRegister(undefined)}
+      >
+        {!isNil(dialogRegister) && (
+          <div className="space-y-2">
+            <p>
+              {dialogRegister.name}：{subgroupMap[dialogRegister.subgroupId]}
+            </p>
+            <div className="divider m-0" />
+            {dialogRegister.externals.map((r) => (
+              <p key={r.name}>
+                {r.name}：{subgroupMap[r.subgroupId]}
+              </p>
+            ))}
+          </div>
+        )}
+      </Dialog>
 
       <table className="table table-pin-rows">
         {activity.subgroups.map((subgroup) => (
@@ -178,25 +188,6 @@ export default function EtogetherRegistrationPage() {
           </>
         ))}
       </table>
-      <Dialog
-        title="報名表"
-        show={!isNil(dialogRegister)}
-        closeModal={() => setDialogRegister(undefined)}
-      >
-        {!isNil(dialogRegister) && (
-          <div className="space-y-2">
-            <p>
-              {dialogRegister.name}：{subgroupMap[dialogRegister.subgroupId]}
-            </p>
-            <div className="divider m-0" />
-            {dialogRegister.externals.map((r) => (
-              <p key={r.name}>
-                {r.name}：{subgroupMap[r.subgroupId]}
-              </p>
-            ))}
-          </div>
-        )}
-      </Dialog>
     </div>
   );
 }
