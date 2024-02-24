@@ -145,49 +145,52 @@ export default function EtogetherRegistrationPage() {
           </div>
         )}
       </Dialog>
-
-      <table className="table table-pin-rows">
-        {activity.subgroups.map((subgroup) => (
-          <>
-            <thead className="text-black">
-              <tr
-                style={
-                  !isNil(subgroup.displayColorCode)
-                    ? {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        backgroundColor: subgroup.displayColorCode,
-                      }
-                    : undefined
-                }
-              >
-                <th>
-                  {subgroup.title}（簽到：
-                  {
-                    userBySubgroup[subgroup.id]?.filter(
-                      (entry) => entry.checked,
-                    ).length
-                  }{" "}
-                  / 報名：{userBySubgroup[subgroup.id]?.length}）
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {userBySubgroup[subgroup.id]?.map((entry) => (
-                // eslint-disable-next-line react/jsx-key
+      <div className="overflow-auto">
+        <table className="table">
+          {activity.subgroups.map((subgroup) => (
+            <>
+              <thead className="text-black">
                 <tr
-                  className="hover cursor-pointer"
-                  onClick={() =>
-                    setDialogRegister(mainRegisterMap[entry.mainRegisterId])
+                  style={
+                    !isNil(subgroup.displayColorCode)
+                      ? {
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          backgroundColor: subgroup.displayColorCode,
+                        }
+                      : undefined
                   }
                 >
-                  <td>{entry.name}</td>
-                  <td>{entry.checked && <CheckIcon className="h-4 w-4" />}</td>
+                  <th>
+                    {subgroup.title}（簽到：
+                    {
+                      userBySubgroup[subgroup.id]?.filter(
+                        (entry) => entry.checked,
+                      ).length
+                    }{" "}
+                    / 報名：{userBySubgroup[subgroup.id]?.length}）
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </>
-        ))}
-      </table>
+              </thead>
+              <tbody>
+                {userBySubgroup[subgroup.id]?.map((entry) => (
+                  // eslint-disable-next-line react/jsx-key
+                  <tr
+                    className="hover cursor-pointer"
+                    onClick={() =>
+                      setDialogRegister(mainRegisterMap[entry.mainRegisterId])
+                    }
+                  >
+                    <td>{entry.name}</td>
+                    <td>
+                      {entry.checked && <CheckIcon className="h-4 w-4" />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </>
+          ))}
+        </table>
+      </div>
     </div>
   );
 }

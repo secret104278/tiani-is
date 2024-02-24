@@ -61,7 +61,7 @@ export function ActivityCard({
         <div className="card-body">
           <div className="flex flex-row items-center justify-between">
             <h2 className="card-title">{activity.title}</h2>
-            <div className="space-x-2">
+            <div className="flex-shrink-0 space-x-2">
               <div className="badge badge-outline">
                 {getActivityStatusText(activity.status)}
               </div>

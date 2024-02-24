@@ -59,7 +59,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="navbar-center">
           <Link href={`/${site}`}>
             <button className="btn btn-ghost text-xl normal-case">
-              {router.pathname.startsWith("/auth")
+              {router.pathname.startsWith("/auth") ||
+              router.pathname.startsWith("/admin") ||
+              router.pathname.startsWith("/personal")
                 ? "天一聖道院資訊系統"
                 : siteToTitle(site)}
             </button>
@@ -67,7 +69,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown dropdown-end">
+            <div className="dropdown-end dropdown">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>
