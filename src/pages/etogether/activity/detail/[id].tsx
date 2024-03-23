@@ -37,13 +37,20 @@ import {
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
 }> = async (context) => {
-  const res = await db.etogetherActivity.findUniqueOrThrow({
+  const res = await db.etogetherActivity.findUnique({
     select: {
       title: true,
       startDateTime: true,
     },
     where: { id: Number(context.query.id) },
   });
+
+  if (isNil(res)) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
     props: {
       ogMeta: {
@@ -189,7 +196,7 @@ export default function EtogetherActivityDetailPage() {
     return (
       <>
         {alreadyRegister && (
-          <div className="card-compact card card-bordered shadow-sm">
+          <div className="card card-bordered card-compact shadow-sm">
             <div className="card-body">
               <p className="font-bold">我的報名表</p>
               <p>
@@ -337,7 +344,7 @@ export default function EtogetherActivityDetailPage() {
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className={`card-compact card card-bordered ml-4 shadow-sm`}
+            className={`card card-bordered card-compact ml-4 shadow-sm`}
             style={
               !isNil(subgroup.displayColorCode)
                 ? {

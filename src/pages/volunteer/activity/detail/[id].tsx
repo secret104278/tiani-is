@@ -41,13 +41,19 @@ import {
 export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
 }> = async (context) => {
-  const res = await db.volunteerActivity.findUniqueOrThrow({
+  const res = await db.volunteerActivity.findUnique({
     select: {
       title: true,
       startDateTime: true,
     },
     where: { id: Number(context.query.id) },
   });
+
+  if (isNil(res)) {
+    return {
+      notFound: true,
+    };
+  }
 
   return {
     props: {
