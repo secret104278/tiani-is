@@ -50,21 +50,34 @@ export const authOptions: NextAuthOptions = {
       if (isNil(account)) return false;
 
       if (account.provider === "line") {
-        await db.account.update({
+        const x = await db.account.findUnique({
+          select: { id: true },
           where: {
             provider_providerAccountId: {
               provider: account.provider,
               providerAccountId: account.providerAccountId,
             },
           },
-          data: {
-            refresh_token: account.refresh_token,
-            access_token: account.access_token,
-            expires_at: account.expires_at,
-          },
         });
 
-        void refreshLineImage(db, user.id);
+        // new user will not have an account
+        if (!isNil(x)) {
+          await db.account.update({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+            data: {
+              refresh_token: account.refresh_token,
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+            },
+          });
+
+          void refreshLineImage(db, user.id);
+        }
       }
 
       return true;

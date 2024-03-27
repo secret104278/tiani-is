@@ -43,7 +43,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { site } = useSiteContext();
   const router = useRouter();
 
-  const { data: hasLineNotify } = api.user.hasLineNotify.useQuery({});
+  const { data: hasLineNotify } = api.user.hasLineNotify.useQuery(
+    {},
+    { enabled: IS_LINE_NOTIFY_ENABLED },
+  );
   const [showLineNotifySetup, setShowLineNotifySetup] = useState(false);
 
   return (
