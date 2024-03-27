@@ -9,6 +9,7 @@ import {
 } from "next-auth";
 import LineProvider from "next-auth/providers/line";
 
+import * as Sentry from "@sentry/node";
 import { env } from "~/env.mjs";
 import { db } from "~/server/db";
 import { refreshLineImage } from "~/utils/server";
@@ -50,21 +51,38 @@ export const authOptions: NextAuthOptions = {
       if (isNil(account)) return false;
 
       if (account.provider === "line") {
-        await db.account.update({
+        const x = await db.account.findUnique({
+          select: { id: true },
           where: {
             provider_providerAccountId: {
               provider: account.provider,
               providerAccountId: account.providerAccountId,
             },
           },
-          data: {
-            refresh_token: account.refresh_token,
-            access_token: account.access_token,
-            expires_at: account.expires_at,
-          },
         });
 
-        void refreshLineImage(db, user.id);
+        if (isNil(x)) {
+          Sentry.captureMessage(
+            `account not found in db: ${JSON.stringify(account)}`,
+            "error",
+          );
+        } else {
+          await db.account.update({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+            data: {
+              refresh_token: account.refresh_token,
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+            },
+          });
+
+          void refreshLineImage(db, user.id);
+        }
       }
 
       return true;
