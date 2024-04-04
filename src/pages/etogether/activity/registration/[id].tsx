@@ -1,6 +1,5 @@
 import {
   CheckBadgeIcon,
-  CheckIcon,
   PencilSquareIcon,
   PlusIcon,
   QueueListIcon,
@@ -34,8 +33,15 @@ export default function EtogetherRegistrationPage() {
     data: activity,
     isLoading,
     error,
+    refetch: refetchActivity,
   } = api.etogetherActivity.getActivityWithRegistrations.useQuery({
     activityId: Number(id),
+  });
+  const {
+    mutate: checkInActivityIndividually,
+    error: checkInActivityIndividuallyError,
+  } = api.etogetherActivity.checkInActivityIndividually.useMutation({
+    onSuccess: () => refetchActivity(),
   });
 
   const [dialogProps, setDialogProps] = useState<
@@ -47,6 +53,10 @@ export default function EtogetherRegistrationPage() {
   if (!_.isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
   if (_.isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
+  if (!_.isNil(checkInActivityIndividuallyError))
+    return (
+      <AlertWarning>{checkInActivityIndividuallyError.message}</AlertWarning>
+    );
   if (sessionStatus === "loading") return <div className="loading"></div>;
   if (_.isNil(session) || !session.user.role.is_etogether_admin)
     return <AlertWarning>沒有權限</AlertWarning>;
@@ -73,7 +83,13 @@ export default function EtogetherRegistrationPage() {
   const mainRegisterMap: Record<number, Register> = {};
   const userBySubgroup: Record<
     number,
-    { name: string; checked: boolean; mainRegisterId: number }[]
+    {
+      name: string;
+      checked: boolean;
+      mainRegisterId: number;
+      registerId: number;
+      isExternal: boolean;
+    }[]
   > = {};
 
   for (const subgroup of activity.subgroups) {
@@ -87,6 +103,8 @@ export default function EtogetherRegistrationPage() {
       name: register.user.name,
       checked: !_.isNil(register.checkRecord),
       mainRegisterId: register.id,
+      registerId: register.id,
+      isExternal: false,
     };
 
     if (userBySubgroup[register.subgroupId] === undefined) {
@@ -106,6 +124,8 @@ export default function EtogetherRegistrationPage() {
       name: register.username,
       checked: !_.isNil(register.checkRecord),
       mainRegisterId: register.mainRegisterId,
+      registerId: register.id,
+      isExternal: true,
     };
 
     if (userBySubgroup[register.subgroupId] === undefined) {
@@ -220,8 +240,8 @@ export default function EtogetherRegistrationPage() {
                     }{" "}
                     / 報名：{userBySubgroup[subgroup.id]?.length}
                   </th>
-                  <th></th>
-                  <th></th>
+                  <th>簽到</th>
+                  <th>補正</th>
                 </tr>
               </thead>
               <tbody>
@@ -242,7 +262,19 @@ export default function EtogetherRegistrationPage() {
                       {entry.name}
                     </td>
                     <td>
-                      {entry.checked && <CheckIcon className="h-4 w-4" />}
+                      <input
+                        type="checkbox"
+                        checked={entry.checked}
+                        className="checkbox"
+                        onClick={() =>
+                          checkInActivityIndividually({
+                            activityId: activity.id,
+                            registerId: entry.registerId,
+                            isExternal: entry.isExternal,
+                            checked: !entry.checked,
+                          })
+                        }
+                      />
                     </td>
                     <td>
                       <button

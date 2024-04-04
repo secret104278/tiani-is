@@ -1,20 +1,17 @@
 import { z } from "zod";
 import {
+  activityManageProcedure,
   activityPublishedOnlyProcedure,
   representableProcedure,
 } from "../../procedures/etogether";
 import { createTRPCRouter } from "../../trpc";
 
 export const checkinRouter = createTRPCRouter({
-  checkInActivity: activityPublishedOnlyProcedure
+  checkInActivityMainRegister: activityPublishedOnlyProcedure
     .input(
       z.object({
         latitude: z.number(),
         longitude: z.number(),
-        subgroupId: z.number(),
-        externals: z.array(
-          z.object({ username: z.string().min(1), subgroupId: z.number() }),
-        ),
       }),
     )
     .mutation(({ ctx, input }) =>
@@ -52,6 +49,63 @@ export const checkinRouter = createTRPCRouter({
         });
       }),
     ),
+
+  checkInActivityIndividually: activityManageProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+        registerId: z.number(),
+        isExternal: z.boolean(),
+        checked: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.checked) {
+        if (input.isExternal) {
+          await ctx.db.externalEtogetherActivityCheckRecord.upsert({
+            where: {
+              registerId: input.registerId,
+            },
+            create: {
+              register: {
+                connect: {
+                  id: input.registerId,
+                },
+              },
+            },
+            update: {},
+          });
+        } else {
+          await ctx.db.etogetherActivityCheckRecord.upsert({
+            where: {
+              registerId: input.registerId,
+            },
+            create: {
+              register: {
+                connect: {
+                  id: input.registerId,
+                },
+              },
+            },
+            update: {},
+          });
+        }
+      } else {
+        if (input.isExternal) {
+          await ctx.db.externalEtogetherActivityCheckRecord.delete({
+            where: {
+              registerId: input.registerId,
+            },
+          });
+        } else {
+          await ctx.db.etogetherActivityCheckRecord.delete({
+            where: {
+              registerId: input.registerId,
+            },
+          });
+        }
+      }
+    }),
 
   getCheckRecord: representableProcedure
     .input(

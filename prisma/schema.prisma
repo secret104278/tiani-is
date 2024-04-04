@@ -329,6 +329,8 @@ model ExternalEtogetherActivityRegister {
     subgroupId Int
 
     checkRecord ExternalEtogetherActivityCheckRecord?
+
+    @@unique([activityId, username])
 }
 
 model EtogetherActivityCheckRecord {

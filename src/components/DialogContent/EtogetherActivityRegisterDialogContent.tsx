@@ -52,7 +52,7 @@ export default function EtogetherActivityRegisterDialogContent({
         <label className="label">
           <span className="label-text">姓名：{user.name}</span>
         </label>
-        <div className="flex flex-row space-x-1">
+        <div className="flex flex-row items-center space-x-1">
           <label className="label">
             <span className="label-text">分組</span>
           </label>
@@ -76,18 +76,18 @@ export default function EtogetherActivityRegisterDialogContent({
           key={field.id}
         >
           <div className="card-body">
-            <div className="flex flex-row space-x-1">
+            <div className="flex flex-row items-center space-x-1">
               <label className="label">
                 <span className="label-text">姓名</span>
               </label>
               <input
                 required
                 type="text"
-                className="tiani-input-inline"
+                className="tiani-input-inline !input-sm"
                 {...register(`externalRegisters.${index}.username`)}
               />
             </div>
-            <div className="flex flex-row space-x-1">
+            <div className="flex flex-row items-center space-x-1">
               <label className="label">
                 <span className="label-text">分組</span>
               </label>

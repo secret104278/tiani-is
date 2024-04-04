@@ -71,7 +71,7 @@ export default function ManualEtogetherCheckInDialogContent({
         error={manualExternalRegisterError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={handleSubmit((data) =>
-          manualExternalRegister({ activityId, ...data }),
+          manualExternalRegister({ activityId, checked: true, ...data }),
         )}
       >
         送出

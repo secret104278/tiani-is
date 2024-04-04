@@ -36,20 +36,35 @@ export const registerRouter = createTRPCRouter({
           },
         });
 
-        // TODO: deal with already checkin
+        for (const externalRegister of input.externalRegisters) {
+          await db.externalEtogetherActivityRegister.upsert({
+            where: {
+              activityId_username: {
+                activityId: input.activityId,
+                username: externalRegister.username,
+              },
+            },
+            update: {
+              subgroupId: externalRegister.subgroupId,
+            },
+            create: {
+              activityId: input.activityId,
+              subgroupId: externalRegister.subgroupId,
+              username: externalRegister.username,
+              mainRegisterId: mainRegister.id,
+            },
+          });
+        }
+
         await db.externalEtogetherActivityRegister.deleteMany({
           where: {
             mainRegisterId: mainRegister.id,
+            NOT: {
+              username: {
+                in: input.externalRegisters.map((e) => e.username),
+              },
+            },
           },
-        });
-
-        await db.externalEtogetherActivityRegister.createMany({
-          data: input.externalRegisters.map((e) => ({
-            activityId: input.activityId,
-            subgroupId: e.subgroupId,
-            username: e.username,
-            mainRegisterId: mainRegister.id,
-          })),
         });
       }),
     ),

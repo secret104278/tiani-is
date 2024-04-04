@@ -19,10 +19,10 @@ export default function EtogetherActivityCheckInDialogContent({
   const { closeModal } = useDialogContext();
 
   const {
-    mutate: checkInActivity,
-    isLoading: checkInActivityIsLoading,
-    error: checkInActivityError,
-  } = api.etogetherActivity.checkInActivity.useMutation({
+    mutate: checkInActivityMainRegister,
+    isLoading: checkInActivityMainRegisterIsLoading,
+    error: checkInActivityMainRegisterError,
+  } = api.etogetherActivity.checkInActivityMainRegister.useMutation({
     onSuccess: () => {
       onCheckInSuccess?.();
       closeModal();
@@ -32,16 +32,14 @@ export default function EtogetherActivityCheckInDialogContent({
   return (
     <BaseCheckInDialogContent
       onCheckIn={(latitude, longitude) =>
-        checkInActivity({
+        checkInActivityMainRegister({
           activityId,
-          subgroupId,
-          externals,
           latitude,
           longitude,
         })
       }
-      checkInIsLoading={checkInActivityIsLoading}
-      checkInError={checkInActivityError?.message}
+      checkInIsLoading={checkInActivityMainRegisterIsLoading}
+      checkInError={checkInActivityMainRegisterError?.message}
     />
   );
 }
