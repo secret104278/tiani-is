@@ -2,16 +2,20 @@ import {
   CheckBadgeIcon,
   CheckIcon,
   PencilSquareIcon,
+  PlusIcon,
   QueueListIcon,
 } from "@heroicons/react/20/solid";
 import type { inferRouterOutputs } from "@trpc/server";
 import _ from "lodash";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import ManualEtogetherCheckInDialogContent from "~/components/DialogContent/CheckIn/ManualEtogetherCheckInDialogContent";
 import EtogetherActivityRegisterDialogContent from "~/components/DialogContent/EtogetherActivityRegisterDialogContent";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
+import ReactiveButton from "~/components/utils/ReactiveButton";
 import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
 
@@ -20,6 +24,9 @@ type Register =
 
 export default function EtogetherRegistrationPage() {
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession({
+    required: true,
+  });
 
   const { id } = router.query;
 
@@ -35,9 +42,14 @@ export default function EtogetherRegistrationPage() {
     { register: Register; mode: "view" | "edit" } | undefined
   >(undefined);
 
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+
   if (!_.isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
   if (_.isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
+  if (sessionStatus === "loading") return <div className="loading"></div>;
+  if (_.isNil(session) || !session.user.role.is_etogether_admin)
+    return <AlertWarning>沒有權限</AlertWarning>;
 
   const totalRegisters =
     activity.registers.length +
@@ -129,6 +141,25 @@ export default function EtogetherRegistrationPage() {
           <div className="stat-value">{totalRegisters}</div>
         </div>
       </div>
+      <div className="flex justify-end">
+        <ReactiveButton
+          className="btn"
+          onClick={() => setCheckInDialogOpen(true)}
+        >
+          <PlusIcon className="h-4 w-4" />
+          手動打卡
+        </ReactiveButton>
+        <Dialog
+          title="手動打卡"
+          show={checkInDialogOpen}
+          closeModal={() => setCheckInDialogOpen(false)}
+        >
+          <ManualEtogetherCheckInDialogContent
+            activityId={activity.id}
+            subgroups={activity.subgroups}
+          />
+        </Dialog>
+      </div>
       <Dialog
         title="報名表"
         show={!_.isNil(dialogProps) && dialogProps.mode === "view"}
@@ -179,13 +210,15 @@ export default function EtogetherRegistrationPage() {
                   }
                 >
                   <th>
-                    {subgroup.title}（簽到：
+                    {subgroup.title}
+                    <br />
+                    簽到：
                     {
                       userBySubgroup[subgroup.id]?.filter(
                         (entry) => entry.checked,
                       ).length
                     }{" "}
-                    / 報名：{userBySubgroup[subgroup.id]?.length}）
+                    / 報名：{userBySubgroup[subgroup.id]?.length}
                   </th>
                   <th></th>
                   <th></th>

@@ -118,4 +118,45 @@ export const registerRouter = createTRPCRouter({
         },
       }),
   ),
+
+  manualExternalRegister: activityManageProcedure
+    .input(
+      z.object({
+        username: z.string().min(1),
+        subgroupId: z.number(),
+        checked: z.boolean().default(false),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.etogetherActivityRegister.update({
+        where: {
+          userId_activityId: {
+            userId: ctx.session.user.id,
+            activityId: input.activityId,
+          },
+        },
+        data: {
+          externalRegisters: {
+            create: {
+              username: input.username,
+              subgroup: {
+                connect: {
+                  id: input.subgroupId,
+                },
+              },
+              activity: {
+                connect: {
+                  id: input.activityId,
+                },
+              },
+              checkRecord: input.checked
+                ? {
+                    create: {},
+                  }
+                : undefined,
+            },
+          },
+        },
+      });
+    }),
 });
