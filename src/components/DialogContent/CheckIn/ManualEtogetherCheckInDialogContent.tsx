@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { type EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
+import { truncateTitle } from "~/utils/ui";
 import ReactiveButton from "../../utils/ReactiveButton";
 
 type ManualEtogetherCheckInFormData = Omit<
@@ -60,7 +61,7 @@ export default function ManualEtogetherCheckInDialogContent({
         >
           {subgroups.map((subgroup) => (
             <option key={subgroup.id} value={subgroup.id}>
-              {subgroup.title}
+              {truncateTitle(subgroup.title)}
             </option>
           ))}
         </select>

@@ -8,6 +8,7 @@ import {
 } from "date-fns";
 import { millisecondsInHour } from "date-fns/constants";
 import { zhTW } from "date-fns/locale";
+import _ from "lodash";
 import type { VolunteerActivityTopics } from "./types";
 
 export const getActivityStatusText = (status: VolunteerActivityStatus) => {
@@ -326,3 +327,7 @@ export const siteToTitle = (site: Site) => {
 
 export const differenceInHoursNoRound = (dateLeft: Date, dateRight: Date) =>
   differenceInMilliseconds(dateLeft, dateRight) / millisecondsInHour;
+
+export const truncateTitle = (title: string) => {
+  return _.truncate(title, { length: 12 });
+};

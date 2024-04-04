@@ -17,6 +17,7 @@ import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
+import { truncateTitle } from "~/utils/ui";
 
 type Register =
   inferRouterOutputs<EtogetherRouter>["getActivityWithRegistrations"]["registers"][0];
@@ -230,7 +231,7 @@ export default function EtogetherRegistrationPage() {
                   }
                 >
                   <th>
-                    {subgroup.title}
+                    {truncateTitle(subgroup.title)}
                     <br />
                     簽到：
                     {

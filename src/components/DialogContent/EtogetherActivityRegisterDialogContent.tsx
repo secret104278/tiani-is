@@ -6,6 +6,7 @@ import type { User } from "next-auth";
 import { useRouter } from "next/router";
 import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
+import { truncateTitle } from "~/utils/ui";
 
 type EtogetherActivityRegisterFormData = Omit<
   inferRouterInputs<EtogetherRouter>["registerActivity"],
@@ -63,7 +64,7 @@ export default function EtogetherActivityRegisterDialogContent({
           >
             {subgroups.map((subgroup) => (
               <option key={subgroup.id} value={subgroup.id}>
-                {subgroup.title}
+                {truncateTitle(subgroup.title)}
               </option>
             ))}
           </select>
@@ -83,16 +84,16 @@ export default function EtogetherActivityRegisterDialogContent({
               <input
                 required
                 type="text"
-                className="tiani-input-inline !input-sm"
+                className="tiani-input-inline"
                 {...register(`externalRegisters.${index}.username`)}
               />
             </div>
             <div className="flex flex-row items-center space-x-1">
               <label className="label">
-                <span className="label-text">分組</span>
+                <span className="label-text flex-shrink-0">分組</span>
               </label>
               <select
-                className="select select-bordered select-sm"
+                className="select select-bordered"
                 required
                 {...register(`externalRegisters.${index}.subgroupId`, {
                   valueAsNumber: true,
@@ -100,7 +101,7 @@ export default function EtogetherActivityRegisterDialogContent({
               >
                 {subgroups.map((subgroup) => (
                   <option key={subgroup.id} value={subgroup.id}>
-                    {subgroup.title}
+                    {truncateTitle(subgroup.title)}
                   </option>
                 ))}
               </select>
