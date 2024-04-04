@@ -334,7 +334,7 @@ model ExternalEtogetherActivityRegister {
 model EtogetherActivityCheckRecord {
     id Int @id @default(autoincrement())
 
-    register   EtogetherActivityRegister @relation(fields: [registerId], references: [id])
+    register   EtogetherActivityRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
     registerId Int                       @unique
 
     latitude  Float?
@@ -344,6 +344,6 @@ model EtogetherActivityCheckRecord {
 model ExternalEtogetherActivityCheckRecord {
     id Int @id @default(autoincrement())
 
-    register   ExternalEtogetherActivityRegister @relation(fields: [registerId], references: [id])
+    register   ExternalEtogetherActivityRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
     registerId Int                               @unique
 }
