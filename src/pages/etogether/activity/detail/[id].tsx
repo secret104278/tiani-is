@@ -200,7 +200,7 @@ export default function EtogetherActivityDetailPage() {
     return (
       <>
         {alreadyRegister && (
-          <div className="card card-bordered card-compact shadow-sm">
+          <div className="card-compact card card-bordered shadow-sm">
             <div className="card-body">
               <p className="font-bold">我的報名表</p>
               <p>
@@ -301,11 +301,6 @@ export default function EtogetherActivityDetailPage() {
         >
           <EtogetherActivityCheckInDialogContent
             activityId={activity.id}
-            subgroupId={registerData.subgroupId}
-            externals={registerData.externalRegisters.map((r) => ({
-              username: r.username,
-              subgroupId: r.subgroupId,
-            }))}
             onCheckInSuccess={() => void refetchCheckRecordData()}
           />
         </Dialog>
@@ -349,7 +344,7 @@ export default function EtogetherActivityDetailPage() {
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className={`card card-bordered card-compact ml-4 shadow-sm`}
+            className={`card-compact card card-bordered ml-4 shadow-sm`}
             style={
               !isNil(subgroup.displayColorCode)
                 ? {

@@ -4,16 +4,9 @@ import BaseCheckInDialogContent from "./BaseCheckInDialogContent";
 
 export default function EtogetherActivityCheckInDialogContent({
   activityId,
-  subgroupId,
-  externals,
   onCheckInSuccess,
 }: {
   activityId: number;
-  subgroupId: number;
-  externals: {
-    username: string;
-    subgroupId: number;
-  }[];
   onCheckInSuccess?: () => void;
 }) {
   const { closeModal } = useDialogContext();
