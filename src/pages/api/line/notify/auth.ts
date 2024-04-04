@@ -19,7 +19,7 @@ export default async function handler(
     JSON.stringify({ redirect: req.query.redirect, csrf }),
   );
 
-  // client_id=VqPtwQbvOWqnw9g8PQgyDN&redirect_uri=http://localhost:3000&scope=notify&state=NO_STATE
+  // client_id=VqPtwQbvOWqnw9g8PQgyDN&redirect_uri=http://localhost:3100&scope=notify&state=NO_STATE
   const authorizationUrl = new URL(
     "https://notify-bot.line.me/oauth/authorize",
   );
