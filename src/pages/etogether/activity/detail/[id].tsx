@@ -68,7 +68,9 @@ export default function EtogetherActivityDetailPage() {
 
   const { site } = useSiteContext();
 
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession({
+    required: true,
+  });
 
   const {
     data: activity,
@@ -117,10 +119,12 @@ export default function EtogetherActivityDetailPage() {
     return <AlertWarning>{activityError.message}</AlertWarning>;
   if (activityIsLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
+  if (sessionStatus === "loading") return <div className="loading"></div>;
+  if (isNil(session)) return <AlertWarning>請先登入</AlertWarning>;
 
   const isManager =
-    !!session?.user.role.is_etogether_admin ||
-    session?.user.id === activity.organiserId;
+    !!session.user.role.is_etogether_admin ||
+    session.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
@@ -200,7 +204,7 @@ export default function EtogetherActivityDetailPage() {
             <div className="card-body">
               <p className="font-bold">我的報名表</p>
               <p>
-                {session?.user.name}：{registerData.subgroup.title}
+                {session.user.name}：{registerData.subgroup.title}
               </p>
               {registerData.externalRegisters.map((r) => (
                 <p key={r.id}>
@@ -254,6 +258,7 @@ export default function EtogetherActivityDetailPage() {
           closeModal={() => setRegisterDialogOpen(false)}
         >
           <EtogetherActivityRegisterDialogContent
+            user={session.user}
             activityId={activity.id}
             subgroups={activity.subgroups}
             defaultValues={alreadyRegister ? registerData : undefined}

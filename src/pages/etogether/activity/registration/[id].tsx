@@ -1,21 +1,22 @@
 import {
   CheckBadgeIcon,
   CheckIcon,
+  PencilSquareIcon,
   QueueListIcon,
 } from "@heroicons/react/20/solid";
-import { isNil } from "lodash";
+import type { inferRouterOutputs } from "@trpc/server";
+import _ from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import EtogetherActivityRegisterDialogContent from "~/components/DialogContent/EtogetherActivityRegisterDialogContent";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
+import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
 
-interface Register {
-  name: string;
-  subgroupId: number;
-  externals: { name: string; subgroupId: number }[];
-}
+type Register =
+  inferRouterOutputs<EtogetherRouter>["getActivityWithRegistrations"]["registers"][0];
 
 export default function EtogetherRegistrationPage() {
   const router = useRouter();
@@ -30,24 +31,33 @@ export default function EtogetherRegistrationPage() {
     activityId: Number(id),
   });
 
-  const [dialogRegister, setDialogRegister] = useState<Register | undefined>(
-    undefined,
-  );
+  const [dialogProps, setDialogProps] = useState<
+    { register: Register; mode: "view" | "edit" } | undefined
+  >(undefined);
 
-  if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
+  if (!_.isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (isLoading) return <div className="loading"></div>;
-  if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
+  if (_.isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   const totalRegisters =
-    activity.registers.length + activity.externalRegisters.length;
-  const totalCheckRecords =
-    activity.registers.filter((register) => !isNil(register.checkRecord))
-      .length +
-    activity.externalRegisters.filter(
-      (register) => !isNil(register.checkRecord),
-    ).length;
+    activity.registers.length +
+    _.chain(activity.registers)
+      .flatMap((r) => r.externalRegisters)
+      .size()
+      .value();
 
-  const subgroupMap: Record<number, string> = {};
+  const totalCheckRecords =
+    _.chain(activity.registers)
+      .filter((r) => !_.isNil(r.checkRecord))
+      .size()
+      .value() +
+    _.chain(activity.registers)
+      .flatMap((r) => r.externalRegisters)
+      .filter((r) => !_.isNil(r.checkRecord))
+      .size()
+      .value();
+
+  const subgroupIdToTitle: Record<number, string> = {};
   const mainRegisterMap: Record<number, Register> = {};
   const userBySubgroup: Record<
     number,
@@ -55,15 +65,15 @@ export default function EtogetherRegistrationPage() {
   > = {};
 
   for (const subgroup of activity.subgroups) {
-    subgroupMap[subgroup.id] = subgroup.title;
+    subgroupIdToTitle[subgroup.id] = subgroup.title;
   }
 
   for (const register of activity.registers) {
-    if (isNil(register.user.name)) continue;
+    if (_.isNil(register.user.name)) continue;
 
     const entry = {
       name: register.user.name,
-      checked: !isNil(register.checkRecord),
+      checked: !_.isNil(register.checkRecord),
       mainRegisterId: register.id,
     };
 
@@ -75,16 +85,14 @@ export default function EtogetherRegistrationPage() {
       userBySubgroup[register.subgroupId].push(entry);
     }
 
-    mainRegisterMap[register.id] = {
-      name: register.user.name,
-      subgroupId: register.subgroupId,
-      externals: [],
-    };
+    mainRegisterMap[register.id] = register;
   }
-  for (const register of activity.externalRegisters) {
+  for (const register of activity.registers.flatMap(
+    (r) => r.externalRegisters,
+  )) {
     const entry = {
       name: register.username,
-      checked: !isNil(register.checkRecord),
+      checked: !_.isNil(register.checkRecord),
       mainRegisterId: register.mainRegisterId,
     };
 
@@ -95,11 +103,6 @@ export default function EtogetherRegistrationPage() {
       // @ts-ignore
       userBySubgroup[register.subgroupId].push(entry);
     }
-
-    mainRegisterMap[register.mainRegisterId]?.externals.push({
-      name: register.username,
-      subgroupId: register.subgroupId,
-    });
   }
 
   return (
@@ -128,31 +131,46 @@ export default function EtogetherRegistrationPage() {
       </div>
       <Dialog
         title="報名表"
-        show={!isNil(dialogRegister)}
-        closeModal={() => setDialogRegister(undefined)}
+        show={!_.isNil(dialogProps) && dialogProps.mode === "view"}
+        closeModal={() => setDialogProps(undefined)}
       >
-        {!isNil(dialogRegister) && (
+        {!_.isNil(dialogProps) && (
           <div className="space-y-2">
             <p>
-              {dialogRegister.name}：{subgroupMap[dialogRegister.subgroupId]}
+              {dialogProps.register.user.name}：
+              {subgroupIdToTitle[dialogProps.register.subgroupId]}
             </p>
             <div className="divider m-0" />
-            {dialogRegister.externals.map((r) => (
-              <p key={r.name}>
-                {r.name}：{subgroupMap[r.subgroupId]}
+            {dialogProps.register.externalRegisters.map((r) => (
+              <p key={r.username}>
+                {r.username}：{subgroupIdToTitle[r.subgroupId]}
               </p>
             ))}
           </div>
         )}
       </Dialog>
+      <Dialog
+        title="修改報名表"
+        show={!_.isNil(dialogProps) && dialogProps.mode === "edit"}
+        closeModal={() => setDialogProps(undefined)}
+      >
+        {!_.isNil(dialogProps) && (
+          <EtogetherActivityRegisterDialogContent
+            user={dialogProps.register.user}
+            activityId={activity.id}
+            subgroups={activity.subgroups}
+            defaultValues={dialogProps.register}
+          />
+        )}
+      </Dialog>
       <div className="overflow-auto">
-        <table className="table">
+        <table className="table table-sm">
           {activity.subgroups.map((subgroup) => (
             <>
               <thead className="text-black">
                 <tr
                   style={
-                    !isNil(subgroup.displayColorCode)
+                    !_.isNil(subgroup.displayColorCode)
                       ? {
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           backgroundColor: subgroup.displayColorCode,
@@ -170,20 +188,44 @@ export default function EtogetherRegistrationPage() {
                     / 報名：{userBySubgroup[subgroup.id]?.length}）
                   </th>
                   <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {userBySubgroup[subgroup.id]?.map((entry) => (
                   // eslint-disable-next-line react/jsx-key
-                  <tr
-                    className="hover cursor-pointer"
-                    onClick={() =>
-                      setDialogRegister(mainRegisterMap[entry.mainRegisterId])
-                    }
-                  >
-                    <td>{entry.name}</td>
+                  <tr>
+                    <td
+                      className="hover cursor-pointer"
+                      onClick={() => {
+                        const register = mainRegisterMap[entry.mainRegisterId];
+                        register &&
+                          setDialogProps({
+                            register: register,
+                            mode: "view",
+                          });
+                      }}
+                    >
+                      {entry.name}
+                    </td>
                     <td>
                       {entry.checked && <CheckIcon className="h-4 w-4" />}
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm"
+                        onClick={() => {
+                          const register =
+                            mainRegisterMap[entry.mainRegisterId];
+                          register &&
+                            setDialogProps({
+                              register: register,
+                              mode: "edit",
+                            });
+                        }}
+                      >
+                        <PencilSquareIcon className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}

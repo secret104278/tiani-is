@@ -7,9 +7,10 @@ import {
 import { createTRPCRouter } from "../../trpc";
 
 export const registerRouter = createTRPCRouter({
-  registerActivity: activityPublishedOnlyProcedure
+  registerActivity: representableProcedure
     .input(
       z.object({
+        activityId: z.number(),
         subgroupId: z.number(),
         externalRegisters: z.array(
           z.object({ username: z.string().min(1), subgroupId: z.number() }),
@@ -21,7 +22,7 @@ export const registerRouter = createTRPCRouter({
         const mainRegister = await db.etogetherActivityRegister.upsert({
           where: {
             userId_activityId: {
-              userId: ctx.session.user.id,
+              userId: ctx.input.userId,
               activityId: input.activityId,
             },
           },
@@ -31,7 +32,7 @@ export const registerRouter = createTRPCRouter({
           create: {
             activityId: input.activityId,
             subgroupId: input.subgroupId,
-            userId: ctx.session.user.id,
+            userId: ctx.input.userId,
           },
         });
 
@@ -103,12 +104,14 @@ export const registerRouter = createTRPCRouter({
                   name: true,
                 },
               },
+              subgroup: true,
               checkRecord: true,
-            },
-          },
-          externalRegisters: {
-            include: {
-              checkRecord: true,
+              externalRegisters: {
+                include: {
+                  subgroup: true,
+                  checkRecord: true,
+                },
+              },
             },
           },
           subgroups: true,

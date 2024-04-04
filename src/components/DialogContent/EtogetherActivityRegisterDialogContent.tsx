@@ -1,23 +1,24 @@
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
 
-import { useSession } from "next-auth/react";
+import type { inferRouterInputs } from "@trpc/server";
+import type { User } from "next-auth";
 import { useRouter } from "next/router";
+import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
 
-interface EtogetherActivityRegisterFormData {
-  subgroupId: number;
-  externalRegisters: {
-    username: string;
-    subgroupId: number;
-  }[];
-}
+type EtogetherActivityRegisterFormData = Omit<
+  inferRouterInputs<EtogetherRouter>["registerActivity"],
+  "activityId" | "userId"
+>;
 
 export default function EtogetherActivityRegisterDialogContent({
+  user,
   activityId,
   subgroups,
   defaultValues,
 }: {
+  user: User;
   activityId: number;
   subgroups: {
     id: number;
@@ -25,7 +26,6 @@ export default function EtogetherActivityRegisterDialogContent({
   }[];
   defaultValues?: EtogetherActivityRegisterFormData;
 }) {
-  const { data: session } = useSession();
   const router = useRouter();
 
   const { register, handleSubmit, control } =
@@ -50,7 +50,7 @@ export default function EtogetherActivityRegisterDialogContent({
     <form className="flex flex-col space-y-4">
       <div>
         <label className="label">
-          <span className="label-text">姓名：{session?.user.name}</span>
+          <span className="label-text">姓名：{user.name}</span>
         </label>
         <div className="flex flex-row space-x-1">
           <label className="label">
@@ -135,6 +135,7 @@ export default function EtogetherActivityRegisterDialogContent({
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={handleSubmit((data) => {
           void registerActivity({
+            userId: user.id,
             activityId,
             ...data,
           });

@@ -8,3 +8,5 @@ export const etogetherRouter = mergeTRPCRouters(
   checkinRouter,
   registerRouter,
 );
+
+export type EtogetherRouter = typeof etogetherRouter;
