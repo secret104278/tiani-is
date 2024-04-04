@@ -169,6 +169,7 @@ export default function EtogetherRegistrationPage() {
                     }{" "}
                     / 報名：{userBySubgroup[subgroup.id]?.length}）
                   </th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
