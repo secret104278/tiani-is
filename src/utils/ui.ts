@@ -120,6 +120,8 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
 
+export const YIDE_WORK_ACTIVITY_TITLES = ["獻供禮拜", "辦道儀禮"];
+
 export const IS_LINE_NOTIFY_ENABLED = false;
 
 export const getEndTime = (startDateTime: Date, duration: number) =>
@@ -134,15 +136,16 @@ export const getCurrentDateTime = (offset = 0) => {
 };
 
 export const titleIsOther = (title: string) => {
-  for (const topic of VOLUNTEER_ACTIVITY_TOPICS) {
-    if (topic.options.includes(title)) {
-      return false;
-    }
+  if (
+    VOLUNTEER_ACTIVITY_TOPICS.flatMap((topic) => topic.options).includes(title)
+  ) {
+    return false;
   }
-  for (const _title of CLASS_ACTIVITY_TITLES) {
-    if (_title === title) {
-      return false;
-    }
+  if (CLASS_ACTIVITY_TITLES.includes(title)) {
+    return false;
+  }
+  if (YIDE_WORK_ACTIVITY_TITLES.includes(title)) {
+    return false;
   }
   return true;
 };
@@ -296,12 +299,14 @@ export enum Site {
   Volunteer = "volunteer",
   Yideclass = "yideclass",
   Etogether = "etogether",
+  YideWork = "yidework",
 }
 
 export const urlBaseToSite = (urlBase?: string): Site => {
   if (urlBase === "volunteer") return Site.Volunteer;
   else if (urlBase === "yideclass") return Site.Yideclass;
   else if (urlBase === "etogether") return Site.Etogether;
+  else if (urlBase === "yidework") return Site.YideWork;
   else return Site.Volunteer;
 };
 
@@ -320,6 +325,8 @@ export const siteToTitle = (site: Site) => {
       return "義德班務網";
     case Site.Etogether:
       return "活動e起來";
+    case Site.YideWork:
+      return "義德道務網";
     default:
       return "天一聖道院資訊系統";
   }

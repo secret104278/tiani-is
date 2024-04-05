@@ -3,6 +3,7 @@ import { etogetherRouter } from "./routers/etogether";
 import { userRouter } from "./routers/user";
 import { volunteerRouter } from "./routers/volunteer";
 import { yideclassRouter } from "./routers/yideclass";
+import { yideworkRouter } from "./routers/yidework";
 
 /**
  * This is the primary router for your server.
@@ -12,6 +13,7 @@ import { yideclassRouter } from "./routers/yideclass";
 export const appRouter = createTRPCRouter({
   volunteerActivity: volunteerRouter,
   classActivity: yideclassRouter,
+  yideworkActivity: yideworkRouter,
   etogetherActivity: etogetherRouter,
   user: userRouter,
 });

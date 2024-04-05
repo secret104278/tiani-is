@@ -2,48 +2,44 @@ import { type inferRouterOutputs } from "@trpc/server";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type YideClassRouter } from "~/server/api/routers/yideclass";
+import { type YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
 import {
-  CLASS_ACTIVITY_LOCATIONS,
-  CLASS_ACTIVITY_TITLES,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
+  YIDE_WORK_ACTIVITY_TITLES,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
   getEndTime,
-  locationIsOther,
   titleIsOther,
 } from "~/utils/ui";
 import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
 
-type ClassActivity = inferRouterOutputs<YideClassRouter>["getActivity"];
+type YideWorkActivity = inferRouterOutputs<YideWorkRouter>["getActivity"];
 
-interface ClassActivityFormData {
+interface YideWorkActivityFormData {
   title: string;
   titleOther: string;
-  location: string;
-  locationOther: string;
+  locationId: number;
   startDateTime: Date | string;
   duration: number;
   description: string;
 }
 
-export default function ClassActivityForm({
+export default function YideWorkActivityForm({
   defaultActivity,
 }: {
-  defaultActivity?: ClassActivity;
+  defaultActivity?: YideWorkActivity;
 }) {
-  let formDefaultValues: Partial<ClassActivityFormData> = {
-    title: CLASS_ACTIVITY_TITLES?.[0],
+  let formDefaultValues: Partial<YideWorkActivityFormData> = {
+    title: YIDE_WORK_ACTIVITY_TITLES?.[0],
     startDateTime: getCurrentDateTime(),
     description: "",
   };
   if (defaultActivity) {
     const defaultTitleIsOther = titleIsOther(defaultActivity.title);
-    const defaultLocationIsOther = locationIsOther(defaultActivity.location);
 
     formDefaultValues = {
       title: defaultTitleIsOther
@@ -51,10 +47,7 @@ export default function ClassActivityForm({
         : defaultActivity.title,
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
 
-      location: defaultLocationIsOther
-        ? VOLUNTEER_ACTIVITY_TOPIC_OTHER
-        : defaultActivity.location,
-      locationOther: defaultLocationIsOther ? defaultActivity.location : "",
+      locationId: defaultActivity.locationId,
 
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
@@ -65,25 +58,30 @@ export default function ClassActivityForm({
     };
   }
 
-  const { register, handleSubmit, watch } = useForm<ClassActivityFormData>({
+  const { register, handleSubmit, watch } = useForm<YideWorkActivityFormData>({
     defaultValues: formDefaultValues,
     mode: "all",
   });
 
   const router = useRouter();
   const {
+    data: locations,
+    isLoading: locationIsLoading,
+    error: locationsError,
+  } = api.yideworkActivity.getLocations.useQuery();
+  const {
     mutate: createActivity,
     error: createActivityError,
     isLoading: createActivityIsLoading,
-  } = api.classActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/yideclass/activity/detail/${data.id}`),
+  } = api.yideworkActivity.createActivity.useMutation({
+    onSuccess: (data) => router.push(`/yidework/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isLoading: updateActivityIsLoading,
-  } = api.classActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/yideclass/activity/detail/${data.id}`),
+  } = api.yideworkActivity.updateActivity.useMutation({
+    onSuccess: (data) => router.push(`/yidework/activity/detail/${data.id}`),
   });
 
   const _handleSubmit = (isDraft = false) => {
@@ -92,9 +90,7 @@ export default function ClassActivityForm({
         updateActivity({
           activityId: defaultActivity.id,
           title: titleIsOther(data.title) ? data.titleOther : data.title,
-          location: locationIsOther(data.location)
-            ? data.locationOther
-            : data.location,
+          locationId: data.locationId,
           startDateTime: data.startDateTime as Date,
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
@@ -106,9 +102,7 @@ export default function ClassActivityForm({
     return handleSubmit((data) =>
       createActivity({
         title: titleIsOther(data.title) ? data.titleOther : data.title,
-        location: locationIsOther(data.location)
-          ? data.locationOther
-          : data.location,
+        locationId: data.locationId,
         startDateTime: data.startDateTime as Date,
         endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
@@ -120,40 +114,45 @@ export default function ClassActivityForm({
   const canSaveDraft =
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
+  if (locationIsLoading) return <div className="loading"></div>;
+  if (!isNil(locationsError))
+    return <AlertWarning>{locationsError.message}</AlertWarning>;
+
   return (
     <form className="form-control max-w-xs">
       <div>
         <label className="label">
-          <span className="label-text">班別</span>
+          <span className="label-text">道務項目</span>
         </label>
         <SelectWithCustomInput
           selectProps={register("title")}
           customInputProps={register("titleOther")}
           showCustomInput={watch("title") === VOLUNTEER_ACTIVITY_TOPIC_OTHER}
         >
-          {CLASS_ACTIVITY_TITLES.map((option, i) => (
+          {YIDE_WORK_ACTIVITY_TITLES.map((option, i) => (
             <option key={i}>{option}</option>
           ))}
         </SelectWithCustomInput>
       </div>
       <div>
         <label className="label">
-          <span className="label-text">開班地點</span>
+          <span className="label-text">佛堂名稱</span>
         </label>
-        <SelectWithCustomInput
-          selectProps={register("location")}
-          customInputProps={register("locationOther")}
-          showCustomInput={watch("location") === VOLUNTEER_ACTIVITY_TOPIC_OTHER}
+        <select
+          className="select select-bordered"
+          {...register("locationId", { valueAsNumber: true })}
         >
-          {CLASS_ACTIVITY_LOCATIONS.map((option, i) => (
-            <option key={i}>{option}</option>
+          {locations?.map((location) => (
+            <option key={location.id} value={location.id}>
+              {location.name}
+            </option>
           ))}
-        </SelectWithCustomInput>
+        </select>
       </div>
       <div className="divider"></div>
       <div>
         <label className="label">
-          <span className="label-text">開班時間</span>
+          <span className="label-text">時間</span>
         </label>
         <input
           type="datetime-local"
@@ -164,7 +163,7 @@ export default function ClassActivityForm({
       </div>
       <div>
         <label className="label">
-          <span className="label-text">開班時數</span>
+          <span className="label-text">預估時數</span>
         </label>
         <input
           type="number"

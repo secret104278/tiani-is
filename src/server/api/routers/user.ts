@@ -164,6 +164,19 @@ export const userRouter = createTRPCRouter({
       ),
     ),
 
+  setIsYideworkAdmin: adminProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isAdmin: z.boolean(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.db.$transaction(
+        handleSetAdmin(input.userId, Role.YIDEWORK_ADMIN, input.isAdmin),
+      ),
+    ),
+
   setIsEtogetherAdmin: adminProcedure
     .input(
       z.object({

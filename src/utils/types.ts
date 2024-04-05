@@ -3,6 +3,7 @@ export interface UserRole {
   is_volunteer_admin: boolean;
   is_yideclass_admin: boolean;
   is_etogether_admin: boolean;
+  is_yidework_admin: boolean;
 }
 
 export type VolunteerActivityTopics = VolunteerActivityTopic[];

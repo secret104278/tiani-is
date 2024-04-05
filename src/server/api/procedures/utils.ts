@@ -27,6 +27,13 @@ const getActivity = (db: PrismaClient, site: Site, activityId: number) => {
           id: activityId,
         },
       });
+    case Site.YideWork:
+      return db.yideWorkActivity.findUniqueOrThrow({
+        select: { organiserId: true, status: true },
+        where: {
+          id: activityId,
+        },
+      });
     default:
       throw new Error("Invalid site");
   }

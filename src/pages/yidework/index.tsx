@@ -4,16 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ActivityCard } from "~/components/ActivityCard";
-import { HourStats } from "~/components/HourStats";
 import { Loading } from "~/components/utils/Loading";
 import { api } from "~/utils/api";
 import { activityIsEnded } from "~/utils/ui";
 
-export default function YiDeClassHome() {
+export default function YideWorkHome() {
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
 
   const activitiesQuery =
-    api.classActivity.getAllActivitiesInfinite.useInfiniteQuery(
+    api.yideworkActivity.getAllActivitiesInfinite.useInfiniteQuery(
       {
         participatedByMe: filterParticipatedByMe,
       },
@@ -23,9 +22,6 @@ export default function YiDeClassHome() {
     );
 
   const activities = activitiesQuery.data?.pages?.flatMap((page) => page.items);
-
-  const { data: workingStats, isLoading: workingStatsIsLoading } =
-    api.classActivity.getWorkingStats.useQuery({});
 
   const onGoingActivities = activities?.filter(
     (activity) => !activityIsEnded(activity.endDateTime),
@@ -37,21 +33,13 @@ export default function YiDeClassHome() {
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
-        <h1>開班總覽</h1>
+        <h1>道務總覽</h1>
       </article>
-      {!workingStatsIsLoading && (
-        <Link href="/yideclass/workingstats" className="flex flex-col">
-          <HourStats
-            title="總開班時數"
-            totalWorkingHours={workingStats?.totalWorkingHours}
-          />
-        </Link>
-      )}
       <div className="flex flex-row justify-end space-x-4">
-        <Link href="/yideclass/activity/new" className="flex-shrink-0">
+        <Link href="/yidework/activity/new" className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
-            建立新簽到單
+            建立新通知
           </div>
         </Link>
       </div>
@@ -78,13 +66,20 @@ export default function YiDeClassHome() {
         >
           <div className="flex flex-col space-y-4">
             {onGoingActivities?.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} />
+              <ActivityCard
+                key={activity.id}
+                activity={{ ...activity, location: activity.location.name }}
+              />
             ))}
           </div>
           {!isEmpty(endedActivities) && <div className="divider">已結束</div>}
           <div className="flex flex-col space-y-4">
             {endedActivities?.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} isEnd />
+              <ActivityCard
+                key={activity.id}
+                activity={{ ...activity, location: activity.location.name }}
+                isEnd
+              />
             ))}
           </div>
         </InfiniteScroll>

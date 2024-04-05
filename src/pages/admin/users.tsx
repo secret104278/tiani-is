@@ -69,6 +69,7 @@ enum SortedType {
   IS_VOLUNTEER_ADMIN,
   IS_YIDECLASS_ADMIN,
   IS_ETOGETHER_ADMIN,
+  IS_YIDEWORK_ADMIN,
 }
 
 const getComparator = (sortedType: SortedType) => {
@@ -96,6 +97,11 @@ const getComparator = (sortedType: SortedType) => {
         const result = rolesComparator(Role.YIDECLASS_ADMIN)(a, b);
         return result !== 0 ? result : userComparator(a, b);
       };
+    case SortedType.IS_YIDEWORK_ADMIN:
+      return (a: User, b: User) => {
+        const result = rolesComparator(Role.YIDEWORK_ADMIN)(a, b);
+        return result !== 0 ? result : userComparator(a, b);
+      };
     case SortedType.IS_ETOGETHER_ADMIN:
       return (a: User, b: User) => {
         const result = rolesComparator(Role.ETOGETHER_ADMIN)(a, b);
@@ -121,6 +127,10 @@ export default function AdminUsersPage() {
     });
   const { mutate: setIsYideclassAdmin } =
     api.user.setIsYideclassAdmin.useMutation({
+      onSettled: () => usersRefetch(),
+    });
+  const { mutate: setIsYideworkAdmin } =
+    api.user.setIsYideworkAdmin.useMutation({
       onSettled: () => usersRefetch(),
     });
   const { mutate: setIsEtogetherAdmin } =
@@ -216,6 +226,19 @@ export default function AdminUsersPage() {
               <th>
                 <div
                   className="flex cursor-pointer"
+                  onClick={() => setSortedType(SortedType.IS_YIDEWORK_ADMIN)}
+                >
+                  義德道務網
+                  <br />
+                  管理者
+                  {sortedType === SortedType.IS_YIDEWORK_ADMIN && (
+                    <BarsArrowDownIcon className="ml-1 w-4" />
+                  )}
+                </div>
+              </th>
+              <th>
+                <div
+                  className="flex cursor-pointer"
                   onClick={() => setSortedType(SortedType.IS_ETOGETHER_ADMIN)}
                 >
                   活動e起來
@@ -270,6 +293,20 @@ export default function AdminUsersPage() {
                       setIsYideclassAdmin({
                         userId: user.id,
                         isAdmin: !user.roles.includes(Role.YIDECLASS_ADMIN),
+                      })
+                    }
+                  />
+                </td>
+                <td>
+                  <input
+                    type="checkbox"
+                    disabled={user.roles.includes(Role.TIANI_ADMIN)}
+                    checked={user.roles.includes(Role.YIDEWORK_ADMIN)}
+                    className="checkbox"
+                    onClick={() =>
+                      setIsYideworkAdmin({
+                        userId: user.id,
+                        isAdmin: !user.roles.includes(Role.YIDEWORK_ADMIN),
                       })
                     }
                   />

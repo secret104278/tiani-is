@@ -10,3 +10,5 @@ export const yideclassRouter = mergeTRPCRouters(
   leaveRouter,
   enrollRouter,
 );
+
+export type YideClassRouter = typeof yideclassRouter;
