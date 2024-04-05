@@ -1,6 +1,6 @@
 import { BarsArrowDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { Role } from "@prisma/client";
-import { isEmpty } from "lodash";
+import { isEmpty, truncate } from "lodash";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -150,30 +150,32 @@ export default function AdminUsersPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <article className="prose">
-        <h1>帳號管理</h1>
-      </article>
-      <div className="flex justify-end">
-        <ReactiveButton
-          className="btn"
-          onClick={() => setCreateUserDialogOpen(true)}
-        >
-          <PlusIcon className="h-4 w-4" />
-          新增帳號
-        </ReactiveButton>
-        <Dialog
-          title="新增帳號"
-          show={createUserDialogOpen}
-          closeModal={() => setCreateUserDialogOpen(false)}
-        >
-          <CreateUserDialogContent />
-        </Dialog>
+      <div className="flex justify-between">
+        <article className="prose">
+          <h1>帳號管理</h1>
+        </article>
+        <div>
+          <ReactiveButton
+            className="btn"
+            onClick={() => setCreateUserDialogOpen(true)}
+          >
+            <PlusIcon className="h-4 w-4" />
+            新增帳號
+          </ReactiveButton>
+          <Dialog
+            title="新增帳號"
+            show={createUserDialogOpen}
+            closeModal={() => setCreateUserDialogOpen(false)}
+          >
+            <CreateUserDialogContent />
+          </Dialog>
+        </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="table">
+      <div className=" h-[calc(100vh-11rem)] overflow-x-auto">
+        <table className="table table-pin-rows table-sm">
           <thead>
-            <tr>
-              <th className="tiani-table-pin-col">
+            <tr className="z-20 bg-base-300">
+              <th className="tiani-table-pin-col bg-base-300">
                 <div
                   className="flex cursor-pointer"
                   onClick={() => setSortedType(SortedType.NAME)}
@@ -254,7 +256,11 @@ export default function AdminUsersPage() {
           <tbody>
             {users?.sort(getComparator(sortedType))?.map((user) => (
               <tr key={user.id} className="hover">
-                <td className="tiani-table-pin-col">{user.name}</td>
+                <td className="tiani-table-pin-col bg-base-200">
+                  <div className="tooltip tooltip-right" data-tip={user.name}>
+                    {truncate(user.name ?? undefined, { length: 6 })}
+                  </div>
+                </td>
                 <td>
                   <input
                     type="checkbox"

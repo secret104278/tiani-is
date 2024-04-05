@@ -16,6 +16,6 @@
   }
 
   .tiani-table-pin-col {
-    @apply sticky left-0 z-10 bg-base-100;
+    @apply sticky left-0 z-10
   }
 }

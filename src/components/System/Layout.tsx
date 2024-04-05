@@ -72,7 +72,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="navbar-end">
           {sessionData && (
-            <div className="dropdown-end dropdown">
+            <div className="dropdown dropdown-end z-50">
               <label tabIndex={0} className="avatar btn btn-circle btn-ghost">
                 <UserAvatar />
               </label>
@@ -109,7 +109,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           )}
         </div>
       </div>
-      <div className="mx-auto max-w-xl px-4 pb-16">{children}</div>
+      <div className="mx-auto max-w-xl px-4 pb-4">{children}</div>
 
       {IS_LINE_NOTIFY_ENABLED && hasLineNotify === false && (
         <>
