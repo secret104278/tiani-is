@@ -1,8 +1,11 @@
 import {
+  ArrowDownOnSquareIcon,
   ClockIcon,
   MapPinIcon,
   PencilSquareIcon,
+  QueueListIcon,
   TrashIcon,
+  UserMinusIcon,
 } from "@heroicons/react/20/solid";
 import { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
@@ -10,8 +13,10 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import YideWorkActivityRegisterDialogContent from "~/components/DialogContent/YideWorkActivityRegisterDialogContent";
 import { AlertWarning } from "~/components/utils/Alert";
 import ConfirmDialog from "~/components/utils/ConfirmDialog";
+import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
@@ -60,7 +65,9 @@ export default function YideWorkActivityDetailPage() {
 
   const { site } = useSiteContext();
 
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession({
+    required: true,
+  });
 
   const {
     data: activity,
@@ -69,6 +76,12 @@ export default function YideWorkActivityDetailPage() {
   } = api.yideworkActivity.getActivity.useQuery({
     activityId: Number(id),
   });
+
+  const { data: registerData, refetch: refetchRegisterData } =
+    api.yideworkActivity.getRegister.useQuery({
+      activityId: Number(id),
+    });
+  const alreadyRegister = !isNil(registerData);
 
   const [shareBtnLoading, setShareBtnLoading] = useState(false);
 
@@ -80,12 +93,24 @@ export default function YideWorkActivityDetailPage() {
     onSuccess: () => router.push(`/${site}`),
   });
 
+  const {
+    mutate: unregisterActivity,
+    isLoading: unregisterActivityIsLoading,
+    error: unregisterActivityError,
+  } = api.yideworkActivity.unregisterActivity.useMutation({
+    onSuccess: () => refetchRegisterData(),
+  });
+
+  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   if (!isNil(activityError))
     return <AlertWarning>{activityError.message}</AlertWarning>;
   if (activityIsLoading) return <div className="loading"></div>;
   if (isNil(activity)) return <AlertWarning>找不到通知</AlertWarning>;
+  if (sessionStatus === "loading") return <div className="loading"></div>;
+  if (isNil(session)) return <AlertWarning>請先登入</AlertWarning>;
 
   const isManager =
     !!session?.user.role.is_yidework_admin ||
@@ -151,9 +176,81 @@ export default function YideWorkActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
+      <Link href={`/yidework/activity/registration/${activity.id}`}>
+        <button className="btn w-full">
+          <QueueListIcon className="h-4 w-4" />
+          報名名單
+        </button>
+      </Link>
       <div className="divider" />
     </>
   );
+
+  const RegisterControl = () => {
+    return (
+      <>
+        {alreadyRegister && (
+          <div className="card card-bordered card-compact shadow-sm">
+            <div className="card-body">
+              <p className="font-bold">我的報名表</p>
+              <p>{session.user.name}</p>
+              {registerData.externalRegisters.map((r) => (
+                <p key={r.id}>{r.username}</p>
+              ))}
+
+              <div className="card-actions justify-end">
+                <ReactiveButton
+                  className="btn"
+                  onClick={() => setRegisterDialogOpen(true)}
+                >
+                  <PencilSquareIcon className="h-4 w-4" />
+                  修改報名
+                </ReactiveButton>
+                <ReactiveButton
+                  className="btn btn-error"
+                  onClick={() => setLeaveDialogOpen(true)}
+                  loading={unregisterActivityIsLoading}
+                  error={unregisterActivityError?.message}
+                >
+                  <UserMinusIcon className="h-4 w-4" />
+                  取消報名
+                </ReactiveButton>
+                <ConfirmDialog
+                  show={leaveDialogOpen}
+                  closeModal={() => setLeaveDialogOpen(false)}
+                  title="取消報名"
+                  content="確定要取消報名嗎？"
+                  onConfirm={() =>
+                    unregisterActivity({ activityId: activity.id })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        {!alreadyRegister && (
+          <ReactiveButton
+            className="btn btn-accent"
+            onClick={() => setRegisterDialogOpen(true)}
+          >
+            <ArrowDownOnSquareIcon className="h-4 w-4" />
+            報名
+          </ReactiveButton>
+        )}
+        <Dialog
+          title={`${activity.title} 報名`}
+          show={registerDialogOpen}
+          closeModal={() => setRegisterDialogOpen(false)}
+        >
+          <YideWorkActivityRegisterDialogContent
+            user={session.user}
+            activityId={activity.id}
+            defaultValues={alreadyRegister ? registerData : undefined}
+          />
+        </Dialog>
+      </>
+    );
+  };
 
   // Fetch and display the details of the book with the given ID
   return (
@@ -188,6 +285,7 @@ export default function YideWorkActivityDetailPage() {
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
+        <RegisterControl />
       </div>
     </div>
   );
