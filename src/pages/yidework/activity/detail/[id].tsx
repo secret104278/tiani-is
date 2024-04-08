@@ -7,7 +7,7 @@ import {
   TrashIcon,
   UserMinusIcon,
 } from "@heroicons/react/20/solid";
-import { isNil } from "lodash";
+import _, { isNil } from "lodash";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -283,6 +283,12 @@ export default function YideWorkActivityDetailPage() {
           </p>
         </div>
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
+          {!_.isEmpty(activity.preset) && (
+            <>
+              {activity.preset.description}
+              <div className="divider"></div>
+            </>
+          )}
           {activity.description}
         </article>
         <RegisterControl />

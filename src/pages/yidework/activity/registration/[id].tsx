@@ -47,7 +47,7 @@ export default function YideWorkActivityRegistrationPage() {
   if (isLoading) return <div className="loading"></div>;
   if (_.isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
   if (sessionStatus === "loading") return <div className="loading"></div>;
-  if (_.isNil(session) || !session.user.role.is_etogether_admin)
+  if (_.isNil(session) || !session.user.role.is_yidework_admin)
     return <AlertWarning>沒有權限</AlertWarning>;
 
   const totalRegisters =
@@ -90,7 +90,7 @@ export default function YideWorkActivityRegistrationPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/etogether/activity/detail/${activity.id}`}>
+      <Link className="link" href={`/yidework/activity/detail/${activity.id}`}>
         ← {activity?.title}
       </Link>
       <article className="prose">

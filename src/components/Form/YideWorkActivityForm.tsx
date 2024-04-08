@@ -17,11 +17,14 @@ import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
 
+const EMPTY_PRESET_ID = -1;
+
 type YideWorkActivity = inferRouterOutputs<YideWorkRouter>["getActivity"];
 
 interface YideWorkActivityFormData {
   title: string;
   titleOther: string;
+  presetId: number;
   locationId: number;
   startDateTime: Date | string;
   duration: number;
@@ -48,6 +51,7 @@ export default function YideWorkActivityForm({
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
 
       locationId: defaultActivity.locationId,
+      presetId: defaultActivity.presetId ?? EMPTY_PRESET_ID,
 
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
@@ -70,6 +74,11 @@ export default function YideWorkActivityForm({
     error: locationsError,
   } = api.yideworkActivity.getLocations.useQuery();
   const {
+    data: presets,
+    isLoading: presetsIsLoading,
+    error: presetsError,
+  } = api.yideworkActivity.getPresets.useQuery();
+  const {
     mutate: createActivity,
     error: createActivityError,
     isLoading: createActivityIsLoading,
@@ -91,6 +100,8 @@ export default function YideWorkActivityForm({
           activityId: defaultActivity.id,
           title: titleIsOther(data.title) ? data.titleOther : data.title,
           locationId: data.locationId,
+          presetId:
+            data.presetId === EMPTY_PRESET_ID ? undefined : data.presetId,
           startDateTime: data.startDateTime as Date,
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
@@ -103,6 +114,7 @@ export default function YideWorkActivityForm({
       createActivity({
         title: titleIsOther(data.title) ? data.titleOther : data.title,
         locationId: data.locationId,
+        presetId: data.presetId === EMPTY_PRESET_ID ? undefined : data.presetId,
         startDateTime: data.startDateTime as Date,
         endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
@@ -117,6 +129,9 @@ export default function YideWorkActivityForm({
   if (locationIsLoading) return <div className="loading"></div>;
   if (!isNil(locationsError))
     return <AlertWarning>{locationsError.message}</AlertWarning>;
+  if (presetsIsLoading) return <div className="loading"></div>;
+  if (!isNil(presetsError))
+    return <AlertWarning>{presetsError.message}</AlertWarning>;
 
   return (
     <form className="form-control max-w-xs">
@@ -133,6 +148,22 @@ export default function YideWorkActivityForm({
             <option key={i}>{option}</option>
           ))}
         </SelectWithCustomInput>
+      </div>
+      <div>
+        <label className="label">
+          <span className="label-text">預設活動</span>
+        </label>
+        <select
+          className="select select-bordered"
+          {...register("presetId", { valueAsNumber: true })}
+        >
+          <option value={EMPTY_PRESET_ID}> -- 請選擇 -- </option>
+          {presets?.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.description}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label className="label">

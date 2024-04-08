@@ -1,4 +1,5 @@
 import { type Prisma } from "@prisma/client";
+import _ from "lodash";
 import { z } from "zod";
 import {
   activityManageProcedure,
@@ -12,6 +13,7 @@ export const activityRouter = createTRPCRouter({
       z.object({
         title: z.string(),
         description: z.string().nullable(),
+        presetId: z.number().optional(),
         locationId: z.number(),
         startDateTime: z.date(),
         endDateTime: z.date(),
@@ -28,6 +30,13 @@ export const activityRouter = createTRPCRouter({
               id: input.locationId,
             },
           },
+          preset: _.isNil(input.presetId)
+            ? undefined
+            : {
+                connect: {
+                  id: input.presetId,
+                },
+              },
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           status: input.isDraft ? "DRAFT" : "PUBLISHED",
@@ -49,6 +58,7 @@ export const activityRouter = createTRPCRouter({
       include: {
         organiser: { select: { name: true } },
         location: { select: { name: true } },
+        preset: true,
       },
     }),
   ),
@@ -58,6 +68,7 @@ export const activityRouter = createTRPCRouter({
       z.object({
         title: z.string(),
         description: z.string().nullable(),
+        presetId: z.number().optional(),
         locationId: z.number(),
         startDateTime: z.date(),
         endDateTime: z.date(),
@@ -77,6 +88,13 @@ export const activityRouter = createTRPCRouter({
               id: input.locationId,
             },
           },
+          preset: _.isNil(input.presetId)
+            ? { disconnect: true }
+            : {
+                connect: {
+                  id: input.presetId,
+                },
+              },
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           status: input.isDraft ? "DRAFT" : undefined,
