@@ -192,6 +192,7 @@ export default function EtogetherActivityForm({
                 </label>
                 <input
                   type="color"
+                  style={{ border: "none" }}
                   {...register(`subgroups.${index}.displayColorCode`)}
                 />
               </div>
