@@ -15,7 +15,7 @@ export const appRouter = createTRPCRouter({
   classActivity: yideclassRouter,
   yideworkActivity: yideworkRouter,
   etogetherActivity: etogetherRouter,
-  user: userRouter,
+  appUser: userRouter,
 });
 
 // export type definition of API
