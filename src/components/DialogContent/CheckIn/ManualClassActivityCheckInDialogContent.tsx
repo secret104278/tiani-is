@@ -20,7 +20,7 @@ export default function ManualClassActivityCheckInDialogContent({
     onSuccess: () => router.reload(),
   });
 
-  const [selected, setSelected] = useState<UserComboboxSelected | undefined>();
+  const [selected, setSelected] = useState<UserComboboxSelected>(null);
 
   return (
     <form className="flex flex-col space-y-4">

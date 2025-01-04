@@ -1,5 +1,5 @@
+import { useClose } from "@headlessui/react";
 import { api } from "~/utils/api";
-import { useDialogContext } from "../../utils/Dialog";
 import BaseCheckInDialogContent from "./BaseCheckInDialogContent";
 
 export default function EtogetherActivityCheckInDialogContent({
@@ -9,7 +9,7 @@ export default function EtogetherActivityCheckInDialogContent({
   activityId: number;
   onCheckInSuccess?: () => void;
 }) {
-  const { closeModal } = useDialogContext();
+  const closeDialog = useClose();
 
   const {
     mutate: checkInActivityMainRegister,
@@ -18,7 +18,7 @@ export default function EtogetherActivityCheckInDialogContent({
   } = api.etogetherActivity.checkInActivityMainRegister.useMutation({
     onSuccess: () => {
       onCheckInSuccess?.();
-      closeModal();
+      closeDialog();
     },
   });
 

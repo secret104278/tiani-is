@@ -1,5 +1,5 @@
+import { useClose } from "@headlessui/react";
 import { api } from "~/utils/api";
-import { useDialogContext } from "../../utils/Dialog";
 import BaseCheckInDialogContent from "./BaseCheckInDialogContent";
 
 export default function CasualCheckInDialogContent({
@@ -7,7 +7,7 @@ export default function CasualCheckInDialogContent({
 }: {
   onCheckInSuccess?: () => void;
 }) {
-  const { closeModal } = useDialogContext();
+  const closeDialog = useClose();
 
   const {
     mutate: casualCheckIn,
@@ -16,7 +16,7 @@ export default function CasualCheckInDialogContent({
   } = api.volunteerActivity.casualCheckIn.useMutation({
     onSuccess: () => {
       onCheckInSuccess?.();
-      closeModal();
+      closeDialog();
     },
   });
 
