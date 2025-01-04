@@ -1,5 +1,4 @@
 import { type PrismaClient } from "@prisma/client";
-import { isNil } from "lodash";
 import { z } from "zod";
 import { Site } from "~/utils/ui";
 import { enforceUserIsAuthed, trpcContext as t } from "../trpc";
@@ -71,7 +70,7 @@ export const buildActivityRepresentableProcedure = (site: Site) =>
       if (
         !(
           ctx.isManager ||
-          isNil(input.userId) ||
+          !input.userId ||
           input.userId === ctx.session.user.id
         )
       )
@@ -110,7 +109,7 @@ export const buildRepresentableProcedure = (site: Site | "tiani") =>
       if (
         !(
           ctx.session.user.role[`is_${site}_admin`] ||
-          isNil(input.userId) ||
+          !input.userId ||
           input.userId === ctx.session.user.id
         )
       )

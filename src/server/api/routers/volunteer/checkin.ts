@@ -1,5 +1,6 @@
-import { isNil, sum } from "lodash";
-import moment from "moment-timezone";
+import { TZDate } from "@date-fns/tz";
+import { startOfDay } from "date-fns";
+import { sum } from "lodash";
 import { z } from "zod";
 import {
   activityIsOnGoing,
@@ -33,7 +34,7 @@ export const checkinRouter = createTRPCRouter({
         )
           throw new Error("非課程時間，無法簽到");
 
-        if (isNil(input.latitude) || isNil(input.longitude))
+        if (input.latitude === undefined || input.longitude === undefined)
           throw new Error("無法取得位置資訊");
 
         if (isOutOfRange(input.latitude, input.longitude))
@@ -82,11 +83,8 @@ export const checkinRouter = createTRPCRouter({
       if (isOutOfRange(input.latitude, input.longitude))
         throw new Error("超出打卡範圍");
 
-      const taipeiMoment = moment.tz("Asia/Taipei");
-      const now = taipeiMoment.clone().tz(moment.tz.guess()).toDate();
-
-      taipeiMoment.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-      const targetMoment = taipeiMoment.clone().tz(moment.tz.guess());
+      const now = new TZDate(new Date(), "Asia/Taipei");
+      const startOfToday = startOfDay(now);
 
       // TODO: lock or transaction
       const latestCheck = await ctx.db.casualCheckRecord.findFirst({
@@ -94,7 +92,7 @@ export const checkinRouter = createTRPCRouter({
         where: {
           userId: ctx.session.user.id,
           checkInAt: {
-            gte: targetMoment.toDate(),
+            gte: startOfToday,
           },
         },
         orderBy: {
@@ -182,7 +180,7 @@ export const checkinRouter = createTRPCRouter({
 
     const casualWorkingHours = sum(
       casualCheckHistories
-        .filter((record) => !isNil(record.checkOutAt))
+        .filter((record) => !!record.checkOutAt)
         .map((record) =>
           differenceInHoursNoRound(record.checkOutAt!, record.checkInAt),
         ),
@@ -198,15 +196,13 @@ export const checkinRouter = createTRPCRouter({
   }),
 
   getLatestCasualCheckIn: protectedProcedure.query(async ({ ctx }) => {
-    const taipeiMoment = moment.tz("Asia/Taipei");
-    taipeiMoment.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-    const targetMoment = taipeiMoment.clone().tz(moment.tz.guess());
+    const startOfToday = startOfDay(new TZDate(new Date(), "Asia/Taipei"));
 
     return await ctx.db.casualCheckRecord.findFirst({
       where: {
         userId: ctx.session.user.id,
         checkInAt: {
-          gte: targetMoment.toDate(),
+          gte: startOfToday,
         },
       },
       orderBy: {

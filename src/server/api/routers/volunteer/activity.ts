@@ -130,7 +130,7 @@ export const activityRouter = createTRPCRouter({
     }),
   ),
 
-  getAllActivitiesInfinite: protectedProcedure
+  getAllActivities: protectedProcedure
     .input(
       z.object({
         organizedByMe: z.boolean().optional(),
@@ -138,7 +138,9 @@ export const activityRouter = createTRPCRouter({
         notFull: z.boolean().optional(),
 
         limit: z.number().min(1).max(100).default(10),
-        cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
+        cursor: z
+          .object({ startDateTime: z.date(), id: z.number() })
+          .optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -176,7 +178,7 @@ export const activityRouter = createTRPCRouter({
           : undefined,
       });
 
-      let nextCursor: typeof input.cursor | undefined = undefined;
+      let nextCursor: typeof input.cursor = undefined;
       if (items.length > input.limit) {
         const nextItem = items.pop();
         nextCursor = {

@@ -1,6 +1,3 @@
-tmp
-vercel_backup.dump
-
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -14,7 +11,7 @@ vercel_backup.dump
 # database
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
-/prisma/pgdata
+db.sqlite
 
 # next.js
 /.next/
@@ -45,5 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# idea files
+.idea
 # Sentry Config File
-.sentryclirc
+.env.sentry-build-plugin

@@ -1,10 +1,13 @@
-import { env } from "~/env.mjs";
+export function getBaseUrl() {
+  if (typeof window !== "undefined") return window.location.origin;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
 
-const BASE_URL = `https://${env.PUBLIC_DOMAIN}`;
 export const getActivityDetailURL = ({
   id,
   version,
 }: {
   id: number;
   version: number;
-}) => `${BASE_URL}/volunteer/activity/detail/${id}?v=${version}`;
+}) => `${getBaseUrl()}/volunteer/activity/detail/${id}?v=${version}`;

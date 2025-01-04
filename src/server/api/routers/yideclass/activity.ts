@@ -1,5 +1,4 @@
 import { type Prisma } from "@prisma/client";
-import { difference, union } from "lodash";
 import { z } from "zod";
 import {
   activityManageProcedure,
@@ -171,9 +170,8 @@ export const activityRouter = createTRPCRouter({
 
         const checkInUserCount = checkedInUserIds.length;
         const leaveUserCount = leavedUserIds.length;
-        const absentUserCount = difference(
-          enrolledUserIds,
-          union(checkedInUserIds, leavedUserIds),
+        const absentUserCount = enrolledUserIds.filter(
+          (id) => !checkedInUserIds.includes(id) && !leavedUserIds.includes(id),
         ).length;
 
         return {

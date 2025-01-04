@@ -1,4 +1,3 @@
-import { isNil } from "lodash";
 import { z } from "zod";
 import {
   activityManageProcedure,
@@ -143,7 +142,7 @@ export const adminRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      if (isNil(input.start) && isNil(input.end)) {
+      if (!input.start && !input.end) {
         return await ctx.db.user.findMany({
           select: {
             id: true,

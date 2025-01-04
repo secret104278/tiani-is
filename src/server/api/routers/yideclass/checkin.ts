@@ -1,4 +1,4 @@
-import { isNil, sum } from "lodash";
+import { sum } from "lodash";
 import { z } from "zod";
 import {
   activityIsOnGoing,
@@ -34,7 +34,7 @@ export const checkinRouter = createTRPCRouter({
         )
           throw new Error("非課程時間，無法簽到");
 
-        if (isNil(input.latitude) || isNil(input.longitude))
+        if (input.latitude === undefined || input.longitude === undefined)
           throw new Error("無法取得位置資訊");
 
         if (isOutOfRange(input.latitude, input.longitude))
@@ -82,7 +82,7 @@ export const checkinRouter = createTRPCRouter({
       },
     });
 
-    return !isNil(checkRecord);
+    return !!checkRecord;
   }),
 
   getActivityCheckRecords: activityManageProcedure.query(({ ctx, input }) =>

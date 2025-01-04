@@ -8,7 +8,6 @@ import {
 } from "date-fns";
 import { millisecondsInHour } from "date-fns/constants";
 import { zhTW } from "date-fns/locale";
-import _ from "lodash";
 import type { VolunteerActivityTopics } from "./types";
 
 export const getActivityStatusText = (status: VolunteerActivityStatus) => {
@@ -302,14 +301,6 @@ export enum Site {
   YideWork = "yidework",
 }
 
-export const urlBaseToSite = (urlBase?: string): Site => {
-  if (urlBase === "volunteer") return Site.Volunteer;
-  else if (urlBase === "yideclass") return Site.Yideclass;
-  else if (urlBase === "etogether") return Site.Etogether;
-  else if (urlBase === "yidework") return Site.YideWork;
-  else return Site.Volunteer;
-};
-
 export const userComparator = (
   a: { name: string | null },
   b: { name: string | null },
@@ -317,7 +308,7 @@ export const userComparator = (
   return !!a.name && !!b.name ? a.name.localeCompare(b.name, "zh-Hant-TW") : 0;
 };
 
-export const siteToTitle = (site: Site) => {
+export const siteToTitle = (site?: Site) => {
   switch (site) {
     case Site.Volunteer:
       return "天一志工隊";
@@ -335,6 +326,6 @@ export const siteToTitle = (site: Site) => {
 export const differenceInHoursNoRound = (dateLeft: Date, dateRight: Date) =>
   differenceInMilliseconds(dateLeft, dateRight) / millisecondsInHour;
 
-export const truncateTitle = (title: string) => {
-  return _.truncate(title, { length: 12 });
-};
+// export const truncateTitle = (title: string) => {
+//   return truncate(title, { length: 12 });
+// };

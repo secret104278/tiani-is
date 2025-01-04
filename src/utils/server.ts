@@ -1,6 +1,6 @@
 import { type PrismaClient } from "@prisma/client";
-import { isNil } from "lodash";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
+import { getBaseUrl } from "~/utils/url";
 
 const refreshLineToken = async (refreshToken: string) => {
   const res = await fetch("https://api.line.me/oauth2/v2.1/token", {
@@ -89,7 +89,7 @@ export const getLineImageURL = async (db: PrismaClient, userId: string) => {
 
 export const refreshLineImage = async (db: PrismaClient, userId: string) => {
   const imageURL = await getLineImageURL(db, userId);
-  if (isNil(imageURL)) return;
+  if (!imageURL) return;
 
   await db.user.update({
     where: { id: userId },
@@ -142,7 +142,5 @@ export const refreshLineTokenIfNeed = async (
 
 export const LINE_NOTIFY_CALLBACK_URL = new URL(
   "/api/line/notify/callback",
-  `${env.NODE_ENV === "production" ? "https://" : "http://"}${
-    env.PUBLIC_DOMAIN
-  }`,
+  getBaseUrl(),
 ).toString();

@@ -1,5 +1,4 @@
 import { type Prisma } from "@prisma/client";
-import _ from "lodash";
 import { z } from "zod";
 import {
   activityManageProcedure,
@@ -30,7 +29,7 @@ export const activityRouter = createTRPCRouter({
               id: input.locationId,
             },
           },
-          preset: _.isNil(input.presetId)
+          preset: input.presetId
             ? undefined
             : {
                 connect: {
@@ -88,7 +87,7 @@ export const activityRouter = createTRPCRouter({
               id: input.locationId,
             },
           },
-          preset: _.isNil(input.presetId)
+          preset: input.presetId
             ? { disconnect: true }
             : {
                 connect: {
@@ -112,13 +111,15 @@ export const activityRouter = createTRPCRouter({
   ),
 
   // TODO: refactor
-  getAllActivitiesInfinite: protectedProcedure
+  getAllActivities: protectedProcedure
     .input(
       z.object({
         participatedByMe: z.boolean().optional(),
 
         limit: z.number().min(1).max(100).default(10),
-        cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
+        cursor: z
+          .object({ startDateTime: z.date(), id: z.number() })
+          .optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -146,7 +147,7 @@ export const activityRouter = createTRPCRouter({
           : undefined,
       });
 
-      let nextCursor: typeof input.cursor | undefined = undefined;
+      let nextCursor: typeof input.cursor = undefined;
       if (items.length > input.limit) {
         const nextItem = items.pop();
         nextCursor = {

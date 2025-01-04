@@ -3,7 +3,7 @@
 // };
 
 import * as line from "@line/bot-sdk";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 
 const globalForLineBot = globalThis as unknown as {
   lineBot: line.messagingApi.MessagingApiClient | undefined;

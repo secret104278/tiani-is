@@ -1,4 +1,3 @@
-import { isNil } from "lodash";
 import {
   activityManageProcedure,
   activityRepresentableProcedure,
@@ -61,6 +60,6 @@ export const leaveRouter = createTRPCRouter({
       },
     });
 
-    return !isNil(leaveRecord);
+    return !!leaveRecord;
   }),
 });

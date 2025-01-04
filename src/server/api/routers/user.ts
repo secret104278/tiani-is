@@ -1,6 +1,5 @@
 import { Role, type PrismaClient, type PrismaPromise } from "@prisma/client";
 import { type ITXClientDenyList } from "@prisma/client/runtime/library";
-import { isNil } from "lodash";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getLineImageURL } from "~/utils/server";
@@ -196,6 +195,6 @@ export const userRouter = createTRPCRouter({
         userId: ctx.input.userId,
       },
     });
-    return !isNil(res);
+    return !!res;
   }),
 });
