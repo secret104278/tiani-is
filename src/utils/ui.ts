@@ -1,3 +1,4 @@
+import { TZDate } from "@date-fns/tz";
 import type { VolunteerActivityStatus } from "@prisma/client";
 import {
   addHours,
@@ -259,13 +260,14 @@ export const activityIsOnGoing = (
 };
 
 export const DEFAULT_LOCALE = zhTW;
+export const DEFAULT_TIMEZONE = "Asia/Taipei";
 
 export const formatDateTitle = (date: Date) =>
   format(
     // since the server my run in different location,
     // and the timestamp is stored in DB is in UTC,
     // so convert it to Asia/Taipei when server side rendering
-    new Date(date.toLocaleString("en-US", { timeZone: "Asia/Taipei" })),
+    new TZDate(date, DEFAULT_TIMEZONE),
     "LLLdo(eeeee) hh:mm",
     {
       locale: DEFAULT_LOCALE,
@@ -273,12 +275,14 @@ export const formatDateTitle = (date: Date) =>
   );
 
 export const formatDate = (date: Date) =>
-  format(date, "yyyy/MM/dd (eeeee)", {
+  // TODO: how to handle timezone in SSR?
+  format(new TZDate(date, DEFAULT_TIMEZONE), "yyyy/MM/dd (eeeee)", {
     locale: DEFAULT_LOCALE,
   });
 
 export const formatDateTime = (date: Date) =>
-  format(date, "yyyy/MM/dd (eeeee) aaaa hh:mm", {
+  // TODO: how to handle timezone in SSR?
+  format(new TZDate(date, DEFAULT_TIMEZONE), "yyyy/MM/dd (eeeee) aaaa hh:mm", {
     locale: DEFAULT_LOCALE,
   });
 
