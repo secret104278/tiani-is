@@ -29,7 +29,7 @@ export function CasualCheckInCard() {
           )}
           {!isNil(latestCasualCheckIn?.checkOutAt) && (
             <div className="flex items-center">
-              <p>簽退：{formatDateTime(latestCasualCheckIn!.checkOutAt)}</p>
+              <p>簽退：{formatDateTime(latestCasualCheckIn.checkOutAt)}</p>
             </div>
           )}
           <div className="card-actions justify-end">
