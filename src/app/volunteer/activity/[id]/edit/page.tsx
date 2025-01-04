@@ -6,7 +6,8 @@ import { api } from "~/trpc/react";
 import VolunteerActivityForm from "../../form";
 
 export default function EditVolunteerActivityPage() {
-  const { id } = useParams();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
 
   const { data, isLoading, error } = api.volunteerActivity.getActivity.useQuery(
     {

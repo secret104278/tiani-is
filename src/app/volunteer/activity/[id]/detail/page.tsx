@@ -44,7 +44,8 @@ import {
 
 export default function VolunteerActivityDetailPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
 
   const { data: session } = useSession();
 
@@ -93,7 +94,7 @@ export default function VolunteerActivityDetailPage() {
     isPending: deleteActivityIsLoading,
     isError: deleteActivityIsError,
   } = api.volunteerActivity.deleteActivity.useMutation({
-    onSuccess: () => router.push(siteHomeHref(Site.Volunteer)),
+    onSuccess: () => router.replace(siteHomeHref(Site.Volunteer)),
   });
 
   const {

@@ -2,7 +2,7 @@ import { HomeIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { type ReactNode } from "react";
 import { siteHomeHref } from "~/utils/navigation";
-import { Site, siteToTitle } from "~/utils/ui";
+import { type Site, siteToTitle } from "~/utils/ui";
 import UserMenu from "./user-menu";
 
 export default function AppLayout({

@@ -11,7 +11,7 @@ export function useAutoSignInRedirect() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (publicPaths.some((path) => pathname.startsWith(path))) {
+    if (publicPaths.some((path) => pathname?.startsWith(path))) {
       return;
     }
 

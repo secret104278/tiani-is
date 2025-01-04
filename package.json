@@ -16,8 +16,8 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "preview": "next build && next start",
-    "start": "next start",
+    "preview": "next build && next start --port 3100",
+    "start": "next start --port 3100",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "date-fns": "^4.1.0",
     "fastq": "^1.18.0",
     "import-in-the-middle": "^1.12.0",
+    "jose": "^5.9.6",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
     "next": "^15.0.1",

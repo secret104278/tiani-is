@@ -9,9 +9,9 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { TIANI_GPS_CENTERS, TIANI_GPS_RADIUS_KM } from "~/utils/ui";
 
 L.Marker.prototype.options.icon = L.icon({
-  // @ts-ignore
+  // @ts-expect-error: somehow the icon imported is string instead of StaticImageData
   iconUrl: icon,
-  // @ts-ignore
+  // @ts-expect-error: somehow the iconShadow imported is string instead of StaticImageData
   shadowUrl: iconShadow,
 });
 

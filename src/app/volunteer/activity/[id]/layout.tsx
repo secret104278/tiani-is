@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "~/server/db";
 import { formatDateTitle } from "~/utils/ui";
@@ -6,14 +6,14 @@ import { formatDateTitle } from "~/utils/ui";
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const res = await db.volunteerActivity.findUnique({
     select: {
       title: true,
       startDateTime: true,
     },
-    where: { id: Number(params.id) },
+    where: { id: Number((await params).id) },
   });
 
   if (!res) {

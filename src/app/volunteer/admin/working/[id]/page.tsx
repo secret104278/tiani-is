@@ -15,7 +15,8 @@ import { api } from "~/trpc/react";
 import { volunteerAdminWorkingHref } from "~/utils/navigation";
 
 export default function AdminCasualUserEdit() {
-  const { id: userId } = useParams();
+  const params = useParams<{ id: string }>();
+  const userId = params?.id;
 
   const [
     modifyCasualCheckRecordDialogOpen,
@@ -40,7 +41,7 @@ export default function AdminCasualUserEdit() {
     data: user,
     isLoading: userIsLoading,
     error: userError,
-  } = api.user.getUser.useQuery({ userId: String(userId) });
+  } = api.appUser.getUser.useQuery({ userId: String(userId) });
 
   const {
     data: workingStats,
@@ -139,13 +140,15 @@ export default function AdminCasualUserEdit() {
           defaultCheckInAt={casualCheckRecord?.checkInAt}
           defaultCheckOutAt={casualCheckRecord?.checkOutAt ?? undefined}
           onConfirm={(checkInAt, checkOutAt) => {
-            casualCheckRecord &&
+            void (
+              casualCheckRecord &&
               modifyCasualCheckRecord({
                 id: casualCheckRecord.id,
                 userId: user.id,
                 checkInAt: checkInAt,
                 checkOutAt: checkOutAt,
-              });
+              })
+            );
           }}
           isLoading={modifyCasualCheckRecordIsLoading}
           error={modifyCasualCheckRecordError?.message}
@@ -161,13 +164,15 @@ export default function AdminCasualUserEdit() {
           defaultCheckInAt={activityCheckRecord?.checkInAt}
           defaultCheckOutAt={activityCheckRecord?.checkOutAt ?? undefined}
           onConfirm={(checkInAt, checkOutAt) => {
-            activityCheckRecord &&
+            void (
+              activityCheckRecord &&
               managerCheckInActivity({
                 activityId: activityCheckRecord.activityId,
                 userId: user.id,
                 checkInAt: checkInAt,
                 checkOutAt: checkOutAt,
-              });
+              })
+            );
           }}
           isLoading={managerCheckInActivityIsLoading}
           error={managerCheckInActivityError?.message}

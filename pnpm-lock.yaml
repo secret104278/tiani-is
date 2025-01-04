@@ -53,6 +53,9 @@ dependencies:
   import-in-the-middle:
     specifier: ^1.12.0
     version: 1.12.0
+  jose:
+    specifier: ^5.9.6
+    version: 5.9.6
   leaflet:
     specifier: ^1.9.4
     version: 1.9.4

@@ -1,4 +1,4 @@
-import { Site } from "./ui";
+import { type Site } from "./ui";
 
 export const siteHomeHref = (site?: Site) => `/${site}`;
 

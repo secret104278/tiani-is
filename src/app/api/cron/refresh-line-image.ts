@@ -1,6 +1,6 @@
 import { map } from "lodash";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { db } from "~/server/db";
 import { refreshLineImage } from "~/utils/server";
 

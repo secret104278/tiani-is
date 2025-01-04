@@ -17,7 +17,8 @@ import ManualVolunteerActivityRegisterDialogContent from "./manual-volunteer-act
 
 export default function VolunteerActivityCheckRecordPage() {
   const { data: sessionData } = useSession();
-  const { id } = useParams();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
 
   const { data, isLoading, error } = api.volunteerActivity.getActivity.useQuery(
     {
