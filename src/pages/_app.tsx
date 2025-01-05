@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
@@ -83,7 +84,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
         <meta name="theme-color" content={siteColor} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <Analytics /> */}
+      <Analytics />
       <SessionProvider session={session}>
         <SiteProvider>
           <AuthGaurd>
