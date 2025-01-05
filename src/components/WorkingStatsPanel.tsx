@@ -1,5 +1,5 @@
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
-import classNames from "classnames";
+import clsx from "clsx";
 import { isNil, sortBy } from "lodash";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -104,7 +104,7 @@ export default function WorkingStatsPanel({
       <tbody>
         {workingStats?.activityCheckHistories.map((history) => (
           <tr
-            className={classNames({
+            className={clsx({
               "hover hover:cursor-pointer": !isAdmin,
             })}
             key={history.activityId}
@@ -148,7 +148,7 @@ export default function WorkingStatsPanel({
       <tbody>
         {workingStats?.casualCheckHistories.map((history) => (
           <tr
-            className={classNames({
+            className={clsx({
               hover: !isAdmin,
             })}
             key={history.id}
@@ -177,7 +177,7 @@ export default function WorkingStatsPanel({
       <div className="flex flex-row justify-center">
         <div className="tabs-boxed tabs">
           <a
-            className={classNames("tab", {
+            className={clsx("tab", {
               "tab-active": activeTab === "all",
             })}
             onClick={() => setActiveTab("all")}
@@ -185,7 +185,7 @@ export default function WorkingStatsPanel({
             全部
           </a>
           <a
-            className={classNames("tab", {
+            className={clsx("tab", {
               "tab-active": activeTab === "activity",
             })}
             onClick={() => setActiveTab("activity")}
@@ -193,7 +193,7 @@ export default function WorkingStatsPanel({
             主題工作
           </a>
           <a
-            className={classNames("tab", {
+            className={clsx("tab", {
               "tab-active": activeTab === "casual",
             })}
             onClick={() => setActiveTab("casual")}
