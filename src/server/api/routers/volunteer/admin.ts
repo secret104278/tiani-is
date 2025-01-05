@@ -1,5 +1,5 @@
-import { isNil } from "lodash";
 import { z } from "zod";
+import { calculateTotalWorkingHours } from "../../../../utils/volunteer";
 import {
   activityManageProcedure,
   adminProcedure,
@@ -135,7 +135,7 @@ export const adminRouter = createTRPCRouter({
       });
     }),
 
-  getUsersByCheckIn: adminProcedure
+  getUsersWithWorkingStatsByCheckIn: adminProcedure
     .input(
       z.object({
         start: z.date().optional(),
@@ -143,44 +143,80 @@ export const adminRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      if (isNil(input.start) && isNil(input.end)) {
-        return await ctx.db.user.findMany({
-          select: {
-            id: true,
-            name: true,
-          },
-        });
-      }
-
-      return await ctx.db.user.findMany({
+      const users = await ctx.db.user.findMany({
         select: {
           id: true,
           name: true,
-        },
-        where: {
-          OR: [
-            {
-              casualCheckRecords: {
-                some: {
-                  checkInAt: {
-                    gte: input.start,
-                    lte: input.end,
-                  },
-                },
-              },
+          casualCheckRecords: {
+            select: {
+              checkInAt: true,
+              checkOutAt: true,
             },
-            {
-              volunteerActivityCheckRecords: {
-                some: {
-                  checkInAt: {
-                    gte: input.start,
-                    lte: input.end,
-                  },
-                },
-              },
+          },
+          volunteerActivityCheckRecords: {
+            select: {
+              checkInAt: true,
+              checkOutAt: true,
             },
-          ],
+          },
         },
+        ...(input.start && input.end
+          ? {
+              where: {
+                OR: [
+                  {
+                    casualCheckRecords: {
+                      some: {
+                        checkInAt: {
+                          gte: input.start,
+                          lte: input.end,
+                        },
+                      },
+                    },
+                  },
+                  {
+                    volunteerActivityCheckRecords: {
+                      some: {
+                        checkInAt: {
+                          gte: input.start,
+                          lte: input.end,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            }
+          : {}),
+      });
+
+      return users.map((user) => {
+        const allRecords = {
+          casualCheckRecords: user.casualCheckRecords,
+          volunteerActivityCheckRecords: user.volunteerActivityCheckRecords,
+        };
+
+        const queryRangeRecords = {
+          casualCheckRecords: user.casualCheckRecords.filter(
+            (record) =>
+              (!input.start || record.checkInAt >= input.start) &&
+              (!input.end || record.checkInAt <= input.end),
+          ),
+          volunteerActivityCheckRecords:
+            user.volunteerActivityCheckRecords.filter(
+              (record) =>
+                (!input.start || record.checkInAt >= input.start) &&
+                (!input.end || record.checkInAt <= input.end),
+            ),
+        };
+
+        return {
+          id: user.id,
+          name: user.name,
+          workingHoursInQueryRange:
+            calculateTotalWorkingHours(queryRangeRecords),
+          totalWorkingHours: calculateTotalWorkingHours(allRecords),
+        };
       });
     }),
 });

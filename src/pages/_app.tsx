@@ -11,6 +11,7 @@ import Layout from "~/components/System/Layout";
 
 import "leaflet/dist/leaflet.css";
 import { useRouter } from "next/router";
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 import { useEffect } from "react";
 import SentrySetup from "~/components/System/SentrySetup";
 import { SiteProvider } from "~/context/SiteContext";
@@ -89,9 +90,11 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
         <SiteProvider>
           <AuthGaurd>
             <SentrySetup>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
+              <NuqsAdapter>
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </NuqsAdapter>
             </SentrySetup>
           </AuthGaurd>
         </SiteProvider>

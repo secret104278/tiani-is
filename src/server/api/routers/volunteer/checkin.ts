@@ -1,12 +1,9 @@
 import { TZDate } from "@date-fns/tz";
 import { startOfDay } from "date-fns";
-import { isNil, sum } from "lodash";
+import { isNil } from "lodash";
 import { z } from "zod";
-import {
-  activityIsOnGoing,
-  differenceInHoursNoRound,
-  isOutOfRange,
-} from "~/utils/ui";
+import { activityIsOnGoing, isOutOfRange } from "~/utils/ui";
+import { calculateTotalWorkingHours } from "../../../../utils/volunteer";
 import {
   activityRepresentableProcedure,
   representableProcedure,
@@ -128,7 +125,7 @@ export const checkinRouter = createTRPCRouter({
     }),
 
   getWorkingStats: representableProcedure.query(async ({ ctx }) => {
-    const activityCheckHistoriesPromise =
+    const [activityCheckHistories, casualCheckHistories] = await Promise.all([
       ctx.db.volunteerActivityCheckRecord.findMany({
         select: {
           activityId: true,
@@ -143,7 +140,6 @@ export const checkinRouter = createTRPCRouter({
         },
         where: {
           userId: ctx.input.userId,
-
           checkOutAt: { not: null },
         },
         orderBy: {
@@ -151,42 +147,26 @@ export const checkinRouter = createTRPCRouter({
             startDateTime: "desc",
           },
         },
-      });
-
-    const casualCheckHistoriesPromise = ctx.db.casualCheckRecord.findMany({
-      select: {
-        id: true,
-        checkInAt: true,
-        checkOutAt: true,
-      },
-      where: {
-        userId: ctx.input.userId,
-      },
-      orderBy: {
-        checkInAt: "desc",
-      },
-    });
-
-    const [activityCheckHistories, casualCheckHistories] = await Promise.all([
-      activityCheckHistoriesPromise,
-      casualCheckHistoriesPromise,
+      }),
+      ctx.db.casualCheckRecord.findMany({
+        select: {
+          id: true,
+          checkInAt: true,
+          checkOutAt: true,
+        },
+        where: {
+          userId: ctx.input.userId,
+        },
+        orderBy: {
+          checkInAt: "desc",
+        },
+      }),
     ]);
 
-    const activityWorkingHours = sum(
-      activityCheckHistories.map((record) =>
-        differenceInHoursNoRound(record.checkOutAt!, record.checkInAt),
-      ),
-    );
-
-    const casualWorkingHours = sum(
-      casualCheckHistories
-        .filter((record) => !isNil(record.checkOutAt))
-        .map((record) =>
-          differenceInHoursNoRound(record.checkOutAt!, record.checkInAt),
-        ),
-    );
-
-    const totalWorkingHours = activityWorkingHours + casualWorkingHours;
+    const totalWorkingHours = calculateTotalWorkingHours({
+      casualCheckRecords: casualCheckHistories,
+      volunteerActivityCheckRecords: activityCheckHistories,
+    });
 
     return {
       activityCheckHistories,
