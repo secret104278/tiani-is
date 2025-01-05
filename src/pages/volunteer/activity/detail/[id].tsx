@@ -89,19 +89,19 @@ export default function VolunteerActivityDetailPage() {
 
   const {
     mutate: submitActivityForReview,
-    isLoading: submitActivityForReviewIsLoading,
+    isPending: submitActivityForReviewIsPending,
   } = api.volunteerActivity.submitActivityForReview.useMutation({
     onSettled: () => refetch(),
   });
 
   const {
     mutate: sendReviewNotification,
-    isLoading: sendReviewNotificationIsLoading,
+    isPending: sendReviewNotificationIsPending,
     isSuccess: sendReviewNotificationIsSuccess,
     isError: sendReviewNotificationIsError,
   } = api.volunteerActivity.sendReviewNotification.useMutation();
 
-  const { mutate: approveActivity, isLoading: approveActivityIsLoading } =
+  const { mutate: approveActivity, isPending: approveActivityIsPending } =
     api.volunteerActivity.approveActivity.useMutation({
       onSettled: () => refetch(),
     });
@@ -117,7 +117,7 @@ export default function VolunteerActivityDetailPage() {
 
   const {
     mutate: deleteActivity,
-    isLoading: deleteActivityIsLoading,
+    isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
   } = api.volunteerActivity.deleteActivity.useMutation({
     onSuccess: () => router.push(`/${site}`),
@@ -125,7 +125,7 @@ export default function VolunteerActivityDetailPage() {
 
   const {
     mutate: participateActivity,
-    isLoading: participateActivityIsLoading,
+    isPending: participateActivityIsPending,
     isError: participateActivityIsError,
   } = api.volunteerActivity.participateActivity.useMutation({
     onSuccess: () => refetch(),
@@ -133,7 +133,7 @@ export default function VolunteerActivityDetailPage() {
 
   const {
     mutate: leaveActivity,
-    isLoading: leaveActivityIsLoading,
+    isPending: leaveActivityIsPending,
     isError: leaveActivityIsError,
   } = api.volunteerActivity.leaveActivity.useMutation({
     onSuccess: () => refetch(),
@@ -175,7 +175,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse-arrow collapse bg-base-200">
+      <form className="collapse collapse-arrow bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -215,7 +215,7 @@ export default function VolunteerActivityDetailPage() {
         <ReactiveButton
           className="btn"
           onClick={() => submitActivityForReview({ activityId: activity.id })}
-          loading={submitActivityForReviewIsLoading}
+          loading={submitActivityForReviewIsPending}
         >
           送出申請
         </ReactiveButton>
@@ -226,7 +226,7 @@ export default function VolunteerActivityDetailPage() {
         return (
           <ReactiveButton
             className="btn"
-            loading={sendReviewNotificationIsLoading}
+            loading={sendReviewNotificationIsPending}
             isSuccess={sendReviewNotificationIsSuccess}
             isError={sendReviewNotificationIsError}
             onClick={() => sendReviewNotification({ activityId: activity.id })}
@@ -239,7 +239,7 @@ export default function VolunteerActivityDetailPage() {
         return (
           <ReactiveButton
             className="btn"
-            loading={approveActivityIsLoading}
+            loading={approveActivityIsPending}
             onClick={() => approveActivity({ activityId: activity.id })}
           >
             核准
@@ -269,7 +269,7 @@ export default function VolunteerActivityDetailPage() {
         </Link>
         <ReactiveButton
           className="btn btn-warning"
-          loading={deleteActivityIsLoading}
+          loading={deleteActivityIsPending}
           isError={deleteActivityIsError}
           onClick={() => setDeleteDialogOpen(true)}
         >
@@ -310,7 +310,7 @@ export default function VolunteerActivityDetailPage() {
           <ReactiveButton
             className="btn btn-error"
             onClick={() => setLeaveDialogOpen(true)}
-            loading={leaveActivityIsLoading}
+            loading={leaveActivityIsPending}
             isError={leaveActivityIsError}
           >
             <UserMinusIcon className="h-4 w-4" />
@@ -338,7 +338,7 @@ export default function VolunteerActivityDetailPage() {
       <ReactiveButton
         className="btn btn-accent"
         onClick={() => participateActivity({ activityId: activity.id })}
-        loading={participateActivityIsLoading}
+        loading={participateActivityIsPending}
         isError={participateActivityIsError}
       >
         <UserPlusIcon className="h-4 w-4" />

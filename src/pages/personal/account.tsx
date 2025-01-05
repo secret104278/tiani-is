@@ -13,7 +13,7 @@ export default function PersonalAccountPage() {
 
   const {
     mutate: updateUserProfile,
-    isLoading: updateUserProfileIsLoading,
+    isPending: updateUserProfileIsPending,
     isSuccess: updateUserProfileIsSuccess,
     error: updateUserProfileError,
   } = api.user.updateUserProfile.useMutation({
@@ -86,7 +86,7 @@ export default function PersonalAccountPage() {
               image: lineImage ?? sessionData.user.image,
             }),
           )}
-          loading={updateUserProfileIsLoading}
+          loading={updateUserProfileIsPending}
           isSuccess={updateUserProfileIsSuccess}
           error={updateUserProfileError?.message}
         >

@@ -51,7 +51,7 @@ export default function AdminCasualUserEdit() {
 
   const {
     mutate: modifyCasualCheckRecord,
-    isLoading: modifyCasualCheckRecordIsLoading,
+    isPending: modifyCasualCheckRecordIsPending,
     error: modifyCasualCheckRecordError,
   } = api.volunteerActivity.modifyCasualCheckRecord.useMutation({
     onSuccess: () => {
@@ -62,7 +62,7 @@ export default function AdminCasualUserEdit() {
 
   const {
     mutate: managerCheckInActivity,
-    isLoading: managerCheckInActivityIsLoading,
+    isPending: managerCheckInActivityIsPending,
     error: managerCheckInActivityError,
   } = api.volunteerActivity.managerCheckInActivity.useMutation({
     onSuccess: () => {
@@ -73,7 +73,7 @@ export default function AdminCasualUserEdit() {
 
   const {
     mutate: manualCasualCheckRecord,
-    isLoading: manualCasualCheckRecordIsLoading,
+    isPending: manualCasualCheckRecordIsPending,
     error: manualCasualCheckRecordError,
   } = api.volunteerActivity.manualCasualCheckRecord.useMutation({
     onSuccess: () => {
@@ -121,7 +121,7 @@ export default function AdminCasualUserEdit() {
                 checkOutAt: checkOutAt,
               });
             }}
-            isLoading={manualCasualCheckRecordIsLoading}
+            isLoading={manualCasualCheckRecordIsPending}
             error={manualCasualCheckRecordError?.message}
           />
         </Dialog>
@@ -145,7 +145,7 @@ export default function AdminCasualUserEdit() {
                 checkOutAt: checkOutAt,
               });
           }}
-          isLoading={modifyCasualCheckRecordIsLoading}
+          isLoading={modifyCasualCheckRecordIsPending}
           error={modifyCasualCheckRecordError?.message}
         />
       </Dialog>
@@ -167,7 +167,7 @@ export default function AdminCasualUserEdit() {
                 checkOutAt: checkOutAt,
               });
           }}
-          isLoading={managerCheckInActivityIsLoading}
+          isLoading={managerCheckInActivityIsPending}
           error={managerCheckInActivityError?.message}
         />
       </Dialog>

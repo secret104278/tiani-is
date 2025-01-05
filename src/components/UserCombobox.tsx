@@ -37,7 +37,7 @@ export default function UserCombobox({
 
   const filteredPeople =
     query === ""
-      ? users
+      ? (users ?? [])
       : (users ?? []).filter((user) => {
           return user.name?.toLowerCase().includes(query.toLowerCase());
         });

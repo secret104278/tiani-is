@@ -41,7 +41,7 @@ export default function EtogetherActivityRegisterDialogContent({
 
   const {
     mutate: registerActivity,
-    isLoading: registerActivityIsLoading,
+    isPending: registerActivityIsPending,
     error: registerActivityError,
   } = api.etogetherActivity.registerActivity.useMutation({
     onSuccess: () => router.reload(),
@@ -131,7 +131,7 @@ export default function EtogetherActivityRegisterDialogContent({
       </button>
       <ReactiveButton
         className="btn btn-primary"
-        loading={registerActivityIsLoading}
+        loading={registerActivityIsPending}
         error={registerActivityError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={handleSubmit((data) => {

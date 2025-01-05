@@ -95,7 +95,7 @@ export default function ClassActivityDetailPage() {
 
   const {
     mutate: deleteActivity,
-    isLoading: deleteActivityIsLoading,
+    isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
   } = api.classActivity.deleteActivity.useMutation({
     onSuccess: () => router.push(`/${site}`),
@@ -103,7 +103,7 @@ export default function ClassActivityDetailPage() {
 
   const {
     mutate: takeLeave,
-    isLoading: takeLeaveIsLoading,
+    isPending: takeLeaveIsPending,
     error: takeLeaveError,
   } = api.classActivity.takeLeave.useMutation({
     onSuccess: () => router.reload(),
@@ -111,7 +111,7 @@ export default function ClassActivityDetailPage() {
 
   const {
     mutate: cancelLeave,
-    isLoading: cancelLeaveIsLoading,
+    isPending: cancelLeaveIsPending,
     error: cancelLeaveError,
   } = api.classActivity.cancelLeave.useMutation({
     onSuccess: () => router.reload(),
@@ -174,7 +174,7 @@ export default function ClassActivityDetailPage() {
         </Link>
         <ReactiveButton
           className="btn btn-warning"
-          loading={deleteActivityIsLoading}
+          loading={deleteActivityIsPending}
           isError={deleteActivityIsError}
           onClick={() => setDeleteDialogOpen(true)}
         >
@@ -260,7 +260,7 @@ export default function ClassActivityDetailPage() {
           className="btn btn-secondary"
           onClick={() => cancelLeave({ activityId: activity.id })}
           disabled={isEnded}
-          loading={cancelLeaveIsLoading}
+          loading={cancelLeaveIsPending}
           error={cancelLeaveError?.message}
         >
           取消請假
@@ -273,7 +273,7 @@ export default function ClassActivityDetailPage() {
           className="btn btn-secondary"
           onClick={() => setLeaveDialogOpen(true)}
           disabled={isEnded}
-          loading={takeLeaveIsLoading}
+          loading={takeLeaveIsPending}
           error={takeLeaveError?.message}
         >
           <ArrowRightOnRectangleIcon className="h-4 w-4" />

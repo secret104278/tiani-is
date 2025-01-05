@@ -35,7 +35,7 @@ export default function YideWorkActivityRegisterDialogContent({
 
   const {
     mutate: registerActivity,
-    isLoading: registerActivityIsLoading,
+    isPending: registerActivityIsPending,
     error: registerActivityError,
   } = api.yideworkActivity.registerActivity.useMutation({
     onSuccess: () => router.reload(),
@@ -91,7 +91,7 @@ export default function YideWorkActivityRegisterDialogContent({
       </button>
       <ReactiveButton
         className="btn btn-primary"
-        loading={registerActivityIsLoading}
+        loading={registerActivityIsPending}
         error={registerActivityError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={handleSubmit((data) => {

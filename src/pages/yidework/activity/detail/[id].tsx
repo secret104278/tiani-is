@@ -87,7 +87,7 @@ export default function YideWorkActivityDetailPage() {
 
   const {
     mutate: deleteActivity,
-    isLoading: deleteActivityIsLoading,
+    isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
   } = api.yideworkActivity.deleteActivity.useMutation({
     onSuccess: () => router.push(`/${site}`),
@@ -95,7 +95,7 @@ export default function YideWorkActivityDetailPage() {
 
   const {
     mutate: unregisterActivity,
-    isLoading: unregisterActivityIsLoading,
+    isPending: unregisterActivityIsPending,
     error: unregisterActivityError,
   } = api.yideworkActivity.unregisterActivity.useMutation({
     onSuccess: () => refetchRegisterData(),
@@ -160,7 +160,7 @@ export default function YideWorkActivityDetailPage() {
         </Link>
         <ReactiveButton
           className="btn btn-warning"
-          loading={deleteActivityIsLoading}
+          loading={deleteActivityIsPending}
           isError={deleteActivityIsError}
           onClick={() => setDeleteDialogOpen(true)}
         >
@@ -209,7 +209,7 @@ export default function YideWorkActivityDetailPage() {
                 <ReactiveButton
                   className="btn btn-error"
                   onClick={() => setLeaveDialogOpen(true)}
-                  loading={unregisterActivityIsLoading}
+                  loading={unregisterActivityIsPending}
                   error={unregisterActivityError?.message}
                 >
                   <UserMinusIcon className="h-4 w-4" />

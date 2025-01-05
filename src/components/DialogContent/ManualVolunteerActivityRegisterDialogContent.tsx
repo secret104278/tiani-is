@@ -14,7 +14,7 @@ export default function ManualVolunteerActivityRegisterDialogContent({
 
   const {
     mutate: participateActivity,
-    isLoading: participateActivityIsLoading,
+    isPending: participateActivityIsPending,
     error: participateActivityError,
   } = api.volunteerActivity.participateActivity.useMutation({
     onSuccess: () => router.reload(),
@@ -35,7 +35,7 @@ export default function ManualVolunteerActivityRegisterDialogContent({
       <ReactiveButton
         className="btn btn-primary"
         disabled={isNil(selected)}
-        loading={participateActivityIsLoading}
+        loading={participateActivityIsPending}
         error={participateActivityError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={() =>

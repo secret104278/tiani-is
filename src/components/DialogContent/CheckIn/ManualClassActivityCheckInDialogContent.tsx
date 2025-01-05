@@ -14,7 +14,7 @@ export default function ManualClassActivityCheckInDialogContent({
 
   const {
     mutate: checkInActivity,
-    isLoading: checkInActivityIsLoading,
+    isPending: checkInActivityIsPending,
     error: checkInActivityError,
   } = api.classActivity.checkInActivity.useMutation({
     onSuccess: () => router.reload(),
@@ -35,7 +35,7 @@ export default function ManualClassActivityCheckInDialogContent({
       <ReactiveButton
         className="btn btn-primary"
         disabled={isNil(selected)}
-        loading={checkInActivityIsLoading}
+        loading={checkInActivityIsPending}
         error={checkInActivityError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={() =>

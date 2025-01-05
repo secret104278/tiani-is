@@ -46,7 +46,7 @@ export default function VolunteerActivityCheckRecordPage() {
 
   const {
     mutate: managerCheckInActivity,
-    isLoading: managerCheckInActivityIsLoading,
+    isPending: managerCheckInActivityIsPending,
     error: managerCheckInActivityError,
   } = api.volunteerActivity.managerCheckInActivity.useMutation({
     onSuccess: () => {
@@ -106,7 +106,7 @@ export default function VolunteerActivityCheckRecordPage() {
               checkOutAt: checkOutAt,
             });
           }}
-          isLoading={managerCheckInActivityIsLoading}
+          isLoading={managerCheckInActivityIsPending}
           error={managerCheckInActivityError?.message}
         />
       </Dialog>

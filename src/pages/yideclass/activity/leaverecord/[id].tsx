@@ -35,7 +35,7 @@ export default function ClassActivityLeaveRecordPage() {
 
   const {
     mutate: cancelLeave,
-    isLoading: cancelLeaveIsLoading,
+    isPending: cancelLeaveIsPending,
     error: cancelLeaveError,
   } = api.classActivity.cancelLeave.useMutation({
     onSuccess: () => refetchLeaveRecords(),
@@ -77,7 +77,7 @@ export default function ClassActivityLeaveRecordPage() {
           </Dialog>
         </div>
       )}
-      {cancelLeaveIsLoading && <div className="loading"></div>}
+      {cancelLeaveIsPending && <div className="loading"></div>}
       {cancelLeaveError && (
         <AlertWarning>{cancelLeaveError.message}</AlertWarning>
       )}

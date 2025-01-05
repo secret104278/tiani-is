@@ -13,7 +13,7 @@ export default function EtogetherActivityCheckInDialogContent({
 
   const {
     mutate: checkInActivityMainRegister,
-    isLoading: checkInActivityMainRegisterIsLoading,
+    isPending: checkInActivityMainRegisterIsPending,
     error: checkInActivityMainRegisterError,
   } = api.etogetherActivity.checkInActivityMainRegister.useMutation({
     onSuccess: () => {
@@ -31,7 +31,7 @@ export default function EtogetherActivityCheckInDialogContent({
           longitude,
         })
       }
-      checkInIsLoading={checkInActivityMainRegisterIsLoading}
+      checkInIsLoading={checkInActivityMainRegisterIsPending}
       checkInError={checkInActivityMainRegisterError?.message}
     />
   );

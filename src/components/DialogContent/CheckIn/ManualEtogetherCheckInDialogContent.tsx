@@ -29,7 +29,7 @@ export default function ManualEtogetherCheckInDialogContent({
 
   const {
     mutate: manualExternalRegister,
-    isLoading: manualExternalRegisterIsLoading,
+    isPending: manualExternalRegisterIsPending,
     error: manualExternalRegisterError,
   } = api.etogetherActivity.manualExternalRegister.useMutation({
     onSuccess: () => router.reload(),
@@ -68,7 +68,7 @@ export default function ManualEtogetherCheckInDialogContent({
       </div>
       <ReactiveButton
         className="btn btn-primary"
-        loading={manualExternalRegisterIsLoading}
+        loading={manualExternalRegisterIsPending}
         error={manualExternalRegisterError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={handleSubmit((data) =>

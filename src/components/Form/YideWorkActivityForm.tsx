@@ -81,14 +81,14 @@ export default function YideWorkActivityForm({
   const {
     mutate: createActivity,
     error: createActivityError,
-    isLoading: createActivityIsLoading,
+    isPending: createActivityIsPending,
   } = api.yideworkActivity.createActivity.useMutation({
     onSuccess: (data) => router.push(`/yidework/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
-    isLoading: updateActivityIsLoading,
+    isPending: updateActivityIsPending,
   } = api.yideworkActivity.updateActivity.useMutation({
     onSuccess: (data) => router.push(`/yidework/activity/detail/${data.id}`),
   });
@@ -228,7 +228,7 @@ export default function YideWorkActivityForm({
             className="btn"
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={_handleSubmit(true)}
-            loading={createActivityIsLoading || updateActivityIsLoading}
+            loading={createActivityIsPending || updateActivityIsPending}
           >
             保存草稿
           </ReactiveButton>
@@ -238,7 +238,7 @@ export default function YideWorkActivityForm({
           className="btn btn-primary"
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={_handleSubmit()}
-          loading={createActivityIsLoading || updateActivityIsLoading}
+          loading={createActivityIsPending || updateActivityIsPending}
         >
           送出
         </ReactiveButton>

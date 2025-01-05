@@ -13,7 +13,7 @@ export default function VolunteerActivityCheckInDialogContent({
 
   const {
     mutate: checkInActivity,
-    isLoading: checkInActivityIsLoading,
+    isPending: checkInActivityIsPending,
     error: checkInActivityError,
   } = api.volunteerActivity.checkInActivity.useMutation({
     onSuccess: () => {
@@ -27,7 +27,7 @@ export default function VolunteerActivityCheckInDialogContent({
       onCheckIn={(latitude, longitude) =>
         checkInActivity({ activityId, latitude, longitude })
       }
-      checkInIsLoading={checkInActivityIsLoading}
+      checkInIsLoading={checkInActivityIsPending}
       checkInError={checkInActivityError?.message}
     />
   );

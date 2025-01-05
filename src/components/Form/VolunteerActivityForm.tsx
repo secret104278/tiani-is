@@ -63,14 +63,14 @@ export default function VolunteerActivityForm({
   const {
     mutate: createActivity,
     error: createActivityError,
-    isLoading: createActivityIsLoading,
+    isPending: createActivityIsPending,
   } = api.volunteerActivity.createActivity.useMutation({
     onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
-    isLoading: updateActivityIsLoading,
+    isPending: updateActivityIsPending,
   } = api.volunteerActivity.updateActivity.useMutation({
     onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
   });
@@ -192,7 +192,7 @@ export default function VolunteerActivityForm({
             className="btn"
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={_handleSubmit(true)}
-            loading={createActivityIsLoading || updateActivityIsLoading}
+            loading={createActivityIsPending || updateActivityIsPending}
           >
             保存草稿
           </ReactiveButton>
@@ -202,7 +202,7 @@ export default function VolunteerActivityForm({
           className="btn btn-primary"
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={_handleSubmit()}
-          loading={createActivityIsLoading || updateActivityIsLoading}
+          loading={createActivityIsPending || updateActivityIsPending}
         >
           送出
         </ReactiveButton>

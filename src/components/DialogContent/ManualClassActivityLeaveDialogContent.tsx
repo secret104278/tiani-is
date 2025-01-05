@@ -14,7 +14,7 @@ export default function ManualClassActivityLeaveDialogContent({
 
   const {
     mutate: manualTakeLeave,
-    isLoading: manualTakeLeaveIsLoading,
+    isPending: manualTakeLeaveIsPending,
     error: manualTakeLeaveError,
   } = api.classActivity.takeLeave.useMutation({
     onSuccess: () => router.reload(),
@@ -35,7 +35,7 @@ export default function ManualClassActivityLeaveDialogContent({
       <ReactiveButton
         className="btn btn-primary"
         disabled={isNil(selected)}
-        loading={manualTakeLeaveIsLoading}
+        loading={manualTakeLeaveIsPending}
         error={manualTakeLeaveError?.message}
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={() =>

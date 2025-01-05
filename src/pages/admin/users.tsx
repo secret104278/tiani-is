@@ -16,7 +16,7 @@ function CreateUserDialogContent() {
 
   const {
     mutate: createUser,
-    isLoading: createUserIsLoading,
+    isPending: createUserIsPending,
     error: createUserError,
   } = api.user.createUser.useMutation({ onSuccess: () => router.reload() });
 
@@ -52,7 +52,7 @@ function CreateUserDialogContent() {
           <ReactiveButton
             type="submit"
             className="btn btn-primary"
-            loading={createUserIsLoading}
+            loading={createUserIsPending}
             error={createUserError?.message}
           >
             建立
@@ -267,10 +267,10 @@ export default function AdminUsersPage() {
                     checked={user.roles.includes(Role.TIANI_ADMIN)}
                     className="checkbox"
                     disabled={user.id === sessionData?.user.id}
-                    onClick={() =>
+                    onChange={(e) =>
                       setIsTianiAdmin({
                         userId: user.id,
-                        isAdmin: !user.roles.includes(Role.TIANI_ADMIN),
+                        isAdmin: e.target.checked,
                       })
                     }
                   />
@@ -281,10 +281,10 @@ export default function AdminUsersPage() {
                     disabled={user.roles.includes(Role.TIANI_ADMIN)}
                     checked={user.roles.includes(Role.VOLUNTEER_ADMIN)}
                     className="checkbox"
-                    onClick={() =>
+                    onChange={(e) =>
                       setIsVolunteerAdmin({
                         userId: user.id,
-                        isAdmin: !user.roles.includes(Role.VOLUNTEER_ADMIN),
+                        isAdmin: e.target.checked,
                       })
                     }
                   />
@@ -295,10 +295,10 @@ export default function AdminUsersPage() {
                     disabled={user.roles.includes(Role.TIANI_ADMIN)}
                     checked={user.roles.includes(Role.YIDECLASS_ADMIN)}
                     className="checkbox"
-                    onClick={() =>
+                    onChange={(e) =>
                       setIsYideclassAdmin({
                         userId: user.id,
-                        isAdmin: !user.roles.includes(Role.YIDECLASS_ADMIN),
+                        isAdmin: e.target.checked,
                       })
                     }
                   />
@@ -309,10 +309,10 @@ export default function AdminUsersPage() {
                     disabled={user.roles.includes(Role.TIANI_ADMIN)}
                     checked={user.roles.includes(Role.YIDEWORK_ADMIN)}
                     className="checkbox"
-                    onClick={() =>
+                    onChange={(e) =>
                       setIsYideworkAdmin({
                         userId: user.id,
-                        isAdmin: !user.roles.includes(Role.YIDEWORK_ADMIN),
+                        isAdmin: e.target.checked,
                       })
                     }
                   />
@@ -323,10 +323,10 @@ export default function AdminUsersPage() {
                     disabled={user.roles.includes(Role.TIANI_ADMIN)}
                     checked={user.roles.includes(Role.ETOGETHER_ADMIN)}
                     className="checkbox"
-                    onClick={() =>
+                    onChange={(e) =>
                       setIsEtogetherAdmin({
                         userId: user.id,
-                        isAdmin: !user.roles.includes(Role.ETOGETHER_ADMIN),
+                        isAdmin: e.target.checked,
                       })
                     }
                   />

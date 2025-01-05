@@ -96,7 +96,7 @@ export default function EtogetherActivityDetailPage() {
 
   const {
     mutate: deleteActivity,
-    isLoading: deleteActivityIsLoading,
+    isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
   } = api.etogetherActivity.deleteActivity.useMutation({
     onSuccess: () => router.push(`/${site}`),
@@ -104,7 +104,7 @@ export default function EtogetherActivityDetailPage() {
 
   const {
     mutate: unregisterActivity,
-    isLoading: unregisterActivityIsLoading,
+    isPending: unregisterActivityIsPending,
     error: unregisterActivityError,
   } = api.etogetherActivity.unregisterActivity.useMutation({
     onSuccess: () => refetchRegisterData(),
@@ -170,7 +170,7 @@ export default function EtogetherActivityDetailPage() {
         </Link>
         <ReactiveButton
           className="btn btn-warning"
-          loading={deleteActivityIsLoading}
+          loading={deleteActivityIsPending}
           isError={deleteActivityIsError}
           onClick={() => setDeleteDialogOpen(true)}
         >
@@ -200,7 +200,7 @@ export default function EtogetherActivityDetailPage() {
     return (
       <>
         {alreadyRegister && (
-          <div className="card-compact card card-bordered shadow-sm">
+          <div className="card card-bordered card-compact shadow-sm">
             <div className="card-body">
               <p className="font-bold">我的報名表</p>
               <p>
@@ -223,7 +223,7 @@ export default function EtogetherActivityDetailPage() {
                   <ReactiveButton
                     className="btn btn-error"
                     onClick={() => setLeaveDialogOpen(true)}
-                    loading={unregisterActivityIsLoading}
+                    loading={unregisterActivityIsPending}
                     error={unregisterActivityError?.message}
                   >
                     <UserMinusIcon className="h-4 w-4" />
@@ -344,7 +344,7 @@ export default function EtogetherActivityDetailPage() {
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className={`card-compact card card-bordered ml-4 shadow-sm`}
+            className={`card card-bordered card-compact ml-4 shadow-sm`}
             style={
               !isNil(subgroup.displayColorCode)
                 ? {

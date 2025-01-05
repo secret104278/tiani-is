@@ -132,9 +132,8 @@ export default function ModifyCheckRecordDialogContent({
       <ReactiveButton
         className="btn btn-primary"
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={handleSubmit(
-          (data) =>
-            onConfirm?.(data.checkInAt as Date, data.checkOutAt as Date),
+        onClick={handleSubmit((data) =>
+          onConfirm?.(data.checkInAt as Date, data.checkOutAt as Date),
         )}
         loading={isLoading}
         error={error}

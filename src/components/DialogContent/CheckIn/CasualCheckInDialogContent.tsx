@@ -11,7 +11,7 @@ export default function CasualCheckInDialogContent({
 
   const {
     mutate: casualCheckIn,
-    isLoading: casualCheckInIsLoading,
+    isPending: casualCheckInIsPending,
     error: casualCheckInError,
   } = api.volunteerActivity.casualCheckIn.useMutation({
     onSuccess: () => {
@@ -25,7 +25,7 @@ export default function CasualCheckInDialogContent({
       onCheckIn={(latitude, longitude) =>
         casualCheckIn({ latitude, longitude })
       }
-      checkInIsLoading={casualCheckInIsLoading}
+      checkInIsLoading={casualCheckInIsPending}
       checkInError={casualCheckInError?.message}
     />
   );
