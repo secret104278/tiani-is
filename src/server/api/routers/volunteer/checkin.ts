@@ -1,5 +1,6 @@
+import { TZDate } from "@date-fns/tz";
+import { startOfDay } from "date-fns";
 import { isNil, sum } from "lodash";
-import moment from "moment-timezone";
 import { z } from "zod";
 import {
   activityIsOnGoing,
@@ -82,11 +83,8 @@ export const checkinRouter = createTRPCRouter({
       if (isOutOfRange(input.latitude, input.longitude))
         throw new Error("超出打卡範圍");
 
-      const taipeiMoment = moment.tz("Asia/Taipei");
-      const now = taipeiMoment.clone().tz(moment.tz.guess()).toDate();
-
-      taipeiMoment.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-      const targetMoment = taipeiMoment.clone().tz(moment.tz.guess());
+      const now = TZDate.tz("Asia/Taipei");
+      const todayStart = startOfDay(now);
 
       // TODO: lock or transaction
       const latestCheck = await ctx.db.casualCheckRecord.findFirst({
@@ -94,7 +92,7 @@ export const checkinRouter = createTRPCRouter({
         where: {
           userId: ctx.session.user.id,
           checkInAt: {
-            gte: targetMoment.toDate(),
+            gte: todayStart,
           },
         },
         orderBy: {
@@ -198,15 +196,13 @@ export const checkinRouter = createTRPCRouter({
   }),
 
   getLatestCasualCheckIn: protectedProcedure.query(async ({ ctx }) => {
-    const taipeiMoment = moment.tz("Asia/Taipei");
-    taipeiMoment.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-    const targetMoment = taipeiMoment.clone().tz(moment.tz.guess());
+    const todayStart = startOfDay(TZDate.tz("Asia/Taipei"));
 
     return await ctx.db.casualCheckRecord.findFirst({
       where: {
         userId: ctx.session.user.id,
         checkInAt: {
-          gte: targetMoment.toDate(),
+          gte: todayStart,
         },
       },
       orderBy: {
