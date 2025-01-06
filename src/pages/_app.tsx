@@ -14,7 +14,9 @@ import { useRouter } from "next/router";
 import { NuqsAdapter } from "nuqs/adapters/next/pages";
 import { useEffect } from "react";
 import SentrySetup from "~/components/System/SentrySetup";
+import { Loading } from "~/components/utils/Loading";
 import { SiteProvider } from "~/context/SiteContext";
+import { usePageLoading } from "~/hooks/usePageLoading";
 import "~/styles/globals.css";
 import type { OGMetaProps } from "~/utils/types";
 import { Site, siteToTitle, urlBaseToSite } from "~/utils/ui";
@@ -40,6 +42,8 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
         break;
     }
   }, [site]);
+
+  const { isPageLoading } = usePageLoading();
 
   let siteIcon = "/logo512.png";
   let siteColor = "";
@@ -92,7 +96,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
             <SentrySetup>
               <NuqsAdapter>
                 <Layout>
-                  <Component {...pageProps} />
+                  {isPageLoading ? <Loading /> : <Component {...pageProps} />}
                 </Layout>
               </NuqsAdapter>
             </SentrySetup>
