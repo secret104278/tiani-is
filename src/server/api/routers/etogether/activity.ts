@@ -1,4 +1,4 @@
-import { type Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { isNumber, omit } from "lodash";
 import { z } from "zod";
 import {
@@ -82,18 +82,28 @@ export const activityRouter = createTRPCRouter({
     )
     .mutation(({ ctx, input }) =>
       ctx.db.$transaction(async (db) => {
-        await db.etogetherActivitySubgroup.deleteMany({
-          where: {
-            etogetherActivityId: input.activityId,
-            NOT: {
-              id: {
-                in: input.subgroups
-                  .map((subgroup) => subgroup.id)
-                  .filter(isNumber),
+        try {
+          await db.etogetherActivitySubgroup.deleteMany({
+            where: {
+              etogetherActivityId: input.activityId,
+              NOT: {
+                id: {
+                  in: input.subgroups
+                    .map((subgroup) => subgroup.id)
+                    .filter(isNumber),
+                },
               },
             },
-          },
-        });
+          });
+        } catch (error) {
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2003" // Foreign key constraint failed
+          ) {
+            throw new Error("不能刪除已經有人報名的組別");
+          }
+          throw error;
+        }
 
         await db.etogetherActivitySubgroup.createMany({
           data: input.subgroups
