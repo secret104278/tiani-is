@@ -1,10 +1,12 @@
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
+import { format, startOfDay } from "date-fns";
 import { isNil, sortBy } from "lodash";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { formatDate } from "~/utils/ui";
+import { ActivityChart } from "./ui/activity-chart";
 
 interface ActivityCheckInHistory {
   checkInAt: Date;
@@ -174,6 +176,35 @@ export default function WorkingStatsPanel({
 
   return (
     <div className="space-y-4">
+      <div className="w-full">
+        <ActivityChart
+          chartData={(() => {
+            // Create a Map to store aggregated hours by date
+            const aggregatedData = new Map<string, number>();
+
+            // Aggregate hours
+            allActivityCheckHistories.forEach((history) => {
+              const date = startOfDay(history.checkInAt);
+              const dateKey = format(date, "yyyy-MM-dd");
+              const hours = history.checkOutAt
+                ? (history.checkOutAt.getTime() - history.checkInAt.getTime()) /
+                  (1000 * 60 * 60)
+                : 1;
+
+              aggregatedData.set(
+                dateKey,
+                (aggregatedData.get(dateKey) ?? 0) + hours,
+              );
+            });
+
+            // Convert Map back to array format expected by ActivityChart
+            return Array.from(aggregatedData, ([dateStr, hours]) => ({
+              date: new Date(dateStr),
+              workingHours: hours,
+            }));
+          })()}
+        />
+      </div>
       <div className="flex flex-row justify-center">
         <div className="tabs-boxed tabs">
           <a
