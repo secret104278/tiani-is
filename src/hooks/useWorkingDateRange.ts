@@ -1,7 +1,9 @@
 import {
+  endOfDay,
   endOfMonth,
   endOfToday,
   endOfWeek,
+  startOfDay,
   startOfMonth,
   startOfToday,
   startOfWeek,
@@ -15,7 +17,14 @@ import { z } from "zod";
 
 const dateRangeOptionSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.enum(["all", "today", "thisWeek", "thisMonth"]),
+    type: z.enum([
+      "all",
+      "today",
+      "thisWeek",
+      "thisMonth",
+      "last7Days",
+      "last30Days",
+    ]),
   }),
   z.object({
     type: z.literal("custom"),
@@ -45,8 +54,14 @@ const getStartAndEnd = (
   if (dateRange.type === "thisMonth") {
     return [startOfMonth(today), endOfMonth(today)];
   }
+  if (dateRange.type === "last7Days") {
+    return [startOfDay(subDays(today, 6)), endOfToday()];
+  }
+  if (dateRange.type === "last30Days") {
+    return [startOfDay(subDays(today, 29)), endOfToday()];
+  }
   if (dateRange.type === "custom") {
-    return [dateRange.start, dateRange.end];
+    return [startOfDay(dateRange.start), endOfDay(dateRange.end)];
   }
   throw new Error("Invalid date range");
 };

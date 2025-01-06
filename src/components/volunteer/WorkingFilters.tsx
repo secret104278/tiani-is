@@ -40,10 +40,12 @@ export function WorkingFilters({
         }}
       >
         <option value="all">全部日期</option>
+        <option value="custom">自訂區間</option>
         <option value="today">本日</option>
         <option value="thisWeek">本週</option>
         <option value="thisMonth">本月</option>
-        <option value="custom">自訂區間</option>
+        <option value="last7Days">過去7天</option>
+        <option value="last30Days">過去30天</option>
       </select>
       {dateRangeOption.type === "custom" && (
         <div>
