@@ -263,6 +263,8 @@ export default function YideWorkActivityDetailPage() {
         {!isManager && <ShareLineBtn />}
       </div>
 
+      <RegisterControl />
+
       {isManager && <AdminPanel />}
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
@@ -291,7 +293,6 @@ export default function YideWorkActivityDetailPage() {
           )}
           {activity.description}
         </article>
-        <RegisterControl />
       </div>
     </div>
   );

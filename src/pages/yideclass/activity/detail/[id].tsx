@@ -329,6 +329,10 @@ export default function ClassActivityDetailPage() {
       </div>
 
       {isManager && <AdminPanel />}
+
+      <CheckInControl />
+      <LeaveControl />
+
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
 
@@ -351,8 +355,6 @@ export default function ClassActivityDetailPage() {
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
-        <CheckInControl />
-        <LeaveControl />
       </div>
     </div>
   );

@@ -319,6 +319,10 @@ export default function EtogetherActivityDetailPage() {
       </div>
 
       {isManager && <AdminPanel />}
+
+      <RegisterControl />
+      <CheckInControl />
+
       <div className="flex flex-col space-y-2 align-bottom">
         <p>發起人：{activity.organiser.name}</p>
 
@@ -365,8 +369,6 @@ export default function EtogetherActivityDetailPage() {
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
-        <RegisterControl />
-        <CheckInControl />
       </div>
     </div>
   );

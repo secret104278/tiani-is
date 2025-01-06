@@ -408,6 +408,10 @@ export default function VolunteerActivityDetailPage() {
         {!isManager && <ShareLineBtn />}
       </div>
       {isManager && <AdminPanel />}
+
+      <ParticipateControl />
+      <CheckInControl />
+
       <ParticipantsCollapse />
       <div className="flex flex-col space-y-2 align-bottom">
         <p>發起人：{activity.organiser.name}</p>
@@ -433,8 +437,6 @@ export default function VolunteerActivityDetailPage() {
         <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
           {activity.description}
         </article>
-        <ParticipateControl />
-        <CheckInControl />
       </div>
     </div>
   );
