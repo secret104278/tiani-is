@@ -5,8 +5,13 @@ export const usePageLoading = () => {
   const [isPageLoading, setIsPageLoading] = useState(false);
 
   useEffect(() => {
-    const routeEventStart = () => {
-      setIsPageLoading(true);
+    const routeEventStart = (
+      url: string,
+      { shallow }: { shallow: boolean },
+    ) => {
+      if (!shallow) {
+        setIsPageLoading(true);
+      }
     };
     const routeEventEnd = () => {
       setIsPageLoading(false);
