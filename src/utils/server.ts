@@ -78,9 +78,12 @@ export const getLineImageURL = async (db: PrismaClient, userId: string) => {
       },
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const profile = await res.json();
+    const profile = (await res.json()) as { pictureUrl?: string };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (isNil(profile.pictureUrl)) {
+      continue;
+    }
+
     return String(profile.pictureUrl);
   }
 
