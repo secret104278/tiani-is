@@ -1,5 +1,6 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { Role, type User } from "@prisma/client";
+import { and, eq } from "drizzle-orm";
 import { isNil } from "lodash";
 import { type GetServerSidePropsContext } from "next";
 import {
@@ -8,12 +9,11 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import LineProvider from "next-auth/providers/line";
-
 import { env } from "~/env.mjs";
-import { db } from "~/server/db";
+import { db, drizzleDB } from "~/server/db";
 import { refreshLineImage } from "~/utils/server";
 import type { UserRole } from "~/utils/types";
-
+import { accountPgTable } from "./db/schema";
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -50,31 +50,30 @@ export const authOptions: NextAuthOptions = {
       if (isNil(account)) return false;
 
       if (account.provider === "line") {
-        const x = await db.account.findUnique({
-          select: { id: true },
-          where: {
-            provider_providerAccountId: {
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-            },
-          },
-        });
+        const accountInDB = await drizzleDB
+          .select({
+            id: accountPgTable.id,
+          })
+          .from(accountPgTable)
+          .where(
+            and(
+              eq(accountPgTable.provider, account.provider),
+              eq(accountPgTable.providerAccountId, account.providerAccountId),
+            ),
+          )
+          .limit(1)
+          .then((res) => res.at(0));
 
         // new user will not have an account
-        if (!isNil(x)) {
-          await db.account.update({
-            where: {
-              provider_providerAccountId: {
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-              },
-            },
-            data: {
-              refresh_token: account.refresh_token,
-              access_token: account.access_token,
-              expires_at: account.expires_at,
-            },
-          });
+        if (!isNil(accountInDB)) {
+          await drizzleDB
+            .update(accountPgTable)
+            .set({
+              refreshToken: account.refresh_token,
+              accessToken: account.access_token,
+              expiresAt: account.expires_at,
+            })
+            .where(eq(accountPgTable.id, accountInDB.id));
 
           void refreshLineImage(db, user.id);
         }
