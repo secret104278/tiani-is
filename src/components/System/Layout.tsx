@@ -38,6 +38,7 @@ function UserAvatar() {
   );
 }
 
+/** @deprecated */
 export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
   const { site } = useSiteContext();

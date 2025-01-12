@@ -302,6 +302,7 @@ export enum Site {
   Yideclass = "yideclass",
   Etogether = "etogether",
   YideWork = "yidework",
+  TianiShop = "tianishop",
 }
 
 export const urlBaseToSite = (urlBase?: string): Site => {
@@ -309,6 +310,7 @@ export const urlBaseToSite = (urlBase?: string): Site => {
   else if (urlBase === "yideclass") return Site.Yideclass;
   else if (urlBase === "etogether") return Site.Etogether;
   else if (urlBase === "yidework") return Site.YideWork;
+  else if (urlBase === "tianishop") return Site.TianiShop;
   else return Site.Volunteer;
 };
 
@@ -319,7 +321,7 @@ export const userComparator = (
   return !!a.name && !!b.name ? a.name.localeCompare(b.name, "zh-Hant-TW") : 0;
 };
 
-export const siteToTitle = (site: Site) => {
+export const siteToTitle = (site?: Site) => {
   switch (site) {
     case Site.Volunteer:
       return "天一志工隊";
@@ -329,6 +331,8 @@ export const siteToTitle = (site: Site) => {
       return "活動e起來";
     case Site.YideWork:
       return "義德道務網";
+    case Site.TianiShop:
+      return "天一友購站";
     default:
       return "天一聖道院資訊系統";
   }

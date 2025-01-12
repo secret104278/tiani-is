@@ -1,12 +1,7 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role, type User } from "@prisma/client";
 import { isNil } from "lodash";
-import { type GetServerSidePropsContext } from "next";
-import {
-  getServerSession,
-  type DefaultSession,
-  type NextAuthOptions,
-} from "next-auth";
+import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import LineProvider from "next-auth/providers/line";
 
 import { env } from "~/env.mjs";
@@ -40,7 +35,7 @@ declare module "next-auth" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
-export const authOptions: NextAuthOptions = {
+export const authConfig = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin",
@@ -48,6 +43,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     signIn: async ({ user, account }) => {
       if (isNil(account)) return false;
+      if (isNil(user.id)) return false;
 
       if (account.provider === "line") {
         const x = await db.account.findUnique({
@@ -110,6 +106,7 @@ export const authOptions: NextAuthOptions = {
     LineProvider({
       clientId: env.LINE_CLIENT_ID,
       clientSecret: env.LINE_CLIENT_SECRET,
+      checks: ["pkce", "state"],
       authorization: {
         params: {
           bot_prompt: "aggressive", // Add friend to be able to send messages
@@ -126,16 +123,4 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-};
-
-/**
- * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
- *
- * @see https://next-auth.js.org/configuration/nextjs
- */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+} satisfies NextAuthConfig;

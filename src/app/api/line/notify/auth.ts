@@ -3,15 +3,16 @@ import { isNil } from "lodash";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getCsrfToken } from "next-auth/react";
 import { env } from "~/env.mjs";
-import { getServerAuthSession } from "~/server/auth";
+import { auth } from "~/server/auth";
 import { LINE_NOTIFY_CALLBACK_URL } from "~/utils/server";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const session = await getServerAuthSession({ req, res });
-  const csrf = await getCsrfToken({ req });
+  const session = await auth(req, res);
+  // TODO: fix me
+  const csrf = await getCsrfToken();
 
   if (isNil(session) || isNil(csrf)) return res.status(401).end();
 

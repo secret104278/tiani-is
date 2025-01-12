@@ -1,5 +1,3 @@
-import type { BuiltInProviderType } from "next-auth/providers";
-import type { ClientSafeProvider, LiteralUnion } from "next-auth/react";
 import { getProviders, signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -9,9 +7,9 @@ import { useSiteContext } from "~/context/SiteContext";
 export default function SinginPage({
   providers,
 }: {
-  providers: Record<LiteralUnion<BuiltInProviderType>, ClientSafeProvider>;
+  providers: Awaited<ReturnType<typeof getProviders>>;
 }) {
-  const lineProvider = providers.line;
+  const lineProvider = providers!.line;
   const router = useRouter();
   const { site } = useSiteContext();
 
