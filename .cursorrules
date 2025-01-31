@@ -1,0 +1,26 @@
+This is a full-stack web application built with:
+- Next.js 15 (using both App Router and Pages Router, with new pages preferring App Router)
+- Prisma as the ORM with PostgreSQL database
+- TypeScript for type safety
+- TailwindCSS and DaisyUI for styling
+- React Hook Form for form handling
+- tRPC for end-to-end typesafe APIs
+- NextAuth for authentication
+- Leaflet for map functionalities
+- Sentry for error tracking
+- Vercel Analytics for usage tracking
+
+Key project features:
+- Hybrid routing strategy with both App and Pages Router
+- Type-safe API layer with tRPC
+- Modern UI components using TailwindCSS and DaisyUI
+- Form validation using React Hook Form and Zod
+- Real-time data fetching with Tanstack Query
+- Map integration using React Leaflet
+- Responsive design principles
+
+Development practices:
+- Using pnpm as package manager
+- ESLint and Prettier for code formatting
+- Running on port 3100 in development
+- Prisma for database schema management and migrations

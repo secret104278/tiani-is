@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { etogetherRouter } from "./routers/etogether";
+import { tianiShopRouter } from "./routers/tianishop";
 import { userRouter } from "./routers/user";
 import { volunteerRouter } from "./routers/volunteer";
 import { yideclassRouter } from "./routers/yideclass";
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   yideworkActivity: yideworkRouter,
   etogetherActivity: etogetherRouter,
   user: userRouter,
+  tianiShop: tianiShopRouter,
 });
 
 // export type definition of API

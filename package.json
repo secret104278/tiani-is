@@ -15,6 +15,7 @@
     "@date-fns/tz": "^1.2.0",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^3.10.0",
     "@line/bot-sdk": "^8.0.0",
     "@prisma/client": "^6.1.0",
     "@radix-ui/react-popover": "^1.1.4",
@@ -30,6 +31,7 @@
     "@trpc/react-query": "11.0.0-rc.682",
     "@trpc/server": "11.0.0-rc.682",
     "@vercel/analytics": "^1.4.1",
+    "@vercel/blob": "^0.27.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -53,6 +55,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "theme-change": "^2.5.0",
+    "thumbhash": "^0.1.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {

@@ -16,7 +16,51 @@
   }
 
   .tiani-table-pin-col {
-    @apply sticky left-0 z-10
+    @apply sticky left-0 z-10;
+  }
+
+  /* copy from DaisyUI v5 validator */
+  .validator:user-valid,
+  .validator:has(:user-valid) {
+    @apply border-success;
+  }
+  .validator:user-valid:focus,
+  .validator:has(:user-valid):focus,
+  .validator:user-valid:checked,
+  .validator:has(:user-valid):checked,
+  .validator:user-valid[aria-checked="true"],
+  .validator:has(:user-valid)[aria-checked="true"],
+  .validator:user-valid:focus-within,
+  .validator:has(:user-valid):focus-within {
+    @apply border-success;
+  }
+
+  .validator:user-invalid,
+  .validator:has(:user-invalid) {
+    @apply border-error;
+  }
+  .validator:user-invalid:focus,
+  .validator:has(:user-invalid):focus,
+  .validator:user-invalid:checked,
+  .validator:has(:user-invalid):checked,
+  .validator:user-invalid[aria-checked="true"],
+  .validator:has(:user-invalid)[aria-checked="true"],
+  .validator:user-invalid:focus-within,
+  .validator:has(:user-invalid):focus-within {
+    @apply border-error;
+  }
+
+  .validator:user-invalid ~ .validator-hint,
+  .validator:has(:user-invalid) ~ .validator-hint {
+    @apply visible block text-error;
+  }
+
+  .validator ~ .validator-hint {
+    @apply invisible;
+  }
+
+  .validator-hint {
+    @apply mt-2 text-xs;
   }
 }
 

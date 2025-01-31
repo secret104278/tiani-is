@@ -89,6 +89,8 @@ model User {
 
     etogetherActivityRegisters EtogetherActivityRegister[]
     yideWorkActivityRegisters  YideWorkActivityRegister[]
+    TianiShopOrder             TianiShopOrder[]
+    TianiShopListing           TianiShopListing[]
 }
 
 model LineNotify {
@@ -433,4 +435,90 @@ model ExternalYideWorkActivityRegister {
     mainRegisterId Int
 
     @@unique([activityId, username])
+}
+
+/**
+ * TianiShop
+ */
+
+model TianiShopListing {
+    id          Int      @id @default(autoincrement())
+    title       String
+    description String?
+    price       Float
+    startTime   DateTime
+    endTime     DateTime
+    capacity    Int? // null means unlimited capacity
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Publisher information
+    publisher   User   @relation(fields: [publisherId], references: [id])
+    publisherId String
+
+    images     TianiShopImage[]
+    orderItems TianiShopOrderItem[]
+
+    @@index([startTime])
+    @@index([endTime])
+    @@index([publisherId])
+}
+
+model TianiShopImage {
+    id        Int              @id @default(autoincrement())
+    key       String // The unique storage key/path
+    thumbhash String           @db.VarChar(40)
+    order     Int // Position of the image in the listing
+    listing   TianiShopListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+    listingId Int
+
+    createdAt DateTime @default(now())
+
+    @@unique([listingId, order]) // Ensure no duplicate orders within same listing
+    @@index([listingId])
+}
+
+model TianiShopOrder {
+    id        Int                  @id @default(autoincrement())
+    user      User                 @relation(fields: [userId], references: [id])
+    userId    String
+    createdAt DateTime             @default(now())
+    items     TianiShopOrderItem[]
+
+    // Price calculations
+    subtotal Float // Sum of all items' subtotals
+    total    Float // Final total after any adjustments
+
+    @@index([userId])
+}
+
+model TianiShopOrderItem {
+    id        Int              @id @default(autoincrement())
+    order     TianiShopOrder   @relation(fields: [orderId], references: [id])
+    orderId   Int
+    listing   TianiShopListing @relation(fields: [listingId], references: [id])
+    listingId Int
+    quantity  Int
+
+    subtotal Float // price * quantity at time of purchase
+
+    snapshot   TianiShopOrderItemSnapshot @relation(fields: [snapshotId], references: [id])
+    snapshotId Int                        @unique // one-to-one relation
+
+    @@index([orderId])
+    @@index([listingId])
+}
+
+model TianiShopOrderItemSnapshot {
+    id          Int                 @id @default(autoincrement())
+    title       String
+    description String?
+    price       Float
+    orderItem   TianiShopOrderItem?
+
+    // Snapshot of the primary image if exists
+    imageKey  String?
+    thumbhash String? @db.VarChar(40)
+
+    createdAt DateTime @default(now())
 }
