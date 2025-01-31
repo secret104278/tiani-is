@@ -95,6 +95,6 @@ export default {
     require("tailwindcss-animate"),
   ],
   daisyui: {
-    themes: ["autumn", "garden", "fantasy"],
+    themes: ["autumn", "garden", "fantasy", "cupcake"],
   } satisfies DaisyUIConfig,
 } satisfies Config;

@@ -2,13 +2,13 @@
 
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Form from "next/form";
+import imageCompression from "browser-image-compression";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { cn } from "~/lib/utils";
-import { createListing } from "./action";
+import { api } from "~/trpc/react";
 
 // Using constants that are safe for database storage
 const MIN_DATE = new Date("1970-01-01T00:00:00.000Z");
@@ -27,9 +27,69 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const compressionOptions = {
+  maxSizeMB: 0.1,
+  maxWidthOrHeight: 1920,
+  useWebWorker: true,
+  fileType: "image/jpeg",
+};
+
+async function compressImage(file: File) {
+  try {
+    const compressedFile = await imageCompression(file, compressionOptions);
+    // Create a new File object with a unique name to avoid cache issues
+    return new File([compressedFile], `${Date.now()}-${file.name}`, {
+      type: compressedFile.type,
+    });
+  } catch (error) {
+    console.error("Image compression failed:", error);
+    return file; // Return original file if compression fails
+  }
+}
+
+async function fileToImageInput(file: File) {
+  const arrayBuffer = await file.arrayBuffer();
+  return {
+    data: new Uint8Array(arrayBuffer),
+    type: file.type,
+    name: file.name,
+  };
+}
+
+async function prepareListingData(values: FormValues) {
+  // Compress images first
+  const compressedImages = await Promise.all(values.images.map(compressImage));
+
+  // Convert compressed images to Uint8Array format
+  const processedImages = await Promise.all(
+    compressedImages.map(fileToImageInput),
+  );
+
+  return {
+    title: values.title,
+    description: values.description ?? "",
+    price: values.price,
+    startTime:
+      values.timeType === "unlimited"
+        ? MIN_DATE
+        : (values.startTime ?? MIN_DATE),
+    endTime:
+      values.timeType === "unlimited" ? MAX_DATE : (values.endTime ?? MAX_DATE),
+    capacity: values.capacity,
+    images: processedImages,
+  };
+}
+
 export default function CreateListingPage() {
   const router = useRouter();
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const { mutate: createListing, isPending } =
+    api.tianiShop.createListing.useMutation({
+      onSuccess: () => {
+        router.push("/tianishop");
+      },
+    });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,36 +115,26 @@ export default function CreateListingPage() {
     }
   }, [images]);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const values = form.getValues();
+    void prepareListingData(values)
+      .then((listingData) => {
+        createListing(listingData);
+      })
+      .catch((error) => {
+        console.error("Error submitting form:", error);
+        alert("上傳失敗，請稍後再試");
+      });
+  };
+
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
         <h1>建立新商品</h1>
       </article>
 
-      <Form
-        action={async (formData: FormData) => {
-          const isValid = await form.trigger();
-          if (!isValid) {
-            return;
-          }
-          const values = form.getValues();
-          console.log(values);
-          formData.set(
-            "startTime",
-            values.timeType === "unlimited"
-              ? MIN_DATE.toISOString()
-              : (values.startTime?.toISOString() ?? ""),
-          );
-          formData.set(
-            "endTime",
-            values.timeType === "unlimited"
-              ? MAX_DATE.toISOString()
-              : (values.endTime?.toISOString() ?? ""),
-          );
-          await createListing(formData);
-        }}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-control">
           <label className="label">
             <span className="label-text">標題</span>
@@ -264,11 +314,22 @@ export default function CreateListingPage() {
           </label>
         </div>
         <div className="card-actions justify-end">
-          <button type="submit" className="btn btn-primary">
-            建立商品
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isPending}
+          >
+            {isPending ? (
+              <>
+                <span className="loading loading-spinner"></span>
+                處理中...
+              </>
+            ) : (
+              "建立商品"
+            )}
           </button>
         </div>
-      </Form>
+      </form>
     </div>
   );
 }

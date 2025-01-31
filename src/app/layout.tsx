@@ -30,7 +30,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html lang="zh-TW">
+    <html lang="zh-TW" data-theme="cupcake">
       <body>
         <SessionProvider session={session}>
           <AutoSignInRedirect />

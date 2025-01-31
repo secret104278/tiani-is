@@ -23,3 +23,8 @@ export const volunteerAdminWorkingUserDetailHref = (userId: string) =>
 export const adminUsersHref = () => `/admin/users`;
 export const yideclassAdminClassHref = () => `/yideclass/admin/class`;
 export const personalAccountHref = () => `/personal/account`;
+
+// Tianishop navigation
+export const tianishopListingDetailHref = (listingId: number) =>
+  `/tianishop/listings/${listingId}`;
+export const tianishopNewListingHref = () => `/tianishop/listings/new`;
