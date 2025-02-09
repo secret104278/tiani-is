@@ -457,7 +457,7 @@ model TianiShopListing {
     publisher   User   @relation(fields: [publisherId], references: [id])
     publisherId String
 
-    images     TianiShopImage[]
+    images     TianiShopListingImage[]
     orderItems TianiShopOrderItem[]
     cartItems  TianiShopCartItem[]
 
@@ -466,7 +466,7 @@ model TianiShopListing {
     @@index([publisherId])
 }
 
-model TianiShopImage {
+model TianiShopListingImage {
     id        Int              @id @default(autoincrement())
     key       String // The unique storage key/path
     thumbhash String           @db.VarChar(40)
