@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { thumbHashToDataURL } from "thumbhash";
 import { api } from "~/trpc/server";
+import { DeleteListingButton } from "./DeleteListingButton";
 
 export default async function MyListingsPage() {
   const listings = await api.tianiShop.getMyListings();
@@ -36,14 +37,10 @@ export default async function MyListingsPage() {
 
       <div className="space-y-4">
         {listings.map((listing) => (
-          <Link
-            key={listing.id}
-            href={`/tianishop/listings/${listing.id}`}
-            className="block"
-          >
+          <Link key={listing.id} href={`/tianishop/listings/${listing.id}`}>
             <div className="rounded-lg bg-base-100 p-4 shadow-sm transition hover:shadow-md">
               <div className="flex gap-4">
-                <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg">
+                <div className="relative block aspect-square w-24 shrink-0 overflow-hidden rounded-lg">
                   {listing.images[0] && (
                     <Image
                       src={listing.images[0].key}
@@ -66,16 +63,28 @@ export default async function MyListingsPage() {
                     </p>
                   </div>
 
-                  <div className="mt-auto flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      建立時間：
-                      {format(listing.createdAt, "PPP", { locale: zhTW })}
-                    </div>
-                    {listing.capacity && (
+                  <div className="mt-auto space-y-2">
+                    <div className="flex items-center justify-between">
                       <div className="text-sm text-gray-600">
-                        限量 {listing.capacity} 份
+                        建立時間：
+                        {format(listing.createdAt, "PPP", { locale: zhTW })}
                       </div>
-                    )}
+                      {listing.capacity && (
+                        <div className="text-sm text-gray-600">
+                          限量 {listing.capacity} 份
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                      <Link
+                        href={`/tianishop/listings/${listing.id}/edit`}
+                        className="btn btn-outline btn-sm"
+                      >
+                        編輯
+                      </Link>
+                      <DeleteListingButton listingId={listing.id} />
+                    </div>
                   </div>
                 </div>
               </div>
