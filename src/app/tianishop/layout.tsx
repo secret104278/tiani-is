@@ -5,12 +5,12 @@ import { Site, siteToTitle } from "~/utils/ui";
 import { CartButton } from "./components/CartButton";
 
 export const viewport: Viewport = {
-  themeColor: "#d69c6c",
+  themeColor: "#65c3c8",
 };
 
 const title = siteToTitle(Site.TianiShop);
 const description = `${title}・天一聖道院資訊系統`;
-const icon = "/volunteer_logo.png";
+const icon = "/tianishop_logo.png";
 
 export const metadata: Metadata = {
   title,
