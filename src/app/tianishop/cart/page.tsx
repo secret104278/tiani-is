@@ -24,9 +24,9 @@ export default function CartPage() {
 
   const { mutate: checkout, isPending: isCheckingOut } =
     api.tianiShop.checkout.useMutation({
-      onSuccess: () => {
+      onSuccess: (order) => {
         setError(null);
-        router.push("/tianishop/orders");
+        router.push(`/tianishop/orders/${order.id}`);
       },
       onError: (error) => {
         setError(error.message);

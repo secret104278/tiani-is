@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -56,7 +56,7 @@ export async function validateListingAvailability({
     capacity: number | null;
   };
   requestedQuantity: number;
-  db: PrismaClient;
+  db: PrismaClient | Prisma.TransactionClient;
   excludeCartItemId?: number;
 }) {
   // Check if listing has started
