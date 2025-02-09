@@ -24,53 +24,63 @@ export default async function MyOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">我的訂單</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">我的訂單</h1>
+        <Link href="/tianishop" className="btn btn-primary btn-sm">
+          回到商店
+        </Link>
+      </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col space-y-4">
         {orders.map((order) => (
-          <Link
-            key={order.id}
-            href={`/tianishop/orders/${order.id}`}
-            className="block"
-          >
+          <Link key={order.id} href={`/tianishop/orders/${order.id}`}>
             <div className="rounded-lg bg-base-100 p-4 shadow-sm transition hover:shadow-md">
-              <div className="mb-3 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  訂單時間：
-                  {format(order.createdAt, "PPP p", { locale: zhTW })}
+              <div className="flex gap-4">
+                <div className="relative block aspect-square w-24 shrink-0 overflow-hidden rounded-lg">
+                  {order.items[0]?.snapshot.imageKey &&
+                    order.items[0]?.snapshot.thumbhash && (
+                      <Image
+                        src={order.items[0].snapshot.imageKey}
+                        alt={order.items[0].snapshot.title}
+                        fill
+                        className="object-cover"
+                        placeholder="blur"
+                        blurDataURL={thumbHashToDataURL(
+                          Buffer.from(
+                            order.items[0].snapshot.thumbhash,
+                            "base64",
+                          ),
+                        )}
+                      />
+                    )}
                 </div>
-                <div className="font-semibold">
-                  NT$ {order.total.toLocaleString()}
-                </div>
-              </div>
 
-              <div className="flex gap-4 overflow-auto">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex shrink-0 gap-3 first:ml-0">
-                    <div className="relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg">
-                      {item.snapshot.imageKey && item.snapshot.thumbhash && (
-                        <Image
-                          src={item.snapshot.imageKey}
-                          alt={item.snapshot.title}
-                          fill
-                          className="object-cover"
-                          placeholder="blur"
-                          blurDataURL={thumbHashToDataURL(
-                            Buffer.from(item.snapshot.thumbhash, "base64"),
-                          )}
-                        />
-                      )}
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">
+                        {order.items[0]?.snapshot.title}
+                        {order.items.length > 1 &&
+                          ` +${order.items.length - 1} 件商品`}
+                      </h3>
+                      <span
+                        className={`badge ${order.status === "CANCELLED" ? "badge-error" : "badge-success"}`}
+                      >
+                        {order.status === "CANCELLED" ? "已取消" : "進行中"}
+                      </span>
                     </div>
-                    <div className="min-w-0">
-                      <div className="truncate font-medium">
-                        {item.snapshot.title}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        x{item.quantity}
-                      </div>
+                    <p className="text-sm text-gray-600">
+                      NT$ {order.total.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto">
+                    <div className="text-sm text-gray-600">
+                      訂單時間：
+                      {format(order.createdAt, "PPP p", { locale: zhTW })}
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </Link>

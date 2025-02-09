@@ -35,7 +35,7 @@ export default async function MyListingsPage() {
         </Link>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col space-y-4">
         {listings.map((listing) => (
           <Link key={listing.id} href={`/tianishop/listings/${listing.id}`}>
             <div className="rounded-lg bg-base-100 p-4 shadow-sm transition hover:shadow-md">

@@ -91,10 +91,13 @@ export async function validateListingAvailability({
       },
     });
 
-    // Get all ordered items for this listing
+    // Get all pending ordered items for this listing
     const orderedItems = await db.tianiShopOrderItem.findMany({
       where: {
         listingId: listing.id,
+        order: {
+          status: "PENDING",
+        },
       },
     });
 

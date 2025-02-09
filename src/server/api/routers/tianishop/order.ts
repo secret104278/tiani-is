@@ -171,4 +171,34 @@ export const orderRouter = createTRPCRouter({
         },
       );
     }),
+
+  cancelOrder: protectedProcedure
+    .input(z.object({ orderId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const order = await ctx.db.tianiShopOrder.findUnique({
+        where: {
+          id: input.orderId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "訂單不存在",
+        });
+      }
+
+      if (order.status === "CANCELLED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "訂單已取消",
+        });
+      }
+
+      return ctx.db.tianiShopOrder.update({
+        where: { id: input.orderId },
+        data: { status: "CANCELLED" },
+      });
+    }),
 });

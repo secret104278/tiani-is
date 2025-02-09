@@ -506,12 +506,18 @@ model TianiShopCartItem {
     @@index([listingId])
 }
 
+enum TianiShopOrderStatus {
+    PENDING
+    CANCELLED
+}
+
 model TianiShopOrder {
     id        Int                  @id @default(autoincrement())
     user      User                 @relation(fields: [userId], references: [id])
     userId    String
     createdAt DateTime             @default(now())
     items     TianiShopOrderItem[]
+    status    TianiShopOrderStatus @default(PENDING)
 
     // Price calculations
     subtotal Float // Sum of all items' subtotals
