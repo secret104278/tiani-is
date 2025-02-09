@@ -8,9 +8,11 @@ import UserMenu from "./user-menu";
 export default function AppLayout({
   site,
   children,
+  headerActions,
 }: {
   site?: Site;
   children: ReactNode;
+  headerActions?: ReactNode;
 }) {
   return (
     <>
@@ -30,6 +32,7 @@ export default function AppLayout({
           </Link>
         </div>
         <div className="navbar-end">
+          {headerActions}
           <UserMenu />
         </div>
       </div>

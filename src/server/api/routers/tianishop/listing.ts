@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
 import { rgbaToThumbHash } from "thumbhash";
@@ -90,8 +91,21 @@ export const listingRouter = createTRPCRouter({
           publisher: {
             select: {
               name: true,
+              image: true,
             },
           },
+        },
+        where: {
+          OR: [
+            {
+              endTime: {
+                gte: new Date(),
+              },
+            },
+            {
+              endTime: null,
+            },
+          ],
         },
       });
 
@@ -105,6 +119,35 @@ export const listingRouter = createTRPCRouter({
         items,
         nextCursor,
       };
+    }),
+
+  getListing: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const listing = await ctx.db.tianiShopListing.findUnique({
+        where: { id: input.id },
+        include: {
+          images: {
+            orderBy: {
+              order: "asc",
+            },
+          },
+          publisher: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (!listing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "商品不存在",
+        });
+      }
+
+      return listing;
     }),
 
   createListing: protectedProcedure
@@ -128,6 +171,87 @@ export const listingRouter = createTRPCRouter({
           images: {
             create: processedImages,
           },
+        },
+      });
+    }),
+
+  addToCart: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.number(),
+        quantity: z.number().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get the listing to check availability
+      const listing = await ctx.db.tianiShopListing.findUnique({
+        where: { id: input.listingId },
+        include: {
+          _count: {
+            select: {
+              orderItems: true,
+            },
+          },
+        },
+      });
+
+      if (!listing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "商品不存在",
+        });
+      }
+
+      // Check if listing has started
+      if (listing.startTime && listing.startTime > new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "商品尚未開始販售",
+        });
+      }
+
+      // Check if listing has ended
+      if (listing.endTime && listing.endTime < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "商品已結束販售",
+        });
+      }
+
+      // Check capacity
+      if (
+        listing.capacity &&
+        listing._count.orderItems + input.quantity > listing.capacity
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "商品數量不足",
+        });
+      }
+
+      // Get or create cart
+      let cart = await ctx.db.tianiShopCart.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!cart) {
+        cart = await ctx.db.tianiShopCart.create({
+          data: {
+            userId: ctx.session.user.id,
+            status: "ACTIVE",
+          },
+        });
+      }
+
+      // Add item to cart
+      return ctx.db.tianiShopCartItem.create({
+        data: {
+          cartId: cart.id,
+          listingId: input.listingId,
+          quantity: input.quantity,
         },
       });
     }),
