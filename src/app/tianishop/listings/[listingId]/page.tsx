@@ -9,10 +9,11 @@ import { AddToCartButton } from "./AddToCartButton";
 export default async function ListingDetailPage({
   params,
 }: {
-  params: { listingId: string };
+  params: Promise<{ listingId: string }>;
 }) {
+  const { listingId } = await params;
   const listing = await api.tianiShop.getListing({
-    id: parseInt(params.listingId),
+    id: parseInt(listingId),
   });
 
   if (!listing) {

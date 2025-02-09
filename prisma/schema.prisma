@@ -483,15 +483,13 @@ model TianiShopImage {
 model TianiShopCart {
     id        Int      @id @default(autoincrement())
     user      User     @relation(fields: [userId], references: [id])
-    userId    String
-    status    String   @default("ACTIVE") // ACTIVE, ORDERED, CANCELLED
+    userId    String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     items TianiShopCartItem[]
 
     @@index([userId])
-    @@index([status])
 }
 
 model TianiShopCartItem {

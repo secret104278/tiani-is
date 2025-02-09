@@ -6,7 +6,7 @@ import { api } from "~/trpc/react";
 export function CheckoutButton({ cartId }: { cartId: number }) {
   const router = useRouter();
 
-  const { mutate: checkout, isLoading } = api.tianiShop.checkout.useMutation({
+  const { mutate: checkout, isPending } = api.tianiShop.checkout.useMutation({
     onSuccess: (order) => {
       router.push(`/tianishop/orders/${order.id}`);
     },
@@ -20,9 +20,9 @@ export function CheckoutButton({ cartId }: { cartId: number }) {
     <button
       className="btn btn-primary w-full"
       onClick={handleCheckout}
-      disabled={isLoading}
+      disabled={isPending}
     >
-      {isLoading ? (
+      {isPending ? (
         <span className="loading loading-spinner loading-sm"></span>
       ) : (
         "結帳"

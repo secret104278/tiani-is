@@ -35,7 +35,13 @@ function UserAvatar({ sessionData }: { sessionData: Session }) {
 export default async function UserMenu() {
   const sessionData = await auth();
 
-  if (!sessionData) return null;
+  if (!sessionData) {
+    return (
+      <Link href="/api/auth/signin" className="btn btn-ghost btn-sm">
+        登入
+      </Link>
+    );
+  }
 
   return (
     <div className="dropdown dropdown-end z-50">
@@ -66,6 +72,12 @@ export default async function UserMenu() {
         )}
         <li>
           <Link href={personalAccountHref()}>個人資料</Link>
+        </li>
+        <li>
+          <Link href="/tianishop/my/orders">我的訂單</Link>
+        </li>
+        <li>
+          <Link href="/tianishop/my/listings">我的商品</Link>
         </li>
         <li>
           <form

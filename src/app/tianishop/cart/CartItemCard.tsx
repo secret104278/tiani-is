@@ -2,46 +2,38 @@
 
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { thumbHashToDataURL } from "thumbhash";
 import { NumberInput } from "~/app/components/number-input";
-import { api } from "~/trpc/react";
+import { cn } from "~/lib/utils";
 import type { RouterOutputs } from "~/trpc/shared";
 
 type CartItem = NonNullable<
   RouterOutputs["tianiShop"]["getCart"]
 >["items"][number];
 
-export function CartItemCard({ item }: { item: CartItem }) {
-  const router = useRouter();
+interface CartItemCardProps {
+  item: CartItem;
+  onUpdateQuantity: (quantity: number) => void;
+  onRemove: () => void;
+  isUpdating: boolean;
+  isRemoving: boolean;
+}
+
+export function CartItemCard({
+  item,
+  onUpdateQuantity,
+  onRemove,
+  isUpdating,
+  isRemoving,
+}: CartItemCardProps) {
   const [quantity, setQuantity] = useState(item.quantity);
 
-  const { mutate: updateQuantity } =
-    api.tianiShop.updateCartItemQuantity.useMutation({
-      onSuccess: () => {
-        router.refresh();
-      },
-    });
-
-  const { mutate: removeFromCart } = api.tianiShop.removeFromCart.useMutation({
-    onSuccess: () => {
-      router.refresh();
-    },
-  });
-
   const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity < 1) return;
+    if (isUpdating || isRemoving) return;
     setQuantity(newQuantity);
-    updateQuantity({
-      cartItemId: item.id,
-      quantity: newQuantity,
-    });
-  };
-
-  const handleRemove = () => {
-    removeFromCart({
-      cartItemId: item.id,
-    });
+    onUpdateQuantity(newQuantity);
   };
 
   return (
@@ -71,14 +63,30 @@ export function CartItemCard({ item }: { item: CartItem }) {
           </div>
           <button
             className="btn btn-ghost btn-sm text-error"
-            onClick={handleRemove}
+            onClick={onRemove}
+            disabled={isUpdating || isRemoving}
           >
-            <TrashIcon className="h-5 w-5" />
+            {isRemoving ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              <TrashIcon className="h-5 w-5" />
+            )}
           </button>
         </div>
 
         <div className="mt-auto flex items-center justify-between">
-          <NumberInput value={quantity} onChange={handleQuantityChange} />
+          <div
+            className={cn("relative", {
+              "pointer-events-none opacity-50": isUpdating || isRemoving,
+            })}
+          >
+            <NumberInput value={quantity} onChange={handleQuantityChange} />
+            {isUpdating && (
+              <div className="absolute inset-0 flex items-center justify-center bg-base-100/50">
+                <span className="loading loading-spinner loading-xs" />
+              </div>
+            )}
+          </div>
 
           <div className="text-right">
             <div className="font-semibold">

@@ -9,7 +9,7 @@ import { thumbHashToDataURL } from "thumbhash";
 import type { RouterOutputs } from "~/trpc/shared";
 
 type Listing =
-  RouterOutputs["tianiShop"]["listing"]["getAllListingsInfinite"]["items"][number];
+  RouterOutputs["tianiShop"]["getAllListingsInfinite"]["items"][number];
 
 function formatPrice(price: number) {
   if (price === 0) return "免費";

@@ -6,26 +6,12 @@ import imageCompression from "browser-image-compression";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
+import { listingFormSchema } from "~/lib/schemas/tianishop";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
-// Using constants that are safe for database storage
-const MIN_DATE = new Date("1970-01-01T00:00:00.000Z");
-const MAX_DATE = new Date("9999-12-31T23:59:59.999Z");
-
-const formSchema = z.object({
-  title: z.string().min(1, "請輸入標題"),
-  description: z.string().optional(),
-  price: z.number().min(0, "價格必須大於零"),
-  timeType: z.enum(["limited", "unlimited"]),
-  startTime: z.date().optional(),
-  endTime: z.date().optional(),
-  capacity: z.number().int().min(1).optional(),
-  images: z.array(z.instanceof(File)).min(1, "請至少上傳一張圖片"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof listingFormSchema>;
 
 const compressionOptions = {
   maxSizeMB: 0.1,
@@ -56,7 +42,7 @@ async function fileToImageInput(file: File) {
   };
 }
 
-async function prepareListingData(values: FormValues) {
+async function prepareListingData(values: FormData) {
   // Compress images first
   const compressedImages = await Promise.all(values.images.map(compressImage));
 
@@ -69,18 +55,14 @@ async function prepareListingData(values: FormValues) {
     title: values.title,
     description: values.description ?? "",
     price: values.price,
-    startTime:
-      values.timeType === "unlimited"
-        ? MIN_DATE
-        : (values.startTime ?? MIN_DATE),
-    endTime:
-      values.timeType === "unlimited" ? MAX_DATE : (values.endTime ?? MAX_DATE),
+    startTime: values.timeType === "unlimited" ? undefined : values.startTime,
+    endTime: values.timeType === "unlimited" ? undefined : values.endTime,
     capacity: values.capacity,
     images: processedImages,
   };
 }
 
-export default function CreateListingPage() {
+const NewListingPage = () => {
   const router = useRouter();
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
@@ -91,8 +73,8 @@ export default function CreateListingPage() {
       },
     });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(listingFormSchema),
     mode: "all",
     shouldUseNativeValidation: true,
     defaultValues: {
@@ -332,4 +314,6 @@ export default function CreateListingPage() {
       </form>
     </div>
   );
-}
+};
+
+export default NewListingPage;

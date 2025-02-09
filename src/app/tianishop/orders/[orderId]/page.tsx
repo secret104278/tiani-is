@@ -8,10 +8,11 @@ import { api } from "~/trpc/server";
 export default async function OrderDetailPage({
   params,
 }: {
-  params: { orderId: string };
+  params: Promise<{ orderId: string }>;
 }) {
+  const { orderId } = await params;
   const order = await api.tianiShop.getOrder({
-    id: parseInt(params.orderId),
+    id: parseInt(orderId),
   });
 
   return (
