@@ -1,21 +1,34 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { validateListingAvailability } from "./utils";
 
 export const orderRouter = createTRPCRouter({
   getOrder: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(
+      z.object({
+        id: z.number(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const order = await ctx.db.tianiShopOrder.findUnique({
         where: {
           id: input.id,
-          userId: ctx.session.user.id,
         },
         include: {
           items: {
             include: {
               snapshot: true,
+              listing: {
+                select: {
+                  publisherId: true,
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              name: true,
             },
           },
         },
@@ -25,6 +38,13 @@ export const orderRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "訂單不存在",
+        });
+      }
+
+      if (order.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "無權限查看此訂單",
         });
       }
 
@@ -180,6 +200,9 @@ export const orderRouter = createTRPCRouter({
           id: input.orderId,
           userId: ctx.session.user.id,
         },
+        include: {
+          items: true,
+        },
       });
 
       if (!order) {
@@ -189,16 +212,158 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      if (order.status === "CANCELLED") {
+      // Check if all items are already cancelled
+      const allItemsCancelled = order.items.every(
+        (item) => item.status === "CANCELLED",
+      );
+      if (allItemsCancelled) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "訂單已取消",
         });
       }
 
-      return ctx.db.tianiShopOrder.update({
-        where: { id: input.orderId },
-        data: { status: "CANCELLED" },
+      // Cancel all pending items
+      await ctx.db.tianiShopOrderItem.updateMany({
+        where: {
+          orderId: input.orderId,
+          status: "PENDING",
+        },
+        data: {
+          status: "CANCELLED",
+        },
+      });
+
+      return order;
+    }),
+
+  getMyListingOrders: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.tianiShopOrder.findMany({
+      where: {
+        items: {
+          some: {
+            listing: {
+              publisherId: ctx.session.user.id,
+            },
+          },
+        },
+      },
+      include: {
+        items: {
+          include: {
+            snapshot: true,
+            listing: {
+              select: {
+                publisherId: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
+
+  completeOrderItem: protectedProcedure
+    .input(
+      z.object({
+        orderItemId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const orderItem = await ctx.db.tianiShopOrderItem.findUnique({
+        where: {
+          id: input.orderItemId,
+        },
+        include: {
+          listing: true,
+        },
+      });
+
+      if (!orderItem) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "訂單項目不存在",
+        });
+      }
+
+      if (orderItem.listing.publisherId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "無權限完成此訂單項目",
+        });
+      }
+
+      if (orderItem.status !== "PENDING") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "此訂單項目已完成或已取消",
+        });
+      }
+
+      return ctx.db.tianiShopOrderItem.update({
+        where: {
+          id: input.orderItemId,
+        },
+        data: {
+          status: "COMPLETED",
+          completedAt: new Date(),
+        },
+      });
+    }),
+
+  cancelOrderItem: protectedProcedure
+    .input(
+      z.object({
+        orderItemId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const orderItem = await ctx.db.tianiShopOrderItem.findUnique({
+        where: {
+          id: input.orderItemId,
+        },
+        include: {
+          order: true,
+        },
+      });
+
+      if (!orderItem) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "訂單項目不存在",
+        });
+      }
+
+      if (orderItem.order.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "無權限取消此訂單項目",
+        });
+      }
+
+      if (orderItem.status !== "PENDING") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "此訂單項目已完成或已取消",
+        });
+      }
+
+      return ctx.db.tianiShopOrderItem.update({
+        where: {
+          id: input.orderItemId,
+        },
+        data: {
+          status: "CANCELLED",
+        },
       });
     }),
 });

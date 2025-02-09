@@ -91,12 +91,12 @@ export async function validateListingAvailability({
       },
     });
 
-    // Get all pending ordered items for this listing
+    // Get all non-cancelled ordered items for this listing
     const orderedItems = await db.tianiShopOrderItem.findMany({
       where: {
         listingId: listing.id,
-        order: {
-          status: "PENDING",
+        status: {
+          not: "CANCELLED",
         },
       },
     });
@@ -145,4 +145,25 @@ export async function getOrCreateCart({
   }
 
   return cart;
+}
+
+export type OrderStatus = "PENDING" | "COMPLETED" | "CANCELLED";
+
+export function calculateOrderStatus(items: { status: string }[]): OrderStatus {
+  const allItemsCancelled = items.every((item) => item.status === "CANCELLED");
+  const allNonCancelledItemsCompleted = items
+    .filter((item) => item.status !== "CANCELLED")
+    .every((item) => item.status === "COMPLETED");
+  const hasNonCancelledItems = items.some(
+    (item) => item.status !== "CANCELLED",
+  );
+
+  let orderStatus: OrderStatus = "PENDING";
+  if (allItemsCancelled || !hasNonCancelledItems) {
+    orderStatus = "CANCELLED";
+  } else if (allNonCancelledItemsCompleted) {
+    orderStatus = "COMPLETED";
+  }
+
+  return orderStatus;
 }

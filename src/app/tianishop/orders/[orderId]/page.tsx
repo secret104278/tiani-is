@@ -3,8 +3,9 @@ import { zhTW } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
 import { thumbHashToDataURL } from "thumbhash";
+import { calculateOrderStatus } from "~/server/api/routers/tianishop/utils";
 import { api } from "~/trpc/server";
-import { CancelOrderButton } from "../../my/orders/CancelOrderButton";
+import { CancelOrderItemButton } from "./CancelOrderItemButton";
 
 export default async function OrderDetailPage({
   params,
@@ -15,6 +16,8 @@ export default async function OrderDetailPage({
   const order = await api.tianiShop.getOrder({
     id: parseInt(orderId),
   });
+
+  const orderStatus = calculateOrderStatus(order.items);
 
   return (
     <div className="space-y-6">
@@ -27,17 +30,24 @@ export default async function OrderDetailPage({
             </p>
             <div>
               <span
-                className={`badge ${order.status === "CANCELLED" ? "badge-error" : "badge-success"}`}
+                className={`badge ${
+                  orderStatus === "COMPLETED"
+                    ? "badge-success"
+                    : orderStatus === "CANCELLED"
+                      ? "badge-error"
+                      : "badge-info"
+                }`}
               >
-                {order.status === "CANCELLED" ? "已取消" : "進行中"}
+                {orderStatus === "COMPLETED"
+                  ? "已完成"
+                  : orderStatus === "CANCELLED"
+                    ? "已取消"
+                    : "進行中"}
               </span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {order.status === "PENDING" && (
-            <CancelOrderButton orderId={order.id} />
-          )}
           <Link href="/tianishop" className="btn btn-primary btn-sm">
             回到商店
           </Link>
@@ -81,11 +91,39 @@ export default async function OrderDetailPage({
               </div>
 
               <div className="mt-auto flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  數量：{item.quantity}
+                <div className="space-x-2">
+                  <span className="text-sm text-gray-600">
+                    數量：{item.quantity}
+                  </span>
+                  <span
+                    className={`badge ${
+                      item.status === "COMPLETED"
+                        ? "badge-success"
+                        : item.status === "CANCELLED"
+                          ? "badge-error"
+                          : "badge-info"
+                    }`}
+                  >
+                    {item.status === "COMPLETED"
+                      ? "已完成"
+                      : item.status === "CANCELLED"
+                        ? "已取消"
+                        : "處理中"}
+                  </span>
+                  {item.completedAt && (
+                    <span className="text-sm text-gray-600">
+                      完成時間：
+                      {format(item.completedAt, "PPP p", { locale: zhTW })}
+                    </span>
+                  )}
                 </div>
-                <div className="font-semibold">
-                  NT$ {item.subtotal.toLocaleString()}
+                <div className="flex items-center gap-2">
+                  <div className="font-semibold">
+                    NT$ {item.subtotal.toLocaleString()}
+                  </div>
+                  {item.status === "PENDING" && (
+                    <CancelOrderItemButton orderItemId={item.id} />
+                  )}
                 </div>
               </div>
             </div>

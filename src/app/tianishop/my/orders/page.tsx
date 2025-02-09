@@ -3,6 +3,7 @@ import { zhTW } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
 import { thumbHashToDataURL } from "thumbhash";
+import { calculateOrderStatus } from "~/server/api/routers/tianishop/utils";
 import { api } from "~/trpc/server";
 
 export default async function MyOrdersPage() {
@@ -63,11 +64,26 @@ export default async function MyOrdersPage() {
                         {order.items.length > 1 &&
                           ` +${order.items.length - 1} 件商品`}
                       </h3>
-                      <span
-                        className={`badge ${order.status === "CANCELLED" ? "badge-error" : "badge-success"}`}
-                      >
-                        {order.status === "CANCELLED" ? "已取消" : "進行中"}
-                      </span>
+                      {(() => {
+                        const orderStatus = calculateOrderStatus(order.items);
+                        return (
+                          <span
+                            className={`badge ${
+                              orderStatus === "COMPLETED"
+                                ? "badge-success"
+                                : orderStatus === "CANCELLED"
+                                  ? "badge-error"
+                                  : "badge-info"
+                            }`}
+                          >
+                            {orderStatus === "COMPLETED"
+                              ? "已完成"
+                              : orderStatus === "CANCELLED"
+                                ? "已取消"
+                                : "進行中"}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <p className="text-sm text-gray-600">
                       NT$ {order.total.toLocaleString()}

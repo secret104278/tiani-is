@@ -30,9 +30,20 @@ export default async function MyListingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">我的商品</h1>
-        <Link href="/tianishop/listings/new" className="btn btn-primary btn-sm">
-          建立商品
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/tianishop/my/listings/orders"
+            className="btn btn-outline btn-sm"
+          >
+            查看訂單
+          </Link>
+          <Link
+            href="/tianishop/listings/new"
+            className="btn btn-primary btn-sm"
+          >
+            建立商品
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col space-y-4">

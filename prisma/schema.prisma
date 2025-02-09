@@ -506,8 +506,9 @@ model TianiShopCartItem {
     @@index([listingId])
 }
 
-enum TianiShopOrderStatus {
+enum TianiShopOrderItemStatus {
     PENDING
+    COMPLETED
     CANCELLED
 }
 
@@ -517,7 +518,6 @@ model TianiShopOrder {
     userId    String
     createdAt DateTime             @default(now())
     items     TianiShopOrderItem[]
-    status    TianiShopOrderStatus @default(PENDING)
 
     // Price calculations
     subtotal Float // Sum of all items' subtotals
@@ -527,12 +527,14 @@ model TianiShopOrder {
 }
 
 model TianiShopOrderItem {
-    id        Int              @id @default(autoincrement())
-    order     TianiShopOrder   @relation(fields: [orderId], references: [id])
-    orderId   Int
-    listing   TianiShopListing @relation(fields: [listingId], references: [id])
-    listingId Int
-    quantity  Int
+    id          Int                      @id @default(autoincrement())
+    order       TianiShopOrder           @relation(fields: [orderId], references: [id])
+    orderId     Int
+    listing     TianiShopListing         @relation(fields: [listingId], references: [id])
+    listingId   Int
+    quantity    Int
+    status      TianiShopOrderItemStatus @default(PENDING)
+    completedAt DateTime? // When the publisher marked this item as completed
 
     subtotal Float // price * quantity at time of purchase
 
