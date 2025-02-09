@@ -24,3 +24,4 @@ Development practices:
 - ESLint and Prettier for code formatting
 - Running on port 3100 in development
 - Prisma for database schema management and migrations
+- alway handle errors and loading states of trpc queries and mutations. The error should be displayed with `import { AlertWarning } from "~/components/utils/Alert";` component.

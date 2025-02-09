@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { AlertWarning } from "~/components/utils/Alert";
 import { listingFormSchema } from "~/lib/schemas/tianishop";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -65,11 +66,15 @@ async function prepareListingData(values: FormData) {
 const NewListingPage = () => {
   const router = useRouter();
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const { mutate: createListing, isPending } =
     api.tianiShop.createListing.useMutation({
       onSuccess: () => {
         router.push("/tianishop");
+      },
+      onError: (error) => {
+        setError(error.message);
       },
     });
 
@@ -99,6 +104,7 @@ const NewListingPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     const values = form.getValues();
     void prepareListingData(values)
       .then((listingData) => {
@@ -106,7 +112,7 @@ const NewListingPage = () => {
       })
       .catch((error) => {
         console.error("Error submitting form:", error);
-        alert("上傳失敗，請稍後再試");
+        setError("處理圖片時發生錯誤，請稍後再試");
       });
   };
 
@@ -115,6 +121,8 @@ const NewListingPage = () => {
       <article className="prose">
         <h1>建立新商品</h1>
       </article>
+
+      {error && <AlertWarning>{error}</AlertWarning>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-control">
