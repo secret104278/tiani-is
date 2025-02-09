@@ -41,7 +41,8 @@ export const listingApiSchema = listingBaseSchema
     ),
   })
   .refine(
-    (data) => data.endTime && data.startTime && data.endTime > data.startTime,
+    (data) =>
+      data.endTime && data.startTime ? data.endTime > data.startTime : true,
     {
       message: "結束時間必須在開始時間之後",
       path: ["endTime"],
