@@ -52,21 +52,31 @@ export default function ClassActivityCheckRecordPage() {
         <h1>打卡名單</h1>
       </article>
       {sessionData?.user.role.is_yideclass_admin && (
-        <div className="flex justify-end">
-          <ReactiveButton
-            className="btn"
-            onClick={() => setCheckInDialogOpen(true)}
-          >
-            <PlusIcon className="h-4 w-4" />
-            手動打卡
-          </ReactiveButton>
-          <Dialog
-            title="手動打卡"
-            show={checkInDialogOpen}
-            closeModal={() => setCheckInDialogOpen(false)}
-          >
-            <ManualClassActivityCheckInDialogContent activityId={activity.id} />
-          </Dialog>
+        <div className="flex items-center justify-between">
+          <div className="stats shadow">
+            <div className="stat">
+              <div className="stat-title">打卡人數</div>
+              <div className="stat-value">{checkRecords?.length}</div>
+            </div>
+          </div>
+          <div>
+            <ReactiveButton
+              className="btn"
+              onClick={() => setCheckInDialogOpen(true)}
+            >
+              <PlusIcon className="h-4 w-4" />
+              手動打卡
+            </ReactiveButton>
+            <Dialog
+              title="手動打卡"
+              show={checkInDialogOpen}
+              closeModal={() => setCheckInDialogOpen(false)}
+            >
+              <ManualClassActivityCheckInDialogContent
+                activityId={activity.id}
+              />
+            </Dialog>
+          </div>
         </div>
       )}
       <table className="table table-sm">

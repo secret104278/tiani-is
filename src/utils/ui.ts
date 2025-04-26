@@ -73,6 +73,7 @@ export const CLASS_ACTIVITY_TITLES = [
   "大內青年班",
   "天元讀經班",
   "燕巢讀經班",
+  "義德長青班",
 ];
 
 export const CLASS_ACTIVITY_LOCATION_MAP = new Map<
