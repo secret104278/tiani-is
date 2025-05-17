@@ -57,7 +57,7 @@ export default function ClassActivityAbsentPage() {
     checkRecordsIsLoading ||
     classMemberEnrollmentsIsLoading
   )
-    return <div className="loading"></div>;
+    return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   const checkedUserIds = checkRecords?.map((record) => record.userId) ?? [];
@@ -79,7 +79,7 @@ export default function ClassActivityAbsentPage() {
       <article className="prose">
         <h1>缺席名單</h1>
       </article>
-      <table className="table table-sm">
+      <table className="table-sm table">
         <thead>
           <tr>
             <th>班員</th>

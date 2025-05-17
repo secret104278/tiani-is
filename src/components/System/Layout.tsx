@@ -2,7 +2,7 @@ import { BellAlertIcon, HomeIcon } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
 import { IS_LINE_NOTIFY_ENABLED, siteToTitle } from "~/utils/ui";
@@ -13,7 +13,7 @@ function UserAvatar() {
   const { data: sessionData } = useSession();
 
   if (!sessionData) {
-    return <span className="loading loading-ring loading-md"></span>;
+    return <span className="loading loading-ring loading-md" />;
   }
 
   if (sessionData.user.image) {
@@ -31,7 +31,7 @@ function UserAvatar() {
 
   return (
     <div className="avatar placeholder">
-      <div className="bg-neutral-focus w-10 rounded-full text-neutral-content">
+      <div className="w-10 rounded-full bg-neutral-focus text-neutral-content">
         <span>{sessionData.user.name}</span>
       </div>
     </div>
@@ -122,9 +122,9 @@ export default function Layout({ children }: { children: ReactNode }) {
                 `/api/line/notify/auth?redirect=${router.asPath}`,
               )
             }
-          ></LineNotifySetupTutorialDialog>
+          />
           <button
-            className="btn fixed bottom-8 right-8 rounded-full border-none bg-[#00C300] text-[#fff] drop-shadow-2xl hover:bg-[#00C300]"
+            className="btn fixed right-8 bottom-8 rounded-full border-none bg-[#00C300] text-[#fff] drop-shadow-2xl hover:bg-[#00C300]"
             onClick={() => setShowLineNotifySetup(true)}
           >
             <BellAlertIcon className="h-5 w-5 animate-bounce" />

@@ -58,8 +58,7 @@ export default function VolunteerActivityCheckRecordPage() {
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
   if (!isNil(checkRecordsError))
     return <AlertWarning>{checkRecordsError.message}</AlertWarning>;
-  if (isLoading || checkRecordsIsLoading)
-    return <div className="loading"></div>;
+  if (isLoading || checkRecordsIsLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   return (
@@ -110,7 +109,7 @@ export default function VolunteerActivityCheckRecordPage() {
           error={managerCheckInActivityError?.message}
         />
       </Dialog>
-      <table className="table table-sm">
+      <table className="table-sm table">
         <thead>
           <tr>
             <th>志工</th>

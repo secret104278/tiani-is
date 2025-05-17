@@ -57,7 +57,7 @@ export function CartItemCard({
         <div className="flex items-start justify-between">
           <div>
             <h3 className="font-semibold">{item.listing.title}</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-gray-600 text-sm">
               單價：NT$ {item.listing.price.toLocaleString()}
             </p>
           </div>
@@ -90,7 +90,7 @@ export function CartItemCard({
 
           <div className="text-right">
             <div className="font-semibold">
-              NT$ {(item.quantity * item.listing.price).toLocaleString()}
+              NT$ {item.listing.price.times(item.quantity).toLocaleString()}
             </div>
           </div>
         </div>

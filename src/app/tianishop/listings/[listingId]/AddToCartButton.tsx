@@ -41,7 +41,7 @@ export function AddToCartButton({ listingId }: { listingId: number }) {
         >
           <ShoppingCartIcon className="h-4 w-4" />
           {isPending ? (
-            <span className="loading loading-spinner loading-sm"></span>
+            <span className="loading loading-spinner loading-sm" />
           ) : (
             "加入購物車"
           )}

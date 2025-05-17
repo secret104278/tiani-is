@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { isNil } from "lodash";
 import { z } from "zod";
 import { Site } from "~/utils/ui";

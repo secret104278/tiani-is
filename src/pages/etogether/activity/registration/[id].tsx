@@ -52,13 +52,13 @@ export default function EtogetherRegistrationPage() {
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
 
   if (!_.isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading) return <div className="loading"></div>;
+  if (isLoading) return <div className="loading" />;
   if (_.isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
   if (!_.isNil(checkInActivityIndividuallyError))
     return (
       <AlertWarning>{checkInActivityIndividuallyError.message}</AlertWarning>
     );
-  if (sessionStatus === "loading") return <div className="loading"></div>;
+  if (sessionStatus === "loading") return <div className="loading" />;
   if (_.isNil(session) || !session.user.role.is_etogether_admin)
     return <AlertWarning>沒有權限</AlertWarning>;
 
@@ -216,9 +216,10 @@ export default function EtogetherRegistrationPage() {
         )}
       </Dialog>
       <div className="overflow-auto">
-        <table className="table table-sm">
+        <table className="table-sm table">
           {activity.subgroups.map((subgroup) => (
             <>
+              {/* biome-ignore lint/correctness/useJsxKeyInIterable: <explanation> */}
               <thead className="text-black">
                 <tr
                   style={
@@ -247,7 +248,7 @@ export default function EtogetherRegistrationPage() {
               </thead>
               <tbody>
                 {userBySubgroup[subgroup.id]?.map((entry) => (
-                  // eslint-disable-next-line react/jsx-key
+                  // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                   <tr>
                     <td
                       className="hover cursor-pointer"

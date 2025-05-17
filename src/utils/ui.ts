@@ -171,18 +171,18 @@ export function formatMilliseconds(milliseconds: number) {
 
   let formattedTime = "";
   if (hours > 0) {
-    formattedTime += hours + " 小時";
+    formattedTime += `${hours} 小時`;
   }
 
   if (remainingMinutes > 0) {
     if (formattedTime.length > 0) {
       formattedTime += " ";
     }
-    formattedTime += remainingMinutes + " 分鐘";
+    formattedTime += `${remainingMinutes} 分鐘`;
   }
 
-  if (formattedTime === "" || hours == 0) {
-    formattedTime = formattedTime + " " + remainingSeconds + " 秒";
+  if (formattedTime === "" || hours === 0) {
+    formattedTime = `${formattedTime} ${remainingSeconds} 秒`;
   }
 
   return formattedTime;
@@ -308,11 +308,11 @@ export enum Site {
 
 export const urlBaseToSite = (urlBase?: string): Site => {
   if (urlBase === "volunteer") return Site.Volunteer;
-  else if (urlBase === "yideclass") return Site.Yideclass;
-  else if (urlBase === "etogether") return Site.Etogether;
-  else if (urlBase === "yidework") return Site.YideWork;
-  else if (urlBase === "tianishop") return Site.TianiShop;
-  else return Site.Volunteer;
+  if (urlBase === "yideclass") return Site.Yideclass;
+  if (urlBase === "etogether") return Site.Etogether;
+  if (urlBase === "yidework") return Site.YideWork;
+  if (urlBase === "tianishop") return Site.TianiShop;
+  return Site.Volunteer;
 };
 
 export const userComparator = (

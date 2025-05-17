@@ -14,8 +14,8 @@ export default async function MyListingOrdersPage() {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">尚無訂單</h1>
-          <p className="mt-2 text-sm text-gray-600">等待買家下單！</p>
+          <h1 className="font-bold text-2xl">尚無訂單</h1>
+          <p className="mt-2 text-gray-600 text-sm">等待買家下單！</p>
         </div>
       </div>
     );
@@ -24,7 +24,7 @@ export default async function MyListingOrdersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">我的商品訂單</h1>
+        <h1 className="font-bold text-2xl">我的商品訂單</h1>
       </div>
 
       <div className="space-y-6">
@@ -40,11 +40,11 @@ export default async function MyListingOrdersPage() {
             <div key={order.id} className="rounded-lg bg-base-100 p-4 shadow">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-gray-600 text-sm">
                     訂單時間：
                     {format(order.createdAt, "PPP p", { locale: zhTW })}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-gray-600 text-sm">
                     訂購人：{order.user.name ?? "未知"}
                   </p>
                   <div className="mt-1">
@@ -93,10 +93,10 @@ export default async function MyListingOrdersPage() {
                         <h3 className="truncate font-semibold">
                           {item.snapshot.title}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-gray-600 text-sm">
                           單價：NT$ {item.snapshot.price.toLocaleString()}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-gray-600 text-sm">
                           數量：{item.quantity}
                         </p>
                       </div>
@@ -119,7 +119,7 @@ export default async function MyListingOrdersPage() {
                                 : "處理中"}
                           </span>
                           {item.completedAt && (
-                            <span className="text-sm text-gray-600">
+                            <span className="text-gray-600 text-sm">
                               完成時間：
                               {format(item.completedAt, "PPP p", {
                                 locale: zhTW,

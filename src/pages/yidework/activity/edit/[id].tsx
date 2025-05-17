@@ -20,7 +20,7 @@ export default function EditYideWorkActivityPage() {
     return <AlertWarning>{activityError.message}</AlertWarning>;
   }
 
-  if (activityIsLoading) return <div className="loading"></div>;
+  if (activityIsLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到通知</AlertWarning>;
 
   return (

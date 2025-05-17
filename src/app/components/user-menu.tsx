@@ -1,4 +1,4 @@
-import { type Session } from "next-auth";
+import type { Session } from "next-auth";
 import Link from "next/link";
 import { auth, signOut } from "~/server/auth";
 import {
@@ -25,7 +25,7 @@ function UserAvatar({ sessionData }: { sessionData: Session }) {
 
   return (
     <div className="avatar placeholder">
-      <div className="bg-neutral-focus w-10 rounded-full text-neutral-content">
+      <div className="w-10 rounded-full bg-neutral-focus text-neutral-content">
         <span>{sessionData.user.name}</span>
       </div>
     </div>

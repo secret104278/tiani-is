@@ -13,15 +13,15 @@ export default async function ListingDetailPage({
 }) {
   const { listingId } = await params;
   const listing = await api.tianiShop.getListing({
-    id: parseInt(listingId),
+    id: Number.parseInt(listingId),
   });
 
   if (!listing) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">404</h1>
-          <p className="mt-2 text-sm text-gray-600">商品不存在</p>
+          <h1 className="font-bold text-2xl">404</h1>
+          <p className="mt-2 text-gray-600 text-sm">商品不存在</p>
         </div>
       </div>
     );
@@ -58,17 +58,17 @@ export default async function ListingDetailPage({
           </div>
           <div>
             <p className="font-semibold">{listing.publisher.name}</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-gray-600 text-sm">
               {format(listing.createdAt, "PPP", { locale: zhTW })}
             </p>
           </div>
         </div>
-        <div className="divider"></div>
+        <div className="divider" />
         <div>
-          <h1 className="text-2xl font-bold">{listing.title}</h1>
+          <h1 className="font-bold text-2xl">{listing.title}</h1>
           <div className="mt-2">
             <span className="badge badge-primary badge-lg">
-              {listing.price === 0
+              {listing.price.isZero()
                 ? "免費"
                 : `NT$ ${listing.price.toLocaleString()}`}
             </span>
@@ -98,8 +98,8 @@ export default async function ListingDetailPage({
         )}
 
         <div>
-          <h2 className="text-lg font-semibold">商品描述</h2>
-          <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
+          <h2 className="font-semibold text-lg">商品描述</h2>
+          <p className="mt-2 whitespace-pre-wrap text-gray-600 text-sm">
             {listing.description}
           </p>
         </div>

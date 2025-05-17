@@ -15,7 +15,7 @@ import YideWorkActivityRegisterDialogContent from "~/components/DialogContent/Yi
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
-import { type YideWorkRouter } from "~/server/api/routers/yidework";
+import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
 
 type Register =
@@ -44,9 +44,9 @@ export default function YideWorkActivityRegistrationPage() {
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
 
   if (!_.isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading) return <div className="loading"></div>;
+  if (isLoading) return <div className="loading" />;
   if (_.isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
-  if (sessionStatus === "loading") return <div className="loading"></div>;
+  if (sessionStatus === "loading") return <div className="loading" />;
   if (_.isNil(session) || !session.user.role.is_yidework_admin)
     return <AlertWarning>沒有權限</AlertWarning>;
 
@@ -150,7 +150,7 @@ export default function YideWorkActivityRegistrationPage() {
         )}
       </Dialog>
       <div className="overflow-auto">
-        <table className="table table-sm">
+        <table className="table-sm table">
           <thead className="text-black">
             <tr>
               <th>姓名</th>
@@ -159,7 +159,7 @@ export default function YideWorkActivityRegistrationPage() {
           </thead>
           <tbody>
             {registeredUsers.map((entry) => (
-              // eslint-disable-next-line react/jsx-key
+              // biome-ignore lint/correctness/useJsxKeyInIterable:
               <tr>
                 <td
                   className="hover cursor-pointer"

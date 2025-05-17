@@ -13,8 +13,8 @@ export default async function MyOrdersPage() {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">尚無訂單</h1>
-          <p className="mt-2 text-sm text-gray-600">快去逛逛吧！</p>
+          <h1 className="font-bold text-2xl">尚無訂單</h1>
+          <p className="mt-2 text-gray-600 text-sm">快去逛逛吧！</p>
           <Link href="/tianishop" className="btn btn-primary btn-sm mt-4">
             回到商店
           </Link>
@@ -26,7 +26,7 @@ export default async function MyOrdersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">我的訂單</h1>
+        <h1 className="font-bold text-2xl">我的訂單</h1>
         <Link href="/tianishop" className="btn btn-primary btn-sm">
           回到商店
         </Link>
@@ -85,13 +85,13 @@ export default async function MyOrdersPage() {
                         );
                       })()}
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-gray-600 text-sm">
                       NT$ {order.total.toLocaleString()}
                     </p>
                   </div>
 
                   <div className="mt-auto">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-gray-600 text-sm">
                       訂單時間：
                       {format(order.createdAt, "PPP p", { locale: zhTW })}
                     </div>

@@ -1,4 +1,4 @@
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { approveActivityEventQueue } from "~/server/queue/approveActivity";
 import { reviewActivityNotificationEventQueue } from "~/server/queue/reviewActivityNotification";

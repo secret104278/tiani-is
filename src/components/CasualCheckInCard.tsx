@@ -19,7 +19,7 @@ export function CasualCheckInCard() {
       <div className="card card-compact w-full shadow-lg">
         <div className="card-body">
           <h2 className="card-title">日常工作</h2>
-          <div className="flex items-center"></div>
+          <div className="flex items-center" />
           {latestCasualCheckInIsLoading && <div className="loading" />}
           {isEmpty(latestCasualCheckIn) && "今日尚未簽到"}
           {!isEmpty(latestCasualCheckIn) && (

@@ -1,22 +1,35 @@
-/* eslint-disable @next/next/no-img-element */
+"use client";
 
-import { api } from "~/trpc/server";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { Loading } from "~/components/utils/Loading";
+import { api } from "~/trpc/react";
 import { ListingCard } from "./ListingCard";
 
-export default async function TianiShopPage() {
-  const { items } = await api.tianiShop.getAllListingsInfinite({
-    limit: 50,
-  });
+export default function TianiShopPage() {
+  const listingsQuery = api.tianiShop.getAllListingsInfinite.useInfiniteQuery(
+    {},
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  const listings = listingsQuery.data?.pages.flatMap((page) => page.items);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 [grid-auto-rows:1fr]">
-        {items.map((listing) => (
+      <InfiniteScroll
+        dataLength={listings?.length ?? 0}
+        next={() => listingsQuery.fetchNextPage()}
+        hasMore={listingsQuery.hasNextPage ?? false}
+        loader={<Loading />}
+        className="grid grid-cols-2 gap-4 [grid-auto-rows:1fr]"
+      >
+        {listings?.map((listing) => (
           <div key={listing.id} className="h-full">
             <ListingCard listing={listing} />
           </div>
         ))}
-      </div>
+      </InfiniteScroll>
     </div>
   );
 }

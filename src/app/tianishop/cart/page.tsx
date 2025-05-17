@@ -1,5 +1,6 @@
 "use client";
 
+import Decimal from "decimal.js";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AlertWarning } from "~/components/utils/Alert";
@@ -18,9 +19,9 @@ export default function CartPage() {
 
   const subtotal =
     cart?.items.reduce(
-      (sum, item) => sum + item.quantity * item.listing.price,
-      0,
-    ) ?? 0;
+      (sum, item) => sum.add(item.listing.price.times(item.quantity)),
+      new Decimal(0),
+    ) ?? new Decimal(0);
 
   const { mutate: checkout, isPending: isCheckingOut } =
     api.tianiShop.checkout.useMutation({
@@ -74,8 +75,8 @@ export default function CartPage() {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">購物車是空的</h1>
-          <p className="mt-2 text-sm text-gray-600">快去逛逛吧！</p>
+          <h1 className="font-bold text-2xl">購物車是空的</h1>
+          <p className="mt-2 text-gray-600 text-sm">快去逛逛吧！</p>
           <a href="/tianishop" className="btn btn-primary btn-sm mt-4">
             回到商店
           </a>
@@ -90,7 +91,7 @@ export default function CartPage() {
         "pointer-events-none opacity-50": isLoading,
       })}
     >
-      <h1 className="text-2xl font-bold">購物車</h1>
+      <h1 className="font-bold text-2xl">購物車</h1>
 
       {error && <AlertWarning>{error}</AlertWarning>}
 
@@ -112,7 +113,7 @@ export default function CartPage() {
           </div>
 
           <div className="rounded-lg bg-base-200 p-4">
-            <h2 className="text-lg font-semibold">訂單摘要</h2>
+            <h2 className="font-semibold text-lg">訂單摘要</h2>
 
             <div className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
@@ -123,7 +124,7 @@ export default function CartPage() {
                 <span>運費</span>
                 <span>免費</span>
               </div>
-              <div className="border-t border-base-300 pt-2">
+              <div className="border-base-300 border-t pt-2">
                 <div className="flex justify-between font-semibold">
                   <span>總計</span>
                   <span>NT$ {subtotal.toLocaleString()}</span>

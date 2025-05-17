@@ -117,9 +117,9 @@ export default function EtogetherActivityDetailPage() {
 
   if (!isNil(activityError))
     return <AlertWarning>{activityError.message}</AlertWarning>;
-  if (activityIsLoading) return <div className="loading"></div>;
+  if (activityIsLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
-  if (sessionStatus === "loading") return <div className="loading"></div>;
+  if (sessionStatus === "loading") return <div className="loading" />;
   if (isNil(session)) return <AlertWarning>請先登入</AlertWarning>;
 
   const isManager =
@@ -135,6 +135,7 @@ export default function EtogetherActivityDetailPage() {
           `${window.location.origin}/etogether/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
+        rel="noreferrer"
       >
         <ReactiveButton
           className="btn bg-green-500"
@@ -348,7 +349,7 @@ export default function EtogetherActivityDetailPage() {
         {activity.subgroups.map((subgroup) => (
           <div
             key={subgroup.id}
-            className={`card card-bordered card-compact ml-4 shadow-sm`}
+            className="card card-bordered card-compact ml-4 shadow-sm"
             style={
               !isNil(subgroup.displayColorCode)
                 ? {

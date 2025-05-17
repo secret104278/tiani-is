@@ -20,7 +20,7 @@ export default function EditVolunteerActivityPage() {
     return <AlertWarning>{error.message}</AlertWarning>;
   }
 
-  if (isLoading) return <div className="loading"></div>;
+  if (isLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   return (

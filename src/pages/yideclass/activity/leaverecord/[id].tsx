@@ -48,7 +48,7 @@ export default function ClassActivityLeaveRecordPage() {
   if (!isNil(leaveRecordsError))
     return <AlertWarning>{leaveRecordsError.message}</AlertWarning>;
   if (activityIsLoading || leaveRecordsIsLoading)
-    return <div className="loading"></div>;
+    return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   return (
@@ -77,11 +77,11 @@ export default function ClassActivityLeaveRecordPage() {
           </Dialog>
         </div>
       )}
-      {cancelLeaveIsPending && <div className="loading"></div>}
+      {cancelLeaveIsPending && <div className="loading" />}
       {cancelLeaveError && (
         <AlertWarning>{cancelLeaveError.message}</AlertWarning>
       )}
-      <table className="table table-sm">
+      <table className="table-sm table">
         <thead>
           <tr>
             <th>班員</th>

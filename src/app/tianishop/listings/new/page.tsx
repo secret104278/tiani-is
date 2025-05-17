@@ -98,7 +98,11 @@ const NewListingPage = () => {
     if (images?.length) {
       const urls = Array.from(images).map((file) => URL.createObjectURL(file));
       setPreviewUrls(urls);
-      return () => urls.forEach((url) => URL.revokeObjectURL(url));
+      return () => {
+        for (const url of urls) {
+          URL.revokeObjectURL(url);
+        }
+      };
     }
   }, [images]);
 
@@ -163,7 +167,7 @@ const NewListingPage = () => {
               上傳圖片
             </label>
             {form.formState.errors.images && (
-              <div className="text-xs text-error">
+              <div className="text-error text-xs">
                 {form.formState.errors.images?.message}
               </div>
             )}
@@ -180,7 +184,7 @@ const NewListingPage = () => {
                       />
                       <button
                         type="button"
-                        className="btn btn-circle btn-error btn-sm absolute -right-1 -top-1"
+                        className="btn btn-circle btn-error btn-sm -right-1 -top-1 absolute"
                         onClick={() => {
                           const newFiles = Array.from(
                             form.watch("images") ?? [],
@@ -296,7 +300,8 @@ const NewListingPage = () => {
             placeholder="請輸入數量上限"
             className="validator input input-bordered w-full"
             {...form.register("capacity", {
-              setValueAs: (v: string) => (v === "" ? undefined : parseInt(v)),
+              setValueAs: (v: string) =>
+                v === "" ? undefined : Number.parseInt(v),
             })}
           />
           <label className="label">
@@ -311,7 +316,7 @@ const NewListingPage = () => {
           >
             {isPending ? (
               <>
-                <span className="loading loading-spinner"></span>
+                <span className="loading loading-spinner" />
                 處理中...
               </>
             ) : (

@@ -61,7 +61,7 @@ export const getServerSideProps: GetServerSideProps<{
         ogTitle: `${res.title}・${formatDateTitle(
           res.startDateTime,
         )}・天一志工隊`,
-        ogDescription: `有新的志工工作需要協助，快來報名吧！`,
+        ogDescription: "有新的志工工作需要協助，快來報名吧！",
       },
     },
   };
@@ -144,12 +144,12 @@ export default function VolunteerActivityDetailPage() {
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   if (!isNil(error)) return <AlertWarning>{error.message}</AlertWarning>;
-  if (isLoading) return <div className="loading"></div>;
+  if (isLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   const isManager =
     session?.user.role.is_volunteer_admin ??
-    session?.user.id == activity.organiserId;
+    session?.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
@@ -160,6 +160,7 @@ export default function VolunteerActivityDetailPage() {
           `${window.location.origin}/volunteer/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
+        rel="noreferrer"
       >
         <ReactiveButton
           className="btn bg-green-500"
@@ -175,7 +176,7 @@ export default function VolunteerActivityDetailPage() {
   const ParticipantsCollapse = () => {
     // use form here to prevent from re-rendering on first click
     return (
-      <form className="collapse collapse-arrow bg-base-200">
+      <form className="collapse-arrow collapse bg-base-200">
         <input type="checkbox" />
         <div className="collapse-title font-medium">
           目前有 {activity.participants?.length || 0} 人報名
@@ -195,7 +196,7 @@ export default function VolunteerActivityDetailPage() {
                   </div>
                 ) : (
                   <div className="avatar placeholder mr-2">
-                    <div className="bg-neutral-focus w-8 rounded-full text-neutral-content">
+                    <div className="w-8 rounded-full bg-neutral-focus text-neutral-content">
                       <span>{participant.name?.charAt(0)}</span>
                     </div>
                   </div>
@@ -235,16 +236,16 @@ export default function VolunteerActivityDetailPage() {
             提醒審核
           </ReactiveButton>
         );
-      else
-        return (
-          <ReactiveButton
-            className="btn"
-            loading={approveActivityIsPending}
-            onClick={() => approveActivity({ activityId: activity.id })}
-          >
-            核准
-          </ReactiveButton>
-        );
+
+      return (
+        <ReactiveButton
+          className="btn"
+          loading={approveActivityIsPending}
+          onClick={() => approveActivity({ activityId: activity.id })}
+        >
+          核准
+        </ReactiveButton>
+      );
     }
 
     if (activity.status === "PUBLISHED") return <ShareLineBtn />;

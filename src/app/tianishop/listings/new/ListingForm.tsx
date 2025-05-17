@@ -124,9 +124,9 @@ export function ListingForm({
 
     return () => {
       // Clean up object URLs
-      newImageUrls.forEach((url) => {
+      for (const url of newImageUrls) {
         URL.revokeObjectURL(url);
-      });
+      }
     };
   }, [images]);
 
@@ -181,7 +181,8 @@ export function ListingForm({
               key: img.key,
               order: index,
             };
-          } else if (img.type === "new" && img.file) {
+          }
+          if (img.type === "new" && img.file) {
             const compressed = await compressImage(img.file);
             const imageData = await fileToImageInput(compressed);
             return {
@@ -270,7 +271,7 @@ export function ListingForm({
               上傳圖片
             </label>
             {formState.errors.images && (
-              <div className="text-xs text-error">
+              <div className="text-error text-xs">
                 {formState.errors.images?.message}
               </div>
             )}
@@ -298,7 +299,7 @@ export function ListingForm({
                       )}
                       <button
                         type="button"
-                        className="btn btn-circle btn-error btn-sm absolute -right-1 -top-1"
+                        className="btn btn-circle btn-error btn-sm -right-1 -top-1 absolute"
                         onClick={() => handleRemoveImage(index)}
                       >
                         <XMarkIcon className="h-4 w-4" />
@@ -407,7 +408,8 @@ export function ListingForm({
             placeholder="請輸入數量上限"
             className="validator input input-bordered w-full"
             {...register("capacity", {
-              setValueAs: (v: string) => (v === "" ? undefined : parseInt(v)),
+              setValueAs: (v: string) =>
+                v === "" ? undefined : Number.parseInt(v),
             })}
           />
           <label className="label">
@@ -422,7 +424,7 @@ export function ListingForm({
           >
             {isPending ? (
               <>
-                <span className="loading loading-spinner"></span>
+                <span className="loading loading-spinner" />
                 處理中...
               </>
             ) : mode === "edit" ? (

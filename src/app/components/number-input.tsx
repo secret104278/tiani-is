@@ -25,7 +25,7 @@ export function NumberInput({
 
   return (
     <div className="flex items-center gap-2">
-      {label && <span className="text-sm font-medium">{label}</span>}
+      {label && <span className="font-medium text-sm">{label}</span>}
       <div className="join">
         <button
           className={`btn join-item btn-${size}`}
@@ -38,7 +38,7 @@ export function NumberInput({
           type="number"
           className="join-item w-16 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           value={value}
-          onChange={(e) => handleChange(parseInt(e.target.value))}
+          onChange={(e) => handleChange(Number.parseInt(e.target.value))}
           min={min}
           max={max}
         />

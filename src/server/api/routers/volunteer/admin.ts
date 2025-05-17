@@ -82,7 +82,7 @@ export const adminRouter = createTRPCRouter({
         throw new Error("簽退時間必須晚於簽到時間");
       }
 
-      if (input.checkInAt.getTime() == input.checkOutAt.getTime()) {
+      if (input.checkInAt.getTime() === input.checkOutAt.getTime()) {
         await ctx.db.casualCheckRecord.delete({
           where: {
             id: input.id,

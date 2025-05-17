@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
-import { type Session } from "next-auth";
+import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
-import { type AppType } from "next/app";
+import type { AppType } from "next/app";
 
 import { api } from "~/utils/api";
 
@@ -80,12 +80,12 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
       <Head>
         <title>{ogMeta?.ogTitle ?? siteTitle}</title>
         <meta name="description" content={`${siteTitle}・天一聖道院資訊系統`} />
-        <meta property="og:title" content={ogMeta?.ogTitle ?? siteTitle}></meta>
+        <meta property="og:title" content={ogMeta?.ogTitle ?? siteTitle} />
         <meta
           property="og:description"
           content={ogMeta?.ogDescription ?? `${siteTitle}・天一聖道院資訊系統`}
-        ></meta>
-        <meta property="og:image" content={ogMeta?.ogImage ?? siteIcon}></meta>
+        />
+        <meta property="og:image" content={ogMeta?.ogImage ?? siteIcon} />
         <meta name="theme-color" content={siteColor} />
         <link rel="icon" href="/favicon.ico" />
       </Head>

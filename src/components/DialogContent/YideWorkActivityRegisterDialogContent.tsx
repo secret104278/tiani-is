@@ -4,7 +4,7 @@ import ReactiveButton from "../utils/ReactiveButton";
 import type { inferRouterInputs } from "@trpc/server";
 import type { User } from "next-auth";
 import { useRouter } from "next/router";
-import { type YideWorkRouter } from "~/server/api/routers/yidework";
+import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
 
 type YideWorkActivityRegisterFormData = Omit<

@@ -38,7 +38,7 @@ export default function SelectWithCustomInput({
         </optgroup>
       </select>
       <label className="label">
-        <span className="label-text"></span>
+        <span className="label-text" />
       </label>
       <input
         type="text"

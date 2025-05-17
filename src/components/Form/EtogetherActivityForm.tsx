@@ -137,7 +137,7 @@ export default function EtogetherActivityForm({
           {...register("location")}
         />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">開始時間</span>
@@ -162,7 +162,7 @@ export default function EtogetherActivityForm({
           {...register("duration", { valueAsNumber: true })}
         />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div className="space-y-4">
         {fields.map((field, index) => (
           <div
@@ -185,7 +185,7 @@ export default function EtogetherActivityForm({
               <textarea
                 className="textarea textarea-bordered w-full"
                 {...register(`subgroups.${index}.description`)}
-              ></textarea>
+              />
               <div className="flex flex-row items-center">
                 <label className="label">
                   <span className="label-text">背景顏色</span>
@@ -226,7 +226,7 @@ export default function EtogetherActivityForm({
           新增分組
         </button>
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">補充說明</span>
@@ -234,9 +234,9 @@ export default function EtogetherActivityForm({
         <textarea
           className="textarea textarea-bordered w-full"
           {...register("description")}
-        ></textarea>
+        />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       {!isNil(createActivityError) && (
         <AlertWarning>{createActivityError.message}</AlertWarning>
       )}

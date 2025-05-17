@@ -1,8 +1,8 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import { type DateRange } from "react-day-picker";
-import { type UseFormRegister } from "react-hook-form";
+import type { DateRange } from "react-day-picker";
+import type { UseFormRegister } from "react-hook-form";
 import { DatePickerWithRange } from "~/components/ui/date-range-picker";
-import { type DateRangeOption } from "~/hooks/useWorkingDateRange";
+import type { DateRangeOption } from "~/hooks/useWorkingDateRange";
 
 interface WorkingFiltersProps {
   register: UseFormRegister<{ username: string }>;

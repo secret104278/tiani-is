@@ -6,9 +6,9 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { type inferRouterOutputs } from "@trpc/server";
+import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
-import { type UserRouter } from "~/server/api/routers/user";
+import type { UserRouter } from "~/server/api/routers/user";
 import { api } from "~/utils/api";
 import { AlertWarning } from "./utils/Alert";
 import { Loading } from "./utils/Loading";
@@ -51,7 +51,7 @@ export default function UserCombobox({
       <div className="relative">
         <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
           <ComboboxInput
-            className="w-full rounded-lg border py-2 pl-3 pr-10 leading-8 text-gray-900 focus:ring-0"
+            className="w-full rounded-lg border py-2 pr-10 pl-3 text-gray-900 leading-8 focus:ring-0"
             displayValue={(person: UserComboboxSelected) => person?.name ?? ""}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -76,7 +76,7 @@ export default function UserCombobox({
               <ComboboxOption
                 key={person.id}
                 className={({ focus }) =>
-                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                  `relative cursor-default select-none py-2 pr-4 pl-10 ${
                     focus ? "bg-teal-600 text-white" : "text-gray-900"
                   }`
                 }

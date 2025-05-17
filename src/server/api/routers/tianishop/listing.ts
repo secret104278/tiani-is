@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { listingApiSchema } from "~/lib/schemas/tianishop";
+import { listingApiSchema, zodDecimalPrice } from "~/lib/schemas/tianishop";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { processImage } from "./utils";
 
@@ -168,7 +168,7 @@ export const listingRouter = createTRPCRouter({
         listingId: z.number(),
         title: z.string(),
         description: z.string(),
-        price: z.number().min(0),
+        price: zodDecimalPrice(),
         startTime: z.date().optional(),
         endTime: z.date().optional(),
         capacity: z.number().min(1).optional(),

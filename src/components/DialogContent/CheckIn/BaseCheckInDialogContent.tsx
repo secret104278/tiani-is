@@ -61,12 +61,10 @@ export default function BaseCheckInDialogContent({
     <div className="flex h-96 flex-col space-y-4">
       <CheckInMap>
         {!geoState.loading && (
-          <>
-            <ViewFocus
-              showMarker
-              center={[geoState.latitude!, geoState.longitude!]}
-            />
-          </>
+          <ViewFocus
+            showMarker
+            center={[geoState.latitude!, geoState.longitude!]}
+          />
         )}
       </CheckInMap>
       <ReactiveButton
@@ -77,8 +75,8 @@ export default function BaseCheckInDialogContent({
         onClick={() =>
           isNumber(geoState.latitude) &&
           isNumber(geoState.longitude) &&
-          isFinite(geoState.latitude) &&
-          isFinite(geoState.longitude) &&
+          Number.isFinite(geoState.latitude) &&
+          Number.isFinite(geoState.longitude) &&
           onCheckIn(geoState.latitude, geoState.longitude)
         }
       >

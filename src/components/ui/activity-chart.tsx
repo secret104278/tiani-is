@@ -86,7 +86,7 @@ const WeekdayLabels = React.memo(function WeekdayLabels() {
     >
       <div />
       {weekdays.map((day) => (
-        <div key={day} className="text-xs text-base-content/70">
+        <div key={day} className="text-base-content/70 text-xs">
           {day}
         </div>
       ))}
@@ -109,7 +109,7 @@ const ActivityCell = React.memo(function ActivityCell({
       role="gridcell"
       data-date={date ? format(date, "yyyy-MM-dd") : undefined}
       className={cn(
-        "border-neutral-foreground/10 rounded-[3px] border-[1px]",
+        "rounded-[3px] border-[1px] border-neutral-foreground/10",
         hours === 0 ? "bg-base-200" : "bg-neutral",
         hours > 0 && "bg-opacity-[var(--intensity)]",
       )}
@@ -184,7 +184,7 @@ export function ActivityChart({ chartData }: { chartData: ActivityData[] }) {
                     {format(date, "MMMM", { locale: DEFAULT_LOCALE })}
                   </span>
                   <span
-                    className="absolute left-0 top-0 text-xs font-normal text-base-content"
+                    className="absolute top-0 left-0 font-normal text-base-content text-xs"
                     aria-hidden="true"
                   >
                     {format(date, "MMM", { locale: DEFAULT_LOCALE })}

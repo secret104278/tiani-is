@@ -1,6 +1,6 @@
 import { includes, isEmpty, sortBy } from "lodash";
 import { useRouter } from "next/router";
-import { type RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type User =
   RouterOutputs["volunteerActivity"]["getUsersWithWorkingStatsByCheckIn"][number];

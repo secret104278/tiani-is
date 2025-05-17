@@ -11,7 +11,7 @@ import {
 } from "date-fns";
 import { parseAsJson, useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
-import { type DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 import { useDebounce } from "react-use";
 import { z } from "zod";
 
@@ -95,13 +95,13 @@ export function useWorkingDateRange(defaultDateRange: DateRangeOption) {
     [dateRangeOption],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies:
   useEffect(() => {
     if (dateRangeOption.type !== "custom") {
       const [newStart, newEnd] = getStartAndEnd(dateRangeOption);
       setDebouncedStart(newStart);
       setDebouncedEnd(newEnd);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(dateRangeOption)]);
 
   /** --- for update date range value --- */

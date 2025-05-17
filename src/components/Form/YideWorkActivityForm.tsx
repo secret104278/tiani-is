@@ -1,8 +1,8 @@
-import { type inferRouterOutputs } from "@trpc/server";
+import type { inferRouterOutputs } from "@trpc/server";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type YideWorkRouter } from "~/server/api/routers/yidework";
+import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
 import {
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
@@ -126,10 +126,10 @@ export default function YideWorkActivityForm({
   const canSaveDraft =
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
-  if (locationIsLoading) return <div className="loading"></div>;
+  if (locationIsLoading) return <div className="loading" />;
   if (!isNil(locationsError))
     return <AlertWarning>{locationsError.message}</AlertWarning>;
-  if (presetsIsLoading) return <div className="loading"></div>;
+  if (presetsIsLoading) return <div className="loading" />;
   if (!isNil(presetsError))
     return <AlertWarning>{presetsError.message}</AlertWarning>;
 
@@ -180,7 +180,7 @@ export default function YideWorkActivityForm({
           ))}
         </select>
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">時間</span>
@@ -205,7 +205,7 @@ export default function YideWorkActivityForm({
           {...register("duration", { valueAsNumber: true })}
         />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">補充說明</span>
@@ -213,9 +213,9 @@ export default function YideWorkActivityForm({
         <textarea
           className="textarea textarea-bordered w-full"
           {...register("description")}
-        ></textarea>
+        />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       {!isNil(createActivityError) && (
         <AlertWarning>{createActivityError.message}</AlertWarning>
       )}

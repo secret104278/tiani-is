@@ -1,7 +1,7 @@
-import { type inferRouterInputs } from "@trpc/server";
+import type { inferRouterInputs } from "@trpc/server";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type EtogetherRouter } from "~/server/api/routers/etogether";
+import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
 import { truncateTitle } from "~/utils/ui";
 import ReactiveButton from "../../utils/ReactiveButton";
@@ -45,7 +45,7 @@ export default function ManualEtogetherCheckInDialogContent({
           required
           type="text"
           className="tiani-input"
-          {...register(`username`)}
+          {...register("username")}
         />
       </div>
       <div>
@@ -55,7 +55,7 @@ export default function ManualEtogetherCheckInDialogContent({
         <select
           className="select select-bordered"
           required
-          {...register(`subgroupId`, {
+          {...register("subgroupId", {
             valueAsNumber: true,
           })}
         >

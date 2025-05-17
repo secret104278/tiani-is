@@ -10,7 +10,7 @@ export default async function EditListingPage({
 }) {
   const { listingId } = await params;
   const listing = await api.tianiShop.getListing({
-    id: parseInt(listingId),
+    id: Number.parseInt(listingId),
   });
 
   // Check if the user is the publisher
@@ -21,7 +21,7 @@ export default async function EditListingPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">編輯商品</h1>
+      <h1 className="font-bold text-2xl">編輯商品</h1>
       <ListingForm mode="edit" initialData={listing} />
     </div>
   );

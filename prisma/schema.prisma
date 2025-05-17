@@ -446,7 +446,7 @@ model TianiShopListing {
     id          Int       @id @default(autoincrement())
     title       String
     description String?
-    price       Float
+    price       Decimal   @db.Decimal(19, 4)
     startTime   DateTime?
     endTime     DateTime?
     capacity    Int? // null means unlimited capacity
@@ -520,8 +520,8 @@ model TianiShopOrder {
     items     TianiShopOrderItem[]
 
     // Price calculations
-    subtotal Float // Sum of all items' subtotals
-    total    Float // Final total after any adjustments
+    subtotal Decimal @db.Decimal(19, 4) // Sum of all items' subtotals
+    total    Decimal @db.Decimal(19, 4) // Final total after any adjustments
 
     @@index([userId])
 }
@@ -536,7 +536,7 @@ model TianiShopOrderItem {
     status      TianiShopOrderItemStatus @default(PENDING)
     completedAt DateTime? // When the publisher marked this item as completed
 
-    subtotal Float // price * quantity at time of purchase
+    subtotal Decimal @db.Decimal(19, 4) // price * quantity at time of purchase
 
     snapshot   TianiShopOrderItemSnapshot @relation(fields: [snapshotId], references: [id])
     snapshotId Int                        @unique // one-to-one relation
@@ -549,7 +549,7 @@ model TianiShopOrderItemSnapshot {
     id          Int                 @id @default(autoincrement())
     title       String
     description String?
-    price       Float
+    price       Decimal             @db.Decimal(19, 4)
     orderItem   TianiShopOrderItem?
 
     // Snapshot of the primary image if exists

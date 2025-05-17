@@ -7,8 +7,8 @@ import { api } from "~/utils/api";
 import { userComparator } from "~/utils/ui";
 
 enum SortedType {
-  NAME,
-  IS_CLASS_MEMBER,
+  NAME = 0,
+  IS_CLASS_MEMBER = 1,
 }
 
 const getComparator = (sortedType: SortedType, enrolledMemberIds: string[]) => {

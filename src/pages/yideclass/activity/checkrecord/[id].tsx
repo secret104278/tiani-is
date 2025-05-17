@@ -40,7 +40,7 @@ export default function ClassActivityCheckRecordPage() {
   if (!isNil(checkRecordsError))
     return <AlertWarning>{checkRecordsError.message}</AlertWarning>;
   if (activityIsLoading || checkRecordsIsLoading)
-    return <div className="loading"></div>;
+    return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   return (
@@ -79,7 +79,7 @@ export default function ClassActivityCheckRecordPage() {
           </div>
         </div>
       )}
-      <table className="table table-sm">
+      <table className="table-sm table">
         <thead>
           <tr>
             <th>班員</th>

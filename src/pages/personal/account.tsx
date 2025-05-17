@@ -29,7 +29,7 @@ export default function PersonalAccountPage() {
   });
 
   if (!sessionData) {
-    return <span className="loading loading-ring loading-md"></span>;
+    return <span className="loading loading-ring loading-md" />;
   }
 
   return (
@@ -71,7 +71,7 @@ export default function PersonalAccountPage() {
           </label>
           <input
             type="text"
-            className="input input-bordered w-full invalid:input-error"
+            className="input input-bordered invalid:input-error w-full"
             required
             defaultValue={sessionData.user.name ?? ""}
             {...register("name")}

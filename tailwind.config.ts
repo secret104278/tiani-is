@@ -1,5 +1,5 @@
 import daisyui, { type Config as DaisyUIConfig } from "daisyui";
-import { type Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
 type DaisyuiThemeExtend = {
   borderRadius: {

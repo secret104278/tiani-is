@@ -11,7 +11,7 @@ export default function WorkingStatsPage() {
   if (workingStatsIsLoading) return <div className="loading" />;
 
   const ActivityCheckHistory = () => (
-    <table className="table table-sm">
+    <table className="table-sm table">
       <thead>
         <tr>
           <th>課程名稱</th>

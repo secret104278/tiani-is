@@ -14,7 +14,7 @@ export default async function OrderDetailPage({
 }) {
   const { orderId } = await params;
   const order = await api.tianiShop.getOrder({
-    id: parseInt(orderId),
+    id: Number.parseInt(orderId),
   });
 
   const orderStatus = calculateOrderStatus(order.items);
@@ -23,9 +23,9 @@ export default async function OrderDetailPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">訂單詳情</h1>
+          <h1 className="font-bold text-2xl">訂單詳情</h1>
           <div className="mt-1 space-y-1">
-            <p className="text-sm text-gray-600">
+            <p className="text-gray-600 text-sm">
               訂單時間：{format(order.createdAt, "PPP p", { locale: zhTW })}
             </p>
             <div>
@@ -80,11 +80,11 @@ export default async function OrderDetailPage({
                 <h3 className="truncate font-semibold">
                   {item.snapshot.title}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-gray-600 text-sm">
                   單價：NT$ {item.snapshot.price.toLocaleString()}
                 </p>
                 {item.snapshot.description && (
-                  <p className="mt-1 line-clamp-2 text-sm text-gray-600">
+                  <p className="mt-1 line-clamp-2 text-gray-600 text-sm">
                     {item.snapshot.description}
                   </p>
                 )}
@@ -92,7 +92,7 @@ export default async function OrderDetailPage({
 
               <div className="mt-auto flex items-center justify-between">
                 <div className="space-x-2">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-gray-600 text-sm">
                     數量：{item.quantity}
                   </span>
                   <span
@@ -111,7 +111,7 @@ export default async function OrderDetailPage({
                         : "處理中"}
                   </span>
                   {item.completedAt && (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-gray-600 text-sm">
                       完成時間：
                       {format(item.completedAt, "PPP p", { locale: zhTW })}
                     </span>
@@ -132,7 +132,7 @@ export default async function OrderDetailPage({
       </div>
 
       <div className="rounded-lg bg-base-200 p-4">
-        <h2 className="text-lg font-semibold">訂單摘要</h2>
+        <h2 className="font-semibold text-lg">訂單摘要</h2>
 
         <div className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
@@ -143,7 +143,7 @@ export default async function OrderDetailPage({
             <span>運費</span>
             <span>免費</span>
           </div>
-          <div className="border-t border-base-300 pt-2">
+          <div className="border-base-300 border-t pt-2">
             <div className="flex justify-between font-semibold">
               <span>總計</span>
               <span>NT$ {order.total.toLocaleString()}</span>

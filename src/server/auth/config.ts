@@ -1,7 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role, type User } from "@prisma/client";
 import { isNil } from "lodash";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import type { DefaultSession, NextAuthConfig } from "next-auth";
 import LineProvider from "next-auth/providers/line";
 
 import { env } from "~/env.mjs";

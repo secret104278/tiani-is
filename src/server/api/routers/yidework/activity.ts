@@ -1,4 +1,4 @@
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import _ from "lodash";
 import { z } from "zod";
 import {

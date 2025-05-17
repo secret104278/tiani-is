@@ -64,12 +64,12 @@ function CreateUserDialogContent() {
 }
 
 enum SortedType {
-  NAME,
-  IS_TIANI_ADMIN,
-  IS_VOLUNTEER_ADMIN,
-  IS_YIDECLASS_ADMIN,
-  IS_ETOGETHER_ADMIN,
-  IS_YIDEWORK_ADMIN,
+  NAME = 0,
+  IS_TIANI_ADMIN = 1,
+  IS_VOLUNTEER_ADMIN = 2,
+  IS_YIDECLASS_ADMIN = 3,
+  IS_ETOGETHER_ADMIN = 4,
+  IS_YIDEWORK_ADMIN = 5,
 }
 
 const getComparator = (sortedType: SortedType) => {
@@ -172,7 +172,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
       <div className=" h-[calc(100vh-11rem)] overflow-x-auto">
-        <table className="table table-pin-rows table-sm">
+        <table className="table-pin-rows table-sm table">
           <thead>
             <tr className="z-20 bg-base-300">
               <th className="tiani-table-pin-col bg-base-300">

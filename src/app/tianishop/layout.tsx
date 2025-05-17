@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import AppLayout from "~/app/components/app-layout";
 import { Site, siteToTitle } from "~/utils/ui";
 import { CartButton } from "./components/CartButton";

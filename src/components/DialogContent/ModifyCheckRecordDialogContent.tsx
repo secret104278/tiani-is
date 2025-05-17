@@ -38,7 +38,7 @@ export default function ModifyCheckRecordDialogContent({
         ((name === "workHours" && type === "change") ||
           (name === "checkInAt" && type === "change")) &&
         isNumber(value.workHours) &&
-        isFinite(value.workHours)
+        Number.isFinite(value.workHours)
       ) {
         setValue(
           "checkOutAt",

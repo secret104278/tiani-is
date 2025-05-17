@@ -1,7 +1,7 @@
-import { type inferRouterInputs } from "@trpc/server";
+import type { inferRouterInputs } from "@trpc/server";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type YideWorkRouter } from "~/server/api/routers/yidework";
+import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
 import ReactiveButton from "../../utils/ReactiveButton";
 
@@ -39,7 +39,7 @@ export default function ManualYideWorkCheckInDialogContent({
           required
           type="text"
           className="tiani-input"
-          {...register(`username`)}
+          {...register("username")}
         />
       </div>
       <ReactiveButton

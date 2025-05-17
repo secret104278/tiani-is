@@ -20,7 +20,7 @@ export default function EtogetherActivityPage() {
     return <AlertWarning>{activityError.message}</AlertWarning>;
   }
 
-  if (activityIsLoading) return <div className="loading"></div>;
+  if (activityIsLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到活動</AlertWarning>;
 
   return (

@@ -3,6 +3,7 @@
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { formatDistanceToNow, isPast } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import type Decimal from "decimal.js";
 import Image from "next/image";
 import Link from "next/link";
 import { thumbHashToDataURL } from "thumbhash";
@@ -11,14 +12,14 @@ import type { RouterOutputs } from "~/trpc/shared";
 type Listing =
   RouterOutputs["tianiShop"]["getAllListingsInfinite"]["items"][number];
 
-function formatPrice(price: number) {
-  if (price === 0) return "免費";
+function formatPrice(price: Decimal) {
+  if (price.isZero()) return "免費";
   return new Intl.NumberFormat("zh-TW", {
     style: "currency",
     currency: "TWD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price);
+  }).format(price.toNumber());
 }
 
 export function ListingCard({ listing }: { listing: Listing }) {
@@ -62,7 +63,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
 
           {/* Time badges */}
           {(willStartIn ?? willEndIn) && (
-            <div className="absolute left-2 top-2 flex flex-col gap-1">
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
               {willStartIn && (
                 <div className="badge badge-warning badge-sm gap-1 shadow-lg">
                   {willStartIn}後開始
@@ -81,12 +82,12 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <div className="space-y-2 p-3">
           {/* Title and Price */}
           <div className="flex items-start justify-between gap-2">
-            <h2 className="line-clamp-2 text-base font-bold leading-tight">
+            <h2 className="line-clamp-2 font-bold text-base leading-tight">
               {listing.title}
             </h2>
             <div
-              className={`shrink-0 rounded-full px-2 py-0.5 text-sm font-semibold ${
-                listing.price === 0
+              className={`shrink-0 rounded-full px-2 py-0.5 font-semibold text-sm ${
+                listing.price.isZero()
                   ? "bg-accent/10 text-accent"
                   : "bg-primary/10 text-primary"
               }`}
@@ -97,13 +98,13 @@ export function ListingCard({ listing }: { listing: Listing }) {
 
           {/* Description */}
           {listing.description && (
-            <p className="line-clamp-2 text-sm leading-relaxed text-base-content/70">
+            <p className="line-clamp-2 text-base-content/70 text-sm leading-relaxed">
               {listing.description}
             </p>
           )}
 
           {/* Footer Section */}
-          <div className="flex items-center justify-between border-t border-base-200 pt-2">
+          <div className="flex items-center justify-between border-base-200 border-t pt-2">
             {/* Publisher Info */}
             <div className="flex items-center gap-2">
               <div className="avatar">
@@ -119,11 +120,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">
+                <span className="font-medium text-sm">
                   {listing.publisher.name}
                 </span>
                 {listing.capacity && (
-                  <span className="text-xs text-base-content/60">
+                  <span className="text-base-content/60 text-xs">
                     限量 {listing.capacity} 份
                   </span>
                 )}

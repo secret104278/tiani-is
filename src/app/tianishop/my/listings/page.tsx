@@ -13,8 +13,8 @@ export default async function MyListingsPage() {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">尚無商品</h1>
-          <p className="mt-2 text-sm text-gray-600">開始建立你的第一個商品！</p>
+          <h1 className="font-bold text-2xl">尚無商品</h1>
+          <p className="mt-2 text-gray-600 text-sm">開始建立你的第一個商品！</p>
           <Link
             href="/tianishop/listings/new"
             className="btn btn-primary btn-sm mt-4"
@@ -29,7 +29,7 @@ export default async function MyListingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">我的商品</h1>
+        <h1 className="font-bold text-2xl">我的商品</h1>
         <div className="flex gap-2">
           <Link
             href="/tianishop/my/listings/orders"
@@ -69,19 +69,19 @@ export default async function MyListingsPage() {
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div>
                     <h3 className="font-semibold">{listing.title}</h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-gray-600 text-sm">
                       NT$ {listing.price.toLocaleString()}
                     </p>
                   </div>
 
                   <div className="mt-auto space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-gray-600 text-sm">
                         建立時間：
                         {format(listing.createdAt, "PPP", { locale: zhTW })}
                       </div>
                       {listing.capacity && (
-                        <div className="text-sm text-gray-600">
+                        <div className="text-gray-600 text-sm">
                           限量 {listing.capacity} 份
                         </div>
                       )}

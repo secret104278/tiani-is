@@ -1,8 +1,8 @@
-import { type inferRouterOutputs } from "@trpc/server";
+import type { inferRouterOutputs } from "@trpc/server";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type YideClassRouter } from "~/server/api/routers/yideclass";
+import type { YideClassRouter } from "~/server/api/routers/yideclass";
 import { api } from "~/utils/api";
 import {
   CLASS_ACTIVITY_LOCATIONS,
@@ -150,7 +150,7 @@ export default function ClassActivityForm({
           ))}
         </SelectWithCustomInput>
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">開班時間</span>
@@ -175,7 +175,7 @@ export default function ClassActivityForm({
           {...register("duration", { valueAsNumber: true })}
         />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">補充說明</span>
@@ -183,9 +183,9 @@ export default function ClassActivityForm({
         <textarea
           className="textarea textarea-bordered w-full"
           {...register("description")}
-        ></textarea>
+        />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       {!isNil(createActivityError) && (
         <AlertWarning>{createActivityError.message}</AlertWarning>
       )}

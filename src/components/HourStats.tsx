@@ -8,7 +8,7 @@ export function HourStats({
   totalWorkingHours?: number;
 }) {
   return (
-    <div className="stats stats-vertical shadow-lg sm:stats-horizontal">
+    <div className="stats stats-vertical sm:stats-horizontal shadow-lg">
       <div className="stat">
         <div className="stat-figure text-primary">
           <ClockIcon className="h-8 w-8" />

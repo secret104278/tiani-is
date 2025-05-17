@@ -1,10 +1,30 @@
+import Decimal from "decimal.js";
 import { z } from "zod";
+
+export const zodDecimalPrice = (errorMessage = "無效的數字格式") =>
+  z.preprocess(
+    (val) => {
+      if (typeof val === "string" || typeof val === "number") {
+        try {
+          return new Decimal(val);
+        } catch (error) {
+          return val; // Return original value if conversion fails, Zod will catch type mismatch
+        }
+      }
+      return val; // Pass through if already a Decimal or other type
+    },
+    z
+      .instanceof(Decimal, { message: errorMessage })
+      .refine((d) => !d.isNaN(), { message: "數字不可為 NaN" })
+      .refine((d) => d.isFinite(), { message: "數字必須是有限值" })
+      .refine((d) => d.gte(0), { message: "價格必須大於等於 0" }),
+  );
 
 // Base schema for listing creation that's shared between frontend and backend
 export const listingBaseSchema = z.object({
   title: z.string().min(1, "請輸入標題"),
   description: z.string().optional(),
-  price: z.number().min(0, "價格必須大於零"),
+  price: zodDecimalPrice(),
   startTime: z.date().optional(),
   endTime: z.date().optional(),
   capacity: z.number().int().min(1).optional(),

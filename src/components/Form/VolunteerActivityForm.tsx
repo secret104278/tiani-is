@@ -144,7 +144,7 @@ export default function VolunteerActivityForm({
           {...register("location")}
         />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">開始時間</span>
@@ -169,7 +169,7 @@ export default function VolunteerActivityForm({
           {...register("duration", { valueAsNumber: true })}
         />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       <div>
         <label className="label">
           <span className="label-text">補充說明</span>
@@ -177,9 +177,9 @@ export default function VolunteerActivityForm({
         <textarea
           className="textarea textarea-bordered w-full"
           {...register("description")}
-        ></textarea>
+        />
       </div>
-      <div className="divider"></div>
+      <div className="divider" />
       {!isNil(createActivityError) && (
         <AlertWarning>{createActivityError.message}</AlertWarning>
       )}

@@ -61,7 +61,7 @@ export default function WorkingStatsPanel({
   ).reverse();
 
   const AllCheckHistory = () => (
-    <table className="table table-sm overflow-x-auto">
+    <table className="table-sm table overflow-x-auto">
       <thead>
         <tr>
           <th>日期</th>
@@ -93,7 +93,7 @@ export default function WorkingStatsPanel({
   );
 
   const ActivityCheckHistory = () => (
-    <table className="table table-sm">
+    <table className="table-sm table">
       <thead>
         <tr>
           <th>日期</th>
@@ -138,7 +138,7 @@ export default function WorkingStatsPanel({
   );
 
   const CasualCheckHistory = () => (
-    <table className="table table-sm">
+    <table className="table-sm table">
       <thead>
         <tr>
           <th>日期</th>
@@ -183,7 +183,7 @@ export default function WorkingStatsPanel({
             const aggregatedData = new Map<string, number>();
 
             // Aggregate hours
-            allActivityCheckHistories.forEach((history) => {
+            for (const history of allActivityCheckHistories) {
               const date = startOfDay(history.checkInAt);
               const dateKey = format(date, "yyyy-MM-dd");
               const hours = history.checkOutAt
@@ -195,7 +195,7 @@ export default function WorkingStatsPanel({
                 dateKey,
                 (aggregatedData.get(dateKey) ?? 0) + hours,
               );
-            });
+            }
 
             // Convert Map back to array format expected by ActivityChart
             return Array.from(aggregatedData, ([dateStr, hours]) => ({

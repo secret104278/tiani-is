@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import Decimal from "decimal.js";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { validateListingAvailability } from "./utils";
@@ -133,8 +134,8 @@ export const orderRouter = createTRPCRouter({
 
           // Calculate totals
           const subtotal = cart.items.reduce(
-            (sum, item) => sum + item.quantity * item.listing.price,
-            0,
+            (sum, item) => item.listing.price.times(item.quantity).add(sum),
+            new Decimal(0),
           );
 
           // Create order with snapshots
@@ -162,7 +163,7 @@ export const orderRouter = createTRPCRouter({
                     return {
                       listingId: item.listing.id,
                       quantity: item.quantity,
-                      subtotal: item.quantity * item.listing.price,
+                      subtotal: item.listing.price.times(item.quantity),
                       snapshotId: snapshot.id,
                     };
                   }),

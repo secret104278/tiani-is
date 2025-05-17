@@ -31,7 +31,7 @@ export default function Dialog({
         <div className="flex min-h-full items-center justify-center p-4 text-center">
           <DialogPanel className="w-full max-w-md transform space-y-4 rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
             <div className="flex flex-row items-center">
-              <DialogTitle className="text-lg font-medium leading-6 text-gray-900">
+              <DialogTitle className="font-medium text-gray-900 text-lg leading-6">
                 {title}
               </DialogTitle>
               <div className="flex-grow" />

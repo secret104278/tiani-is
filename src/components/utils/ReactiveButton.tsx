@@ -39,5 +39,5 @@ export default function ReactiveButton({
       </button>
     );
 
-  return <button {...props}></button>;
+  return <button {...props} />;
 }

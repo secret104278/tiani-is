@@ -123,12 +123,12 @@ export default function ClassActivityDetailPage() {
 
   if (!isNil(activityError))
     return <AlertWarning>{activityError.message}</AlertWarning>;
-  if (activityIsLoading) return <div className="loading"></div>;
+  if (activityIsLoading) return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   const isManager =
     !!session?.user.role.is_yideclass_admin ||
-    session?.user.id == activity.organiserId;
+    session?.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
@@ -139,6 +139,7 @@ export default function ClassActivityDetailPage() {
           `${window.location.origin}/yideclass/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
+        rel="noreferrer"
       >
         <ReactiveButton
           className="btn bg-green-500"
@@ -250,7 +251,7 @@ export default function ClassActivityDetailPage() {
   };
 
   const LeaveControl = () => {
-    if (isLeavedIsLoading) return <div className="loading"></div>;
+    if (isLeavedIsLoading) return <div className="loading" />;
     if (!isNil(isLeavedError))
       return <AlertWarning>{isLeavedError.message}</AlertWarning>;
 
@@ -310,6 +311,7 @@ export default function ClassActivityDetailPage() {
         <a
           target="_blank"
           href={`https://maps.google.com/?q=@${location.gps[0]},${location.gps[1]}`}
+          rel="noreferrer"
         >
           地址：<a className="link">{location.address}</a>
         </a>
