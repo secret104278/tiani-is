@@ -74,12 +74,6 @@ export default async function UserMenu() {
           <Link href={personalAccountHref()}>個人資料</Link>
         </li>
         <li>
-          <Link href="/tianishop/my/orders">我的訂單</Link>
-        </li>
-        <li>
-          <Link href="/tianishop/my/listings">我的商品</Link>
-        </li>
-        <li>
           <form
             action={async () => {
               "use server";
