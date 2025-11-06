@@ -72,6 +72,16 @@ model User {
 
     roles Role[] @default([])
 
+    // 求道卡相關欄位
+    qiudaoDateSolar  DateTime? // 求道日期（國曆）
+    qiudaoDateLunar  String? // 求道日期（農曆）
+    qiudaoTemple     String? // 求道佛堂
+    qiudaoTanzhu     String? // 壇主（姓名）
+    affiliation      String? // 所屬單位
+    dianChuanShi     String? // 點傳師
+    yinShi           String? // 引師
+    baoShi           String? // 保師
+
     organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
     organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")
     organizedEtogetherActivites EtogetherActivity[] @relation("OrganizedEtogetherActivites")

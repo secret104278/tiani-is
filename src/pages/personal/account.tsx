@@ -4,10 +4,25 @@ import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
+type QiudaoInfoForm = {
+  qiudaoDateSolar: string;
+  qiudaoDateLunar: string;
+  qiudaoTemple: string;
+  qiudaoTanzhu: string;
+  affiliation: string;
+  dianChuanShi: string;
+  yinShi: string;
+  baoShi: string;
+};
+
 export default function PersonalAccountPage() {
   const { data: sessionData, update: updateSession } = useSession();
 
   const { register, handleSubmit } = useForm<{ name: string }>({
+    mode: "all",
+  });
+
+  const { register: registerQiudao, handleSubmit: handleSubmitQiudao } = useForm<QiudaoInfoForm>({
     mode: "all",
   });
 
@@ -26,6 +41,15 @@ export default function PersonalAccountPage() {
     refetch: getLineImage,
   } = api.user.getLineImage.useQuery(undefined, {
     enabled: false,
+  });
+
+  const {
+    mutate: updateQiudaoInfo,
+    isPending: updateQiudaoInfoIsPending,
+    isSuccess: updateQiudaoInfoIsSuccess,
+    error: updateQiudaoInfoError,
+  } = api.user.updateQiudaoInfo.useMutation({
+    onSuccess: () => updateSession(),
   });
 
   if (!sessionData) {
@@ -91,6 +115,119 @@ export default function PersonalAccountPage() {
           error={updateUserProfileError?.message}
         >
           送出
+        </ReactiveButton>
+      </form>
+
+      <div className="divider"></div>
+
+      <article className="prose">
+        <h2>求道卡資料</h2>
+      </article>
+      <form
+        className="form-control max-w-xs space-y-4"
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <div>
+          <label className="label">
+            <span className="label-text">求道日期（國曆）</span>
+          </label>
+          <input
+            type="date"
+            className="input input-bordered w-full"
+            {...registerQiudao("qiudaoDateSolar")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">求道日期（農曆）</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            placeholder="例：農曆正月初一"
+            {...registerQiudao("qiudaoDateLunar")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">求道佛堂</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...registerQiudao("qiudaoTemple")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">壇主（姓名）</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...registerQiudao("qiudaoTanzhu")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">所屬單位</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...registerQiudao("affiliation")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">點傳師</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...registerQiudao("dianChuanShi")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">引師</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...registerQiudao("yinShi")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">保師</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...registerQiudao("baoShi")}
+          />
+        </div>
+        <ReactiveButton
+          className="btn btn-primary"
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onClick={handleSubmitQiudao((data) =>
+            updateQiudaoInfo({
+              qiudaoDateSolar: data.qiudaoDateSolar ? new Date(data.qiudaoDateSolar) : null,
+              qiudaoDateLunar: data.qiudaoDateLunar || null,
+              qiudaoTemple: data.qiudaoTemple || null,
+              qiudaoTanzhu: data.qiudaoTanzhu || null,
+              affiliation: data.affiliation || null,
+              dianChuanShi: data.dianChuanShi || null,
+              yinShi: data.yinShi || null,
+              baoShi: data.baoShi || null,
+            }),
+          )}
+          loading={updateQiudaoInfoIsPending}
+          isSuccess={updateQiudaoInfoIsSuccess}
+          error={updateQiudaoInfoError?.message}
+        >
+          儲存求道卡資料
         </ReactiveButton>
       </form>
     </div>

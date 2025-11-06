@@ -61,6 +61,68 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
+  updateQiudaoInfo: protectedProcedure
+    .input(
+      z.object({
+        qiudaoDateSolar: z.date().nullish(),
+        qiudaoDateLunar: z.string().nullish(),
+        qiudaoTemple: z.string().nullish(),
+        qiudaoTanzhu: z.string().nullish(),
+        affiliation: z.string().nullish(),
+        dianChuanShi: z.string().nullish(),
+        yinShi: z.string().nullish(),
+        baoShi: z.string().nullish(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          qiudaoDateSolar: input.qiudaoDateSolar,
+          qiudaoDateLunar: input.qiudaoDateLunar,
+          qiudaoTemple: input.qiudaoTemple,
+          qiudaoTanzhu: input.qiudaoTanzhu,
+          affiliation: input.affiliation,
+          dianChuanShi: input.dianChuanShi,
+          yinShi: input.yinShi,
+          baoShi: input.baoShi,
+        },
+      });
+    }),
+
+  updateUserQiudaoInfo: allAdminRepresentableProcedure
+    .input(
+      z.object({
+        qiudaoDateSolar: z.date().nullish(),
+        qiudaoDateLunar: z.string().nullish(),
+        qiudaoTemple: z.string().nullish(),
+        qiudaoTanzhu: z.string().nullish(),
+        affiliation: z.string().nullish(),
+        dianChuanShi: z.string().nullish(),
+        yinShi: z.string().nullish(),
+        baoShi: z.string().nullish(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.user.update({
+        where: {
+          id: ctx.input.userId,
+        },
+        data: {
+          qiudaoDateSolar: input.qiudaoDateSolar,
+          qiudaoDateLunar: input.qiudaoDateLunar,
+          qiudaoTemple: input.qiudaoTemple,
+          qiudaoTanzhu: input.qiudaoTanzhu,
+          affiliation: input.affiliation,
+          dianChuanShi: input.dianChuanShi,
+          yinShi: input.yinShi,
+          baoShi: input.baoShi,
+        },
+      });
+    }),
+
   createUser: adminProcedure
     .input(
       z.object({
@@ -82,6 +144,14 @@ export const userRouter = createTRPCRouter({
         id: true,
         name: true,
         roles: true,
+        qiudaoDateSolar: true,
+        qiudaoDateLunar: true,
+        qiudaoTemple: true,
+        qiudaoTanzhu: true,
+        affiliation: true,
+        dianChuanShi: true,
+        yinShi: true,
+        baoShi: true,
       },
       where: {
         id: ctx.input.userId,
