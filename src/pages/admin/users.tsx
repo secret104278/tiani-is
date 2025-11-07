@@ -9,6 +9,7 @@ import lunisolar from "lunisolar";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
+import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { api } from "~/utils/api";
 import { userComparator } from "~/utils/ui";
 
@@ -75,6 +76,7 @@ type QiudaoInfoForm = {
 };
 
 function UserProfileDialogContent({ userId }: { userId: string }) {
+  const [qiudaoHour, setQiudaoHour] = useState<string>("");
   const [lunarDate, setLunarDate] = useState<string>("");
 
   const {
@@ -107,7 +109,7 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
     if (qiudaoDateSolar) {
       try {
         const lunar = lunisolar(qiudaoDateSolar);
-        const lunarStr = `農曆${lunar.format("lYYYY年lMlD")}`;
+        const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
         setLunarDate(lunarStr);
       } catch (e) {
         setLunarDate("");
@@ -131,6 +133,7 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
         yinShi: user.yinShi ?? "",
         baoShi: user.baoShi ?? "",
       });
+      setQiudaoHour(user.qiudaoHour ?? "");
     }
   }, [user, userIsLoading, reset]);
 
@@ -157,16 +160,12 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
             {...register("qiudaoDateSolar")}
           />
         </div>
-        {lunarDate && (
-          <div>
-            <label className="label">
-              <span className="label-text">求道日期（農曆）</span>
-            </label>
-            <div className="input input-bordered w-full bg-base-200">
-              {lunarDate}
-            </div>
-          </div>
-        )}
+
+        <QiudaoLunarDisplay
+          solarDate={qiudaoDateSolar}
+          hour={qiudaoHour}
+          onHourChange={setQiudaoHour}
+        />
         <div>
           <label className="label">
             <span className="label-text">求道佛堂</span>
@@ -238,6 +237,7 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
                   ? new Date(data.qiudaoDateSolar)
                   : null,
                 qiudaoDateLunar: lunarDate || null,
+                qiudaoHour: qiudaoHour || null,
                 qiudaoTemple: data.qiudaoTemple || null,
                 qiudaoTanzhu: data.qiudaoTanzhu || null,
                 affiliation: data.affiliation || null,

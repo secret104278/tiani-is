@@ -75,6 +75,7 @@ model User {
     // 求道卡相關欄位
     qiudaoDateSolar  DateTime? // 求道日期（國曆）
     qiudaoDateLunar  String? // 求道日期（農曆）
+    qiudaoHour       String? // 求道時辰（子丑寅卯辰巳午未申酉戌亥）
     qiudaoTemple     String? // 求道佛堂
     qiudaoTanzhu     String? // 壇主（姓名）
     affiliation      String? // 所屬單位

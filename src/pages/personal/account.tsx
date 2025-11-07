@@ -4,11 +4,13 @@ import { useState } from "react";
 import lunisolar from "lunisolar";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
+import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { api } from "~/utils/api";
 
 type ProfileForm = {
   name: string;
   qiudaoDateSolar: string;
+  qiudaoHour: string;
   qiudaoTemple: string;
   qiudaoTanzhu: string;
   affiliation: string;
@@ -19,9 +21,10 @@ type ProfileForm = {
 
 export default function PersonalAccountPage() {
   const { data: sessionData, update: updateSession } = useSession();
+  const [qiudaoHour, setQiudaoHour] = useState<string>("");
   const [lunarDate, setLunarDate] = useState<string>("");
 
-  const { register, handleSubmit, watch } = useForm<ProfileForm>({
+  const { register, handleSubmit, watch, setValue } = useForm<ProfileForm>({
     mode: "all",
   });
 
@@ -32,7 +35,7 @@ export default function PersonalAccountPage() {
   if (qiudaoDateSolar) {
     try {
       const lunar = lunisolar(qiudaoDateSolar);
-      const lunarStr = `農曆${lunar.format("lYYYY年lMlD")}`;
+      const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
       if (lunarStr !== lunarDate) {
         setLunarDate(lunarStr);
       }
@@ -89,6 +92,7 @@ export default function PersonalAccountPage() {
               ? new Date(data.qiudaoDateSolar)
               : null,
             qiudaoDateLunar: lunarDate || null,
+            qiudaoHour: qiudaoHour || null,
             qiudaoTemple: data.qiudaoTemple || null,
             qiudaoTanzhu: data.qiudaoTanzhu || null,
             affiliation: data.affiliation || null,
@@ -163,16 +167,12 @@ export default function PersonalAccountPage() {
             {...register("qiudaoDateSolar")}
           />
         </div>
-        {lunarDate && (
-          <div>
-            <label className="label">
-              <span className="label-text">求道日期（農曆）</span>
-            </label>
-            <div className="input input-bordered w-full bg-base-200">
-              {lunarDate}
-            </div>
-          </div>
-        )}
+
+        <QiudaoLunarDisplay
+          solarDate={qiudaoDateSolar}
+          hour={qiudaoHour}
+          onHourChange={setQiudaoHour}
+        />
         <div>
           <label className="label">
             <span className="label-text">求道佛堂</span>
