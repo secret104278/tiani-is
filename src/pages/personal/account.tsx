@@ -1,12 +1,14 @@
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+import lunisolar from "lunisolar";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
-type QiudaoInfoForm = {
+type ProfileForm = {
+  name: string;
   qiudaoDateSolar: string;
-  qiudaoDateLunar: string;
   qiudaoTemple: string;
   qiudaoTanzhu: string;
   affiliation: string;
@@ -17,23 +19,32 @@ type QiudaoInfoForm = {
 
 export default function PersonalAccountPage() {
   const { data: sessionData, update: updateSession } = useSession();
+  const [lunarDate, setLunarDate] = useState<string>("");
 
-  const { register, handleSubmit } = useForm<{ name: string }>({
+  const { register, handleSubmit, watch } = useForm<ProfileForm>({
     mode: "all",
   });
 
-  const { register: registerQiudao, handleSubmit: handleSubmitQiudao } = useForm<QiudaoInfoForm>({
-    mode: "all",
-  });
+  // Watch for solar date changes and auto-calculate lunar date
+  const qiudaoDateSolar = watch("qiudaoDateSolar");
 
-  const {
-    mutate: updateUserProfile,
-    isPending: updateUserProfileIsPending,
-    isSuccess: updateUserProfileIsSuccess,
-    error: updateUserProfileError,
-  } = api.user.updateUserProfile.useMutation({
-    onSuccess: () => updateSession(),
-  });
+  // Auto-calculate lunar date when solar date changes
+  if (qiudaoDateSolar) {
+    try {
+      const lunar = lunisolar(qiudaoDateSolar);
+      const lunarStr = `農曆${lunar.format("lYYYY年lMlD")}`;
+      if (lunarStr !== lunarDate) {
+        setLunarDate(lunarStr);
+      }
+    } catch (e) {
+      // Invalid date, ignore
+      if (lunarDate !== "") {
+        setLunarDate("");
+      }
+    }
+  } else if (lunarDate !== "") {
+    setLunarDate("");
+  }
 
   const {
     data: lineImage,
@@ -44,17 +55,51 @@ export default function PersonalAccountPage() {
   });
 
   const {
+    mutate: updateProfile,
+    isPending: updateProfileIsPending,
+    isSuccess: updateProfileIsSuccess,
+    error: updateProfileError,
+  } = api.user.updateUserProfile.useMutation({
+    onSuccess: () => {
+      void updateSession();
+    },
+  });
+
+  const {
     mutate: updateQiudaoInfo,
     isPending: updateQiudaoInfoIsPending,
-    isSuccess: updateQiudaoInfoIsSuccess,
-    error: updateQiudaoInfoError,
-  } = api.user.updateQiudaoInfo.useMutation({
-    onSuccess: () => updateSession(),
-  });
+  } = api.user.updateQiudaoInfo.useMutation();
 
   if (!sessionData) {
     return <span className="loading loading-ring loading-md" />;
   }
+
+  const handleFormSubmit = handleSubmit((data) => {
+    // Update profile and image first
+    updateProfile(
+      {
+        name: data.name,
+        image: lineImage ?? sessionData.user.image,
+      },
+      {
+        onSuccess: () => {
+          // Then update qiudao info
+          updateQiudaoInfo({
+            qiudaoDateSolar: data.qiudaoDateSolar
+              ? new Date(data.qiudaoDateSolar)
+              : null,
+            qiudaoDateLunar: lunarDate || null,
+            qiudaoTemple: data.qiudaoTemple || null,
+            qiudaoTanzhu: data.qiudaoTanzhu || null,
+            affiliation: data.affiliation || null,
+            dianChuanShi: data.dianChuanShi || null,
+            yinShi: data.yinShi || null,
+            baoShi: data.baoShi || null,
+          });
+        },
+      },
+    );
+  });
 
   return (
     <div className="flex flex-col space-y-4">
@@ -101,32 +146,13 @@ export default function PersonalAccountPage() {
             {...register("name")}
           />
         </div>
-        <ReactiveButton
-          className="btn btn-primary"
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={handleSubmit((data) =>
-            updateUserProfile({
-              name: data.name,
-              image: lineImage ?? sessionData.user.image,
-            }),
-          )}
-          loading={updateUserProfileIsPending}
-          isSuccess={updateUserProfileIsSuccess}
-          error={updateUserProfileError?.message}
-        >
-          送出
-        </ReactiveButton>
-      </form>
 
-      <div className="divider"></div>
+        <div className="divider"></div>
 
-      <article className="prose">
-        <h2>求道卡資料</h2>
-      </article>
-      <form
-        className="form-control max-w-xs space-y-4"
-        onSubmit={(e) => e.preventDefault()}
-      >
+        <article className="prose">
+          <h2>求道卡資料</h2>
+        </article>
+
         <div>
           <label className="label">
             <span className="label-text">求道日期（國曆）</span>
@@ -134,20 +160,19 @@ export default function PersonalAccountPage() {
           <input
             type="date"
             className="input input-bordered w-full"
-            {...registerQiudao("qiudaoDateSolar")}
+            {...register("qiudaoDateSolar")}
           />
         </div>
-        <div>
-          <label className="label">
-            <span className="label-text">求道日期（農曆）</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            placeholder="例：農曆正月初一"
-            {...registerQiudao("qiudaoDateLunar")}
-          />
-        </div>
+        {lunarDate && (
+          <div>
+            <label className="label">
+              <span className="label-text">求道日期（農曆）</span>
+            </label>
+            <div className="input input-bordered w-full bg-base-200">
+              {lunarDate}
+            </div>
+          </div>
+        )}
         <div>
           <label className="label">
             <span className="label-text">求道佛堂</span>
@@ -155,7 +180,7 @@ export default function PersonalAccountPage() {
           <input
             type="text"
             className="input input-bordered w-full"
-            {...registerQiudao("qiudaoTemple")}
+            {...register("qiudaoTemple")}
           />
         </div>
         <div>
@@ -165,7 +190,7 @@ export default function PersonalAccountPage() {
           <input
             type="text"
             className="input input-bordered w-full"
-            {...registerQiudao("qiudaoTanzhu")}
+            {...register("qiudaoTanzhu")}
           />
         </div>
         <div>
@@ -175,7 +200,7 @@ export default function PersonalAccountPage() {
           <input
             type="text"
             className="input input-bordered w-full"
-            {...registerQiudao("affiliation")}
+            {...register("affiliation")}
           />
         </div>
         <div>
@@ -185,7 +210,7 @@ export default function PersonalAccountPage() {
           <input
             type="text"
             className="input input-bordered w-full"
-            {...registerQiudao("dianChuanShi")}
+            {...register("dianChuanShi")}
           />
         </div>
         <div>
@@ -195,7 +220,7 @@ export default function PersonalAccountPage() {
           <input
             type="text"
             className="input input-bordered w-full"
-            {...registerQiudao("yinShi")}
+            {...register("yinShi")}
           />
         </div>
         <div>
@@ -205,29 +230,18 @@ export default function PersonalAccountPage() {
           <input
             type="text"
             className="input input-bordered w-full"
-            {...registerQiudao("baoShi")}
+            {...register("baoShi")}
           />
         </div>
         <ReactiveButton
           className="btn btn-primary"
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={handleSubmitQiudao((data) =>
-            updateQiudaoInfo({
-              qiudaoDateSolar: data.qiudaoDateSolar ? new Date(data.qiudaoDateSolar) : null,
-              qiudaoDateLunar: data.qiudaoDateLunar || null,
-              qiudaoTemple: data.qiudaoTemple || null,
-              qiudaoTanzhu: data.qiudaoTanzhu || null,
-              affiliation: data.affiliation || null,
-              dianChuanShi: data.dianChuanShi || null,
-              yinShi: data.yinShi || null,
-              baoShi: data.baoShi || null,
-            }),
-          )}
-          loading={updateQiudaoInfoIsPending}
-          isSuccess={updateQiudaoInfoIsSuccess}
-          error={updateQiudaoInfoError?.message}
+          onClick={handleFormSubmit}
+          loading={updateProfileIsPending || updateQiudaoInfoIsPending}
+          isSuccess={updateProfileIsSuccess}
+          error={updateProfileError?.message}
         >
-          儲存求道卡資料
+          儲存
         </ReactiveButton>
       </form>
     </div>

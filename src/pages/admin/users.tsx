@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import lunisolar from "lunisolar";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
@@ -65,7 +66,6 @@ function CreateUserDialogContent() {
 
 type QiudaoInfoForm = {
   qiudaoDateSolar: string;
-  qiudaoDateLunar: string;
   qiudaoTemple: string;
   qiudaoTanzhu: string;
   affiliation: string;
@@ -75,6 +75,8 @@ type QiudaoInfoForm = {
 };
 
 function UserProfileDialogContent({ userId }: { userId: string }) {
+  const [lunarDate, setLunarDate] = useState<string>("");
+
   const {
     data: user,
     isLoading: userIsLoading,
@@ -88,12 +90,32 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
     isSuccess: updateUserQiudaoInfoIsSuccess,
     error: updateUserQiudaoInfoError,
   } = api.user.updateUserQiudaoInfo.useMutation({
-    onSuccess: () => userRefetch(),
+    onSuccess: () => {
+      void userRefetch();
+    },
   });
 
-  const { register, handleSubmit, reset } = useForm<QiudaoInfoForm>({
+  const { register, handleSubmit, reset, watch } = useForm<QiudaoInfoForm>({
     mode: "all",
   });
+
+  // Watch for solar date changes
+  const qiudaoDateSolar = watch("qiudaoDateSolar");
+
+  // Auto-calculate lunar date when solar date changes
+  useEffect(() => {
+    if (qiudaoDateSolar) {
+      try {
+        const lunar = lunisolar(qiudaoDateSolar);
+        const lunarStr = `農曆${lunar.format("lYYYY年lMlD")}`;
+        setLunarDate(lunarStr);
+      } catch (e) {
+        setLunarDate("");
+      }
+    } else {
+      setLunarDate("");
+    }
+  }, [qiudaoDateSolar]);
 
   // Reset form when user data is loaded
   useEffect(() => {
@@ -102,7 +124,6 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
         qiudaoDateSolar: user.qiudaoDateSolar
           ? new Date(user.qiudaoDateSolar).toISOString().split("T")[0]
           : "",
-        qiudaoDateLunar: user.qiudaoDateLunar ?? "",
         qiudaoTemple: user.qiudaoTemple ?? "",
         qiudaoTanzhu: user.qiudaoTanzhu ?? "",
         affiliation: user.affiliation ?? "",
@@ -136,17 +157,16 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
             {...register("qiudaoDateSolar")}
           />
         </div>
-        <div>
-          <label className="label">
-            <span className="label-text">求道日期（農曆）</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            placeholder="例：農曆正月初一"
-            {...register("qiudaoDateLunar")}
-          />
-        </div>
+        {lunarDate && (
+          <div>
+            <label className="label">
+              <span className="label-text">求道日期（農曆）</span>
+            </label>
+            <div className="input input-bordered w-full bg-base-200">
+              {lunarDate}
+            </div>
+          </div>
+        )}
         <div>
           <label className="label">
             <span className="label-text">求道佛堂</span>
@@ -217,7 +237,7 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
                 qiudaoDateSolar: data.qiudaoDateSolar
                   ? new Date(data.qiudaoDateSolar)
                   : null,
-                qiudaoDateLunar: data.qiudaoDateLunar || null,
+                qiudaoDateLunar: lunarDate || null,
                 qiudaoTemple: data.qiudaoTemple || null,
                 qiudaoTanzhu: data.qiudaoTanzhu || null,
                 affiliation: data.affiliation || null,
