@@ -29,63 +29,37 @@ export default function QiudaoLunarDisplay({
   onHourChange,
   readonly = false,
 }: QiudaoLunarDisplayProps) {
-  if (!solarDate) return null;
-
   let lunarInfo: {
     ganzhiYear: string;
     month: string;
     day: string;
   } | null = null;
 
-  try {
-    const lunar = lunisolar(solarDate);
+  if (solarDate) {
+    try {
+      const lunar = lunisolar(solarDate);
 
-    // 獲取天干地支年份
-    const ganzhiYear = lunar.format("cY");
+      // 獲取天干地支年份
+      const ganzhiYear = lunar.format("cY");
 
-    // 獲取農曆月份（中文）
-    const monthStr = lunar.format("lMMMM");
+      // 獲取農曆月份（中文）
+      const monthStr = lunar.format("lMMMM");
 
-    // 獲取農曆日期（中文）
-    const dayStr = lunar.format("lD");
+      // 獲取農曆日期（中文）
+      const dayStr = lunar.format("lD");
 
-    lunarInfo = {
-      ganzhiYear,
-      month: monthStr,
-      day: dayStr,
-    };
-  } catch (e) {
-    return null;
+      lunarInfo = {
+        ganzhiYear,
+        month: monthStr,
+        day: dayStr,
+      };
+    } catch (e) {
+      // Invalid date
+    }
   }
 
-  if (!lunarInfo) return null;
-
   return (
-    <div className="space-y-2">
-      <label className="label">
-        <span className="label-text">求道日期（農曆）</span>
-      </label>
-
-      {/* 農曆顯示 */}
-      <div className="flex items-center gap-3 rounded-lg bg-base-200 p-4">
-        <div className="flex flex-wrap items-center gap-2 text-lg font-medium">
-          <span className="badge badge-lg badge-neutral">
-            {lunarInfo.ganzhiYear}年
-          </span>
-          <span className="badge badge-lg badge-primary">
-            {lunarInfo.month}
-          </span>
-          <span className="badge badge-lg badge-secondary">
-            {lunarInfo.day}
-          </span>
-          {hour && (
-            <span className="badge badge-lg badge-accent">
-              {hour}時
-            </span>
-          )}
-        </div>
-      </div>
-
+    <div className="space-y-4">
       {/* 時辰選擇器 */}
       {!readonly && (
         <div>
@@ -104,6 +78,19 @@ export default function QiudaoLunarDisplay({
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {/* 農曆顯示 */}
+      {lunarInfo && (
+        <div>
+          <label className="label">
+            <span className="label-text">求道日期（農曆）</span>
+          </label>
+          <div className="input input-bordered w-full bg-base-200 flex items-center">
+            {lunarInfo.ganzhiYear} {lunarInfo.month} {lunarInfo.day}
+            {hour && ` ${hour}時`}
+          </div>
         </div>
       )}
     </div>
