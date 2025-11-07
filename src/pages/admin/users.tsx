@@ -75,7 +75,13 @@ type QiudaoInfoForm = {
   baoShi: string;
 };
 
-function UserProfileDialogContent({ userId }: { userId: string }) {
+function UserProfileDialogContent({
+  userId,
+  onClose,
+}: {
+  userId: string;
+  onClose: () => void;
+}) {
   const [qiudaoHour, setQiudaoHour] = useState<string>("");
   const [lunarDate, setLunarDate] = useState<string>("");
 
@@ -94,6 +100,8 @@ function UserProfileDialogContent({ userId }: { userId: string }) {
   } = api.user.updateUserQiudaoInfo.useMutation({
     onSuccess: () => {
       void userRefetch();
+      // Close dialog after successful save
+      onClose();
     },
   });
 
@@ -555,7 +563,15 @@ export default function AdminUsersPage() {
           setSelectedUserId(null);
         }}
       >
-        {selectedUserId && <UserProfileDialogContent userId={selectedUserId} />}
+        {selectedUserId && (
+          <UserProfileDialogContent
+            userId={selectedUserId}
+            onClose={() => {
+              setUserProfileDialogOpen(false);
+              setSelectedUserId(null);
+            }}
+          />
+        )}
       </Dialog>
     </div>
   );
