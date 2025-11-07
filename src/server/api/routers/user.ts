@@ -42,6 +42,28 @@ export const userRouter = createTRPCRouter({
     return getLineImageURL(ctx.db, ctx.session.user.id);
   }),
 
+  getCurrentUserProfile: protectedProcedure.query(({ ctx }) =>
+    ctx.db.user.findUnique({
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        qiudaoDateSolar: true,
+        qiudaoDateLunar: true,
+        qiudaoHour: true,
+        qiudaoTemple: true,
+        qiudaoTanzhu: true,
+        affiliation: true,
+        dianChuanShi: true,
+        yinShi: true,
+        baoShi: true,
+      },
+      where: {
+        id: ctx.session.user.id,
+      },
+    }),
+  ),
+
   updateUserProfile: protectedProcedure
     .input(
       z.object({

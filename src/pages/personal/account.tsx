@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import lunisolar from "lunisolar";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
@@ -24,30 +24,53 @@ export default function PersonalAccountPage() {
   const [qiudaoHour, setQiudaoHour] = useState<string>("");
   const [lunarDate, setLunarDate] = useState<string>("");
 
-  const { register, handleSubmit, watch, setValue } = useForm<ProfileForm>({
+  const { register, handleSubmit, watch, reset } = useForm<ProfileForm>({
     mode: "all",
   });
+
+  // Fetch current user profile data
+  const {
+    data: userProfile,
+    isLoading: userProfileIsLoading,
+  } = api.user.getCurrentUserProfile.useQuery();
+
+  // Set form default values when user profile is loaded
+  useEffect(() => {
+    if (userProfile && !userProfileIsLoading) {
+      reset({
+        name: userProfile.name ?? "",
+        qiudaoDateSolar: userProfile.qiudaoDateSolar
+          ? new Date(userProfile.qiudaoDateSolar).toISOString().split("T")[0]
+          : "",
+        qiudaoHour: userProfile.qiudaoHour ?? "",
+        qiudaoTemple: userProfile.qiudaoTemple ?? "",
+        qiudaoTanzhu: userProfile.qiudaoTanzhu ?? "",
+        affiliation: userProfile.affiliation ?? "",
+        dianChuanShi: userProfile.dianChuanShi ?? "",
+        yinShi: userProfile.yinShi ?? "",
+        baoShi: userProfile.baoShi ?? "",
+      });
+      setQiudaoHour(userProfile.qiudaoHour ?? "");
+    }
+  }, [userProfile, userProfileIsLoading, reset]);
 
   // Watch for solar date changes and auto-calculate lunar date
   const qiudaoDateSolar = watch("qiudaoDateSolar");
 
   // Auto-calculate lunar date when solar date changes
-  if (qiudaoDateSolar) {
-    try {
-      const lunar = lunisolar(qiudaoDateSolar);
-      const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
-      if (lunarStr !== lunarDate) {
+  useEffect(() => {
+    if (qiudaoDateSolar) {
+      try {
+        const lunar = lunisolar(qiudaoDateSolar);
+        const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
         setLunarDate(lunarStr);
-      }
-    } catch (e) {
-      // Invalid date, ignore
-      if (lunarDate !== "") {
+      } catch (e) {
         setLunarDate("");
       }
+    } else {
+      setLunarDate("");
     }
-  } else if (lunarDate !== "") {
-    setLunarDate("");
-  }
+  }, [qiudaoDateSolar]);
 
   const {
     data: lineImage,
@@ -73,7 +96,7 @@ export default function PersonalAccountPage() {
     isPending: updateQiudaoInfoIsPending,
   } = api.user.updateQiudaoInfo.useMutation();
 
-  if (!sessionData) {
+  if (!sessionData || userProfileIsLoading) {
     return <span className="loading loading-ring loading-md" />;
   }
 
@@ -146,7 +169,6 @@ export default function PersonalAccountPage() {
             type="text"
             className="input input-bordered invalid:input-error w-full"
             required
-            defaultValue={sessionData.user.name ?? ""}
             {...register("name")}
           />
         </div>
