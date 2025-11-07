@@ -42,6 +42,28 @@ export const userRouter = createTRPCRouter({
     return getLineImageURL(ctx.db, ctx.session.user.id);
   }),
 
+  getCurrentUserProfile: protectedProcedure.query(({ ctx }) =>
+    ctx.db.user.findUnique({
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        qiudaoDateSolar: true,
+        qiudaoDateLunar: true,
+        qiudaoHour: true,
+        qiudaoTemple: true,
+        qiudaoTanzhu: true,
+        affiliation: true,
+        dianChuanShi: true,
+        yinShi: true,
+        baoShi: true,
+      },
+      where: {
+        id: ctx.session.user.id,
+      },
+    }),
+  ),
+
   updateUserProfile: protectedProcedure
     .input(
       z.object({
@@ -57,6 +79,72 @@ export const userRouter = createTRPCRouter({
         data: {
           name: input.name,
           image: input.image,
+        },
+      });
+    }),
+
+  updateQiudaoInfo: protectedProcedure
+    .input(
+      z.object({
+        qiudaoDateSolar: z.date().nullish(),
+        qiudaoDateLunar: z.string().nullish(),
+        qiudaoHour: z.string().nullish(),
+        qiudaoTemple: z.string().nullish(),
+        qiudaoTanzhu: z.string().nullish(),
+        affiliation: z.string().nullish(),
+        dianChuanShi: z.string().nullish(),
+        yinShi: z.string().nullish(),
+        baoShi: z.string().nullish(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          qiudaoDateSolar: input.qiudaoDateSolar,
+          qiudaoDateLunar: input.qiudaoDateLunar,
+          qiudaoHour: input.qiudaoHour,
+          qiudaoTemple: input.qiudaoTemple,
+          qiudaoTanzhu: input.qiudaoTanzhu,
+          affiliation: input.affiliation,
+          dianChuanShi: input.dianChuanShi,
+          yinShi: input.yinShi,
+          baoShi: input.baoShi,
+        },
+      });
+    }),
+
+  updateUserQiudaoInfo: allAdminRepresentableProcedure
+    .input(
+      z.object({
+        qiudaoDateSolar: z.date().nullish(),
+        qiudaoDateLunar: z.string().nullish(),
+        qiudaoHour: z.string().nullish(),
+        qiudaoTemple: z.string().nullish(),
+        qiudaoTanzhu: z.string().nullish(),
+        affiliation: z.string().nullish(),
+        dianChuanShi: z.string().nullish(),
+        yinShi: z.string().nullish(),
+        baoShi: z.string().nullish(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.user.update({
+        where: {
+          id: ctx.input.userId,
+        },
+        data: {
+          qiudaoDateSolar: input.qiudaoDateSolar,
+          qiudaoDateLunar: input.qiudaoDateLunar,
+          qiudaoHour: input.qiudaoHour,
+          qiudaoTemple: input.qiudaoTemple,
+          qiudaoTanzhu: input.qiudaoTanzhu,
+          affiliation: input.affiliation,
+          dianChuanShi: input.dianChuanShi,
+          yinShi: input.yinShi,
+          baoShi: input.baoShi,
         },
       });
     }),
@@ -82,6 +170,15 @@ export const userRouter = createTRPCRouter({
         id: true,
         name: true,
         roles: true,
+        qiudaoDateSolar: true,
+        qiudaoDateLunar: true,
+        qiudaoHour: true,
+        qiudaoTemple: true,
+        qiudaoTanzhu: true,
+        affiliation: true,
+        dianChuanShi: true,
+        yinShi: true,
+        baoShi: true,
       },
       where: {
         id: ctx.input.userId,

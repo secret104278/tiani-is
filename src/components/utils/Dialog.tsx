@@ -22,12 +22,12 @@ export default function Dialog({
     <DialogHeadless
       as="div"
       open={show}
-      className="relative z-10 transition duration-300 ease-out data-[closed]:opacity-0"
+      className="relative z-50 transition duration-300 ease-out data-[closed]:opacity-0"
       onClose={closeModal}
       transition
     >
-      <DialogBackdrop className="fixed inset-0 bg-black/30" />
-      <div className="fixed inset-0 overflow-y-auto">
+      <DialogBackdrop className="fixed inset-0 bg-black/30 z-40" />
+      <div className="fixed inset-0 overflow-y-auto z-50">
         <div className="flex min-h-full items-center justify-center p-4 text-center">
           <DialogPanel className="w-full max-w-md transform space-y-4 rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
             <div className="flex flex-row items-center">
