@@ -44,11 +44,13 @@ export {
 // Check-in and registration schemas
 export {
   manualCheckInFormSchema,
+  manualEtogetherCheckInFormSchema,
   modifyCheckRecordFormSchema,
   etogetherRegistrationFormSchema,
   yideWorkRegistrationFormSchema,
   externalRegisterSchema,
   type ManualCheckInFormData,
+  type ManualEtogetherCheckInFormData,
   type ModifyCheckRecordFormData,
   type EtogetherRegistrationFormData,
   type YideWorkRegistrationFormData,

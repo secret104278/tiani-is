@@ -66,16 +66,9 @@ export async function invalidateActivities(
  * Invalidate user-related queries
  *
  * @param utils - tRPC utils instance
- * @param userId - Optional specific user ID
  */
-export async function invalidateUsers(utils: ApiUtils, userId?: string) {
-  await utils.user.getAll.invalidate();
-
-  if (userId) {
-    await utils.user.getUserProfile.invalidate({ userId });
-  }
-
-  // Also invalidate current user profile
+export async function invalidateUsers(utils: ApiUtils) {
+  // Invalidate current user profile
   await utils.user.getCurrentUserProfile.invalidate();
 }
 
@@ -108,8 +101,8 @@ export async function invalidateActivityRegistrations(
     await utils.classActivity.getActivityCheckRecords.invalidate({
       activityId,
     });
-    // Working stats (hours, counts)
-    await utils.classActivity.getWorkingStats.invalidate({ activityId });
+    // Working stats (hours, counts) - no parameters
+    await utils.classActivity.getWorkingStats.invalidate();
     // Check-in status for current user
     await utils.classActivity.isCheckedIn.invalidate({ activityId });
     // Leave records
@@ -127,15 +120,13 @@ export async function invalidateActivityRegistrations(
     await utils.volunteerActivity.getActivityCheckRecords.invalidate({
       activityId,
     });
-    // Working stats (hours, counts)
-    await utils.volunteerActivity.getWorkingStats.invalidate({ activityId });
-    // Users with working stats by check-in
-    await utils.volunteerActivity.getUsersWithWorkingStatsByCheckIn.invalidate(
-      { activityId },
-    );
-    // Check-in activity history
+    // Working stats (hours, counts) - no parameters
+    await utils.volunteerActivity.getWorkingStats.invalidate();
+    // Users with working stats by check-in - invalidate all (date-based query)
+    await utils.volunteerActivity.getUsersWithWorkingStatsByCheckIn.invalidate();
+    // Check-in activity history - no parameters
     await utils.volunteerActivity.getCheckInActivityHistory.invalidate();
-    // Latest casual check-in
+    // Latest casual check-in - no parameters
     await utils.volunteerActivity.getLatestCasualCheckIn.invalidate();
   }
 
@@ -176,15 +167,11 @@ export async function invalidateCart(utils: ApiUtils) {
  * @param utils - tRPC utils instance
  * @param listingId - Optional specific listing ID
  */
-export async function invalidateListings(
-  utils: ApiUtils,
-  listingId?: string,
-) {
-  await utils.tianiShop.getAllListings.invalidate();
+export async function invalidateListings(utils: ApiUtils, listingId?: number) {
   await utils.tianiShop.getMyListings.invalidate();
 
   if (listingId) {
-    await utils.tianiShop.getListing.invalidate({ listingId });
+    await utils.tianiShop.getListing.invalidate({ id: listingId });
   }
 }
 

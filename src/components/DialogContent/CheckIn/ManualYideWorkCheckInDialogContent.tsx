@@ -5,7 +5,8 @@ import {
   manualCheckInFormSchema,
   type ManualCheckInFormData,
 } from "~/lib/schemas";
-import { useCheckInMutations } from "~/hooks";
+import { api } from "~/utils/api";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import ReactiveButton from "../../utils/ReactiveButton";
 
 export default function ManualYideWorkCheckInDialogContent({
@@ -14,6 +15,7 @@ export default function ManualYideWorkCheckInDialogContent({
   activityId: number;
 }) {
   const close = useClose();
+  const utils = api.useUtils();
 
   const {
     register,
@@ -24,14 +26,19 @@ export default function ManualYideWorkCheckInDialogContent({
     mode: "onBlur",
   });
 
-  const { manualRegister, isPending, error } = useCheckInMutations(
-    "yidework",
-    activityId,
-    { onClose: close },
-  );
+  const {
+    mutate: manualRegister,
+    isPending,
+    error,
+  } = api.yideworkActivity.manualExternalRegister.useMutation({
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "yidework", activityId);
+      close();
+    },
+  });
 
   const onSubmit = (data: ManualCheckInFormData) => {
-    manualRegister?.({ activityId, checked: true, ...data });
+    manualRegister({ activityId, checked: true, ...data });
   };
 
   return (

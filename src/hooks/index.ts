@@ -12,11 +12,7 @@ export {
   useClassMutations,
   useEtogetherMutations,
   useYideWorkMutations,
-  type ActivityType,
 } from "./useActivityMutations";
-
-// Check-in and registration hooks
-export { useCheckInMutations } from "./useCheckInMutations";
 
 // Query invalidation utilities (re-export for convenience)
 export {
@@ -26,5 +22,6 @@ export {
   invalidateCart,
   invalidateListings,
   invalidateAll,
+  type ActivityType,
   type ApiUtils,
 } from "~/lib/query/invalidation";

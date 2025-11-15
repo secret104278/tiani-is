@@ -5,7 +5,8 @@ import {
   manualEtogetherCheckInFormSchema,
   type ManualEtogetherCheckInFormData,
 } from "~/lib/schemas";
-import { useCheckInMutations } from "~/hooks";
+import { api } from "~/utils/api";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import { truncateTitle } from "~/utils/ui";
 import ReactiveButton from "../../utils/ReactiveButton";
 
@@ -20,6 +21,7 @@ export default function ManualEtogetherCheckInDialogContent({
   }[];
 }) {
   const close = useClose();
+  const utils = api.useUtils();
 
   const {
     register,
@@ -30,14 +32,19 @@ export default function ManualEtogetherCheckInDialogContent({
     mode: "onBlur",
   });
 
-  const { manualRegister, isPending, error } = useCheckInMutations(
-    "etogether",
-    activityId,
-    { onClose: close },
-  );
+  const {
+    mutate: manualRegister,
+    isPending,
+    error,
+  } = api.etogetherActivity.manualExternalRegister.useMutation({
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "etogether", activityId);
+      close();
+    },
+  });
 
   const onSubmit = (data: ManualEtogetherCheckInFormData) => {
-    manualRegister?.({ activityId, checked: true, ...data });
+    manualRegister({ activityId, checked: true, ...data });
   };
 
   return (

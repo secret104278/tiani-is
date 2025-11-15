@@ -86,7 +86,14 @@ export const etogetherRegistrationFormSchema = z.object({
       invalid_type_error: "分組必須是數字",
     })
     .int("分組ID必須是整數"),
-  externalRegisters: z.array(externalRegisterSchema).optional(),
+  externalRegisters: z
+    .array(
+      z.object({
+        username: z.string().min(1, "請輸入姓名"),
+        subgroupId: z.number().int("分組ID必須是整數"),
+      }),
+    )
+    .default([]),
 });
 
 export type EtogetherRegistrationFormData = z.infer<
@@ -98,7 +105,13 @@ export type EtogetherRegistrationFormData = z.infer<
  * Used in: src/components/DialogContent/YideWorkActivityRegisterDialogContent.tsx
  */
 export const yideWorkRegistrationFormSchema = z.object({
-  externalRegisters: z.array(externalRegisterSchema).optional(),
+  externalRegisters: z
+    .array(
+      z.object({
+        username: z.string().min(1, "請輸入姓名"),
+      }),
+    )
+    .default([]),
 });
 
 export type YideWorkRegistrationFormData = z.infer<
