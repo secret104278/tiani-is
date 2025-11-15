@@ -11,6 +11,24 @@ export const manualCheckInFormSchema = z.object({
 export type ManualCheckInFormData = z.infer<typeof manualCheckInFormSchema>;
 
 /**
+ * Manual Etogether Check-In Schema (for external users with subgroup)
+ * Used in: src/components/DialogContent/CheckIn/ManualEtogetherCheckInDialogContent.tsx
+ */
+export const manualEtogetherCheckInFormSchema = z.object({
+  username: z.string().min(1, "請輸入姓名"),
+  subgroupId: z
+    .number({
+      required_error: "請選擇分組",
+      invalid_type_error: "分組必須是數字",
+    })
+    .int("分組ID必須是整數"),
+});
+
+export type ManualEtogetherCheckInFormData = z.infer<
+  typeof manualEtogetherCheckInFormSchema
+>;
+
+/**
  * Modify Check Record Schema
  * Used in: src/components/DialogContent/ModifyCheckRecordDialogContent.tsx
  * Allows editing check-in/check-out times with automatic work hours calculation

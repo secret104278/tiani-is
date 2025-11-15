@@ -1,7 +1,7 @@
 import { isNil } from "lodash";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { api } from "~/utils/api";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import UserCombobox, { type UserComboboxSelected } from "../UserCombobox";
 import ReactiveButton from "../utils/ReactiveButton";
 
@@ -10,20 +10,28 @@ export default function ManualVolunteerActivityRegisterDialogContent({
 }: {
   activityId: number;
 }) {
-  const router = useRouter();
+  const utils = api.useUtils();
+  const [selected, setSelected] = useState<UserComboboxSelected>(null);
 
   const {
     mutate: participateActivity,
     isPending: participateActivityIsPending,
     error: participateActivityError,
   } = api.volunteerActivity.participateActivity.useMutation({
-    onSuccess: () => router.reload(),
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "volunteer", activityId);
+    },
   });
 
-  const [selected, setSelected] = useState<UserComboboxSelected>(null);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selected) {
+      participateActivity({ activityId, userId: selected.id });
+    }
+  };
 
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
       <div>
         <label className="label">
           <span className="label-text">志工</span>
@@ -33,14 +41,11 @@ export default function ManualVolunteerActivityRegisterDialogContent({
         </div>
       </div>
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
         disabled={isNil(selected)}
         loading={participateActivityIsPending}
         error={participateActivityError?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={() =>
-          selected && participateActivity({ activityId, userId: selected.id })
-        }
       >
         送出
       </ReactiveButton>

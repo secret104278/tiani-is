@@ -1,17 +1,15 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
 
-import type { inferRouterInputs } from "@trpc/server";
 import type { User } from "next-auth";
-import { useRouter } from "next/router";
-import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
+import {
+  etogetherRegistrationFormSchema,
+  type EtogetherRegistrationFormData,
+} from "~/lib/schemas";
 import { truncateTitle } from "~/utils/ui";
-
-type EtogetherActivityRegisterFormData = Omit<
-  inferRouterInputs<EtogetherRouter>["registerActivity"],
-  "activityId" | "userId"
->;
 
 export default function EtogetherActivityRegisterDialogContent({
   user,
@@ -25,15 +23,20 @@ export default function EtogetherActivityRegisterDialogContent({
     id: number;
     title: string;
   }[];
-  defaultValues?: EtogetherActivityRegisterFormData;
+  defaultValues?: EtogetherRegistrationFormData;
 }) {
-  const router = useRouter();
+  const utils = api.useUtils();
 
-  const { register, handleSubmit, control } =
-    useForm<EtogetherActivityRegisterFormData>({
-      mode: "all",
-      defaultValues,
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<EtogetherRegistrationFormData>({
+    resolver: zodResolver(etogetherRegistrationFormSchema),
+    mode: "onBlur",
+    defaultValues,
+  });
   const { fields, append, remove } = useFieldArray({
     control,
     name: "externalRegisters",
@@ -44,11 +47,21 @@ export default function EtogetherActivityRegisterDialogContent({
     isPending: registerActivityIsPending,
     error: registerActivityError,
   } = api.etogetherActivity.registerActivity.useMutation({
-    onSuccess: () => router.reload(),
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "etogether", activityId);
+    },
   });
 
+  const onSubmit = (data: EtogetherRegistrationFormData) => {
+    registerActivity({
+      userId: user.id,
+      activityId,
+      ...data,
+    });
+  };
+
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label className="label">
           <span className="label-text">姓名：{user.name}</span>
@@ -59,7 +72,6 @@ export default function EtogetherActivityRegisterDialogContent({
           </label>
           <select
             className="select select-bordered select-sm"
-            required
             {...register("subgroupId", { valueAsNumber: true })}
           >
             {subgroups.map((subgroup) => (
@@ -69,6 +81,13 @@ export default function EtogetherActivityRegisterDialogContent({
             ))}
           </select>
         </div>
+        {errors.subgroupId && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.subgroupId.message}
+            </span>
+          </label>
+        )}
       </div>
       <div className="divider">其他夥伴</div>
       {fields.map((field, index) => (
@@ -82,7 +101,6 @@ export default function EtogetherActivityRegisterDialogContent({
                 <span className="label-text">姓名</span>
               </label>
               <input
-                required
                 type="text"
                 className="tiani-input-inline"
                 {...register(`externalRegisters.${index}.username`)}
@@ -94,7 +112,6 @@ export default function EtogetherActivityRegisterDialogContent({
               </label>
               <select
                 className="select select-bordered"
-                required
                 {...register(`externalRegisters.${index}.subgroupId`, {
                   valueAsNumber: true,
                 })}
@@ -108,11 +125,9 @@ export default function EtogetherActivityRegisterDialogContent({
             </div>
             <div className="card-actions justify-end">
               <button
+                type="button"
                 className="btn btn-primary btn-sm"
-                onClick={(e) => {
-                  void e.preventDefault();
-                  remove(index);
-                }}
+                onClick={() => remove(index)}
               >
                 移除
               </button>
@@ -121,26 +136,17 @@ export default function EtogetherActivityRegisterDialogContent({
         </div>
       ))}
       <button
+        type="button"
         className="btn"
-        onClick={(e) => {
-          void e.preventDefault();
-          append({ username: "", subgroupId: subgroups?.[0]?.id ?? -1 });
-        }}
+        onClick={() => append({ username: "", subgroupId: subgroups?.[0]?.id ?? -1 })}
       >
         新增夥伴
       </button>
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
         loading={registerActivityIsPending}
         error={registerActivityError?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={handleSubmit((data) => {
-          void registerActivity({
-            userId: user.id,
-            activityId,
-            ...data,
-          });
-        })}
       >
         送出報名
       </ReactiveButton>

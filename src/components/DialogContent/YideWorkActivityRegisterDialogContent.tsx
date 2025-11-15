@@ -1,16 +1,14 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
 
-import type { inferRouterInputs } from "@trpc/server";
 import type { User } from "next-auth";
-import { useRouter } from "next/router";
-import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
-
-type YideWorkActivityRegisterFormData = Omit<
-  inferRouterInputs<YideWorkRouter>["registerActivity"],
-  "activityId" | "userId"
->;
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
+import {
+  yideWorkRegistrationFormSchema,
+  type YideWorkRegistrationFormData,
+} from "~/lib/schemas";
 
 export default function YideWorkActivityRegisterDialogContent({
   user,
@@ -19,15 +17,20 @@ export default function YideWorkActivityRegisterDialogContent({
 }: {
   user: User;
   activityId: number;
-  defaultValues?: YideWorkActivityRegisterFormData;
+  defaultValues?: YideWorkRegistrationFormData;
 }) {
-  const router = useRouter();
+  const utils = api.useUtils();
 
-  const { register, handleSubmit, control } =
-    useForm<YideWorkActivityRegisterFormData>({
-      mode: "all",
-      defaultValues,
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<YideWorkRegistrationFormData>({
+    resolver: zodResolver(yideWorkRegistrationFormSchema),
+    mode: "onBlur",
+    defaultValues,
+  });
   const { fields, append, remove } = useFieldArray({
     control,
     name: "externalRegisters",
@@ -38,11 +41,21 @@ export default function YideWorkActivityRegisterDialogContent({
     isPending: registerActivityIsPending,
     error: registerActivityError,
   } = api.yideworkActivity.registerActivity.useMutation({
-    onSuccess: () => router.reload(),
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "yidework", activityId);
+    },
   });
 
+  const onSubmit = (data: YideWorkRegistrationFormData) => {
+    registerActivity({
+      userId: user.id,
+      activityId,
+      ...data,
+    });
+  };
+
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label className="label">
           <span className="label-text">姓名：{user.name}</span>
@@ -60,7 +73,6 @@ export default function YideWorkActivityRegisterDialogContent({
                 <span className="label-text">姓名</span>
               </label>
               <input
-                required
                 type="text"
                 className="tiani-input-inline"
                 {...register(`externalRegisters.${index}.username`)}
@@ -68,11 +80,9 @@ export default function YideWorkActivityRegisterDialogContent({
             </div>
             <div className="card-actions justify-end">
               <button
+                type="button"
                 className="btn btn-primary btn-sm"
-                onClick={(e) => {
-                  void e.preventDefault();
-                  remove(index);
-                }}
+                onClick={() => remove(index)}
               >
                 移除
               </button>
@@ -81,26 +91,17 @@ export default function YideWorkActivityRegisterDialogContent({
         </div>
       ))}
       <button
+        type="button"
         className="btn"
-        onClick={(e) => {
-          void e.preventDefault();
-          append({ username: "" });
-        }}
+        onClick={() => append({ username: "" })}
       >
         新增夥伴
       </button>
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
         loading={registerActivityIsPending}
         error={registerActivityError?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={handleSubmit((data) => {
-          void registerActivity({
-            userId: user.id,
-            activityId,
-            ...data,
-          });
-        })}
       >
         送出報名
       </ReactiveButton>

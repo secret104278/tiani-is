@@ -1,7 +1,7 @@
 import { isNil } from "lodash";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { api } from "~/utils/api";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import UserCombobox, { type UserComboboxSelected } from "../UserCombobox";
 import ReactiveButton from "../utils/ReactiveButton";
 
@@ -10,20 +10,28 @@ export default function ManualClassActivityLeaveDialogContent({
 }: {
   activityId: number;
 }) {
-  const router = useRouter();
+  const utils = api.useUtils();
+  const [selected, setSelected] = useState<UserComboboxSelected>(null);
 
   const {
     mutate: manualTakeLeave,
     isPending: manualTakeLeaveIsPending,
     error: manualTakeLeaveError,
   } = api.classActivity.takeLeave.useMutation({
-    onSuccess: () => router.reload(),
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "class", activityId);
+    },
   });
 
-  const [selected, setSelected] = useState<UserComboboxSelected>(null);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selected) {
+      manualTakeLeave({ activityId, userId: selected.id });
+    }
+  };
 
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
       <div>
         <label className="label">
           <span className="label-text">班員</span>
@@ -33,14 +41,11 @@ export default function ManualClassActivityLeaveDialogContent({
         </div>
       </div>
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
         disabled={isNil(selected)}
         loading={manualTakeLeaveIsPending}
         error={manualTakeLeaveError?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={() =>
-          selected && manualTakeLeave({ activityId, userId: selected.id })
-        }
       >
         送出
       </ReactiveButton>
