@@ -48,21 +48,17 @@ export async function invalidateActivities(
 
   const router = routerMap[type];
 
-  // Invalidate list queries (includes infinite queries)
-  await router.getAll.invalidate();
-  await router.getAllInfinite.invalidate();
+  // Invalidate list queries (infinite queries)
+  await router.getAllActivitiesInfinite.invalidate();
 
   // Invalidate specific activity if ID provided
   if (activityId) {
     await router.getActivity.invalidate({ id: activityId });
   }
 
-  // Invalidate stats (working, registered users, etc.)
-  if ("getWorkingStats" in router) {
-    await router.getWorkingStats.invalidate();
-  }
-  if ("getRegisteredUsers" in router) {
-    await router.getRegisteredUsers.invalidate();
+  // Class-specific: invalidate title search
+  if (type === "class") {
+    await utils.classActivity.getActivitiesByTitle.invalidate();
   }
 }
 
@@ -95,6 +91,7 @@ export async function invalidateActivityRegistrations(
   type: ActivityType,
   activityId: number,
 ) {
+  // Always invalidate the activity itself first (counts, status, etc.)
   const routerMap = {
     volunteer: utils.volunteerActivity,
     class: utils.classActivity,
@@ -103,44 +100,64 @@ export async function invalidateActivityRegistrations(
   };
 
   const router = routerMap[type];
+  await router.getActivity.invalidate({ id: activityId });
 
   // Invalidate type-specific queries
   if (type === "class") {
+    // Check-in records table
     await utils.classActivity.getActivityCheckRecords.invalidate({
       activityId,
     });
+    // Working stats (hours, counts)
+    await utils.classActivity.getWorkingStats.invalidate({ activityId });
+    // Check-in status for current user
+    await utils.classActivity.isCheckedIn.invalidate({ activityId });
+    // Leave records
+    await utils.classActivity.getActivityLeaveRecords.invalidate({
+      activityId,
+    });
+    // Leave status for current user
+    await utils.classActivity.isLeaved.invalidate({ activityId });
+    // Class member enrollments
+    await utils.classActivity.getClassMemberEnrollments.invalidate();
   }
 
   if (type === "volunteer") {
+    // Check-in records table
     await utils.volunteerActivity.getActivityCheckRecords.invalidate({
       activityId,
     });
+    // Working stats (hours, counts)
+    await utils.volunteerActivity.getWorkingStats.invalidate({ activityId });
+    // Users with working stats by check-in
+    await utils.volunteerActivity.getUsersWithWorkingStatsByCheckIn.invalidate(
+      { activityId },
+    );
+    // Check-in activity history
+    await utils.volunteerActivity.getCheckInActivityHistory.invalidate();
+    // Latest casual check-in
+    await utils.volunteerActivity.getLatestCasualCheckIn.invalidate();
   }
 
   if (type === "etogether") {
+    // Activity with all registrations (main view)
     await utils.etogetherActivity.getActivityWithRegistrations.invalidate({
       activityId,
     });
+    // Current user's registration status
     await utils.etogetherActivity.getRegister.invalidate({ activityId });
+    // Check record for user
+    await utils.etogetherActivity.getCheckRecord.invalidate({ activityId });
   }
 
   if (type === "yidework") {
+    // Activity with all registrations (main view)
     await utils.yideworkActivity.getActivityWithRegistrations.invalidate({
       activityId,
     });
+    // Current user's registration status
     await utils.yideworkActivity.getRegister.invalidate({ activityId });
   }
-
-  // Invalidate common registration-related queries
-  if ("getRegisteredUsers" in router) {
-    await router.getRegisteredUsers.invalidate({ activityId });
-  }
-  if ("getWorkingStats" in router) {
-    await router.getWorkingStats.invalidate({ activityId });
-  }
-
-  // Also invalidate the activity itself (registration counts may change)
-  await router.getActivity.invalidate({ id: activityId });
 }
 
 /**
