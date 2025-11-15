@@ -16,9 +16,14 @@ import {
   getEndTime,
   titleIsOther,
 } from "~/utils/ui";
-import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput, { NestedSelect } from "./SelectWithCustomInput";
+import {
+  FormField,
+  DateTimeField,
+  NumberField,
+  FormError,
+} from "./shared";
 
 export default function VolunteerActivityForm({
   defaultActivity,
@@ -27,7 +32,7 @@ export default function VolunteerActivityForm({
 }) {
   let formDefaultValues: Partial<VolunteerActivityFormData> = {
     title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],
-    startDateTime: getCurrentDateTime(),
+    startDateTime: getCurrentDateTime() as any as Date,
     description: "",
   };
   if (defaultActivity) {
@@ -39,7 +44,7 @@ export default function VolunteerActivityForm({
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
       headcount: defaultActivity.headcount,
       location: defaultActivity.location,
-      startDateTime: getDateTimeString(defaultActivity.startDateTime),
+      startDateTime: getDateTimeString(defaultActivity.startDateTime) as any as Date,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -66,12 +71,12 @@ export default function VolunteerActivityForm({
   const onSubmit = (data: VolunteerActivityFormData, isDraft = false) => {
     // Transform form data to API format
     const activityData = {
-      title: titleIsOther(data.title) ? data.titleOther : data.title,
+      title: titleIsOther(data.title) ? data.titleOther! : data.title,
       headcount: data.headcount,
       location: data.location,
       startDateTime: data.startDateTime,
       endDateTime: getEndTime(data.startDateTime, data.duration),
-      description: data.description,
+      description: data.description ?? null,
       isDraft: isDraft,
     };
 
@@ -80,10 +85,10 @@ export default function VolunteerActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      });
+      } as any);
     } else {
       // Create new activity
-      createActivity(activityData);
+      createActivity(activityData as any);
     }
   };
 
@@ -111,90 +116,30 @@ export default function VolunteerActivityForm({
           <NestedSelect topics={VOLUNTEER_ACTIVITY_TOPICS} />
         </SelectWithCustomInput>
       </div>
-      <div>
-        <label className="label">
-          <span className="label-text">
-            人數
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="number"
-          inputMode="numeric"
-          className="tiani-input"
-          {...register("headcount", { valueAsNumber: true })}
-        />
-        {errors.headcount && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.headcount.message}
-            </span>
-          </label>
-        )}
-      </div>
-      <div>
-        <label className="label">
-          <span className="label-text">
-            地點
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="text"
-          className="tiani-input"
-          {...register("location")}
-        />
-        {errors.location && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.location.message}
-            </span>
-          </label>
-        )}
-      </div>
+      <NumberField
+        label="人數"
+        required
+        error={errors.headcount?.message}
+        {...register("headcount", { valueAsNumber: true })}
+      />
+      <FormField label="地點" required error={errors.location?.message}>
+        <input type="text" className="tiani-input" {...register("location")} />
+      </FormField>
       <div className="divider" />
-      <div>
-        <label className="label">
-          <span className="label-text">
-            開始時間
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="datetime-local"
-          className="tiani-input"
-          {...register("startDateTime", { valueAsDate: true })}
-        />
-        {errors.startDateTime && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.startDateTime.message}
-            </span>
-          </label>
-        )}
-      </div>
-      <div>
-        <label className="label">
-          <span className="label-text">
-            預估時數
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="number"
-          inputMode="decimal"
-          className="tiani-input"
-          step="0.1"
-          {...register("duration", { valueAsNumber: true })}
-        />
-        {errors.duration && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.duration.message}
-            </span>
-          </label>
-        )}
-      </div>
+      <DateTimeField
+        label="開始時間"
+        required
+        error={errors.startDateTime?.message}
+        {...register("startDateTime", { valueAsDate: true })}
+      />
+      <NumberField
+        label="預估時數"
+        required
+        inputMode="decimal"
+        step={0.1}
+        error={errors.duration?.message}
+        {...register("duration", { valueAsNumber: true })}
+      />
       <div className="divider" />
       <div>
         <label className="label">
@@ -206,7 +151,7 @@ export default function VolunteerActivityForm({
         />
       </div>
       <div className="divider" />
-      {!isNil(error) && <AlertWarning>{error.message}</AlertWarning>}
+      <FormError error={error?.message} />
       <div className="flex flex-row justify-end space-x-4">
         {canSaveDraft && (
           <ReactiveButton

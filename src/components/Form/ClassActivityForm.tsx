@@ -19,9 +19,9 @@ import {
   locationIsOther,
   titleIsOther,
 } from "~/utils/ui";
-import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
+import { DateTimeField, NumberField, FormError } from "./shared";
 
 type ClassActivity = inferRouterOutputs<YideClassRouter>["getActivity"];
 
@@ -32,7 +32,7 @@ export default function ClassActivityForm({
 }) {
   let formDefaultValues: Partial<ClassActivityFormData> = {
     title: CLASS_ACTIVITY_TITLES?.[0],
-    startDateTime: getCurrentDateTime(),
+    startDateTime: getCurrentDateTime() as any as Date,
     description: "",
   };
   if (defaultActivity) {
@@ -50,7 +50,7 @@ export default function ClassActivityForm({
         : defaultActivity.location,
       locationOther: defaultLocationIsOther ? defaultActivity.location : "",
 
-      startDateTime: getDateTimeString(defaultActivity.startDateTime),
+      startDateTime: getDateTimeString(defaultActivity.startDateTime) as any as Date,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -77,13 +77,13 @@ export default function ClassActivityForm({
   const onSubmit = (data: ClassActivityFormData, isDraft = false) => {
     // Transform form data to API format
     const activityData = {
-      title: titleIsOther(data.title) ? data.titleOther : data.title,
+      title: titleIsOther(data.title) ? data.titleOther! : data.title,
       location: locationIsOther(data.location)
-        ? data.locationOther
+        ? data.locationOther!
         : data.location,
       startDateTime: data.startDateTime,
       endDateTime: getEndTime(data.startDateTime, data.duration),
-      description: data.description,
+      description: data.description ?? null,
       isDraft: isDraft,
     };
 
@@ -92,10 +92,10 @@ export default function ClassActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      });
+      } as any);
     } else {
       // Create new activity
-      createActivity(activityData);
+      createActivity(activityData as any);
     }
   };
 
@@ -140,48 +140,20 @@ export default function ClassActivityForm({
         </SelectWithCustomInput>
       </div>
       <div className="divider" />
-      <div>
-        <label className="label">
-          <span className="label-text">
-            開班時間
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="datetime-local"
-          className="tiani-input"
-          {...register("startDateTime", { valueAsDate: true })}
-        />
-        {errors.startDateTime && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.startDateTime.message}
-            </span>
-          </label>
-        )}
-      </div>
-      <div>
-        <label className="label">
-          <span className="label-text">
-            開班時數
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="number"
-          inputMode="decimal"
-          className="tiani-input"
-          step="0.1"
-          {...register("duration", { valueAsNumber: true })}
-        />
-        {errors.duration && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.duration.message}
-            </span>
-          </label>
-        )}
-      </div>
+      <DateTimeField
+        label="開班時間"
+        required
+        error={errors.startDateTime?.message}
+        {...register("startDateTime", { valueAsDate: true })}
+      />
+      <NumberField
+        label="開班時數"
+        required
+        inputMode="decimal"
+        step={0.1}
+        error={errors.duration?.message}
+        {...register("duration", { valueAsNumber: true })}
+      />
       <div className="divider" />
       <div>
         <label className="label">
@@ -193,7 +165,7 @@ export default function ClassActivityForm({
         />
       </div>
       <div className="divider" />
-      {!isNil(error) && <AlertWarning>{error.message}</AlertWarning>}
+      <FormError error={error?.message} />
       <div className="flex flex-row justify-end space-x-4">
         {canSaveDraft && (
           <ReactiveButton

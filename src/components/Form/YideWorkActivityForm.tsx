@@ -18,9 +18,9 @@ import {
   getEndTime,
   titleIsOther,
 } from "~/utils/ui";
-import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
+import { DateTimeField, NumberField, FormError } from "./shared";
 
 const EMPTY_PRESET_ID = -1;
 
@@ -33,7 +33,7 @@ export default function YideWorkActivityForm({
 }) {
   let formDefaultValues: Partial<YideWorkActivityFormData> = {
     title: YIDE_WORK_ACTIVITY_TITLES?.[0],
-    startDateTime: getCurrentDateTime(),
+    startDateTime: getCurrentDateTime() as any as Date,
     description: "",
   };
   if (defaultActivity) {
@@ -48,7 +48,7 @@ export default function YideWorkActivityForm({
       locationId: defaultActivity.locationId,
       presetId: defaultActivity.presetId ?? EMPTY_PRESET_ID,
 
-      startDateTime: getDateTimeString(defaultActivity.startDateTime),
+      startDateTime: getDateTimeString(defaultActivity.startDateTime) as any as Date,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -86,12 +86,12 @@ export default function YideWorkActivityForm({
   const onSubmit = (data: YideWorkActivityFormData, isDraft = false) => {
     // Transform form data to API format
     const activityData = {
-      title: titleIsOther(data.title) ? data.titleOther : data.title,
+      title: titleIsOther(data.title) ? data.titleOther! : data.title,
       locationId: data.locationId,
       presetId: data.presetId === EMPTY_PRESET_ID ? undefined : data.presetId,
       startDateTime: data.startDateTime,
       endDateTime: getEndTime(data.startDateTime, data.duration),
-      description: data.description,
+      description: data.description ?? null,
       isDraft: isDraft,
     };
 
@@ -100,10 +100,10 @@ export default function YideWorkActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      });
+      } as any);
     } else {
       // Create new activity
-      createActivity(activityData);
+      createActivity(activityData as any);
     }
   };
 
@@ -115,11 +115,9 @@ export default function YideWorkActivityForm({
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   if (locationIsLoading) return <div className="loading" />;
-  if (!isNil(locationsError))
-    return <AlertWarning>{locationsError.message}</AlertWarning>;
+  if (!isNil(locationsError)) return <FormError error={locationsError.message} />;
   if (presetsIsLoading) return <div className="loading" />;
-  if (!isNil(presetsError))
-    return <AlertWarning>{presetsError.message}</AlertWarning>;
+  if (!isNil(presetsError)) return <FormError error={presetsError.message} />;
 
   return (
     <form
@@ -149,7 +147,7 @@ export default function YideWorkActivityForm({
           {...register("presetId", { valueAsNumber: true })}
         >
           <option value={EMPTY_PRESET_ID}> -- 請選擇 -- </option>
-          {presets?.map((preset) => (
+          {presets?.map((preset: { id: number; description: string }) => (
             <option key={preset.id} value={preset.id}>
               {preset.description}
             </option>
@@ -167,7 +165,7 @@ export default function YideWorkActivityForm({
           className="select select-bordered"
           {...register("locationId", { valueAsNumber: true })}
         >
-          {locations?.map((location) => (
+          {locations?.map((location: { id: number; name: string }) => (
             <option key={location.id} value={location.id}>
               {location.name}
             </option>
@@ -182,48 +180,20 @@ export default function YideWorkActivityForm({
         )}
       </div>
       <div className="divider" />
-      <div>
-        <label className="label">
-          <span className="label-text">
-            時間
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="datetime-local"
-          className="tiani-input"
-          {...register("startDateTime", { valueAsDate: true })}
-        />
-        {errors.startDateTime && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.startDateTime.message}
-            </span>
-          </label>
-        )}
-      </div>
-      <div>
-        <label className="label">
-          <span className="label-text">
-            預估時數
-            <span className="text-error ml-1">*</span>
-          </span>
-        </label>
-        <input
-          type="number"
-          inputMode="decimal"
-          className="tiani-input"
-          step="0.1"
-          {...register("duration", { valueAsNumber: true })}
-        />
-        {errors.duration && (
-          <label className="label">
-            <span className="label-text-alt text-error">
-              {errors.duration.message}
-            </span>
-          </label>
-        )}
-      </div>
+      <DateTimeField
+        label="時間"
+        required
+        error={errors.startDateTime?.message}
+        {...register("startDateTime", { valueAsDate: true })}
+      />
+      <NumberField
+        label="預估時數"
+        required
+        inputMode="decimal"
+        step={0.1}
+        error={errors.duration?.message}
+        {...register("duration", { valueAsNumber: true })}
+      />
       <div className="divider" />
       <div>
         <label className="label">
@@ -235,7 +205,7 @@ export default function YideWorkActivityForm({
         />
       </div>
       <div className="divider" />
-      {!isNil(error) && <AlertWarning>{error.message}</AlertWarning>}
+      <FormError error={error?.message} />
       <div className="flex flex-row justify-end space-x-4">
         {canSaveDraft && (
           <ReactiveButton
