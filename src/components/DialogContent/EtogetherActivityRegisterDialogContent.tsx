@@ -1,3 +1,4 @@
+import { useClose } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
@@ -16,7 +17,6 @@ export default function EtogetherActivityRegisterDialogContent({
   activityId,
   subgroups,
   defaultValues,
-  onClose,
 }: {
   user: User;
   activityId: number;
@@ -25,8 +25,8 @@ export default function EtogetherActivityRegisterDialogContent({
     title: string;
   }[];
   defaultValues?: EtogetherRegistrationFormData;
-  onClose?: () => void;
 }) {
+  const close = useClose();
   const utils = api.useUtils();
 
   const {
@@ -51,7 +51,7 @@ export default function EtogetherActivityRegisterDialogContent({
   } = api.etogetherActivity.registerActivity.useMutation({
     onSuccess: async () => {
       await invalidateActivityRegistrations(utils, "etogether", activityId);
-      onClose?.();
+      close();
     },
   });
 

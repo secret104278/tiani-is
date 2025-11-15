@@ -1,3 +1,4 @@
+import { useClose } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -9,11 +10,11 @@ import ReactiveButton from "../../utils/ReactiveButton";
 
 export default function ManualYideWorkCheckInDialogContent({
   activityId,
-  onClose,
 }: {
   activityId: number;
-  onClose?: () => void;
 }) {
+  const close = useClose();
+
   const {
     register,
     handleSubmit,
@@ -26,7 +27,7 @@ export default function ManualYideWorkCheckInDialogContent({
   const { manualRegister, isPending, error } = useCheckInMutations(
     "yidework",
     activityId,
-    { onClose },
+    { onClose: close },
   );
 
   const onSubmit = (data: ManualCheckInFormData) => {

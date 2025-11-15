@@ -1,3 +1,4 @@
+import { useClose } from "@headlessui/react";
 import { isNil } from "lodash";
 import { useState } from "react";
 import { api } from "~/utils/api";
@@ -7,11 +8,10 @@ import ReactiveButton from "../utils/ReactiveButton";
 
 export default function ManualVolunteerActivityRegisterDialogContent({
   activityId,
-  onClose,
 }: {
   activityId: number;
-  onClose?: () => void;
 }) {
+  const close = useClose();
   const utils = api.useUtils();
   const [selected, setSelected] = useState<UserComboboxSelected>(null);
 
@@ -22,7 +22,7 @@ export default function ManualVolunteerActivityRegisterDialogContent({
   } = api.volunteerActivity.participateActivity.useMutation({
     onSuccess: async () => {
       await invalidateActivityRegistrations(utils, "volunteer", activityId);
-      onClose?.();
+      close();
     },
   });
 

@@ -1,3 +1,4 @@
+import { useClose } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -11,15 +12,15 @@ import ReactiveButton from "../../utils/ReactiveButton";
 export default function ManualEtogetherCheckInDialogContent({
   activityId,
   subgroups,
-  onClose,
 }: {
   activityId: number;
   subgroups: {
     id: number;
     title: string;
   }[];
-  onClose?: () => void;
 }) {
+  const close = useClose();
+
   const {
     register,
     handleSubmit,
@@ -32,7 +33,7 @@ export default function ManualEtogetherCheckInDialogContent({
   const { manualRegister, isPending, error } = useCheckInMutations(
     "etogether",
     activityId,
-    { onClose },
+    { onClose: close },
   );
 
   const onSubmit = (data: ManualEtogetherCheckInFormData) => {

@@ -1,3 +1,4 @@
+import { useClose } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
@@ -14,13 +15,12 @@ export default function YideWorkActivityRegisterDialogContent({
   user,
   activityId,
   defaultValues,
-  onClose,
 }: {
   user: User;
   activityId: number;
   defaultValues?: YideWorkRegistrationFormData;
-  onClose?: () => void;
 }) {
+  const close = useClose();
   const utils = api.useUtils();
 
   const {
@@ -45,7 +45,7 @@ export default function YideWorkActivityRegisterDialogContent({
   } = api.yideworkActivity.registerActivity.useMutation({
     onSuccess: async () => {
       await invalidateActivityRegistrations(utils, "yidework", activityId);
-      onClose?.();
+      close();
     },
   });
 
