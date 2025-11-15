@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
@@ -6,26 +7,25 @@ import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { api } from "~/utils/api";
-
-type ProfileForm = {
-  name: string;
-  qiudaoDateSolar: string;
-  qiudaoHour: string;
-  qiudaoTemple: string;
-  qiudaoTanzhu: string;
-  affiliation: string;
-  dianChuanShi: string;
-  yinShi: string;
-  baoShi: string;
-};
+import {
+  userProfileFormSchema,
+  type UserProfileFormData,
+} from "~/lib/schemas";
 
 export default function PersonalAccountPage() {
   const { data: sessionData, update: updateSession } = useSession();
   const [qiudaoHour, setQiudaoHour] = useState<string>("");
   const [lunarDate, setLunarDate] = useState<string>("");
 
-  const { register, handleSubmit, watch, reset } = useForm<ProfileForm>({
-    mode: "all",
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<UserProfileFormData>({
+    resolver: zodResolver(userProfileFormSchema),
+    mode: "onBlur", // Better UX - only validate after user leaves field
   });
 
   // Fetch current user profile data
@@ -100,7 +100,7 @@ export default function PersonalAccountPage() {
     return <span className="loading loading-ring loading-md" />;
   }
 
-  const handleFormSubmit = handleSubmit((data) => {
+  const onSubmit = (data: UserProfileFormData) => {
     // Update profile and image first
     updateProfile(
       {
@@ -126,7 +126,7 @@ export default function PersonalAccountPage() {
         },
       },
     );
-  });
+  };
 
   return (
     <div className="flex flex-col space-y-4">
@@ -135,7 +135,7 @@ export default function PersonalAccountPage() {
       </article>
       <form
         className="form-control max-w-xs space-y-4"
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <div>
           <label className="label">
@@ -151,26 +151,40 @@ export default function PersonalAccountPage() {
                 />
               </div>
             </div>
-            <ReactiveButton
+            <button
+              type="button"
               className="btn bg-[#00C300] text-[#fff] hover:bg-[#00C300]"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={() => getLineImage()}
-              loading={getLineImageIsFetching}
+              onClick={() => {
+                void getLineImage();
+              }}
+              disabled={getLineImageIsFetching}
             >
+              {getLineImageIsFetching && (
+                <span className="loading loading-spinner loading-sm" />
+              )}
               從 Line 同步
-            </ReactiveButton>
+            </button>
           </div>
         </div>
         <div>
           <label className="label">
-            <span className="label-text">姓名（APP 裡顯示的名字）</span>
+            <span className="label-text">
+              姓名（APP 裡顯示的名字）
+              <span className="text-error ml-1">*</span>
+            </span>
           </label>
           <input
             type="text"
             className="input input-bordered invalid:input-error w-full"
-            required
             {...register("name")}
           />
+          {errors.name && (
+            <label className="label">
+              <span className="label-text-alt text-error">
+                {errors.name.message}
+              </span>
+            </label>
+          )}
         </div>
 
         <div className="divider"></div>
@@ -256,9 +270,8 @@ export default function PersonalAccountPage() {
           />
         </div>
         <ReactiveButton
+          type="submit"
           className="btn btn-primary"
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={handleFormSubmit}
           loading={updateProfileIsPending || updateQiudaoInfoIsPending}
           isSuccess={updateProfileIsSuccess}
           error={updateProfileError?.message}
