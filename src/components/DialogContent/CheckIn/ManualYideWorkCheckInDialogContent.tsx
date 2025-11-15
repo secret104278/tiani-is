@@ -9,8 +9,10 @@ import ReactiveButton from "../../utils/ReactiveButton";
 
 export default function ManualYideWorkCheckInDialogContent({
   activityId,
+  onClose,
 }: {
   activityId: number;
+  onClose?: () => void;
 }) {
   const {
     register,
@@ -24,6 +26,7 @@ export default function ManualYideWorkCheckInDialogContent({
   const { manualRegister, isPending, error } = useCheckInMutations(
     "yidework",
     activityId,
+    { onClose },
   );
 
   const onSubmit = (data: ManualCheckInFormData) => {

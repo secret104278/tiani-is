@@ -16,6 +16,7 @@ export default function EtogetherActivityRegisterDialogContent({
   activityId,
   subgroups,
   defaultValues,
+  onClose,
 }: {
   user: User;
   activityId: number;
@@ -24,6 +25,7 @@ export default function EtogetherActivityRegisterDialogContent({
     title: string;
   }[];
   defaultValues?: EtogetherRegistrationFormData;
+  onClose?: () => void;
 }) {
   const utils = api.useUtils();
 
@@ -49,6 +51,7 @@ export default function EtogetherActivityRegisterDialogContent({
   } = api.etogetherActivity.registerActivity.useMutation({
     onSuccess: async () => {
       await invalidateActivityRegistrations(utils, "etogether", activityId);
+      onClose?.();
     },
   });
 

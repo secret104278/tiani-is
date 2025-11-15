@@ -11,12 +11,14 @@ import ReactiveButton from "../../utils/ReactiveButton";
 export default function ManualEtogetherCheckInDialogContent({
   activityId,
   subgroups,
+  onClose,
 }: {
   activityId: number;
   subgroups: {
     id: number;
     title: string;
   }[];
+  onClose?: () => void;
 }) {
   const {
     register,
@@ -30,6 +32,7 @@ export default function ManualEtogetherCheckInDialogContent({
   const { manualRegister, isPending, error } = useCheckInMutations(
     "etogether",
     activityId,
+    { onClose },
   );
 
   const onSubmit = (data: ManualEtogetherCheckInFormData) => {

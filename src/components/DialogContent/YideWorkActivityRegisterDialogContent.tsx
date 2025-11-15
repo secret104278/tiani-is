@@ -14,10 +14,12 @@ export default function YideWorkActivityRegisterDialogContent({
   user,
   activityId,
   defaultValues,
+  onClose,
 }: {
   user: User;
   activityId: number;
   defaultValues?: YideWorkRegistrationFormData;
+  onClose?: () => void;
 }) {
   const utils = api.useUtils();
 
@@ -43,6 +45,7 @@ export default function YideWorkActivityRegisterDialogContent({
   } = api.yideworkActivity.registerActivity.useMutation({
     onSuccess: async () => {
       await invalidateActivityRegistrations(utils, "yidework", activityId);
+      onClose?.();
     },
   });
 

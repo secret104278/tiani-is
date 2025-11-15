@@ -7,8 +7,10 @@ import ReactiveButton from "../../utils/ReactiveButton";
 
 export default function ManualClassActivityCheckInDialogContent({
   activityId,
+  onClose,
 }: {
   activityId: number;
+  onClose?: () => void;
 }) {
   const utils = api.useUtils();
   const [selected, setSelected] = useState<UserComboboxSelected>(null);
@@ -20,6 +22,7 @@ export default function ManualClassActivityCheckInDialogContent({
   } = api.classActivity.checkInActivity.useMutation({
     onSuccess: async () => {
       await invalidateActivityRegistrations(utils, "class", activityId);
+      onClose?.();
     },
   });
 
