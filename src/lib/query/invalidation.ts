@@ -104,7 +104,34 @@ export async function invalidateActivityRegistrations(
 
   const router = routerMap[type];
 
-  // Invalidate registration-related queries
+  // Invalidate type-specific queries
+  if (type === "class") {
+    await utils.classActivity.getActivityCheckRecords.invalidate({
+      activityId,
+    });
+  }
+
+  if (type === "volunteer") {
+    await utils.volunteerActivity.getActivityCheckRecords.invalidate({
+      activityId,
+    });
+  }
+
+  if (type === "etogether") {
+    await utils.etogetherActivity.getActivityWithRegistrations.invalidate({
+      activityId,
+    });
+    await utils.etogetherActivity.getRegister.invalidate({ activityId });
+  }
+
+  if (type === "yidework") {
+    await utils.yideworkActivity.getActivityWithRegistrations.invalidate({
+      activityId,
+    });
+    await utils.yideworkActivity.getRegister.invalidate({ activityId });
+  }
+
+  // Invalidate common registration-related queries
   if ("getRegisteredUsers" in router) {
     await router.getRegisteredUsers.invalidate({ activityId });
   }
