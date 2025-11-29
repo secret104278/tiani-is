@@ -1,8 +1,8 @@
 import { useClose } from "@headlessui/react";
 import { isNil } from "lodash";
 import { useState } from "react";
-import { api } from "~/utils/api";
 import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
+import { api } from "~/utils/api";
 import UserCombobox, { type UserComboboxSelected } from "../../UserCombobox";
 import ReactiveButton from "../../utils/ReactiveButton";
 

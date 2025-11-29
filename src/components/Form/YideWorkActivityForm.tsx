@@ -1,14 +1,14 @@
-import type { inferRouterOutputs } from "@trpc/server";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { inferRouterOutputs } from "@trpc/server";
 import { isNil } from "lodash";
 import { useForm } from "react-hook-form";
+import { useYideWorkMutations } from "~/hooks";
+import {
+  type YideWorkActivityFormData,
+  yideWorkActivityFormSchema,
+} from "~/lib/schemas";
 import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
-import {
-  yideWorkActivityFormSchema,
-  type YideWorkActivityFormData,
-} from "~/lib/schemas";
-import { useYideWorkMutations } from "~/hooks";
 import {
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   YIDE_WORK_ACTIVITY_TITLES,
@@ -20,7 +20,7 @@ import {
 } from "~/utils/ui";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
-import { DateTimeField, NumberField, FormError } from "./shared";
+import { DateTimeField, FormError, NumberField } from "./shared";
 
 const EMPTY_PRESET_ID = -1;
 
@@ -33,7 +33,9 @@ export default function YideWorkActivityForm({
 }) {
   let formDefaultValues: Partial<YideWorkActivityFormData> = {
     title: YIDE_WORK_ACTIVITY_TITLES?.[0],
-    startDateTime: getCurrentDateTime() as any as Date,
+    // Cast to Date because RHF defaultValues expects the schema type (Date),
+    // but the input type="datetime-local" requires an ISO string.
+    startDateTime: getCurrentDateTime() as unknown as Date,
     description: "",
   };
   if (defaultActivity) {
@@ -48,7 +50,9 @@ export default function YideWorkActivityForm({
       locationId: defaultActivity.locationId,
       presetId: defaultActivity.presetId ?? EMPTY_PRESET_ID,
 
-      startDateTime: getDateTimeString(defaultActivity.startDateTime) as any as Date,
+      startDateTime: getDateTimeString(
+        defaultActivity.startDateTime,
+      ) as unknown as Date,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -100,10 +104,13 @@ export default function YideWorkActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      } as any);
+      } as unknown as Parameters<typeof updateActivity>[0]);
     } else {
       // Create new activity
-      createActivity(activityData as any);
+      // Create new activity
+      createActivity(
+        activityData as unknown as Parameters<typeof createActivity>[0],
+      );
     }
   };
 
@@ -115,15 +122,13 @@ export default function YideWorkActivityForm({
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   if (locationIsLoading) return <div className="loading" />;
-  if (!isNil(locationsError)) return <FormError error={locationsError.message} />;
+  if (!isNil(locationsError))
+    return <FormError error={locationsError.message} />;
   if (presetsIsLoading) return <div className="loading" />;
   if (!isNil(presetsError)) return <FormError error={presetsError.message} />;
 
   return (
-    <form
-      className="form-control max-w-xs"
-      onSubmit={handleFormSubmit()}
-    >
+    <form className="form-control max-w-xs" onSubmit={handleFormSubmit()}>
       <div>
         <label className="label">
           <span className="label-text">道務項目</span>
@@ -158,7 +163,7 @@ export default function YideWorkActivityForm({
         <label className="label">
           <span className="label-text">
             佛堂名稱
-            <span className="text-error ml-1">*</span>
+            <span className="ml-1 text-error">*</span>
           </span>
         </label>
         <select

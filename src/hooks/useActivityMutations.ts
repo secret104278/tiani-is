@@ -23,11 +23,11 @@
  */
 
 import { useRouter } from "next/router";
-import { api } from "~/utils/api";
 import {
-  invalidateActivities,
   type ActivityType,
+  invalidateActivities,
 } from "~/lib/query/invalidation";
+import { api } from "~/utils/api";
 
 interface UseActivityMutationsOptions {
   /**
@@ -62,7 +62,12 @@ export function useActivityMutations(
   type: ActivityType,
   options: UseActivityMutationsOptions = {},
 ) {
-  const { onCreateSuccess, onUpdateSuccess, onDeleteSuccess, autoNavigate = true } = options;
+  const {
+    onCreateSuccess,
+    onUpdateSuccess,
+    onDeleteSuccess,
+    autoNavigate = true,
+  } = options;
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -165,8 +170,7 @@ export function useActivityMutations(
     isDeleting: deleteMutation.isPending,
 
     // Error states
-    error:
-      createMutation.error || updateMutation.error || deleteMutation.error,
+    error: createMutation.error || updateMutation.error || deleteMutation.error,
     createError: createMutation.error,
     updateError: updateMutation.error,
     deleteError: deleteMutation.error,

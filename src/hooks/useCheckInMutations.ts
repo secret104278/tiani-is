@@ -17,11 +17,11 @@
  */
 
 import { useRouter } from "next/router";
-import { api } from "~/utils/api";
 import {
-  invalidateActivityRegistrations,
   type ActivityType,
+  invalidateActivityRegistrations,
 } from "~/lib/query/invalidation";
+import { api } from "~/utils/api";
 
 interface UseCheckInMutationsOptions {
   /**

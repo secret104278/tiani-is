@@ -1,16 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
 import lunisolar from "lunisolar";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
-import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
+import { type UserProfileFormData, userProfileFormSchema } from "~/lib/schemas";
 import { api } from "~/utils/api";
-import {
-  userProfileFormSchema,
-  type UserProfileFormData,
-} from "~/lib/schemas";
 
 export default function PersonalAccountPage() {
   const { data: sessionData, update: updateSession } = useSession();
@@ -29,10 +26,8 @@ export default function PersonalAccountPage() {
   });
 
   // Fetch current user profile data
-  const {
-    data: userProfile,
-    isLoading: userProfileIsLoading,
-  } = api.user.getCurrentUserProfile.useQuery();
+  const { data: userProfile, isLoading: userProfileIsLoading } =
+    api.user.getCurrentUserProfile.useQuery();
 
   // Set form default values when user profile is loaded
   useEffect(() => {
@@ -91,10 +86,8 @@ export default function PersonalAccountPage() {
     },
   });
 
-  const {
-    mutate: updateQiudaoInfo,
-    isPending: updateQiudaoInfoIsPending,
-  } = api.user.updateQiudaoInfo.useMutation();
+  const { mutate: updateQiudaoInfo, isPending: updateQiudaoInfoIsPending } =
+    api.user.updateQiudaoInfo.useMutation();
 
   if (!sessionData || userProfileIsLoading) {
     return <span className="loading loading-ring loading-md" />;
@@ -170,7 +163,7 @@ export default function PersonalAccountPage() {
           <label className="label">
             <span className="label-text">
               姓名（APP 裡顯示的名字）
-              <span className="text-error ml-1">*</span>
+              <span className="ml-1 text-error">*</span>
             </span>
           </label>
           <input
@@ -187,7 +180,7 @@ export default function PersonalAccountPage() {
           )}
         </div>
 
-        <div className="divider"></div>
+        <div className="divider" />
 
         <article className="prose">
           <h2>求道卡資料</h2>

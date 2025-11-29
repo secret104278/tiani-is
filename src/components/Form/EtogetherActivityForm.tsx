@@ -1,15 +1,15 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   EtogetherActivity,
   EtogetherActivitySubgroup,
 } from "@prisma/client";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { isNil } from "lodash";
 import { useFieldArray, useForm } from "react-hook-form";
-import {
-  etogetherActivityFormSchema,
-  type EtogetherActivityFormData,
-} from "~/lib/schemas";
 import { useEtogetherMutations } from "~/hooks";
+import {
+  type EtogetherActivityFormData,
+  etogetherActivityFormSchema,
+} from "~/lib/schemas";
 import {
   getCurrentDateTime,
   getDateTimeString,
@@ -17,7 +17,7 @@ import {
   getEndTime,
 } from "~/utils/ui";
 import ReactiveButton from "../utils/ReactiveButton";
-import { FormField, DateTimeField, NumberField, FormError } from "./shared";
+import { DateTimeField, FormError, FormField, NumberField } from "./shared";
 
 export default function EtogetherActivityForm({
   defaultActivity,
@@ -28,14 +28,18 @@ export default function EtogetherActivityForm({
 }) {
   let formDefaultValues: Partial<EtogetherActivityFormData> = {
     title: "",
-    startDateTime: getCurrentDateTime() as any as Date,
+    // Cast to Date because RHF defaultValues expects the schema type (Date),
+    // but the input type="datetime-local" requires an ISO string.
+    startDateTime: getCurrentDateTime() as unknown as Date,
     description: "",
   };
   if (defaultActivity) {
     formDefaultValues = {
       title: defaultActivity.title,
       location: defaultActivity.location,
-      startDateTime: getDateTimeString(defaultActivity.startDateTime) as any as Date,
+      startDateTime: getDateTimeString(
+        defaultActivity.startDateTime,
+      ) as unknown as Date,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -82,10 +86,13 @@ export default function EtogetherActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      } as any);
+      } as unknown as Parameters<typeof updateActivity>[0]);
     } else {
       // Create new activity
-      createActivity(activityData as any);
+      // Create new activity
+      createActivity(
+        activityData as unknown as Parameters<typeof createActivity>[0],
+      );
     }
   };
 
@@ -97,10 +104,7 @@ export default function EtogetherActivityForm({
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   return (
-    <form
-      className="form-control max-w-xs"
-      onSubmit={handleFormSubmit()}
-    >
+    <form className="form-control max-w-xs" onSubmit={handleFormSubmit()}>
       <FormField label="主題" required error={errors.title?.message}>
         <input type="text" className="tiani-input" {...register("title")} />
       </FormField>

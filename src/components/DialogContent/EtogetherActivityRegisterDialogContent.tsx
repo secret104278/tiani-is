@@ -4,12 +4,12 @@ import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
 
 import type { User } from "next-auth";
-import { api } from "~/utils/api";
 import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import {
-  etogetherRegistrationFormSchema,
   type EtogetherRegistrationFormData,
+  etogetherRegistrationFormSchema,
 } from "~/lib/schemas";
+import { api } from "~/utils/api";
 import { truncateTitle } from "~/utils/ui";
 
 export default function EtogetherActivityRegisterDialogContent({
@@ -141,7 +141,9 @@ export default function EtogetherActivityRegisterDialogContent({
       <button
         type="button"
         className="btn"
-        onClick={() => append({ username: "", subgroupId: subgroups?.[0]?.id ?? -1 })}
+        onClick={() =>
+          append({ username: "", subgroupId: subgroups?.[0]?.id ?? -1 })
+        }
       >
         新增夥伴
       </button>

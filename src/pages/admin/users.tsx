@@ -1,15 +1,19 @@
-import { BarsArrowDownIcon, PlusIcon, UserIcon } from "@heroicons/react/20/solid";
+import {
+  BarsArrowDownIcon,
+  PlusIcon,
+  UserIcon,
+} from "@heroicons/react/20/solid";
 import { Role } from "@prisma/client";
 import { isEmpty, truncate } from "lodash";
+import lunisolar from "lunisolar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import lunisolar from "lunisolar";
+import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
-import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { api } from "~/utils/api";
 import { userComparator } from "~/utils/ui";
 
@@ -456,9 +460,7 @@ export default function AdminUsersPage() {
                   )}
                 </div>
               </th>
-              <th>
-                個人資料
-              </th>
+              <th>個人資料</th>
             </tr>
           </thead>
           <tbody>

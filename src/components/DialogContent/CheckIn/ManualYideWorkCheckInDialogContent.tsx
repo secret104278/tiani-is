@@ -1,12 +1,12 @@
 import { useClose } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import {
-  manualCheckInFormSchema,
   type ManualCheckInFormData,
+  manualCheckInFormSchema,
 } from "~/lib/schemas";
 import { api } from "~/utils/api";
-import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import ReactiveButton from "../../utils/ReactiveButton";
 
 export default function ManualYideWorkCheckInDialogContent({

@@ -63,7 +63,7 @@ export function FormField({
       <label className="label">
         <span className="label-text">
           {label}
-          {required && <span className="text-error ml-1">*</span>}
+          {required && <span className="ml-1 text-error">*</span>}
         </span>
       </label>
       {children}

@@ -4,12 +4,12 @@ import { useFieldArray, useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
 
 import type { User } from "next-auth";
-import { api } from "~/utils/api";
 import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
 import {
-  yideWorkRegistrationFormSchema,
   type YideWorkRegistrationFormData,
+  yideWorkRegistrationFormSchema,
 } from "~/lib/schemas";
+import { api } from "~/utils/api";
 
 export default function YideWorkActivityRegisterDialogContent({
   user,

@@ -1,12 +1,12 @@
-import type { VolunteerActivity } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { VolunteerActivity } from "@prisma/client";
 import { isNil } from "lodash";
 import { useForm } from "react-hook-form";
-import {
-  volunteerActivityFormSchema,
-  type VolunteerActivityFormData,
-} from "~/lib/schemas";
 import { useVolunteerMutations } from "~/hooks";
+import {
+  type VolunteerActivityFormData,
+  volunteerActivityFormSchema,
+} from "~/lib/schemas";
 import {
   VOLUNTEER_ACTIVITY_TOPICS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
@@ -18,12 +18,7 @@ import {
 } from "~/utils/ui";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput, { NestedSelect } from "./SelectWithCustomInput";
-import {
-  FormField,
-  DateTimeField,
-  NumberField,
-  FormError,
-} from "./shared";
+import { DateTimeField, FormError, FormField, NumberField } from "./shared";
 
 export default function VolunteerActivityForm({
   defaultActivity,
@@ -32,7 +27,9 @@ export default function VolunteerActivityForm({
 }) {
   let formDefaultValues: Partial<VolunteerActivityFormData> = {
     title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],
-    startDateTime: getCurrentDateTime() as any as Date,
+    // Cast to Date because RHF defaultValues expects the schema type (Date),
+    // but the input type="datetime-local" requires an ISO string.
+    startDateTime: getCurrentDateTime() as unknown as Date,
     description: "",
   };
   if (defaultActivity) {
@@ -44,7 +41,9 @@ export default function VolunteerActivityForm({
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
       headcount: defaultActivity.headcount,
       location: defaultActivity.location,
-      startDateTime: getDateTimeString(defaultActivity.startDateTime) as any as Date,
+      startDateTime: getDateTimeString(
+        defaultActivity.startDateTime,
+      ) as unknown as Date,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -85,10 +84,13 @@ export default function VolunteerActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      } as any);
+      } as unknown as Parameters<typeof updateActivity>[0]);
     } else {
       // Create new activity
-      createActivity(activityData as any);
+      // Create new activity
+      createActivity(
+        activityData as unknown as Parameters<typeof createActivity>[0],
+      );
     }
   };
 
@@ -100,10 +102,7 @@ export default function VolunteerActivityForm({
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   return (
-    <form
-      className="form-control max-w-xs"
-      onSubmit={handleFormSubmit()}
-    >
+    <form className="form-control max-w-xs" onSubmit={handleFormSubmit()}>
       <div hidden={!isNil(defaultActivity)}>
         <label className="label">
           <span className="label-text">主題</span>

@@ -87,7 +87,7 @@ export default function QiudaoLunarDisplay({
           <label className="label">
             <span className="label-text">求道日期（農曆）</span>
           </label>
-          <div className="input input-bordered w-full bg-base-200 flex items-center">
+          <div className="input input-bordered flex w-full items-center bg-base-200">
             {lunarInfo.ganzhiYear} {lunarInfo.month} {lunarInfo.day}
             {hour && ` ${hour}時`}
           </div>
