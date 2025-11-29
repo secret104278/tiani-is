@@ -22,6 +22,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+
+    geolocation: { latitude: 22.863542, longitude: 120.366275 },
+    permissions: ['geolocation'],
   },
 
   /* Configure projects for major browsers */
@@ -51,8 +54,12 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "pnpm dev",
+    command: "pnpm preview",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+    env: {
+      AUTH_TRUST_HOST: "true",
+    },
   },
 });

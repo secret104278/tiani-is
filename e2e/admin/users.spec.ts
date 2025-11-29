@@ -7,6 +7,22 @@ test.describe("Admin Users", () => {
     // Verify page title
     await expect(page.getByRole("heading", { name: "帳號管理" })).toBeVisible();
 
+    // Verify table columns
+    const headers = [
+      "姓名",
+      "最高 管理者",
+      "天一志工隊 管理者",
+      "義德班務網 管理者",
+      "義德道務網 管理者",
+      "活動e起來 管理者",
+      "個人資料",
+    ];
+    for (const header of headers) {
+      await expect(
+        page.getByRole("columnheader", { name: header }),
+      ).toBeVisible();
+    }
+
     // Verify "E2E Test User" is present in the table
     // It might be paginated or sorted, but with few users it should be visible.
     // The name cell is in the first column (tiani-table-pin-col).

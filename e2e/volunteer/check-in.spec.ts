@@ -49,7 +49,7 @@ test.describe("Volunteer Check-in", () => {
       timeout: 10000,
     });
 
-    // The component mocks geolocation in dev, so "打卡" should be enabled.
+    // The browser mocks geolocation, so "打卡" should be enabled.
     const confirmButton = page.getByRole("button", { name: "打卡" });
     // Use timeout to allow geolocation logic to settle
     // The dialog might be animating in or geolocation loading

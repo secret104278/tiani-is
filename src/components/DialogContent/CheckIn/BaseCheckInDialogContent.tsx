@@ -28,21 +28,7 @@ export default function BaseCheckInDialogContent({
   checkInError?: string;
   onCheckIn: (latitude: number, longitude: number) => void;
 }) {
-  let geoState = useGeolocation();
-  if (process.env.NODE_ENV === "development") {
-    geoState = {
-      error: undefined,
-      latitude: TIANI_GPS_CENTERS.at(0)!.at(0)!,
-      longitude: TIANI_GPS_CENTERS.at(0)!.at(1)!,
-      loading: false,
-      accuracy: null,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null,
-      timestamp: null,
-    };
-  }
+  const geoState = useGeolocation();
 
   if (geoState.error)
     return <AlertWarning>{geoState.error.message}</AlertWarning>;
