@@ -20,7 +20,7 @@ import {
 } from "~/utils/ui";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
-import { DateTimeField, FormError, NumberField } from "./shared";
+import { ControlledDateTimeField, FormError, NumberField } from "./shared";
 
 const EMPTY_PRESET_ID = -1;
 
@@ -33,9 +33,7 @@ export default function YideWorkActivityForm({
 }) {
   let formDefaultValues: Partial<YideWorkActivityFormData> = {
     title: YIDE_WORK_ACTIVITY_TITLES?.[0],
-    // Cast to Date because RHF defaultValues expects the schema type (Date),
-    // but the input type="datetime-local" requires an ISO string.
-    startDateTime: getCurrentDateTime() as unknown as Date,
+    startDateTime: new Date(getCurrentDateTime()),
     description: "",
   };
   if (defaultActivity) {
@@ -50,9 +48,7 @@ export default function YideWorkActivityForm({
       locationId: defaultActivity.locationId,
       presetId: defaultActivity.presetId ?? EMPTY_PRESET_ID,
 
-      startDateTime: getDateTimeString(
-        defaultActivity.startDateTime,
-      ) as unknown as Date,
+      startDateTime: defaultActivity.startDateTime,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -65,6 +61,7 @@ export default function YideWorkActivityForm({
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<YideWorkActivityFormData>({
     resolver: zodResolver(yideWorkActivityFormSchema),
@@ -104,13 +101,11 @@ export default function YideWorkActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      } as unknown as Parameters<typeof updateActivity>[0]);
+      });
     } else {
       // Create new activity
       // Create new activity
-      createActivity(
-        activityData as unknown as Parameters<typeof createActivity>[0],
-      );
+      createActivity(activityData);
     }
   };
 
@@ -185,11 +180,11 @@ export default function YideWorkActivityForm({
         )}
       </div>
       <div className="divider" />
-      <DateTimeField
+      <ControlledDateTimeField
         label="時間"
         required
-        error={errors.startDateTime?.message}
-        {...register("startDateTime", { valueAsDate: true })}
+        control={control}
+        name="startDateTime"
       />
       <NumberField
         label="預估時數"

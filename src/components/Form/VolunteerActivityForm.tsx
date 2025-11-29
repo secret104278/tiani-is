@@ -18,7 +18,12 @@ import {
 } from "~/utils/ui";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput, { NestedSelect } from "./SelectWithCustomInput";
-import { DateTimeField, FormError, FormField, NumberField } from "./shared";
+import {
+  ControlledDateTimeField,
+  FormError,
+  FormField,
+  NumberField,
+} from "./shared";
 
 export default function VolunteerActivityForm({
   defaultActivity,
@@ -27,9 +32,7 @@ export default function VolunteerActivityForm({
 }) {
   let formDefaultValues: Partial<VolunteerActivityFormData> = {
     title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],
-    // Cast to Date because RHF defaultValues expects the schema type (Date),
-    // but the input type="datetime-local" requires an ISO string.
-    startDateTime: getCurrentDateTime() as unknown as Date,
+    startDateTime: new Date(getCurrentDateTime()),
     description: "",
   };
   if (defaultActivity) {
@@ -41,9 +44,7 @@ export default function VolunteerActivityForm({
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
       headcount: defaultActivity.headcount,
       location: defaultActivity.location,
-      startDateTime: getDateTimeString(
-        defaultActivity.startDateTime,
-      ) as unknown as Date,
+      startDateTime: defaultActivity.startDateTime,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -56,6 +57,7 @@ export default function VolunteerActivityForm({
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<VolunteerActivityFormData>({
     resolver: zodResolver(volunteerActivityFormSchema),
@@ -84,13 +86,11 @@ export default function VolunteerActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      } as unknown as Parameters<typeof updateActivity>[0]);
+      });
     } else {
       // Create new activity
       // Create new activity
-      createActivity(
-        activityData as unknown as Parameters<typeof createActivity>[0],
-      );
+      createActivity(activityData);
     }
   };
 
@@ -125,11 +125,11 @@ export default function VolunteerActivityForm({
         <input type="text" className="tiani-input" {...register("location")} />
       </FormField>
       <div className="divider" />
-      <DateTimeField
+      <ControlledDateTimeField
         label="開始時間"
         required
-        error={errors.startDateTime?.message}
-        {...register("startDateTime", { valueAsDate: true })}
+        control={control}
+        name="startDateTime"
       />
       <NumberField
         label="預估時數"

@@ -12,5 +12,9 @@
 
 export { FormField, type FormFieldProps } from "./FormField";
 export { DateTimeField, type DateTimeFieldProps } from "./DateTimeField";
+export {
+  ControlledDateTimeField,
+  type ControlledDateTimeFieldProps,
+} from "./ControlledDateTimeField";
 export { NumberField, type NumberFieldProps } from "./NumberField";
 export { FormError, type FormErrorProps } from "./FormError";

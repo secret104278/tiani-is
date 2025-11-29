@@ -17,7 +17,12 @@ import {
   getEndTime,
 } from "~/utils/ui";
 import ReactiveButton from "../utils/ReactiveButton";
-import { DateTimeField, FormError, FormField, NumberField } from "./shared";
+import {
+  ControlledDateTimeField,
+  FormError,
+  FormField,
+  NumberField,
+} from "./shared";
 
 export default function EtogetherActivityForm({
   defaultActivity,
@@ -28,18 +33,14 @@ export default function EtogetherActivityForm({
 }) {
   let formDefaultValues: Partial<EtogetherActivityFormData> = {
     title: "",
-    // Cast to Date because RHF defaultValues expects the schema type (Date),
-    // but the input type="datetime-local" requires an ISO string.
-    startDateTime: getCurrentDateTime() as unknown as Date,
+    startDateTime: new Date(getCurrentDateTime()),
     description: "",
   };
   if (defaultActivity) {
     formDefaultValues = {
       title: defaultActivity.title,
       location: defaultActivity.location,
-      startDateTime: getDateTimeString(
-        defaultActivity.startDateTime,
-      ) as unknown as Date,
+      startDateTime: defaultActivity.startDateTime,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -86,13 +87,11 @@ export default function EtogetherActivityForm({
       updateActivity({
         activityId: defaultActivity.id,
         ...activityData,
-      } as unknown as Parameters<typeof updateActivity>[0]);
+      });
     } else {
       // Create new activity
       // Create new activity
-      createActivity(
-        activityData as unknown as Parameters<typeof createActivity>[0],
-      );
+      createActivity(activityData);
     }
   };
 
@@ -112,11 +111,11 @@ export default function EtogetherActivityForm({
         <input type="text" className="tiani-input" {...register("location")} />
       </FormField>
       <div className="divider" />
-      <DateTimeField
+      <ControlledDateTimeField
         label="開始時間"
         required
-        error={errors.startDateTime?.message}
-        {...register("startDateTime", { valueAsDate: true })}
+        control={control}
+        name="startDateTime"
       />
       <NumberField
         label="預估時數"
