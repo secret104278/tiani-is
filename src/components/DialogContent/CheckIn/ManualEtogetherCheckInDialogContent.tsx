@@ -1,15 +1,14 @@
-import type { inferRouterInputs } from "@trpc/server";
-import { useRouter } from "next/router";
+import { useClose } from "@headlessui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import type { EtogetherRouter } from "~/server/api/routers/etogether";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
+import {
+  type ManualEtogetherCheckInFormData,
+  manualEtogetherCheckInFormSchema,
+} from "~/lib/schemas";
 import { api } from "~/utils/api";
 import { truncateTitle } from "~/utils/ui";
 import ReactiveButton from "../../utils/ReactiveButton";
-
-type ManualEtogetherCheckInFormData = Omit<
-  inferRouterInputs<EtogetherRouter>["manualExternalRegister"],
-  "activityId" | "checked"
->;
 
 export default function ManualEtogetherCheckInDialogContent({
   activityId,
@@ -21,32 +20,47 @@ export default function ManualEtogetherCheckInDialogContent({
     title: string;
   }[];
 }) {
-  const router = useRouter();
+  const close = useClose();
+  const utils = api.useUtils();
 
-  const { register, handleSubmit } = useForm<ManualEtogetherCheckInFormData>({
-    mode: "all",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ManualEtogetherCheckInFormData>({
+    resolver: zodResolver(manualEtogetherCheckInFormSchema),
+    mode: "onBlur",
   });
 
   const {
-    mutate: manualExternalRegister,
-    isPending: manualExternalRegisterIsPending,
-    error: manualExternalRegisterError,
+    mutate: manualRegister,
+    isPending,
+    error,
   } = api.etogetherActivity.manualExternalRegister.useMutation({
-    onSuccess: () => router.reload(),
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "etogether", activityId);
+      close();
+    },
   });
 
+  const onSubmit = (data: ManualEtogetherCheckInFormData) => {
+    manualRegister({ activityId, checked: true, ...data });
+  };
+
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label className="label">
           <span className="label-text">姓名</span>
         </label>
-        <input
-          required
-          type="text"
-          className="tiani-input"
-          {...register("username")}
-        />
+        <input type="text" className="tiani-input" {...register("username")} />
+        {errors.username && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.username.message}
+            </span>
+          </label>
+        )}
       </div>
       <div>
         <label className="label">
@@ -54,7 +68,6 @@ export default function ManualEtogetherCheckInDialogContent({
         </label>
         <select
           className="select select-bordered"
-          required
           {...register("subgroupId", {
             valueAsNumber: true,
           })}
@@ -65,15 +78,19 @@ export default function ManualEtogetherCheckInDialogContent({
             </option>
           ))}
         </select>
+        {errors.subgroupId && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.subgroupId.message}
+            </span>
+          </label>
+        )}
       </div>
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
-        loading={manualExternalRegisterIsPending}
-        error={manualExternalRegisterError?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={handleSubmit((data) =>
-          manualExternalRegister({ activityId, checked: true, ...data }),
-        )}
+        loading={isPending}
+        error={error?.message}
       >
         送出
       </ReactiveButton>

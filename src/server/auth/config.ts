@@ -24,10 +24,9 @@ declare module "next-auth" {
     };
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    roles: Role[];
+  }
 }
 
 /**
@@ -84,19 +83,19 @@ export const authConfig = {
         ...session.user,
         id: user.id,
         role: {
-          is_tiani_admin: (user as User).roles.includes(Role.TIANI_ADMIN),
+          is_tiani_admin: user.roles.includes(Role.TIANI_ADMIN),
           is_volunteer_admin:
-            (user as User).roles.includes(Role.VOLUNTEER_ADMIN) ||
-            (user as User).roles.includes(Role.TIANI_ADMIN),
+            user.roles.includes(Role.VOLUNTEER_ADMIN) ||
+            user.roles.includes(Role.TIANI_ADMIN),
           is_yideclass_admin:
-            (user as User).roles.includes(Role.YIDECLASS_ADMIN) ||
-            (user as User).roles.includes(Role.TIANI_ADMIN),
+            user.roles.includes(Role.YIDECLASS_ADMIN) ||
+            user.roles.includes(Role.TIANI_ADMIN),
           is_yidework_admin:
-            (user as User).roles.includes(Role.YIDEWORK_ADMIN) ||
-            (user as User).roles.includes(Role.TIANI_ADMIN),
+            user.roles.includes(Role.YIDEWORK_ADMIN) ||
+            user.roles.includes(Role.TIANI_ADMIN),
           is_etogether_admin:
-            (user as User).roles.includes(Role.ETOGETHER_ADMIN) ||
-            (user as User).roles.includes(Role.TIANI_ADMIN),
+            user.roles.includes(Role.ETOGETHER_ADMIN) ||
+            user.roles.includes(Role.TIANI_ADMIN),
         },
       },
     }),

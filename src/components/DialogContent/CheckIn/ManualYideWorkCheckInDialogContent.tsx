@@ -1,55 +1,66 @@
-import type { inferRouterInputs } from "@trpc/server";
-import { useRouter } from "next/router";
+import { useClose } from "@headlessui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import type { YideWorkRouter } from "~/server/api/routers/yidework";
+import { invalidateActivityRegistrations } from "~/lib/query/invalidation";
+import {
+  type ManualCheckInFormData,
+  manualCheckInFormSchema,
+} from "~/lib/schemas";
 import { api } from "~/utils/api";
 import ReactiveButton from "../../utils/ReactiveButton";
-
-type ManualYideWorkCheckInFormData = Omit<
-  inferRouterInputs<YideWorkRouter>["manualExternalRegister"],
-  "activityId" | "checked"
->;
 
 export default function ManualYideWorkCheckInDialogContent({
   activityId,
 }: {
   activityId: number;
 }) {
-  const router = useRouter();
+  const close = useClose();
+  const utils = api.useUtils();
 
-  const { register, handleSubmit } = useForm<ManualYideWorkCheckInFormData>({
-    mode: "all",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ManualCheckInFormData>({
+    resolver: zodResolver(manualCheckInFormSchema),
+    mode: "onBlur",
   });
 
   const {
-    mutate: manualExternalRegister,
-    isPending: manualExternalRegisterIsPending,
-    error: manualExternalRegisterError,
+    mutate: manualRegister,
+    isPending,
+    error,
   } = api.yideworkActivity.manualExternalRegister.useMutation({
-    onSuccess: () => router.reload(),
+    onSuccess: async () => {
+      await invalidateActivityRegistrations(utils, "yidework", activityId);
+      close();
+    },
   });
 
+  const onSubmit = (data: ManualCheckInFormData) => {
+    manualRegister({ activityId, checked: true, ...data });
+  };
+
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label className="label">
           <span className="label-text">姓名</span>
         </label>
-        <input
-          required
-          type="text"
-          className="tiani-input"
-          {...register("username")}
-        />
+        <input type="text" className="tiani-input" {...register("username")} />
+        {errors.username && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.username.message}
+            </span>
+          </label>
+        )}
       </div>
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
-        loading={manualExternalRegisterIsPending}
-        error={manualExternalRegisterError?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={handleSubmit((data) =>
-          manualExternalRegister({ activityId, checked: true, ...data }),
-        )}
+        loading={isPending}
+        error={error?.message}
       >
         送出
       </ReactiveButton>

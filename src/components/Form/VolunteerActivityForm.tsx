@@ -1,8 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import type { VolunteerActivity } from "@prisma/client";
 import { isNil } from "lodash";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { api } from "~/utils/api";
+import { useVolunteerMutations } from "~/hooks";
+import {
+  type VolunteerActivityFormData,
+  volunteerActivityFormSchema,
+} from "~/lib/schemas";
 import {
   VOLUNTEER_ACTIVITY_TOPICS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
@@ -12,19 +16,14 @@ import {
   getEndTime,
   titleIsOther,
 } from "~/utils/ui";
-import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput, { NestedSelect } from "./SelectWithCustomInput";
-
-type VolunteerActivityFormData = {
-  title: string;
-  titleOther: string;
-  headcount: number;
-  location: string;
-  startDateTime: Date | string;
-  duration: number;
-  description: string;
-};
+import {
+  ControlledDateTimeField,
+  FormError,
+  FormField,
+  NumberField,
+} from "./shared";
 
 export default function VolunteerActivityForm({
   defaultActivity,
@@ -33,7 +32,7 @@ export default function VolunteerActivityForm({
 }) {
   let formDefaultValues: Partial<VolunteerActivityFormData> = {
     title: VOLUNTEER_ACTIVITY_TOPICS[0]?.options[0],
-    startDateTime: getCurrentDateTime(),
+    startDateTime: new Date(getCurrentDateTime()),
     description: "",
   };
   if (defaultActivity) {
@@ -45,7 +44,7 @@ export default function VolunteerActivityForm({
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
       headcount: defaultActivity.headcount,
       location: defaultActivity.location,
-      startDateTime: getDateTimeString(defaultActivity.startDateTime),
+      startDateTime: defaultActivity.startDateTime,
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -54,61 +53,56 @@ export default function VolunteerActivityForm({
     };
   }
 
-  const { register, handleSubmit, watch } = useForm<VolunteerActivityFormData>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<VolunteerActivityFormData>({
+    resolver: zodResolver(volunteerActivityFormSchema),
     defaultValues: formDefaultValues,
-    mode: "all",
+    mode: "onBlur", // Better UX - only validate after user leaves field
   });
 
-  const router = useRouter();
-  const {
-    mutate: createActivity,
-    error: createActivityError,
-    isPending: createActivityIsPending,
-  } = api.volunteerActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
-  });
-  const {
-    mutate: updateActivity,
-    error: updateActivityError,
-    isPending: updateActivityIsPending,
-  } = api.volunteerActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/volunteer/activity/detail/${data.id}`),
-  });
+  // Use the new mutation hook with automatic cache invalidation
+  const { createActivity, updateActivity, isPending, error } =
+    useVolunteerMutations();
 
-  const _handleSubmit = (isDraft = false) => {
+  const onSubmit = (data: VolunteerActivityFormData, isDraft = false) => {
+    // Transform form data to API format
+    const activityData = {
+      title: titleIsOther(data.title) ? data.titleOther! : data.title,
+      headcount: data.headcount,
+      location: data.location,
+      startDateTime: data.startDateTime,
+      endDateTime: getEndTime(data.startDateTime, data.duration),
+      description: data.description ?? null,
+      isDraft: isDraft,
+    };
+
     if (defaultActivity) {
-      return handleSubmit((data) =>
-        updateActivity({
-          activityId: defaultActivity.id,
-          title: titleIsOther(data.title) ? data.titleOther : data.title,
-          headcount: data.headcount,
-          location: data.location,
-          startDateTime: data.startDateTime as Date,
-          endDateTime: getEndTime(data.startDateTime as Date, data.duration),
-          description: data.description,
-          isDraft: isDraft,
-        }),
-      );
+      // Update existing activity
+      updateActivity({
+        activityId: defaultActivity.id,
+        ...activityData,
+      });
+    } else {
+      // Create new activity
+      // Create new activity
+      createActivity(activityData);
     }
+  };
 
-    return handleSubmit((data) =>
-      createActivity({
-        title: titleIsOther(data.title) ? data.titleOther : data.title,
-        headcount: data.headcount,
-        location: data.location,
-        startDateTime: data.startDateTime as Date,
-        endDateTime: getEndTime(data.startDateTime as Date, data.duration),
-        description: data.description,
-        isDraft: isDraft,
-      }),
-    );
+  const handleFormSubmit = (isDraft = false) => {
+    return handleSubmit((data) => onSubmit(data, isDraft));
   };
 
   const canSaveDraft =
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
   return (
-    <form className="form-control max-w-xs">
+    <form className="form-control max-w-xs" onSubmit={handleFormSubmit()}>
       <div hidden={!isNil(defaultActivity)}>
         <label className="label">
           <span className="label-text">主題</span>
@@ -121,54 +115,30 @@ export default function VolunteerActivityForm({
           <NestedSelect topics={VOLUNTEER_ACTIVITY_TOPICS} />
         </SelectWithCustomInput>
       </div>
-      <div>
-        <label className="label">
-          <span className="label-text">人數</span>
-        </label>
-        <input
-          type="number"
-          inputMode="numeric"
-          className="tiani-input"
-          required
-          {...register("headcount", { valueAsNumber: true })}
-        />
-      </div>
-      <div>
-        <label className="label">
-          <span className="label-text">地點</span>
-        </label>
-        <input
-          type="text"
-          className="tiani-input"
-          required
-          {...register("location")}
-        />
-      </div>
+      <NumberField
+        label="人數"
+        required
+        error={errors.headcount?.message}
+        {...register("headcount", { valueAsNumber: true })}
+      />
+      <FormField label="地點" required error={errors.location?.message}>
+        <input type="text" className="tiani-input" {...register("location")} />
+      </FormField>
       <div className="divider" />
-      <div>
-        <label className="label">
-          <span className="label-text">開始時間</span>
-        </label>
-        <input
-          type="datetime-local"
-          className="tiani-input"
-          required
-          {...register("startDateTime", { valueAsDate: true })}
-        />
-      </div>
-      <div>
-        <label className="label">
-          <span className="label-text">預估時數</span>
-        </label>
-        <input
-          type="number"
-          inputMode="decimal"
-          className="tiani-input"
-          step="0.1"
-          required
-          {...register("duration", { valueAsNumber: true })}
-        />
-      </div>
+      <ControlledDateTimeField
+        label="開始時間"
+        required
+        control={control}
+        name="startDateTime"
+      />
+      <NumberField
+        label="預估時數"
+        required
+        inputMode="decimal"
+        step={0.1}
+        error={errors.duration?.message}
+        {...register("duration", { valueAsNumber: true })}
+      />
       <div className="divider" />
       <div>
         <label className="label">
@@ -180,29 +150,23 @@ export default function VolunteerActivityForm({
         />
       </div>
       <div className="divider" />
-      {!isNil(createActivityError) && (
-        <AlertWarning>{createActivityError.message}</AlertWarning>
-      )}
-      {!isNil(updateActivityError) && (
-        <AlertWarning>{updateActivityError.message}</AlertWarning>
-      )}
+      <FormError error={error?.message} />
       <div className="flex flex-row justify-end space-x-4">
         {canSaveDraft && (
           <ReactiveButton
+            type="button"
             className="btn"
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={_handleSubmit(true)}
-            loading={createActivityIsPending || updateActivityIsPending}
+            onClick={handleFormSubmit(true)}
+            loading={isPending}
           >
             保存草稿
           </ReactiveButton>
         )}
 
         <ReactiveButton
+          type="submit"
           className="btn btn-primary"
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={_handleSubmit()}
-          loading={createActivityIsPending || updateActivityIsPending}
+          loading={isPending}
         >
           送出
         </ReactiveButton>

@@ -26,8 +26,8 @@ export default function Dialog({
       onClose={closeModal}
       transition
     >
-      <DialogBackdrop className="fixed inset-0 bg-black/30 z-40" />
-      <div className="fixed inset-0 overflow-y-auto z-50">
+      <DialogBackdrop className="fixed inset-0 z-40 bg-black/30" />
+      <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4 text-center">
           <DialogPanel className="w-full max-w-md transform space-y-4 rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
             <div className="flex flex-row items-center">
