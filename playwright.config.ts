@@ -24,7 +24,7 @@ export default defineConfig({
     trace: "on-first-retry",
 
     geolocation: { latitude: 22.863542, longitude: 120.366275 },
-    permissions: ['geolocation'],
+    permissions: ["geolocation"],
   },
 
   /* Configure projects for major browsers */
