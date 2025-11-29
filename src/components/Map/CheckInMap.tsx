@@ -6,10 +6,16 @@ import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { TIANI_GPS_CENTERS, TIANI_GPS_RADIUS_KM } from "~/utils/ui";
 
-L.Marker.prototype.options.icon = L.icon({
-  iconUrl: icon.src,
-  shadowUrl: iconShadow.src,
+const DefaultIcon = L.icon({
+  iconUrl: typeof icon === "string" ? icon : (icon as { src: string }).src,
+  shadowUrl:
+    typeof iconShadow === "string"
+      ? iconShadow
+      : (iconShadow as { src: string }).src,
+  iconAnchor: [12, 41],
 });
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function CheckInMap({ children }: { children?: ReactNode }) {
   return (
