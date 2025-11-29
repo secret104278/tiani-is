@@ -1,10 +1,10 @@
-import { useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
 import lunisolar from "lunisolar";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
-import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { api } from "~/utils/api";
 
 type ProfileForm = {
@@ -29,10 +29,8 @@ export default function PersonalAccountPage() {
   });
 
   // Fetch current user profile data
-  const {
-    data: userProfile,
-    isLoading: userProfileIsLoading,
-  } = api.user.getCurrentUserProfile.useQuery();
+  const { data: userProfile, isLoading: userProfileIsLoading } =
+    api.user.getCurrentUserProfile.useQuery();
 
   // Set form default values when user profile is loaded
   useEffect(() => {
@@ -91,10 +89,8 @@ export default function PersonalAccountPage() {
     },
   });
 
-  const {
-    mutate: updateQiudaoInfo,
-    isPending: updateQiudaoInfoIsPending,
-  } = api.user.updateQiudaoInfo.useMutation();
+  const { mutate: updateQiudaoInfo, isPending: updateQiudaoInfoIsPending } =
+    api.user.updateQiudaoInfo.useMutation();
 
   if (!sessionData || userProfileIsLoading) {
     return <span className="loading loading-ring loading-md" />;
@@ -173,7 +169,7 @@ export default function PersonalAccountPage() {
           />
         </div>
 
-        <div className="divider"></div>
+        <div className="divider" />
 
         <article className="prose">
           <h2>求道卡資料</h2>

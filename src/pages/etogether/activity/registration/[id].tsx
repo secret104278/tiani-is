@@ -9,7 +9,7 @@ import _ from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import ManualEtogetherCheckInDialogContent from "~/components/DialogContent/CheckIn/ManualEtogetherCheckInDialogContent";
 import EtogetherActivityRegisterDialogContent from "~/components/DialogContent/EtogetherActivityRegisterDialogContent";
 import { AlertWarning } from "~/components/utils/Alert";
@@ -218,8 +218,7 @@ export default function EtogetherRegistrationPage() {
       <div className="overflow-auto">
         <table className="table-sm table">
           {activity.subgroups.map((subgroup) => (
-            <>
-              {/* biome-ignore lint/correctness/useJsxKeyInIterable: <explanation> */}
+            <Fragment key={subgroup.id}>
               <thead className="text-black">
                 <tr
                   style={
@@ -248,8 +247,7 @@ export default function EtogetherRegistrationPage() {
               </thead>
               <tbody>
                 {userBySubgroup[subgroup.id]?.map((entry) => (
-                  // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                  <tr>
+                  <tr key={`${entry.isExternal}-${entry.registerId}`}>
                     <td
                       className="hover cursor-pointer"
                       onClick={() => {
@@ -297,7 +295,7 @@ export default function EtogetherRegistrationPage() {
                   </tr>
                 ))}
               </tbody>
-            </>
+            </Fragment>
           ))}
         </table>
       </div>
