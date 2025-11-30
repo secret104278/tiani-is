@@ -98,6 +98,7 @@ export default function EtogetherActivityDetailPage() {
     mutate: deleteActivity,
     isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
+    error: deleteActivityError,
   } = api.etogetherActivity.deleteActivity.useMutation({
     onSuccess: () => router.push(`/${site}`),
   });
@@ -187,6 +188,9 @@ export default function EtogetherActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
+      {!isNil(deleteActivityError) && (
+        <AlertWarning>{deleteActivityError.message}</AlertWarning>
+      )}
       <Link href={`/etogether/activity/registration/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />

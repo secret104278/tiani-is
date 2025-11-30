@@ -144,11 +144,23 @@ export const activityRouter = createTRPCRouter({
       }),
     ),
 
-  deleteActivity: activityManageProcedure.mutation(({ ctx, input }) =>
-    ctx.db.classActivity.delete({
-      where: { id: input.activityId },
-    }),
-  ),
+  deleteActivity: activityManageProcedure.mutation(async ({ ctx, input }) => {
+    const hasRegistrations = await ctx.db.etogetherActivityRegister.count({
+      where: { activityId: input.activityId },
+    });
+    if (hasRegistrations > 0) {
+      throw new Error("無法撤銷已有人報名的活動");
+    }
+
+    return ctx.db.$transaction(async (db) => {
+      await db.etogetherActivitySubgroup.deleteMany({
+        where: { etogetherActivityId: input.activityId },
+      });
+      return db.etogetherActivity.delete({
+        where: { id: input.activityId },
+      });
+    });
+  }),
 
   getAllActivitiesInfinite: protectedProcedure
     .input(

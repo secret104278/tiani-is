@@ -7,7 +7,13 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [".next", "node_modules"]
+    "ignore": [
+      ".next",
+      "node_modules",
+      "playwright",
+      "playwright-report",
+      "test-results"
+    ]
   },
   "formatter": {
     "enabled": true,
