@@ -3,9 +3,9 @@ import {
   createEtogetherActivity,
   performEtogetherCheckIn,
   registerForActivity,
-} from "../../utils/etogether-helpers";
+} from "../utils/etogether-helpers";
 
-test.describe("Participation - Check-in", () => {
+test.describe("Etogether Participation - Check-in", () => {
   test("should allow user to check in", async ({ page }) => {
     await createEtogetherActivity(page);
     await registerForActivity(page, "Group A");

@@ -14,7 +14,10 @@ e2e/
 │   └── users.spec.ts
 ├── etogether/                   # Etogether module tests
 │   ├── activity-flow.spec.ts
-│   └── management/
+│   ├── activity-management.spec.ts
+│   ├── authorization.spec.ts
+│   ├── check-in.spec.ts
+│   └── registration.spec.ts
 ├── volunteer/                   # Volunteer module tests
 │   ├── activity-management.spec.ts
 │   ├── authorization.spec.ts

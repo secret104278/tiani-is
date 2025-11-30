@@ -3,9 +3,9 @@ import {
   cancelRegistration,
   createEtogetherActivity,
   registerForActivity,
-} from "../../utils/etogether-helpers";
+} from "../utils/etogether-helpers";
 
-test.describe("Participation - Registration", () => {
+test.describe("Etogether Participation - Registration", () => {
   test("should register for activity", async ({ page }) => {
     const { subgroups } = await createEtogetherActivity(page);
     const firstSubgroup = subgroups[0]!;
