@@ -20,7 +20,7 @@ test.describe("YiDeClass Enrollment", () => {
       ),
     );
 
-    const userRow = page.locator("tr", { hasText: "E2E Test User" });
+    const userRow = page.locator("tr", { hasText: /E2E Test User/ }).first();
     const checkbox = userRow.locator('input[type="checkbox"]');
 
     await checkbox.click();

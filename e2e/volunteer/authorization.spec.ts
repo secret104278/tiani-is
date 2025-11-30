@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { loginAs } from "../utils/auth-helpers";
 import {
   createActivity,
+  getWorkerSpecificTestUserId,
   setManualCheckInTimes,
 } from "../utils/volunteer-helpers";
 
@@ -10,23 +11,23 @@ test.describe
   .serial("Authorization and Admin Actions", () => {
     let publishedActivityId: string;
     let inReviewActivityId: string;
-    const testUserId = "e2e-test-user-id";
+    let testUserId: string;
 
     test.beforeAll(async ({ browser }) => {
       const context = await browser.newContext();
       const page = await context.newPage();
 
+      testUserId = getWorkerSpecificTestUserId();
+
       await loginAs(context, [Role.TIANI_ADMIN, Role.VOLUNTEER_ADMIN]);
 
       const { id: inReviewId } = await createActivity(page, {
-        location: "Auth Test Location",
         description: "Auth Test Description",
       });
       inReviewActivityId = inReviewId;
       await expect(page.getByText("審核中")).toBeVisible();
 
       const { id: publishedId } = await createActivity(page, {
-        location: "Auth Test Published",
         description: "Auth Test Published Desc",
       });
       await page.getByRole("button", { name: "核准" }).click();

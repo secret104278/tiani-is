@@ -8,7 +8,6 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page).toHaveURL("/volunteer/activity/new");
 
     const { location, description } = await createActivity(page, {
-      location: "Test Location New",
       description: "Description New",
       offsetHours: 1,
     });
@@ -34,7 +33,8 @@ test.describe("Volunteer Activity Management", () => {
     await page.getByRole("button", { name: "編輯" }).click();
     await expect(page).toHaveURL(`/volunteer/activity/edit/${id}`);
 
-    const newLocation = `Updated Location ${Date.now()}`;
+    const workerIndex = test.info().workerIndex ?? 0;
+    const newLocation = `Updated Location w${workerIndex}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     await page.fill('input[name="location"]', newLocation);
     await page.getByRole("button", { name: "送出" }).click();
 
@@ -62,8 +62,11 @@ test.describe("Volunteer Activity Management", () => {
     const { id } = await createActivity(page);
     await page.getByRole("button", { name: "編輯" }).click();
 
-    const newLoc = `New Loc ${Date.now()}`;
-    const newDesc = `New Desc ${Date.now()}`;
+    const workerIndex = test.info().workerIndex ?? 0;
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 9);
+    const newLoc = `New Loc w${workerIndex}-${timestamp}-${random}`;
+    const newDesc = `New Desc w${workerIndex}-${timestamp}-${random}`;
 
     await page.fill('input[name="location"]', newLoc);
     await page.fill('textarea[name="description"]', newDesc);

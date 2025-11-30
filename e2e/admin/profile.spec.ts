@@ -4,7 +4,8 @@ test.describe("4. Profile Management", () => {
   test("should update user profile Tao information", async ({ page }) => {
     await page.goto("/admin/users");
     await page
-      .getByRole("row", { name: "E2E Test User" })
+      .getByRole("row", { name: /E2E Test User/ })
+      .first()
       .getByRole("button")
       .click();
 
@@ -23,7 +24,8 @@ test.describe("4. Profile Management", () => {
 
     await page.reload();
     await page
-      .getByRole("row", { name: "E2E Test User" })
+      .getByRole("row", { name: /E2E Test User/ })
+      .first()
       .getByRole("button")
       .click();
 

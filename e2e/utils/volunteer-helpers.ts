@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 
 export interface CreateActivityOptions {
   titleIndex?: number;
@@ -8,6 +8,18 @@ export interface CreateActivityOptions {
   duration?: string;
   description?: string;
   isDraft?: boolean;
+}
+
+function getUniqueId(prefix = ""): string {
+  let workerIndex = 0;
+  try {
+    workerIndex = test.info().workerIndex ?? 0;
+  } catch {
+    workerIndex = process.pid % 1000;
+  }
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 9);
+  return `${prefix}${workerIndex}-${timestamp}-${random}`;
 }
 
 export async function createActivity(
@@ -35,9 +47,7 @@ export async function createActivity(
 
   await page.fill('input[name="headcount"]', headcount);
 
-  const finalLocation =
-    location ||
-    `Test Location ${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const finalLocation = location || `Test Location ${getUniqueId()}`;
   await page.fill('input[name="location"]', finalLocation);
 
   const now = new Date();
@@ -161,4 +171,14 @@ export async function setManualCheckInTimes(
     },
     { checkInTime, checkOutTime },
   );
+}
+
+export function getWorkerSpecificTestUserId(): string {
+  let workerIndex = 0;
+  try {
+    workerIndex = test.info().workerIndex ?? 0;
+  } catch {
+    workerIndex = process.pid % 1000;
+  }
+  return `e2e-test-user-id-w${workerIndex}`;
 }

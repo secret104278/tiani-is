@@ -13,7 +13,6 @@ test.describe("UI Interactions and Edge Cases", () => {
   }) => {
     // Setup: Create a new activity to work with
     const { location: uniqueLocation } = await createActivity(page, {
-      location: `Test Location UI ${Date.now()}`,
       description: "UI Test Description",
       offsetHours: 1,
     });

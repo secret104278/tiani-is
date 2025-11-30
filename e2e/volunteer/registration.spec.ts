@@ -34,13 +34,19 @@ test.describe("Volunteer Registration Tests", () => {
   test("should handle activity registration based on participant status and headcount", async ({
     page,
   }) => {
-    await createActivity(page, { offsetHours: -3, location: "Ended Activity" });
+    const workerIndex = test.info().workerIndex ?? 0;
+    await createActivity(page, {
+      offsetHours: -3,
+      location: `Ended Activity w${workerIndex}-${Date.now()}`,
+    });
 
     const endedButton = page.getByRole("button", { name: "已結束" });
     await expect(endedButton).toBeVisible();
     await expect(endedButton).toHaveClass(/btn-disabled/);
 
-    await createActivity(page, { location: "Participant Activity" });
+    await createActivity(page, {
+      location: `Participant Activity w${workerIndex}-${Date.now()}`,
+    });
     await page.getByRole("button", { name: "報名" }).click();
 
     await expect(page.getByRole("button", { name: "取消報名" })).toBeVisible();
