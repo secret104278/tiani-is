@@ -9,7 +9,6 @@ export async function loginAs(context: BrowserContext, roles: Role[]) {
   const userId = `user-${timestamp}-${Math.floor(Math.random() * 1000)}`;
   const sessionToken = `session-${timestamp}-${Math.floor(Math.random() * 1000)}`;
 
-  // Create user
   const user = await prisma.user.create({
     data: {
       id: userId,
@@ -19,7 +18,6 @@ export async function loginAs(context: BrowserContext, roles: Role[]) {
     },
   });
 
-  // Create session
   const expires = new Date();
   expires.setDate(expires.getDate() + 1);
   await prisma.session.create({
@@ -30,7 +28,6 @@ export async function loginAs(context: BrowserContext, roles: Role[]) {
     },
   });
 
-  // Set cookies
   await context.addCookies([
     {
       name: "next-auth.session-token",
