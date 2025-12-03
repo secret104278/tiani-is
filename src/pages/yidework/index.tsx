@@ -9,13 +9,9 @@ import { api } from "~/utils/api";
 import { activityIsEnded } from "~/utils/ui";
 
 export default function YideWorkHome() {
-  const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
-
   const activitiesQuery =
     api.yideworkActivity.getAllActivitiesInfinite.useInfiniteQuery(
-      {
-        participatedByMe: filterParticipatedByMe,
-      },
+      {},
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
@@ -42,17 +38,6 @@ export default function YideWorkHome() {
             建立新通知
           </div>
         </Link>
-      </div>
-      <div className="flex flex-row flex-wrap">
-        <label className="label cursor-pointer space-x-2">
-          <span className="label-text">我參加的</span>
-          <input
-            type="checkbox"
-            className="toggle toggle-primary"
-            checked={filterParticipatedByMe}
-            onChange={() => setFilterParticipatedByMe((prev) => !prev)}
-          />
-        </label>
       </div>
       <div>
         {activitiesQuery.isLoading && <Loading />}

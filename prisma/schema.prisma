@@ -109,7 +109,6 @@ model User {
     classMemberEnrollments        ClassMemberEnrollment[]
 
     etogetherActivityRegisters EtogetherActivityRegister[]
-    yideWorkActivityRegisters  YideWorkActivityRegister[]
     qiudaorenOnActivities      QiudaorenOnActivity[]
     TianiShopOrder             TianiShopOrder[]
     TianiShopListing           TianiShopListing[]
@@ -416,8 +415,6 @@ model YideWorkActivity {
 
     version Int @default(1)
 
-    registers         YideWorkActivityRegister[]
-    externalRegisters ExternalYideWorkActivityRegister[]
     qiudaorenOnActivities QiudaorenOnActivity[]
 
     @@index([title])
@@ -431,34 +428,6 @@ model YideWorkPreset {
     description String
 
     activities YideWorkActivity[]
-}
-
-model YideWorkActivityRegister {
-    id Int @id @default(autoincrement())
-
-    activity   YideWorkActivity @relation(fields: [activityId], references: [id])
-    activityId Int
-
-    user   User   @relation(fields: [userId], references: [id])
-    userId String
-
-    externalRegisters ExternalYideWorkActivityRegister[]
-
-    @@unique([userId, activityId])
-}
-
-model ExternalYideWorkActivityRegister {
-    id Int @id @default(autoincrement())
-
-    activity   YideWorkActivity @relation(fields: [activityId], references: [id])
-    activityId Int
-
-    username String
-
-    mainRegister   YideWorkActivityRegister @relation(fields: [mainRegisterId], references: [id], onDelete: Cascade)
-    mainRegisterId Int
-
-    @@unique([activityId, username])
 }
 
 model QiudaorenOnActivity {
