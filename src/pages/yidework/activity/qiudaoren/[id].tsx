@@ -31,9 +31,14 @@ export default function YideWorkActivityQiudaorenPage() {
     isLoading: qiudaorenIsLoading,
     error: qiudaorenError,
     refetch: refetchQiudaoren,
-  } = api.yideworkActivity.getQiudaorenByActivity.useQuery({
-    activityId: Number(id),
-  });
+  } = api.yideworkActivity.getQiudaorenByActivity.useQuery(
+    {
+      activityId: Number(id),
+    },
+    {
+      refetchInterval: 1000,
+    }
+  );
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editingQiudaorenUserId, setEditingQiudaorenUserId] = useState<
@@ -131,7 +136,7 @@ export default function YideWorkActivityQiudaorenPage() {
                 if (items) {
                   const found = items.find(
                     (item: (typeof items)[number]) =>
-                      item.user.id === editingQiudaorenUserId,
+                      item.user.id === editingQiudaorenUserId
                   );
                   if (found) {
                     return (
