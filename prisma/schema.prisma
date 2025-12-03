@@ -60,6 +60,11 @@ enum Role {
     YIDEWORK_ADMIN
 }
 
+enum Gender {
+    MALE
+    FEMALE
+}
+
 model User {
     id            String      @id @default(cuid())
     name          String?
@@ -81,7 +86,12 @@ model User {
     affiliation      String? // 所屬單位
     dianChuanShi     String? // 點傳師
     yinShi           String? // 引師
+    yinShiPhone      String? // 引師電話
     baoShi           String? // 保師
+    baoShiPhone      String? // 保師電話
+    phone            String? // 電話
+    gender           Gender? // 性別
+    birthYear        Int? // 出生年份（用於計算佛堂性別）
 
     organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
     organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")
@@ -100,6 +110,7 @@ model User {
 
     etogetherActivityRegisters EtogetherActivityRegister[]
     yideWorkActivityRegisters  YideWorkActivityRegister[]
+    qiudaorenOnActivities      QiudaorenOnActivity[]
     TianiShopOrder             TianiShopOrder[]
     TianiShopListing           TianiShopListing[]
     TianiShopCart              TianiShopCart[]
@@ -407,6 +418,7 @@ model YideWorkActivity {
 
     registers         YideWorkActivityRegister[]
     externalRegisters ExternalYideWorkActivityRegister[]
+    qiudaorenOnActivities QiudaorenOnActivity[]
 
     @@index([title])
     @@index([organiserId])
@@ -447,6 +459,20 @@ model ExternalYideWorkActivityRegister {
     mainRegisterId Int
 
     @@unique([activityId, username])
+}
+
+model QiudaorenOnActivity {
+    id Int @id @default(autoincrement())
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+
+    activity   YideWorkActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    activityId Int
+
+    @@unique([userId, activityId])
+    @@index([userId])
+    @@index([activityId])
 }
 
 /**

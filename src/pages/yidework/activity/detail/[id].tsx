@@ -3,6 +3,7 @@ import {
   ClockIcon,
   MapPinIcon,
   PencilSquareIcon,
+  PlusIcon,
   QueueListIcon,
   TrashIcon,
   UserMinusIcon,
@@ -13,6 +14,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
 import YideWorkActivityRegisterDialogContent from "~/components/DialogContent/YideWorkActivityRegisterDialogContent";
 import { AlertWarning } from "~/components/utils/Alert";
 import ConfirmDialog from "~/components/utils/ConfirmDialog";
@@ -104,6 +106,15 @@ export default function YideWorkActivityDetailPage() {
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [qiudaorenDialogOpen, setQiudaorenDialogOpen] = useState(false);
+  const [editingQiudaorenUserId, setEditingQiudaorenUserId] = useState<
+    string | undefined
+  >(undefined);
+
+  const { data: qiudaorenData, refetch: refetchQiudaoren } =
+    api.yideworkActivity.getQiudaorenByActivity.useQuery({
+      activityId: Number(id),
+    });
 
   if (!isNil(activityError))
     return <AlertWarning>{activityError.message}</AlertWarning>;
@@ -117,6 +128,8 @@ export default function YideWorkActivityDetailPage() {
     session?.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);
+
+  const isQiudaoYili = activity.title === "辦道儀禮";
 
   const ShareLineBtn = () => {
     return (
@@ -183,6 +196,85 @@ export default function YideWorkActivityDetailPage() {
           報名名單
         </button>
       </Link>
+      {isQiudaoYili && (
+        <>
+          <div className="divider">新求道人</div>
+          <div className="flex flex-row space-x-2">
+            <ReactiveButton
+              className="btn flex-1"
+              onClick={() => {
+                setEditingQiudaorenUserId(undefined);
+                setQiudaorenDialogOpen(true);
+              }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              新增求道人
+            </ReactiveButton>
+            <Link
+              href={`/yidework/activity/qiudaoren/${activity.id}`}
+              className="flex-1"
+            >
+              <button className="btn w-full">
+                <QueueListIcon className="h-4 w-4" />
+                求道人清單
+              </button>
+            </Link>
+          </div>
+        </>
+      )}
+      {isQiudaoYili && (
+        <Dialog
+          title={editingQiudaorenUserId ? "編輯新求道人" : "新增新求道人"}
+          show={qiudaorenDialogOpen}
+          closeModal={() => {
+            setQiudaorenDialogOpen(false);
+            setEditingQiudaorenUserId(undefined);
+          }}
+        >
+          <AddQiudaorenDialogContent
+            activityId={activity.id}
+            defaultValues={
+              editingQiudaorenUserId && qiudaorenData
+                ? (() => {
+                    for (const genderKey of [
+                      "QIAN",
+                      "TONG",
+                      "KUN",
+                      "NV",
+                    ] as const) {
+                      const items = qiudaorenData[genderKey];
+                      if (items) {
+                        const found = items.find(
+                          (item: (typeof items)[number]) =>
+                            item.user.id === editingQiudaorenUserId,
+                        );
+                        if (found) {
+                          return {
+                            userId: found.user.id,
+                            name: found.user.name ?? undefined,
+                            gender: found.user.gender ?? undefined,
+                            birthYear: found.user.birthYear ?? undefined,
+                            phone: found.user.phone ?? undefined,
+                            yinShi: found.user.yinShi ?? undefined,
+                            yinShiPhone: found.user.yinShiPhone ?? undefined,
+                            baoShi: found.user.baoShi ?? undefined,
+                            baoShiPhone: found.user.baoShiPhone ?? undefined,
+                          };
+                        }
+                      }
+                    }
+                    return undefined;
+                  })()
+                : undefined
+            }
+            onSuccess={() => {
+              setQiudaorenDialogOpen(false);
+              setEditingQiudaorenUserId(undefined);
+              void refetchQiudaoren();
+            }}
+          />
+        </Dialog>
+      )}
       <div className="divider" />
     </>
   );
