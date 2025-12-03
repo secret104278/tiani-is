@@ -136,6 +136,10 @@ export default function AddQiudaorenDialogContent({
         </label>
         <input
           type="number"
+          inputMode="numeric"
+          step="1"
+          min={1900}
+          max={new Date().getFullYear()}
           className="input input-bordered w-full"
           required
           {...register("birthYear", {

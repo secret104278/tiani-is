@@ -131,7 +131,7 @@ export default function YideWorkActivityQiudaorenPage() {
                 if (items) {
                   const found = items.find(
                     (item: (typeof items)[number]) =>
-                      item.user.id === editingQiudaorenUserId
+                      item.user.id === editingQiudaorenUserId,
                   );
                   if (found) {
                     return (
