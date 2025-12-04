@@ -1,4 +1,5 @@
 import {
+  EllipsisVerticalIcon,
   PencilSquareIcon,
   PhoneIcon,
   TrashIcon,
@@ -94,109 +95,131 @@ export default function QiudaorenList({
   ) => {
     const displayGenderKey = genderKey || getGenderKeyForItem(item.id);
 
+    const formatPhoneNumber = (phone: string) => {
+      return phone.replace(/(\d{4})(\d{3})(\d{3})/, "$1-$2-$3");
+    };
+
     return (
       <div key={item.id} className="card card-bordered bg-base-100">
-        <div className="card-body p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="mb-3 flex items-center gap-2">
-                <h3 className="font-extrabold text-lg">{item.user.name}</h3>
-                {displayGenderKey && (
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold text-xs ${getGenderBadgeStyle(
-                      displayGenderKey,
-                    )}`}
-                  >
-                    {TEMPLE_GENDER_LABELS[displayGenderKey]}
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-2 text-sm">
-                {(item.user.yinShi || item.user.yinShiPhone) && (
-                  <div className="flex items-start gap-2">
-                    <span className="whitespace-nowrap font-medium text-gray-700">
-                      引師：
+        <div className="card-body p-3">
+          <div className="flex items-start justify-between gap-2 border-gray-100 border-b pb-1">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <div>
+                <div className="mb-1 flex items-center gap-2">
+                  <h3 className="font-semibold text-base text-gray-900">
+                    {item.user.name}
+                  </h3>
+                  {displayGenderKey && (
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold text-xs ${getGenderBadgeStyle(
+                        displayGenderKey,
+                      )}`}
+                    >
+                      {TEMPLE_GENDER_LABELS[displayGenderKey]}
                     </span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-900">
-                          {item.user.yinShi || "—"}
-                        </span>
-                        {item.user.yinShiGender && (
-                          <span
-                            className={`inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold text-xs ${getShiGenderBadgeStyle(
-                              item.user.yinShiGender,
-                            )}`}
-                          >
-                            {item.user.yinShiGender === "MALE" ? "乾" : "坤"}
-                          </span>
-                        )}
-                      </div>
-                      {item.user.yinShiPhone && (
-                        <a
-                          href={`tel:${item.user.yinShiPhone}`}
-                          className="mt-0.5 flex items-center gap-1 text-gray-600"
-                        >
-                          <PhoneIcon className="h-3.5 w-3.5" />
-                          <span>{item.user.yinShiPhone}</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {(item.user.baoShi || item.user.baoShiPhone) && (
-                  <div className="flex items-start gap-2">
-                    <span className="whitespace-nowrap font-medium text-gray-700">
-                      保師：
-                    </span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-900">
-                          {item.user.baoShi || "—"}
-                        </span>
-                        {item.user.baoShiGender && (
-                          <span
-                            className={`inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold text-xs ${getShiGenderBadgeStyle(
-                              item.user.baoShiGender,
-                            )}`}
-                          >
-                            {item.user.baoShiGender === "MALE" ? "乾" : "坤"}
-                          </span>
-                        )}
-                      </div>
-                      {item.user.baoShiPhone && (
-                        <a
-                          href={`tel:${item.user.baoShiPhone}`}
-                          className="mt-0.5 flex items-center gap-1 text-gray-600"
-                        >
-                          <PhoneIcon className="h-3.5 w-3.5" />
-                          <span>{item.user.baoShiPhone}</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-shrink-0 gap-2">
+            <div className="dropdown dropdown-end">
               <button
-                className="btn-ghost btn btn-sm"
-                onClick={() => onEdit(item.user.id)}
+                tabIndex={0}
+                className="btn btn-ghost btn-sm"
                 type="button"
+                aria-label="More options"
               >
-                <PencilSquareIcon className="h-4 w-4" />
+                <EllipsisVerticalIcon className="h-4 w-4" />
               </button>
-              <ReactiveButton
-                className="btn-error btn-ghost btn btn-sm"
-                onClick={() => onDelete(item.user.id)}
-                loading={isDeleting === item.user.id}
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
               >
-                <TrashIcon className="h-4 w-4" />
-              </ReactiveButton>
+                <li>
+                  <a onClick={() => onEdit(item.user.id)}>
+                    <PencilSquareIcon className="h-4 w-4" />
+                    編輯
+                  </a>
+                </li>
+                <li>
+                  <a
+                    onClick={() => onDelete(item.user.id)}
+                    className={isDeleting === item.user.id ? "loading" : ""}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                    刪除
+                  </a>
+                </li>
+              </ul>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            {(item.user.yinShi || item.user.yinShiPhone) && (
+              <div className="grid grid-cols-[80px_1fr] gap-2">
+                <span className="pt-0.5 font-medium text-gray-500 text-xs uppercase tracking-wide">
+                  引師
+                </span>
+                <div>
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="font-medium text-gray-900">
+                      {item.user.yinShi || "—"}
+                    </span>
+                    {item.user.yinShiGender && (
+                      <span
+                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold text-xs ${getShiGenderBadgeStyle(
+                          item.user.yinShiGender,
+                        )}`}
+                      >
+                        {item.user.yinShiGender === "MALE" ? "乾" : "坤"}
+                      </span>
+                    )}
+                  </div>
+                  {item.user.yinShiPhone && (
+                    <a
+                      href={`tel:${item.user.yinShiPhone}`}
+                      className="inline-flex items-center gap-1.5 font-medium text-gray-600 text-sm"
+                    >
+                      <PhoneIcon className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span>{formatPhoneNumber(item.user.yinShiPhone)}</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {(item.user.baoShi || item.user.baoShiPhone) && (
+              <div className="grid grid-cols-[80px_1fr] gap-2">
+                <span className="pt-0.5 font-medium text-gray-500 text-xs uppercase tracking-wide">
+                  保師
+                </span>
+                <div>
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="font-medium text-gray-900">
+                      {item.user.baoShi || "—"}
+                    </span>
+                    {item.user.baoShiGender && (
+                      <span
+                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold text-xs ${getShiGenderBadgeStyle(
+                          item.user.baoShiGender,
+                        )}`}
+                      >
+                        {item.user.baoShiGender === "MALE" ? "乾" : "坤"}
+                      </span>
+                    )}
+                  </div>
+                  {item.user.baoShiPhone && (
+                    <a
+                      href={`tel:${item.user.baoShiPhone}`}
+                      className="inline-flex items-center gap-1.5 font-medium text-gray-600 text-sm"
+                    >
+                      <PhoneIcon className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span>{formatPhoneNumber(item.user.baoShiPhone)}</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
