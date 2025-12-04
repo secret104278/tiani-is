@@ -55,13 +55,13 @@ export const qiudaorenRouter = createTRPCRouter({
         name: z.string().min(1).optional(),
         gender: z.enum(["MALE", "FEMALE"]).optional(),
         birthYear: birthYearSchema.optional(),
-        phone: phoneNumberSchema,
+        phone: phoneNumberSchema.optional(),
         yinShi: z.string().optional(),
         yinShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
-        yinShiPhone: phoneNumberSchema,
+        yinShiPhone: phoneNumberSchema.optional(),
         baoShi: z.string().optional(),
         baoShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
-        baoShiPhone: phoneNumberSchema,
+        baoShiPhone: phoneNumberSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

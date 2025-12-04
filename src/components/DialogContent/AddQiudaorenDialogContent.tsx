@@ -48,7 +48,7 @@ export default function AddQiudaorenDialogContent({
 
   const templeGender = useMemo(
     () => calculateTempleGender(gender, birthYear),
-    [gender, birthYear],
+    [gender, birthYear]
   );
 
   const {
@@ -76,8 +76,23 @@ export default function AddQiudaorenDialogContent({
   const isPending = createQiudaorenIsPending || updateQiudaorenIsPending;
   const error = createQiudaorenError || updateQiudaorenError;
 
+  const handleFormSubmit = handleSubmit((data) => {
+    if (isEditMode && defaultValues?.userId) {
+      void updateQiudaoren({
+        activityId,
+        userId: defaultValues.userId,
+        ...data,
+      });
+    } else {
+      void createQiudaoren({
+        activityId,
+        ...data,
+      });
+    }
+  });
+
   return (
-    <form className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleFormSubmit}>
       {error && <AlertWarning>{error.message}</AlertWarning>}
       <div>
         <label className="label">
@@ -302,24 +317,10 @@ export default function AddQiudaorenDialogContent({
       </div>
 
       <ReactiveButton
+        type="submit"
         className="btn btn-primary"
         loading={isPending}
         error={error?.message}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={handleSubmit((data) => {
-          if (isEditMode && defaultValues?.userId) {
-            void updateQiudaoren({
-              activityId,
-              userId: defaultValues.userId,
-              ...data,
-            });
-          } else {
-            void createQiudaoren({
-              activityId,
-              ...data,
-            });
-          }
-        })}
       >
         {isEditMode ? "更新" : "新增"}
       </ReactiveButton>
