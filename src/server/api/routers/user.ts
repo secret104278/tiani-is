@@ -49,7 +49,6 @@ export const userRouter = createTRPCRouter({
         name: true,
         image: true,
         qiudaoDateSolar: true,
-        qiudaoDateLunar: true,
         qiudaoHour: true,
         qiudaoTemple: true,
         qiudaoTanzhu: true,
@@ -87,7 +86,6 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         qiudaoDateSolar: z.date().nullish(),
-        qiudaoDateLunar: z.string().nullish(),
         qiudaoHour: z.string().nullish(),
         qiudaoTemple: z.string().nullish(),
         qiudaoTanzhu: z.string().nullish(),
@@ -104,7 +102,6 @@ export const userRouter = createTRPCRouter({
         },
         data: {
           qiudaoDateSolar: input.qiudaoDateSolar,
-          qiudaoDateLunar: input.qiudaoDateLunar,
           qiudaoHour: input.qiudaoHour,
           qiudaoTemple: input.qiudaoTemple,
           qiudaoTanzhu: input.qiudaoTanzhu,
@@ -120,7 +117,6 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         qiudaoDateSolar: z.date().nullish(),
-        qiudaoDateLunar: z.string().nullish(),
         qiudaoHour: z.string().nullish(),
         qiudaoTemple: z.string().nullish(),
         qiudaoTanzhu: z.string().nullish(),
@@ -137,7 +133,6 @@ export const userRouter = createTRPCRouter({
         },
         data: {
           qiudaoDateSolar: input.qiudaoDateSolar,
-          qiudaoDateLunar: input.qiudaoDateLunar,
           qiudaoHour: input.qiudaoHour,
           qiudaoTemple: input.qiudaoTemple,
           qiudaoTanzhu: input.qiudaoTanzhu,
@@ -171,7 +166,6 @@ export const userRouter = createTRPCRouter({
         name: true,
         roles: true,
         qiudaoDateSolar: true,
-        qiudaoDateLunar: true,
         qiudaoHour: true,
         qiudaoTemple: true,
         qiudaoTanzhu: true,

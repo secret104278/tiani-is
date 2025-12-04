@@ -37,7 +37,7 @@ export default function YideWorkActivityQiudaorenPage() {
     },
     {
       refetchInterval: 1000,
-    }
+    },
   );
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -136,7 +136,7 @@ export default function YideWorkActivityQiudaorenPage() {
                 if (items) {
                   const found = items.find(
                     (item: (typeof items)[number]) =>
-                      item.user.id === editingQiudaorenUserId
+                      item.user.id === editingQiudaorenUserId,
                   );
                   if (found) {
                     return (

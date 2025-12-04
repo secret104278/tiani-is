@@ -29,30 +29,13 @@ export default function QiudaoLunarDisplay({
   onHourChange,
   readonly = false,
 }: QiudaoLunarDisplayProps) {
-  let lunarInfo: {
-    ganzhiYear: string;
-    month: string;
-    day: string;
-  } | null = null;
+  let lunarString: string | null = null;
 
   if (solarDate) {
     try {
       const lunar = lunisolar(solarDate);
 
-      // 獲取天干地支年份
-      const ganzhiYear = lunar.format("cY");
-
-      // 獲取農曆月份（中文）
-      const monthStr = lunar.format("lMMMM");
-
-      // 獲取農曆日期（中文）
-      const dayStr = lunar.format("lD");
-
-      lunarInfo = {
-        ganzhiYear,
-        month: monthStr,
-        day: dayStr,
-      };
+      lunarString = lunar.format("cY年 lMlD");
     } catch (e) {
       // Invalid date
     }
@@ -82,13 +65,13 @@ export default function QiudaoLunarDisplay({
       )}
 
       {/* 農曆顯示 */}
-      {lunarInfo && (
+      {lunarString && (
         <div>
           <label className="label">
             <span className="label-text">求道日期（農曆）</span>
           </label>
           <div className="input input-bordered flex w-full items-center bg-base-200">
-            {lunarInfo.ganzhiYear} {lunarInfo.month} {lunarInfo.day}
+            {lunarString}
             {hour && ` ${hour}時`}
           </div>
         </div>

@@ -248,7 +248,6 @@ function UserProfileDialogContent({
                 qiudaoDateSolar: data.qiudaoDateSolar
                   ? new Date(data.qiudaoDateSolar)
                   : null,
-                qiudaoDateLunar: lunarDate || null,
                 qiudaoHour: qiudaoHour || null,
                 qiudaoTemple: data.qiudaoTemple || null,
                 qiudaoTanzhu: data.qiudaoTanzhu || null,
