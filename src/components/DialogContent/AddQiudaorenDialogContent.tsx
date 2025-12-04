@@ -18,25 +18,17 @@ type AddQiudaorenFormData = Omit<
   "activityId"
 >;
 
+type AddQiudaorenDefaultValues = Partial<AddQiudaorenFormData> & {
+  userId: string;
+};
+
 export default function AddQiudaorenDialogContent({
   activityId,
   defaultValues,
   onSuccess,
 }: {
   activityId: number;
-  defaultValues?: {
-    userId: string;
-    name?: string;
-    gender?: "MALE" | "FEMALE";
-    birthYear?: number;
-    phone?: string;
-    yinShi?: string;
-    yinShiGender?: "MALE" | "FEMALE";
-    yinShiPhone?: string;
-    baoShi?: string;
-    baoShiGender?: "MALE" | "FEMALE";
-    baoShiPhone?: string;
-  };
+  defaultValues?: AddQiudaorenDefaultValues;
   onSuccess?: () => void;
 }) {
   const isEditMode = !!defaultValues;
@@ -46,16 +38,7 @@ export default function AddQiudaorenDialogContent({
     mode: "all",
     defaultValues: defaultValues
       ? {
-          name: defaultValues.name,
-          gender: defaultValues.gender,
-          birthYear: defaultValues.birthYear,
-          phone: defaultValues.phone,
-          yinShi: defaultValues.yinShi,
-          yinShiGender: defaultValues.yinShiGender,
-          yinShiPhone: defaultValues.yinShiPhone,
-          baoShi: defaultValues.baoShi,
-          baoShiGender: defaultValues.baoShiGender,
-          baoShiPhone: defaultValues.baoShiPhone,
+          ...defaultValues,
         }
       : undefined,
   });

@@ -1,4 +1,5 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
+import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -47,6 +48,7 @@ export default function YideWorkActivityQiudaorenPage() {
   const [deletingQiudaorenUserId, setDeletingQiudaorenUserId] = useState<
     string | undefined
   >(undefined);
+  const [groupBy, setGroupBy] = useState<"gender" | "shifu">("gender");
 
   const { mutate: deleteQiudaoren, isPending: deleteQiudaorenIsPending } =
     api.yideworkActivity.deleteQiudaoren.useMutation({
@@ -76,10 +78,7 @@ export default function YideWorkActivityQiudaorenPage() {
       <article className="prose">
         <h1>求道人清單</h1>
       </article>
-      <ReactiveButton
-        className="btn btn-primary"
-        onClick={() => setAddDialogOpen(true)}
-      >
+      <ReactiveButton className="btn" onClick={() => setAddDialogOpen(true)}>
         <PlusIcon className="h-4 w-4" />
         新增求道人
       </ReactiveButton>
@@ -89,26 +88,54 @@ export default function YideWorkActivityQiudaorenPage() {
           <div className="stat-value">{totalQiudaoren}</div>
         </div>
       </div>
-      {qiudaorenIsLoading && <div className="loading" />}
-      {qiudaorenError && <AlertWarning>{qiudaorenError.message}</AlertWarning>}
-      {qiudaorenData && (
-        <QiudaorenList
-          qiudaoren={qiudaorenData}
-          onEdit={(userId) => {
-            setEditingQiudaorenUserId(userId);
-          }}
-          onDelete={(userId) => {
-            setDeletingQiudaorenUserId(userId);
-            deleteQiudaoren({
-              activityId: activity.id,
-              userId,
-            });
-          }}
-          isDeleting={
-            deleteQiudaorenIsPending ? deletingQiudaorenUserId : undefined
-          }
-        />
-      )}
+      <div className="flex flex-row justify-center">
+        <div className="tabs tabs-boxed">
+          <button
+            className={clsx("tab", {
+              "tab-active": groupBy === "gender",
+            })}
+            onClick={() => setGroupBy("gender")}
+            type="button"
+          >
+            性別
+          </button>
+          <button
+            className={clsx("tab", {
+              "tab-active": groupBy === "shifu",
+            })}
+            onClick={() => setGroupBy("shifu")}
+            type="button"
+          >
+            引保師
+          </button>
+        </div>
+      </div>
+      <div className="space-y-4">
+        {qiudaorenIsLoading && <div className="loading" />}
+        {qiudaorenError && (
+          <AlertWarning>{qiudaorenError.message}</AlertWarning>
+        )}
+        {qiudaorenData && (
+          <QiudaorenList
+            qiudaoren={qiudaorenData}
+            groupBy={groupBy}
+            onEdit={(userId) => {
+              setEditingQiudaorenUserId(userId);
+            }}
+            onDelete={(userId) => {
+              setDeletingQiudaorenUserId(userId);
+              deleteQiudaoren({
+                activityId: activity.id,
+                userId,
+              });
+            }}
+            isDeleting={
+              deleteQiudaorenIsPending ? deletingQiudaorenUserId : undefined
+            }
+            showGenderLabel={groupBy === "shifu"}
+          />
+        )}
+      </div>
       <Dialog
         title="新增新求道人"
         show={addDialogOpen}
@@ -147,9 +174,12 @@ export default function YideWorkActivityQiudaorenPage() {
                           name: found.user.name ?? undefined,
                           gender: found.user.gender ?? undefined,
                           birthYear: found.user.birthYear ?? undefined,
+                          phone: found.user.phone ?? undefined,
                           yinShi: found.user.yinShi ?? undefined,
+                          yinShiGender: found.user.yinShiGender ?? undefined,
                           yinShiPhone: found.user.yinShiPhone ?? undefined,
                           baoShi: found.user.baoShi ?? undefined,
+                          baoShiGender: found.user.baoShiGender ?? undefined,
                           baoShiPhone: found.user.baoShiPhone ?? undefined,
                         }}
                         onSuccess={() => {

@@ -51,7 +51,7 @@ export const getServerSideProps: GetServerSideProps<{
     props: {
       ogMeta: {
         ogTitle: `${res.title}・${formatDateTitle(
-          res.startDateTime
+          res.startDateTime,
         )}・義德道務網`,
       },
     },
@@ -116,7 +116,7 @@ export default function YideWorkActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/yidework/activity/detail/${activity.id}?v=${activity.version}`
+          `${window.location.origin}/yidework/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -221,7 +221,7 @@ export default function YideWorkActivityDetailPage() {
                       if (items) {
                         const found = items.find(
                           (item: (typeof items)[number]) =>
-                            item.user.id === editingQiudaorenUserId
+                            item.user.id === editingQiudaorenUserId,
                         );
                         if (found) {
                           return {
@@ -231,8 +231,10 @@ export default function YideWorkActivityDetailPage() {
                             birthYear: found.user.birthYear ?? undefined,
                             phone: found.user.phone ?? undefined,
                             yinShi: found.user.yinShi ?? undefined,
+                            yinShiGender: found.user.yinShiGender ?? undefined,
                             yinShiPhone: found.user.yinShiPhone ?? undefined,
                             baoShi: found.user.baoShi ?? undefined,
+                            baoShiGender: found.user.baoShiGender ?? undefined,
                             baoShiPhone: found.user.baoShiPhone ?? undefined,
                           };
                         }
