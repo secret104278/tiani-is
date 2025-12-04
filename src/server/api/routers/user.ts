@@ -55,7 +55,9 @@ export const userRouter = createTRPCRouter({
         affiliation: true,
         dianChuanShi: true,
         yinShi: true,
+        yinShiGender: true,
         baoShi: true,
+        baoShiGender: true,
       },
       where: {
         id: ctx.session.user.id,
@@ -92,7 +94,9 @@ export const userRouter = createTRPCRouter({
         affiliation: z.string().nullish(),
         dianChuanShi: z.string().nullish(),
         yinShi: z.string().nullish(),
+        yinShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
         baoShi: z.string().nullish(),
+        baoShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -108,7 +112,9 @@ export const userRouter = createTRPCRouter({
           affiliation: input.affiliation,
           dianChuanShi: input.dianChuanShi,
           yinShi: input.yinShi,
+          yinShiGender: input.yinShiGender,
           baoShi: input.baoShi,
+          baoShiGender: input.baoShiGender,
         },
       });
     }),
@@ -123,7 +129,9 @@ export const userRouter = createTRPCRouter({
         affiliation: z.string().nullish(),
         dianChuanShi: z.string().nullish(),
         yinShi: z.string().nullish(),
+        yinShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
         baoShi: z.string().nullish(),
+        baoShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -139,7 +147,9 @@ export const userRouter = createTRPCRouter({
           affiliation: input.affiliation,
           dianChuanShi: input.dianChuanShi,
           yinShi: input.yinShi,
+          yinShiGender: input.yinShiGender,
           baoShi: input.baoShi,
+          baoShiGender: input.baoShiGender,
         },
       });
     }),
@@ -172,7 +182,9 @@ export const userRouter = createTRPCRouter({
         affiliation: true,
         dianChuanShi: true,
         yinShi: true,
+        yinShiGender: true,
         baoShi: true,
+        baoShiGender: true,
       },
       where: {
         id: ctx.input.userId,

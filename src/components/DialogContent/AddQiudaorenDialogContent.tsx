@@ -31,8 +31,10 @@ export default function AddQiudaorenDialogContent({
     birthYear?: number;
     phone?: string;
     yinShi?: string;
+    yinShiGender?: "MALE" | "FEMALE";
     yinShiPhone?: string;
     baoShi?: string;
+    baoShiGender?: "MALE" | "FEMALE";
     baoShiPhone?: string;
   };
   onSuccess?: () => void;
@@ -49,8 +51,10 @@ export default function AddQiudaorenDialogContent({
           birthYear: defaultValues.birthYear,
           phone: defaultValues.phone,
           yinShi: defaultValues.yinShi,
+          yinShiGender: defaultValues.yinShiGender,
           yinShiPhone: defaultValues.yinShiPhone,
           baoShi: defaultValues.baoShi,
+          baoShiGender: defaultValues.baoShiGender,
           baoShiPhone: defaultValues.baoShiPhone,
         }
       : undefined,
@@ -215,6 +219,32 @@ export default function AddQiudaorenDialogContent({
 
       <div>
         <label className="label">
+          <span className="label-text">引師性別</span>
+        </label>
+        <div className="flex space-x-4">
+          <label className="label cursor-pointer">
+            <input
+              type="radio"
+              className="radio"
+              value="MALE"
+              {...register("yinShiGender")}
+            />
+            <span className="label-text ml-2">男</span>
+          </label>
+          <label className="label cursor-pointer">
+            <input
+              type="radio"
+              className="radio"
+              value="FEMALE"
+              {...register("yinShiGender")}
+            />
+            <span className="label-text ml-2">女</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label className="label">
           <span className="label-text">引師電話</span>
         </label>
         <input
@@ -242,6 +272,32 @@ export default function AddQiudaorenDialogContent({
           className="input input-bordered w-full"
           {...register("baoShi")}
         />
+      </div>
+
+      <div>
+        <label className="label">
+          <span className="label-text">保師性別</span>
+        </label>
+        <div className="flex space-x-4">
+          <label className="label cursor-pointer">
+            <input
+              type="radio"
+              className="radio"
+              value="MALE"
+              {...register("baoShiGender")}
+            />
+            <span className="label-text ml-2">男</span>
+          </label>
+          <label className="label cursor-pointer">
+            <input
+              type="radio"
+              className="radio"
+              value="FEMALE"
+              {...register("baoShiGender")}
+            />
+            <span className="label-text ml-2">女</span>
+          </label>
+        </div>
       </div>
 
       <div>

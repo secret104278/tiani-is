@@ -122,7 +122,7 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
 
-export const YIDE_WORK_ACTIVITY_TITLES = ["獻供禮拜", "辦道儀禮"];
+export const YIDE_WORK_ACTIVITY_TITLES = ["獻供", "辦道"];
 
 export const IS_LINE_NOTIFY_ENABLED = false;
 

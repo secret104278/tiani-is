@@ -85,8 +85,10 @@ model User {
     affiliation      String? // 所屬單位
     dianChuanShi     String? // 點傳師
     yinShi           String? // 引師
+    yinShiGender     Gender? // 引師性別
     yinShiPhone      String? // 引師電話
     baoShi           String? // 保師
+    baoShiGender     Gender? // 保師性別
     baoShiPhone      String? // 保師電話
     phone            String? // 電話
     gender           Gender? // 性別
