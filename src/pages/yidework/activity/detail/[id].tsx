@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
 import QiudaorenList from "~/components/QiudaorenList";
+import YideWorkActivityStaffManagement from "~/components/YideWorkActivityStaffManagement";
 import { AlertWarning } from "~/components/utils/Alert";
 import ConfirmDialog from "~/components/utils/ConfirmDialog";
 import Dialog from "~/components/utils/Dialog";
@@ -107,6 +108,12 @@ export default function YideWorkActivityDetailPage() {
     !!session?.user.role.is_yidework_admin ||
     session?.user.id === activity.organiserId;
 
+  const isStaff =
+    !isManager &&
+    activity.staffs?.some((staff) => staff.user.id === session?.user.id);
+
+  const canViewQiudaorenList = isManager || isStaff;
+
   const isEnded = activityIsEnded(activity.endDateTime);
 
   const isQiudaoYili = activity.title.includes("辦道");
@@ -170,16 +177,20 @@ export default function YideWorkActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
-      {isQiudaoYili && (
-        <Link
-          href={`/yidework/activity/qiudaoren/${activity.id}`}
-          className="w-full"
-        >
-          <button className="btn w-full">
-            <QueueListIcon className="h-4 w-4" />
-            求道人清單
-          </button>
-        </Link>
+      <YideWorkActivityStaffManagement activityId={activity.id} />
+      {isQiudaoYili && canViewQiudaorenList && (
+        <>
+          <div className="divider" />
+          <Link
+            href={`/yidework/activity/qiudaoren/${activity.id}`}
+            className="w-full"
+          >
+            <button className="btn w-full">
+              <QueueListIcon className="h-4 w-4" />
+              求道人清單
+            </button>
+          </Link>
+        </>
       )}
       <div className="divider" />
     </>
@@ -242,7 +253,7 @@ export default function YideWorkActivityDetailPage() {
 
       {isQiudaoYili && (
         <Dialog
-          title="新增新求道人"
+          title="新增求道人"
           show={qiudaorenDialogOpen}
           closeModal={() => {
             setQiudaorenDialogOpen(false);

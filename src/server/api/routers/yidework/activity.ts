@@ -59,6 +59,11 @@ export const activityRouter = createTRPCRouter({
         organiser: { select: { name: true } },
         location: { select: { name: true } },
         preset: true,
+        staffs: {
+          include: {
+            user: { select: { id: true, name: true } },
+          },
+        },
       },
     }),
   ),
@@ -157,4 +162,49 @@ export const activityRouter = createTRPCRouter({
 
       return { items, nextCursor };
     }),
+
+  addStaff: activityManageProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.db.yideWorkActivityStaff.create({
+        data: {
+          activityId: input.activityId,
+          userId: input.userId,
+        },
+        include: {
+          user: { select: { id: true, name: true } },
+        },
+      }),
+    ),
+
+  removeStaff: activityManageProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.yideWorkActivityStaff.delete({
+        where: {
+          activityId_userId: {
+            activityId: input.activityId,
+            userId: input.userId,
+          },
+        },
+      });
+      return { success: true };
+    }),
+
+  getStaffs: activityManageProcedure.query(({ ctx, input }) =>
+    ctx.db.yideWorkActivityStaff.findMany({
+      where: { activityId: input.activityId },
+      include: {
+        user: { select: { id: true, name: true, image: true } },
+      },
+    }),
+  ),
 });

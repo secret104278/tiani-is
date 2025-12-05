@@ -56,7 +56,9 @@ export default function QiudaorenList({
   const hasAnyQiudaoren = qiudaorens.length > 0;
 
   if (!hasAnyQiudaoren) {
-    return <div className="py-8 text-center text-gray-500">尚無新求道人</div>;
+    return (
+      <div className="py-8 text-center text-gray-500">您尚無新增任何求道人</div>
+    );
   }
 
   const handleDeleteClick = (userId: string, userName: string) => {
@@ -264,7 +266,7 @@ export default function QiudaorenList({
         if (found) {
           return (
             <Dialog
-              title="編輯新求道人"
+              title="編輯求道人"
               show={!!editingQiudaorenUserId}
               closeModal={() => {
                 setEditingQiudaorenUserId(undefined);

@@ -44,14 +44,15 @@ export default function UserCombobox({
 
   return (
     <Combobox
+      immediate
       value={selected}
       onChange={setSelected}
       onClose={() => setQuery("")}
     >
       <div className="relative">
-        <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
+        <div className="relative w-full cursor-default overflow-hidden rounded-[.5em] bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
           <ComboboxInput
-            className="w-full rounded-lg border py-2 pr-10 pl-3 text-gray-900 leading-8 focus:ring-0"
+            className="w-full rounded-[.5em] border py-2 pr-10 pl-3 text-gray-900 leading-8 focus:ring-0"
             displayValue={(person: UserComboboxSelected) => person?.name ?? ""}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -64,7 +65,7 @@ export default function UserCombobox({
         </div>
 
         <ComboboxOptions
-          className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 transition duration-100 ease-out empty:invisible focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 sm:text-sm"
+          className="absolute mt-1 max-h-60 w-full overflow-auto rounded-[.5em] bg-white py-1 text-base shadow-lg ring-1 ring-black/5 transition duration-100 ease-out empty:invisible focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 sm:text-sm"
           transition
         >
           {filteredPeople.length === 0 && query !== "" ? (
@@ -77,7 +78,9 @@ export default function UserCombobox({
                 key={person.id}
                 className={({ focus }) =>
                   `relative cursor-default select-none py-2 pr-4 pl-10 ${
-                    focus ? "bg-teal-600 text-white" : "text-gray-900"
+                    focus
+                      ? "cursor-pointer bg-teal-600 text-white"
+                      : "text-gray-900"
                   }`
                 }
                 value={person}

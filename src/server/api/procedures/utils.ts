@@ -29,7 +29,11 @@ const getActivity = (db: PrismaClient, site: Site, activityId: number) => {
       });
     case Site.YideWork:
       return db.yideWorkActivity.findUniqueOrThrow({
-        select: { organiserId: true, status: true },
+        select: {
+          organiserId: true,
+          status: true,
+          staffs: { select: { userId: true } },
+        },
         where: {
           id: activityId,
         },
@@ -45,9 +49,17 @@ export const buildCollectActivity = (site: Site) =>
     .input(z.object({ activityId: z.number() }))
     .use(async ({ ctx, input, next }) => {
       const activity = await getActivity(ctx.db, site, input.activityId);
-      const isManager =
+
+      let isManager =
         ctx.session.user.id === activity.organiserId ||
         ctx.session.user.role[`is_${site}_admin`];
+
+      // Check if user is a staff for YideWork activities
+      if (site === Site.YideWork && !isManager && "staffs" in activity) {
+        isManager = activity.staffs.some(
+          (staff) => staff.userId === ctx.session.user.id,
+        );
+      }
 
       return next({
         ctx: {

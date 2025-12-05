@@ -112,6 +112,7 @@ model User {
   etogetherActivityRegisters EtogetherActivityRegister[]
   qiudaorenOnActivities      QiudaorenOnActivity[]
   qiudaorenCreated           QiudaorenOnActivity[]       @relation("QiudaorenCreatedBy")
+  yideWorkActivityStaffs     YideWorkActivityStaff[]
   TianiShopOrder             TianiShopOrder[]
   TianiShopListing           TianiShopListing[]
   TianiShopCart              TianiShopCart[]
@@ -418,6 +419,7 @@ model YideWorkActivity {
   version Int @default(1)
 
   qiudaorenOnActivities QiudaorenOnActivity[]
+  staffs                YideWorkActivityStaff[]
 
   @@index([title])
   @@index([organiserId])
@@ -448,6 +450,18 @@ model QiudaorenOnActivity {
   @@index([userId])
   @@index([activityId])
   @@index([createdById])
+}
+
+model YideWorkActivityStaff {
+  id         Int              @id @default(autoincrement())
+  activity   YideWorkActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId Int
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+
+  @@unique([activityId, userId])
+  @@index([activityId])
+  @@index([userId])
 }
 
 /**

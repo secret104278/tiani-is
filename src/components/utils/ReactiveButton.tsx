@@ -1,6 +1,7 @@
 import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
 import type { ButtonHTMLAttributes, DetailedHTMLProps } from "react";
+import { cn } from "~/lib/utils";
 
 export default function ReactiveButton({
   loading = false,
@@ -19,21 +20,21 @@ export default function ReactiveButton({
 >) {
   if (loading)
     return (
-      <button className="btn btn-disabled">
+      <button {...props} className={cn("btn btn-disabled", props.className)}>
         <div className="loading loading-sm" />
       </button>
     );
 
   if (isSuccess)
     return (
-      <button className="btn btn-disabled">
+      <button {...props} className={cn("btn btn-disabled", props.className)}>
         <CheckIcon className="h-4 w-4" />
       </button>
     );
 
   if (isError || !isEmpty(error))
     return (
-      <button className="btn btn-error">
+      <button {...props} className={cn("btn btn-error", props.className)}>
         <ExclamationTriangleIcon className="h-4 w-4" />
         {isEmpty(error) ? "錯誤" : error}
       </button>

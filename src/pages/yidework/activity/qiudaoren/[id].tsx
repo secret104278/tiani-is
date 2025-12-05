@@ -51,8 +51,17 @@ export default function YideWorkActivityQiudaorenPage() {
   if (activityIsLoading) return <div className="loading" />;
   if (!activity) return <AlertWarning>找不到活動</AlertWarning>;
   if (sessionStatus === "loading") return <div className="loading" />;
-  if (!session || !session.user.role.is_yidework_admin)
-    return <AlertWarning>沒有權限</AlertWarning>;
+  if (!session) return <AlertWarning>請先登入</AlertWarning>;
+
+  const isManager =
+    !!session.user.role.is_yidework_admin ||
+    session.user.id === activity.organiserId;
+
+  const isStaff =
+    !isManager &&
+    activity.staffs?.some((staff) => staff.user.id === session?.user.id);
+
+  if (!isManager && !isStaff) return <AlertWarning>沒有權限</AlertWarning>;
 
   const totalQiudaoren = qiudaorens?.length ?? 0;
 
@@ -125,7 +134,7 @@ export default function YideWorkActivityQiudaorenPage() {
         )}
       </div>
       <Dialog
-        title="新增新求道人"
+        title="新增求道人"
         show={addDialogOpen}
         closeModal={() => setAddDialogOpen(false)}
       >
