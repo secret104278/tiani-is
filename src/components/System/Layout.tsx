@@ -54,20 +54,16 @@ export default function Layout({ children }: { children: ReactNode }) {
     <>
       <div className="navbar mb-4 bg-base-100 shadow-md">
         <div className="navbar-start">
-          <Link href={`/${site}`}>
+          <Link href={site ? `/${site}` : "/personal/account"}>
             <button className="btn btn-circle btn-ghost">
               <HomeIcon className="h-6 w-6" />
             </button>
           </Link>
         </div>
         <div className="navbar-center">
-          <Link href={`/${site}`}>
+          <Link href={site ? `/${site}` : "/personal/account"}>
             <button className="btn btn-ghost text-xl normal-case">
-              {router.pathname.startsWith("/auth") ||
-              router.pathname.startsWith("/admin") ||
-              router.pathname.startsWith("/personal")
-                ? "天一聖道院資訊系統"
-                : siteToTitle(site)}
+              {siteToTitle(site)}
             </button>
           </Link>
         </div>

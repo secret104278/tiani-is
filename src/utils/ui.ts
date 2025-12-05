@@ -122,7 +122,7 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
 
-export const YIDE_WORK_ACTIVITY_TITLES = ["獻供", "辦道"];
+export const YIDE_WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
 
 export const IS_LINE_NOTIFY_ENABLED = false;
 
@@ -306,13 +306,13 @@ export enum Site {
   TianiShop = "tianishop",
 }
 
-export const urlBaseToSite = (urlBase?: string): Site => {
+export const urlBaseToSite = (urlBase?: string): Site | undefined => {
   if (urlBase === "volunteer") return Site.Volunteer;
   if (urlBase === "yideclass") return Site.Yideclass;
   if (urlBase === "etogether") return Site.Etogether;
   if (urlBase === "yidework") return Site.YideWork;
   if (urlBase === "tianishop") return Site.TianiShop;
-  return Site.Volunteer;
+  return undefined;
 };
 
 export const userComparator = (

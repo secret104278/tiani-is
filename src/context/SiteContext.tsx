@@ -5,8 +5,8 @@ import { type Site, urlBaseToSite } from "~/utils/ui";
 
 // Define the context type
 type SiteContextType = {
-  site: Site;
-  setSite: React.Dispatch<React.SetStateAction<Site>>;
+  site: Site | undefined;
+  setSite: React.Dispatch<React.SetStateAction<Site | undefined>>;
 };
 
 // Create the context
@@ -15,7 +15,7 @@ const SiteContext = createContext<SiteContextType | undefined>(undefined);
 // Create a context provider component
 export const SiteProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
-  const [site, setSite] = useState<Site>(
+  const [site, setSite] = useState<Site | undefined>(
     urlBaseToSite(router.pathname.split("/")[1]),
   );
 

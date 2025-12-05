@@ -1,3 +1,4 @@
+import { useClose } from "@headlessui/react";
 import { useForm } from "react-hook-form";
 import ReactiveButton from "../utils/ReactiveButton";
 
@@ -25,31 +26,34 @@ type AddQiudaorenDefaultValues = Partial<AddQiudaorenFormData> & {
 export default function AddQiudaorenDialogContent({
   activityId,
   defaultValues,
-  onSuccess,
 }: {
   activityId: number;
   defaultValues?: AddQiudaorenDefaultValues;
-  onSuccess?: () => void;
 }) {
   const isEditMode = !!defaultValues;
   const utils = api.useUtils();
 
-  const { register, handleSubmit, watch } = useForm<AddQiudaorenFormData>({
-    mode: "all",
-    defaultValues: defaultValues
-      ? {
-          ...defaultValues,
-        }
-      : undefined,
-  });
+  const { register, handleSubmit, watch, formState } =
+    useForm<AddQiudaorenFormData>({
+      mode: "all",
+      defaultValues: defaultValues
+        ? {
+            ...defaultValues,
+          }
+        : undefined,
+    });
+
+  const { errors } = formState;
 
   const gender = watch("gender");
   const birthYear = watch("birthYear");
 
   const templeGender = useMemo(
     () => calculateTempleGender(gender, birthYear),
-    [gender, birthYear]
+    [gender, birthYear],
   );
+
+  const close = useClose();
 
   const {
     mutate: createQiudaoren,
@@ -57,8 +61,9 @@ export default function AddQiudaorenDialogContent({
     error: createQiudaorenError,
   } = api.yideworkActivity.createQiudaoren.useMutation({
     onSuccess: () => {
-      void utils.yideworkActivity.getQiudaorenByActivity.invalidate();
-      onSuccess?.();
+      void utils.yideworkActivity.getQiudaorensByActivity.invalidate();
+      void utils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+      close();
     },
   });
 
@@ -68,8 +73,9 @@ export default function AddQiudaorenDialogContent({
     error: updateQiudaorenError,
   } = api.yideworkActivity.updateQiudaoren.useMutation({
     onSuccess: () => {
-      void utils.yideworkActivity.getQiudaorenByActivity.invalidate();
-      onSuccess?.();
+      void utils.yideworkActivity.getQiudaorensByActivity.invalidate();
+      void utils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+      close();
     },
   });
 
@@ -100,10 +106,19 @@ export default function AddQiudaorenDialogContent({
         </label>
         <input
           type="text"
-          className="input input-bordered w-full"
+          className={`input input-bordered w-full ${
+            errors.name ? "input-error" : ""
+          }`}
           required
-          {...register("name")}
+          {...register("name", { required: "名字為必填" })}
         />
+        {errors.name && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.name.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -116,20 +131,27 @@ export default function AddQiudaorenDialogContent({
               type="radio"
               className="radio"
               value="MALE"
-              {...register("gender", { required: true })}
+              {...register("gender", { required: "性別為必填" })}
             />
-            <span className="label-text ml-2">男</span>
+            <span className="label-text ml-2">乾</span>
           </label>
           <label className="label cursor-pointer">
             <input
               type="radio"
               className="radio"
               value="FEMALE"
-              {...register("gender", { required: true })}
+              {...register("gender", { required: "性別為必填" })}
             />
-            <span className="label-text ml-2">女</span>
+            <span className="label-text ml-2">坤</span>
           </label>
         </div>
+        {errors.gender && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.gender.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -142,7 +164,9 @@ export default function AddQiudaorenDialogContent({
           step="1"
           min={1900}
           max={new Date().getFullYear()}
-          className="input input-bordered w-full"
+          className={`input input-bordered w-full ${
+            errors.birthYear ? "input-error" : ""
+          }`}
           required
           {...register("birthYear", {
             // Use setValueAs instead of valueAsNumber to prevent NaN from appearing
@@ -174,11 +198,18 @@ export default function AddQiudaorenDialogContent({
             },
           })}
         />
-        {birthYear && lodashIsFinite(birthYear) && (
+        {errors.birthYear && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.birthYear.message}
+            </span>
+          </label>
+        )}
+        {birthYear && lodashIsFinite(birthYear) && !errors.birthYear && (
           <div className="mt-2 flex flex-col gap-1 text-gray-600 text-sm">
             <div>年齡：{new Date().getFullYear() - birthYear} 歲</div>
             {templeGender && (
-              <div>佛堂性別：{TEMPLE_GENDER_LABELS[templeGender]}</div>
+              <div>求道性別：{TEMPLE_GENDER_LABELS[templeGender]}</div>
             )}
           </div>
         )}
@@ -192,7 +223,9 @@ export default function AddQiudaorenDialogContent({
           type="tel"
           inputMode="numeric"
           placeholder="09XXXXXXXX"
-          className="input input-bordered w-full"
+          className={`input input-bordered w-full ${
+            errors.phone ? "input-error" : ""
+          }`}
           {...register("phone", {
             validate: (value) =>
               !value || validatePhoneNumber(value)
@@ -200,6 +233,13 @@ export default function AddQiudaorenDialogContent({
                 : "電話號碼必須以 09 開頭，共 10 位數字",
           })}
         />
+        {errors.phone && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.phone.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div className="divider" />
@@ -210,9 +250,19 @@ export default function AddQiudaorenDialogContent({
         </label>
         <input
           type="text"
-          className="input input-bordered w-full"
-          {...register("yinShi")}
+          className={`input input-bordered w-full ${
+            errors.yinShi ? "input-error" : ""
+          }`}
+          required
+          {...register("yinShi", { required: "引師為必填" })}
         />
+        {errors.yinShi && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.yinShi.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -225,20 +275,27 @@ export default function AddQiudaorenDialogContent({
               type="radio"
               className="radio"
               value="MALE"
-              {...register("yinShiGender")}
+              {...register("yinShiGender", { required: "引師性別為必填" })}
             />
-            <span className="label-text ml-2">男</span>
+            <span className="label-text ml-2">乾</span>
           </label>
           <label className="label cursor-pointer">
             <input
               type="radio"
               className="radio"
               value="FEMALE"
-              {...register("yinShiGender")}
+              {...register("yinShiGender", { required: "引師性別為必填" })}
             />
-            <span className="label-text ml-2">女</span>
+            <span className="label-text ml-2">坤</span>
           </label>
         </div>
+        {errors.yinShiGender && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.yinShiGender.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -249,7 +306,9 @@ export default function AddQiudaorenDialogContent({
           type="tel"
           inputMode="numeric"
           placeholder="09XXXXXXXX"
-          className="input input-bordered w-full"
+          className={`input input-bordered w-full ${
+            errors.yinShiPhone ? "input-error" : ""
+          }`}
           {...register("yinShiPhone", {
             validate: (value) =>
               !value || validatePhoneNumber(value)
@@ -257,6 +316,13 @@ export default function AddQiudaorenDialogContent({
                 : "電話號碼必須以 09 開頭，共 10 位數字",
           })}
         />
+        {errors.yinShiPhone && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.yinShiPhone.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div className="divider" />
@@ -267,9 +333,19 @@ export default function AddQiudaorenDialogContent({
         </label>
         <input
           type="text"
-          className="input input-bordered w-full"
-          {...register("baoShi")}
+          className={`input input-bordered w-full ${
+            errors.baoShi ? "input-error" : ""
+          }`}
+          required
+          {...register("baoShi", { required: "保師為必填" })}
         />
+        {errors.baoShi && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.baoShi.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -282,20 +358,27 @@ export default function AddQiudaorenDialogContent({
               type="radio"
               className="radio"
               value="MALE"
-              {...register("baoShiGender")}
+              {...register("baoShiGender", { required: "保師性別為必填" })}
             />
-            <span className="label-text ml-2">男</span>
+            <span className="label-text ml-2">乾</span>
           </label>
           <label className="label cursor-pointer">
             <input
               type="radio"
               className="radio"
               value="FEMALE"
-              {...register("baoShiGender")}
+              {...register("baoShiGender", { required: "保師性別為必填" })}
             />
-            <span className="label-text ml-2">女</span>
+            <span className="label-text ml-2">坤</span>
           </label>
         </div>
+        {errors.baoShiGender && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.baoShiGender.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -306,7 +389,9 @@ export default function AddQiudaorenDialogContent({
           type="tel"
           inputMode="numeric"
           placeholder="09XXXXXXXX"
-          className="input input-bordered w-full"
+          className={`input input-bordered w-full ${
+            errors.baoShiPhone ? "input-error" : ""
+          }`}
           {...register("baoShiPhone", {
             validate: (value) =>
               !value || validatePhoneNumber(value)
@@ -314,6 +399,13 @@ export default function AddQiudaorenDialogContent({
                 : "電話號碼必須以 09 開頭，共 10 位數字",
           })}
         />
+        {errors.baoShiPhone && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.baoShiPhone.message}
+            </span>
+          </label>
+        )}
       </div>
 
       <ReactiveButton

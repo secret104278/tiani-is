@@ -1,26 +1,28 @@
 import { z } from "zod";
 import { birthYearSchema, phoneNumberSchema } from "~/utils/phoneValidation";
-import { activityManageProcedure } from "../../procedures/yidework";
+import {
+  activityManageProcedure,
+  representableProcedure,
+} from "../../procedures/yidework";
 import { createTRPCRouter } from "../../trpc";
-import { type TempleGender, calculateTempleGender } from "./templeGenderUtils";
+
+const qiudaorenSchema = z.object({
+  activityId: z.number(),
+  name: z.string().min(1),
+  gender: z.enum(["MALE", "FEMALE"]),
+  birthYear: birthYearSchema,
+  phone: phoneNumberSchema.optional(),
+  yinShi: z.string().min(1),
+  yinShiGender: z.enum(["MALE", "FEMALE"]),
+  yinShiPhone: phoneNumberSchema.optional(),
+  baoShi: z.string().min(1),
+  baoShiGender: z.enum(["MALE", "FEMALE"]),
+  baoShiPhone: phoneNumberSchema.optional(),
+});
 
 export const qiudaorenRouter = createTRPCRouter({
-  createQiudaoren: activityManageProcedure
-    .input(
-      z.object({
-        activityId: z.number(),
-        name: z.string().min(1),
-        gender: z.enum(["MALE", "FEMALE"]),
-        birthYear: birthYearSchema,
-        phone: phoneNumberSchema,
-        yinShi: z.string().optional(),
-        yinShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
-        yinShiPhone: phoneNumberSchema,
-        baoShi: z.string().optional(),
-        baoShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
-        baoShiPhone: phoneNumberSchema,
-      }),
-    )
+  createQiudaoren: representableProcedure
+    .input(qiudaorenSchema)
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.db.user.create({
         data: {
@@ -41,27 +43,17 @@ export const qiudaorenRouter = createTRPCRouter({
         data: {
           userId: user.id,
           activityId: input.activityId,
+          createdById: ctx.session.user.id,
         },
       });
 
       return user;
     }),
 
-  updateQiudaoren: activityManageProcedure
+  updateQiudaoren: representableProcedure
     .input(
-      z.object({
-        activityId: z.number(),
+      qiudaorenSchema.extend({
         userId: z.string(),
-        name: z.string().min(1).optional(),
-        gender: z.enum(["MALE", "FEMALE"]).optional(),
-        birthYear: birthYearSchema.optional(),
-        phone: phoneNumberSchema.optional(),
-        yinShi: z.string().optional(),
-        yinShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
-        yinShiPhone: phoneNumberSchema.optional(),
-        baoShi: z.string().optional(),
-        baoShiGender: z.enum(["MALE", "FEMALE"]).nullish(),
-        baoShiPhone: phoneNumberSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -95,9 +87,9 @@ export const qiudaorenRouter = createTRPCRouter({
       });
     }),
 
-  getQiudaorenByActivity: activityManageProcedure.query(
+  getQiudaorensByActivity: activityManageProcedure.query(
     async ({ ctx, input }) => {
-      const qiudaoren = await ctx.db.qiudaorenOnActivity.findMany({
+      const qiudaorens = await ctx.db.qiudaorenOnActivity.findMany({
         where: { activityId: input.activityId },
         include: {
           user: {
@@ -115,66 +107,52 @@ export const qiudaorenRouter = createTRPCRouter({
               baoShiPhone: true,
             },
           },
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       });
 
-      const grouped: Record<TempleGender, typeof qiudaoren> = {
-        QIAN: [],
-        TONG: [],
-        KUN: [],
-        NV: [],
-      };
-
-      for (const item of qiudaoren) {
-        const templeGender = calculateTempleGender(
-          item.user.gender,
-          item.user.birthYear,
-        );
-        if (templeGender) {
-          grouped[templeGender].push(item);
-        }
-      }
-
-      return grouped;
+      return qiudaorens;
     },
   ),
 
-  searchQiudaoren: activityManageProcedure
-    .input(
-      z.object({
-        activityId: z.number(),
-        searchTerm: z.string().min(1),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const users = await ctx.db.user.findMany({
+  getQiudaorensByActivityAndCreatedBy: activityManageProcedure.query(
+    async ({ ctx, input }) => {
+      const qiudaorens = await ctx.db.qiudaorenOnActivity.findMany({
         where: {
-          name: {
-            contains: input.searchTerm,
-            mode: "insensitive",
+          activityId: input.activityId,
+          createdById: ctx.session.user.id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              gender: true,
+              birthYear: true,
+              phone: true,
+              yinShi: true,
+              yinShiGender: true,
+              yinShiPhone: true,
+              baoShi: true,
+              baoShiGender: true,
+              baoShiPhone: true,
+            },
           },
-          gender: { not: null },
-          birthYear: { not: null },
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
-        select: {
-          id: true,
-          name: true,
-          gender: true,
-          birthYear: true,
-          phone: true,
-          yinShi: true,
-          yinShiGender: true,
-          yinShiPhone: true,
-          baoShi: true,
-          baoShiGender: true,
-          baoShiPhone: true,
-        },
-        take: 20,
       });
 
-      return users.map((user) => ({
-        ...user,
-        templeGender: calculateTempleGender(user.gender, user.birthYear),
-      }));
-    }),
+      return qiudaorens;
+    },
+  ),
 });

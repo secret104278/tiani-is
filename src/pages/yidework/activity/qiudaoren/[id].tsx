@@ -1,5 +1,6 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
+import _ from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -28,11 +29,10 @@ export default function YideWorkActivityQiudaorenPage() {
   });
 
   const {
-    data: qiudaorenData,
+    data: qiudaorens,
     isLoading: qiudaorenIsLoading,
     error: qiudaorenError,
-    refetch: refetchQiudaoren,
-  } = api.yideworkActivity.getQiudaorenByActivity.useQuery(
+  } = api.yideworkActivity.getQiudaorensByActivity.useQuery(
     {
       activityId: Number(id),
     },
@@ -42,21 +42,9 @@ export default function YideWorkActivityQiudaorenPage() {
   );
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [editingQiudaorenUserId, setEditingQiudaorenUserId] = useState<
-    string | undefined
-  >(undefined);
-  const [deletingQiudaorenUserId, setDeletingQiudaorenUserId] = useState<
-    string | undefined
-  >(undefined);
-  const [groupBy, setGroupBy] = useState<"gender" | "shifu">("gender");
-
-  const { mutate: deleteQiudaoren, isPending: deleteQiudaorenIsPending } =
-    api.yideworkActivity.deleteQiudaoren.useMutation({
-      onSuccess: () => {
-        void refetchQiudaoren();
-        setDeletingQiudaorenUserId(undefined);
-      },
-    });
+  const [groupBy, setGroupBy] = useState<"qiudaoren" | "yinBaoShi">(
+    "qiudaoren",
+  );
 
   if (activityError)
     return <AlertWarning>{activityError.message}</AlertWarning>;
@@ -66,9 +54,14 @@ export default function YideWorkActivityQiudaorenPage() {
   if (!session || !session.user.role.is_yidework_admin)
     return <AlertWarning>沒有權限</AlertWarning>;
 
-  const totalQiudaoren = qiudaorenData
-    ? Object.values(qiudaorenData).reduce((sum, items) => sum + items.length, 0)
-    : 0;
+  const totalQiudaoren = qiudaorens?.length ?? 0;
+
+  const totalYinBaoShi = _.uniq(
+    _.concat(
+      qiudaorens?.flatMap((item) => item.user.yinShi) ?? [],
+      qiudaorens?.flatMap((item) => item.user.baoShi) ?? [],
+    ),
+  ).length;
 
   return (
     <div className="flex flex-col space-y-4">
@@ -84,26 +77,34 @@ export default function YideWorkActivityQiudaorenPage() {
       </ReactiveButton>
       <div className="stats shadow">
         <div className="stat">
-          <div className="stat-title">總人數</div>
+          <div className="stat-title">求道人數</div>
           <div className="stat-value">{totalQiudaoren}</div>
+        </div>
+        <div className="stat">
+          <div className="stat-title">引保師人數</div>
+          <div className="stat-value">{totalYinBaoShi}</div>
         </div>
       </div>
       <div className="flex flex-row justify-center">
         <div className="tabs tabs-boxed">
           <button
             className={clsx("tab", {
-              "tab-active": groupBy === "gender",
+              "tab-active": groupBy === "qiudaoren",
             })}
-            onClick={() => setGroupBy("gender")}
+            onClick={() => {
+              setGroupBy("qiudaoren");
+            }}
             type="button"
           >
-            性別
+            求道人
           </button>
           <button
             className={clsx("tab", {
-              "tab-active": groupBy === "shifu",
+              "tab-active": groupBy === "yinBaoShi",
             })}
-            onClick={() => setGroupBy("shifu")}
+            onClick={() => {
+              setGroupBy("yinBaoShi");
+            }}
             type="button"
           >
             引保師
@@ -115,24 +116,11 @@ export default function YideWorkActivityQiudaorenPage() {
         {qiudaorenError && (
           <AlertWarning>{qiudaorenError.message}</AlertWarning>
         )}
-        {qiudaorenData && (
+        {qiudaorens && (
           <QiudaorenList
-            qiudaoren={qiudaorenData}
+            qiudaorens={qiudaorens}
+            activityId={activity.id}
             groupBy={groupBy}
-            onEdit={(userId) => {
-              setEditingQiudaorenUserId(userId);
-            }}
-            onDelete={(userId) => {
-              setDeletingQiudaorenUserId(userId);
-              deleteQiudaoren({
-                activityId: activity.id,
-                userId,
-              });
-            }}
-            isDeleting={
-              deleteQiudaorenIsPending ? deletingQiudaorenUserId : undefined
-            }
-            showGenderLabel={groupBy === "shifu"}
           />
         )}
       </div>
@@ -141,59 +129,7 @@ export default function YideWorkActivityQiudaorenPage() {
         show={addDialogOpen}
         closeModal={() => setAddDialogOpen(false)}
       >
-        <AddQiudaorenDialogContent
-          activityId={activity.id}
-          onSuccess={() => {
-            setAddDialogOpen(false);
-            void refetchQiudaoren();
-          }}
-        />
-      </Dialog>
-      <Dialog
-        title="編輯新求道人"
-        show={!!editingQiudaorenUserId}
-        closeModal={() => {
-          setEditingQiudaorenUserId(undefined);
-        }}
-      >
-        {editingQiudaorenUserId && qiudaorenData
-          ? (() => {
-              for (const genderKey of ["QIAN", "TONG", "KUN", "NV"] as const) {
-                const items = qiudaorenData[genderKey];
-                if (items) {
-                  const found = items.find(
-                    (item: (typeof items)[number]) =>
-                      item.user.id === editingQiudaorenUserId,
-                  );
-                  if (found) {
-                    return (
-                      <AddQiudaorenDialogContent
-                        activityId={activity.id}
-                        defaultValues={{
-                          userId: found.user.id,
-                          name: found.user.name ?? undefined,
-                          gender: found.user.gender ?? undefined,
-                          birthYear: found.user.birthYear ?? undefined,
-                          phone: found.user.phone ?? undefined,
-                          yinShi: found.user.yinShi ?? undefined,
-                          yinShiGender: found.user.yinShiGender ?? undefined,
-                          yinShiPhone: found.user.yinShiPhone ?? undefined,
-                          baoShi: found.user.baoShi ?? undefined,
-                          baoShiGender: found.user.baoShiGender ?? undefined,
-                          baoShiPhone: found.user.baoShiPhone ?? undefined,
-                        }}
-                        onSuccess={() => {
-                          setEditingQiudaorenUserId(undefined);
-                          void refetchQiudaoren();
-                        }}
-                      />
-                    );
-                  }
-                }
-              }
-              return <AlertWarning>找不到該求道人資料</AlertWarning>;
-            })()
-          : null}
+        <AddQiudaorenDialogContent activityId={activity.id} />
       </Dialog>
     </div>
   );

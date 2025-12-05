@@ -2,447 +2,452 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    // provider = "sqlite"
-    provider  = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url       = env("DATABASE_PRISMA_URL")
-    directUrl = env("DATABASE_URL_NON_POOLING")
+  // provider = "sqlite"
+  provider  = "postgresql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url       = env("DATABASE_PRISMA_URL")
+  directUrl = env("DATABASE_URL_NON_POOLING")
 }
 
 model Example {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-    @@index([name])
+  @@index([name])
 }
 
 // Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? // @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? // @db.Text
+  access_token      String? // @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? // @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
-    TIANI_ADMIN
-    VOLUNTEER_ADMIN
-    YIDECLASS_ADMIN
-    ETOGETHER_ADMIN
-    YIDEWORK_ADMIN
+  TIANI_ADMIN
+  VOLUNTEER_ADMIN
+  YIDECLASS_ADMIN
+  ETOGETHER_ADMIN
+  YIDEWORK_ADMIN
 }
 
 enum Gender {
-    MALE
-    FEMALE
+  MALE
+  FEMALE
 }
 
 model User {
-    id            String      @id @default(cuid())
-    name          String?
-    email         String?     @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    lineNotify    LineNotify?
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  lineNotify    LineNotify?
 
-    roles Role[] @default([])
+  roles Role[] @default([])
 
-    // 求道卡相關欄位
-    qiudaoDateSolar  DateTime? // 求道日期（國曆）
-    qiudaoHour       String? // 求道時辰（子丑寅卯辰巳午未申酉戌亥）
-    qiudaoTemple     String? // 求道佛堂
-    qiudaoTanzhu     String? // 壇主（姓名）
-    affiliation      String? // 所屬單位
-    dianChuanShi     String? // 點傳師
-    yinShi           String? // 引師
-    yinShiGender     Gender? // 引師性別
-    yinShiPhone      String? // 引師電話
-    baoShi           String? // 保師
-    baoShiGender     Gender? // 保師性別
-    baoShiPhone      String? // 保師電話
-    phone            String? // 電話
-    gender           Gender? // 性別
-    birthYear        Int? // 出生年份（用於計算佛堂性別）
+  // 求道卡相關欄位
+  qiudaoDateSolar DateTime? // 求道日期（國曆）
+  qiudaoHour      String? // 求道時辰（子丑寅卯辰巳午未申酉戌亥）
+  qiudaoTemple    String? // 求道佛堂
+  qiudaoTanzhu    String? // 壇主（姓名）
+  affiliation     String? // 所屬單位
+  dianChuanShi    String? // 點傳師
+  yinShi          String? // 引師
+  yinShiGender    Gender? // 引師性別
+  yinShiPhone     String? // 引師電話
+  baoShi          String? // 保師
+  baoShiGender    Gender? // 保師性別
+  baoShiPhone     String? // 保師電話
+  phone           String? // 電話
+  gender          Gender? // 性別
+  birthYear       Int? // 出生年份（用於計算求道性別）
 
-    organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
-    organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")
-    organizedEtogetherActivites EtogetherActivity[] @relation("OrganizedEtogetherActivites")
-    organizedYideWorkActivities YideWorkActivity[]  @relation("OrganizedYideWorkActivities")
+  organizedVolunteerActivites VolunteerActivity[] @relation("OrganizedVolunteerActivites")
+  organizedClassActivites     ClassActivity[]     @relation("OrganizedClassActivites")
+  organizedEtogetherActivites EtogetherActivity[] @relation("OrganizedEtogetherActivites")
+  organizedYideWorkActivities YideWorkActivity[]  @relation("OrganizedYideWorkActivities")
 
-    participatedVolunteerActivites VolunteerActivity[] @relation("ParticipatedVolunteerActivites")
+  participatedVolunteerActivites VolunteerActivity[] @relation("ParticipatedVolunteerActivites")
 
-    activityReviewer ActivityReviewer?
+  activityReviewer ActivityReviewer?
 
-    volunteerActivityCheckRecords VolunteerActivityCheckRecord[]
-    casualCheckRecords            CasualCheckRecord[]
-    classActivityCheckRecord      ClassActivityCheckRecord[]
-    classActivityLeaveRecord      ClassActivityLeaveRecord[]
-    classMemberEnrollments        ClassMemberEnrollment[]
+  volunteerActivityCheckRecords VolunteerActivityCheckRecord[]
+  casualCheckRecords            CasualCheckRecord[]
+  classActivityCheckRecord      ClassActivityCheckRecord[]
+  classActivityLeaveRecord      ClassActivityLeaveRecord[]
+  classMemberEnrollments        ClassMemberEnrollment[]
 
-    etogetherActivityRegisters EtogetherActivityRegister[]
-    qiudaorenOnActivities      QiudaorenOnActivity[]
-    TianiShopOrder             TianiShopOrder[]
-    TianiShopListing           TianiShopListing[]
-    TianiShopCart              TianiShopCart[]
+  etogetherActivityRegisters EtogetherActivityRegister[]
+  qiudaorenOnActivities      QiudaorenOnActivity[]
+  qiudaorenCreated           QiudaorenOnActivity[]       @relation("QiudaorenCreatedBy")
+  TianiShopOrder             TianiShopOrder[]
+  TianiShopListing           TianiShopListing[]
+  TianiShopCart              TianiShopCart[]
 }
 
 model LineNotify {
-    id          Int    @id @default(autoincrement())
-    userId      String
-    user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    accessToken String
+  id          Int    @id @default(autoincrement())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken String
 
-    @@unique([userId])
+  @@unique([userId])
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
 }
 
 model VolunteerActivity {
-    id            Int                     @id @default(autoincrement())
-    title         String
-    description   String?
-    headcount     Int
-    location      String
-    startDateTime DateTime
-    endDateTime   DateTime
-    status        VolunteerActivityStatus @default(INREVIEW)
+  id            Int                     @id @default(autoincrement())
+  title         String
+  description   String?
+  headcount     Int
+  location      String
+  startDateTime DateTime
+  endDateTime   DateTime
+  status        VolunteerActivityStatus @default(INREVIEW)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-    organiser   User   @relation("OrganizedVolunteerActivites", fields: [organiserId], references: [id])
-    organiserId String
+  organiser   User   @relation("OrganizedVolunteerActivites", fields: [organiserId], references: [id])
+  organiserId String
 
-    participants User[] @relation("ParticipatedVolunteerActivites")
+  participants User[] @relation("ParticipatedVolunteerActivites")
 
-    version Int @default(1)
+  version Int @default(1)
 
-    volunteerActivityCheckIns VolunteerActivityCheckRecord[]
+  volunteerActivityCheckIns VolunteerActivityCheckRecord[]
 
-    @@index([organiserId])
-    @@index([startDateTime])
+  @@index([organiserId])
+  @@index([startDateTime])
 }
 
 enum VolunteerActivityStatus {
-    DRAFT
-    INREVIEW
-    PUBLISHED
+  DRAFT
+  INREVIEW
+  PUBLISHED
 }
 
 model ActivityReviewer {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    user   User   @relation(fields: [userId], references: [id])
-    userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }
 
 model VolunteerActivityCheckRecord {
-    id         Int               @id @default(autoincrement())
-    user       User              @relation(fields: [userId], references: [id])
-    userId     String
-    activity   VolunteerActivity @relation(fields: [activityId], references: [id])
-    activityId Int
+  id         Int               @id @default(autoincrement())
+  user       User              @relation(fields: [userId], references: [id])
+  userId     String
+  activity   VolunteerActivity @relation(fields: [activityId], references: [id])
+  activityId Int
 
-    checkInAt  DateTime  @default(now())
-    checkOutAt DateTime?
+  checkInAt  DateTime  @default(now())
+  checkOutAt DateTime?
 
-    checkInLatitude   Float?
-    checkInLongitude  Float?
-    checkOutLatitude  Float?
-    checkOutLongitude Float?
+  checkInLatitude   Float?
+  checkInLongitude  Float?
+  checkOutLatitude  Float?
+  checkOutLongitude Float?
 
-    @@unique([userId, activityId])
-    @@index([userId])
-    @@index([activityId])
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
 }
 
 model CasualCheckRecord {
-    id     Int    @id @default(autoincrement())
-    user   User   @relation(fields: [userId], references: [id])
-    userId String
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
-    checkInAt  DateTime  @default(now())
-    checkOutAt DateTime?
+  checkInAt  DateTime  @default(now())
+  checkOutAt DateTime?
 
-    checkInLatitude   Float?
-    checkInLongitude  Float?
-    checkOutLatitude  Float?
-    checkOutLongitude Float?
+  checkInLatitude   Float?
+  checkInLongitude  Float?
+  checkOutLatitude  Float?
+  checkOutLongitude Float?
 
-    @@index([userId, checkInAt])
+  @@index([userId, checkInAt])
 }
 
 enum ClassActivityStatus {
-    DRAFT
-    PUBLISHED
+  DRAFT
+  PUBLISHED
 }
 
 model ClassActivity {
-    id            Int                 @id @default(autoincrement())
-    title         String
-    description   String?
-    location      String
-    startDateTime DateTime
-    endDateTime   DateTime
-    status        ClassActivityStatus @default(PUBLISHED)
+  id            Int                 @id @default(autoincrement())
+  title         String
+  description   String?
+  location      String
+  startDateTime DateTime
+  endDateTime   DateTime
+  status        ClassActivityStatus @default(PUBLISHED)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-    organiser   User   @relation("OrganizedClassActivites", fields: [organiserId], references: [id])
-    organiserId String
+  organiser   User   @relation("OrganizedClassActivites", fields: [organiserId], references: [id])
+  organiserId String
 
-    version Int @default(1)
+  version Int @default(1)
 
-    classActivityCheckRecords ClassActivityCheckRecord[]
-    classActivityLeaveRecords ClassActivityLeaveRecord[]
+  classActivityCheckRecords ClassActivityCheckRecord[]
+  classActivityLeaveRecords ClassActivityLeaveRecord[]
 
-    @@index([title])
-    @@index([organiserId])
-    @@index([startDateTime])
+  @@index([title])
+  @@index([organiserId])
+  @@index([startDateTime])
 }
 
 model ClassActivityCheckRecord {
-    id         Int           @id @default(autoincrement())
-    user       User          @relation(fields: [userId], references: [id])
-    userId     String
-    activity   ClassActivity @relation(fields: [activityId], references: [id])
-    activityId Int
-    checkAt    DateTime      @default(now())
+  id         Int           @id @default(autoincrement())
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String
+  activity   ClassActivity @relation(fields: [activityId], references: [id])
+  activityId Int
+  checkAt    DateTime      @default(now())
 
-    latitude  Float?
-    longitude Float?
+  latitude  Float?
+  longitude Float?
 
-    @@unique([userId, activityId])
-    @@index([userId])
-    @@index([activityId])
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
 }
 
 model ClassActivityLeaveRecord {
-    id         Int           @id @default(autoincrement())
-    user       User          @relation(fields: [userId], references: [id])
-    userId     String
-    activity   ClassActivity @relation(fields: [activityId], references: [id])
-    activityId Int
+  id         Int           @id @default(autoincrement())
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String
+  activity   ClassActivity @relation(fields: [activityId], references: [id])
+  activityId Int
 
-    @@unique([userId, activityId])
-    @@index([userId])
-    @@index([activityId])
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
 }
 
 model ClassMemberEnrollment {
-    id     Int    @id @default(autoincrement())
-    user   User   @relation(fields: [userId], references: [id])
-    userId String
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
-    classTitle String
+  classTitle String
 
-    @@unique([userId, classTitle])
-    @@index([classTitle])
+  @@unique([userId, classTitle])
+  @@index([classTitle])
 }
 
 enum EtogetherActivityStatus {
-    DRAFT
-    PUBLISHED
+  DRAFT
+  PUBLISHED
 }
 
 model EtogetherActivitySubgroup {
-    id               Int     @id @default(autoincrement())
-    title            String
-    description      String?
-    displayColorCode String?
+  id               Int     @id @default(autoincrement())
+  title            String
+  description      String?
+  displayColorCode String?
 
-    etogetherActivity   EtogetherActivity @relation(fields: [etogetherActivityId], references: [id])
-    etogetherActivityId Int
+  etogetherActivity   EtogetherActivity @relation(fields: [etogetherActivityId], references: [id])
+  etogetherActivityId Int
 
-    registers         EtogetherActivityRegister[]
-    externalRegisters ExternalEtogetherActivityRegister[]
+  registers         EtogetherActivityRegister[]
+  externalRegisters ExternalEtogetherActivityRegister[]
 }
 
 model EtogetherActivity {
-    id            Int                         @id @default(autoincrement())
-    title         String
-    description   String?
-    location      String
-    startDateTime DateTime
-    endDateTime   DateTime
-    subgroups     EtogetherActivitySubgroup[]
-    status        EtogetherActivityStatus     @default(PUBLISHED)
+  id            Int                         @id @default(autoincrement())
+  title         String
+  description   String?
+  location      String
+  startDateTime DateTime
+  endDateTime   DateTime
+  subgroups     EtogetherActivitySubgroup[]
+  status        EtogetherActivityStatus     @default(PUBLISHED)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-    organiser   User   @relation("OrganizedEtogetherActivites", fields: [organiserId], references: [id])
-    organiserId String
+  organiser   User   @relation("OrganizedEtogetherActivites", fields: [organiserId], references: [id])
+  organiserId String
 
-    version Int @default(1)
+  version Int @default(1)
 
-    // classActivityCheckRecords ClassActivityCheckRecord[]
-    // classActivityLeaveRecords ClassActivityLeaveRecord[]
-    registers         EtogetherActivityRegister[]
-    externalRegisters ExternalEtogetherActivityRegister[]
+  // classActivityCheckRecords ClassActivityCheckRecord[]
+  // classActivityLeaveRecords ClassActivityLeaveRecord[]
+  registers         EtogetherActivityRegister[]
+  externalRegisters ExternalEtogetherActivityRegister[]
 
-    @@index([title])
-    @@index([organiserId])
-    @@index([startDateTime])
+  @@index([title])
+  @@index([organiserId])
+  @@index([startDateTime])
 }
 
 model EtogetherActivityRegister {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
-    activityId Int
+  activity   EtogetherActivity @relation(fields: [activityId], references: [id])
+  activityId Int
 
-    user   User   @relation(fields: [userId], references: [id])
-    userId String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
-    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
-    subgroupId Int
+  subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
+  subgroupId Int
 
-    externalRegisters ExternalEtogetherActivityRegister[]
+  externalRegisters ExternalEtogetherActivityRegister[]
 
-    checkRecord EtogetherActivityCheckRecord?
+  checkRecord EtogetherActivityCheckRecord?
 
-    @@unique([userId, activityId])
+  @@unique([userId, activityId])
 }
 
 model ExternalEtogetherActivityRegister {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    activity   EtogetherActivity @relation(fields: [activityId], references: [id])
-    activityId Int
+  activity   EtogetherActivity @relation(fields: [activityId], references: [id])
+  activityId Int
 
-    username String
+  username String
 
-    mainRegister   EtogetherActivityRegister @relation(fields: [mainRegisterId], references: [id], onDelete: Cascade)
-    mainRegisterId Int
+  mainRegister   EtogetherActivityRegister @relation(fields: [mainRegisterId], references: [id], onDelete: Cascade)
+  mainRegisterId Int
 
-    subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
-    subgroupId Int
+  subgroup   EtogetherActivitySubgroup @relation(fields: [subgroupId], references: [id])
+  subgroupId Int
 
-    checkRecord ExternalEtogetherActivityCheckRecord?
+  checkRecord ExternalEtogetherActivityCheckRecord?
 
-    @@unique([activityId, username])
+  @@unique([activityId, username])
 }
 
 model EtogetherActivityCheckRecord {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    register   EtogetherActivityRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
-    registerId Int                       @unique
+  register   EtogetherActivityRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  registerId Int                       @unique
 
-    latitude  Float?
-    longitude Float?
+  latitude  Float?
+  longitude Float?
 }
 
 model ExternalEtogetherActivityCheckRecord {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    register   ExternalEtogetherActivityRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
-    registerId Int                               @unique
+  register   ExternalEtogetherActivityRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  registerId Int                               @unique
 }
 
 model YideWorkLocation {
-    id   Int    @id @default(autoincrement())
-    name String
+  id   Int    @id @default(autoincrement())
+  name String
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-    yideWorkActivities YideWorkActivity[]
+  yideWorkActivities YideWorkActivity[]
 }
 
 enum YideWorkActivityStatus {
-    DRAFT
-    PUBLISHED
+  DRAFT
+  PUBLISHED
 }
 
 model YideWorkActivity {
-    id          Int     @id @default(autoincrement())
-    title       String
-    description String?
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
 
-    presetId Int?
-    preset   YideWorkPreset? @relation(fields: [presetId], references: [id])
+  presetId Int?
+  preset   YideWorkPreset? @relation(fields: [presetId], references: [id])
 
-    locationId Int
-    location   YideWorkLocation       @relation(fields: [locationId], references: [id])
-    status     YideWorkActivityStatus @default(PUBLISHED)
+  locationId Int
+  location   YideWorkLocation       @relation(fields: [locationId], references: [id])
+  status     YideWorkActivityStatus @default(PUBLISHED)
 
-    startDateTime DateTime
-    endDateTime   DateTime
+  startDateTime DateTime
+  endDateTime   DateTime
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-    organiser   User   @relation("OrganizedYideWorkActivities", fields: [organiserId], references: [id])
-    organiserId String
+  organiser   User   @relation("OrganizedYideWorkActivities", fields: [organiserId], references: [id])
+  organiserId String
 
-    version Int @default(1)
+  version Int @default(1)
 
-    qiudaorenOnActivities QiudaorenOnActivity[]
+  qiudaorenOnActivities QiudaorenOnActivity[]
 
-    @@index([title])
-    @@index([organiserId])
-    @@index([startDateTime])
-    @@index([locationId])
+  @@index([title])
+  @@index([organiserId])
+  @@index([startDateTime])
+  @@index([locationId])
 }
 
 model YideWorkPreset {
-    id          Int    @id @default(autoincrement())
-    description String
+  id          Int    @id @default(autoincrement())
+  description String
 
-    activities YideWorkActivity[]
+  activities YideWorkActivity[]
 }
 
 model QiudaorenOnActivity {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 
-    activity   YideWorkActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-    activityId Int
+  activity   YideWorkActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId Int
 
-    @@unique([userId, activityId])
-    @@index([userId])
-    @@index([activityId])
+  createdBy   User   @relation("QiudaorenCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  createdById String
+
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
+  @@index([createdById])
 }
 
 /**
@@ -450,118 +455,118 @@ model QiudaorenOnActivity {
  */
 
 model TianiShopListing {
-    id          Int       @id @default(autoincrement())
-    title       String
-    description String?
-    price       Decimal   @db.Decimal(19, 4)
-    startTime   DateTime?
-    endTime     DateTime?
-    capacity    Int? // null means unlimited capacity
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  price       Decimal   @db.Decimal(19, 4)
+  startTime   DateTime?
+  endTime     DateTime?
+  capacity    Int? // null means unlimited capacity
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-    // Publisher information
-    publisher   User   @relation(fields: [publisherId], references: [id])
-    publisherId String
+  // Publisher information
+  publisher   User   @relation(fields: [publisherId], references: [id])
+  publisherId String
 
-    images     TianiShopListingImage[]
-    orderItems TianiShopOrderItem[]
-    cartItems  TianiShopCartItem[]
+  images     TianiShopListingImage[]
+  orderItems TianiShopOrderItem[]
+  cartItems  TianiShopCartItem[]
 
-    @@index([startTime])
-    @@index([endTime])
-    @@index([publisherId])
+  @@index([startTime])
+  @@index([endTime])
+  @@index([publisherId])
 }
 
 model TianiShopListingImage {
-    id        Int              @id @default(autoincrement())
-    key       String // The unique storage key/path
-    thumbhash String           @db.VarChar(40)
-    order     Int // Position of the image in the listing
-    listing   TianiShopListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-    listingId Int
+  id        Int              @id @default(autoincrement())
+  key       String // The unique storage key/path
+  thumbhash String           @db.VarChar(40)
+  order     Int // Position of the image in the listing
+  listing   TianiShopListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId Int
 
-    createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
 
-    @@unique([listingId, order]) // Ensure no duplicate orders within same listing
-    @@index([listingId])
+  @@unique([listingId, order]) // Ensure no duplicate orders within same listing
+  @@index([listingId])
 }
 
 model TianiShopCart {
-    id        Int      @id @default(autoincrement())
-    user      User     @relation(fields: [userId], references: [id])
-    userId    String   @unique
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    items TianiShopCartItem[]
+  items TianiShopCartItem[]
 
-    @@index([userId])
+  @@index([userId])
 }
 
 model TianiShopCartItem {
-    id        Int              @id @default(autoincrement())
-    cart      TianiShopCart    @relation(fields: [cartId], references: [id])
-    cartId    Int
-    listing   TianiShopListing @relation(fields: [listingId], references: [id])
-    listingId Int
-    quantity  Int
-    createdAt DateTime         @default(now())
-    updatedAt DateTime         @updatedAt
+  id        Int              @id @default(autoincrement())
+  cart      TianiShopCart    @relation(fields: [cartId], references: [id])
+  cartId    Int
+  listing   TianiShopListing @relation(fields: [listingId], references: [id])
+  listingId Int
+  quantity  Int
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
-    @@index([cartId])
-    @@index([listingId])
+  @@index([cartId])
+  @@index([listingId])
 }
 
 enum TianiShopOrderItemStatus {
-    PENDING
-    COMPLETED
-    CANCELLED
+  PENDING
+  COMPLETED
+  CANCELLED
 }
 
 model TianiShopOrder {
-    id        Int                  @id @default(autoincrement())
-    user      User                 @relation(fields: [userId], references: [id])
-    userId    String
-    createdAt DateTime             @default(now())
-    items     TianiShopOrderItem[]
+  id        Int                  @id @default(autoincrement())
+  user      User                 @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime             @default(now())
+  items     TianiShopOrderItem[]
 
-    // Price calculations
-    subtotal Decimal @db.Decimal(19, 4) // Sum of all items' subtotals
-    total    Decimal @db.Decimal(19, 4) // Final total after any adjustments
+  // Price calculations
+  subtotal Decimal @db.Decimal(19, 4) // Sum of all items' subtotals
+  total    Decimal @db.Decimal(19, 4) // Final total after any adjustments
 
-    @@index([userId])
+  @@index([userId])
 }
 
 model TianiShopOrderItem {
-    id          Int                      @id @default(autoincrement())
-    order       TianiShopOrder           @relation(fields: [orderId], references: [id])
-    orderId     Int
-    listing     TianiShopListing         @relation(fields: [listingId], references: [id])
-    listingId   Int
-    quantity    Int
-    status      TianiShopOrderItemStatus @default(PENDING)
-    completedAt DateTime? // When the publisher marked this item as completed
+  id          Int                      @id @default(autoincrement())
+  order       TianiShopOrder           @relation(fields: [orderId], references: [id])
+  orderId     Int
+  listing     TianiShopListing         @relation(fields: [listingId], references: [id])
+  listingId   Int
+  quantity    Int
+  status      TianiShopOrderItemStatus @default(PENDING)
+  completedAt DateTime? // When the publisher marked this item as completed
 
-    subtotal Decimal @db.Decimal(19, 4) // price * quantity at time of purchase
+  subtotal Decimal @db.Decimal(19, 4) // price * quantity at time of purchase
 
-    snapshot   TianiShopOrderItemSnapshot @relation(fields: [snapshotId], references: [id])
-    snapshotId Int                        @unique // one-to-one relation
+  snapshot   TianiShopOrderItemSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshotId Int                        @unique // one-to-one relation
 
-    @@index([orderId])
-    @@index([listingId])
+  @@index([orderId])
+  @@index([listingId])
 }
 
 model TianiShopOrderItemSnapshot {
-    id          Int                 @id @default(autoincrement())
-    title       String
-    description String?
-    price       Decimal             @db.Decimal(19, 4)
-    orderItem   TianiShopOrderItem?
+  id          Int                 @id @default(autoincrement())
+  title       String
+  description String?
+  price       Decimal             @db.Decimal(19, 4)
+  orderItem   TianiShopOrderItem?
 
-    // Snapshot of the primary image if exists
-    imageKey  String?
-    thumbhash String? @db.VarChar(40)
+  // Snapshot of the primary image if exists
+  imageKey  String?
+  thumbhash String? @db.VarChar(40)
 
-    createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
 }
