@@ -208,8 +208,15 @@ export default function QiudaorenList({
 
           {item.createdBy && (
             <div className="mt-2 flex items-center justify-end border-gray-100 border-t pt-2">
-              <div className="text-gray-500 text-xs">
-                新增: {item.createdBy.name}
+              <div className="space-y-1 text-right">
+                {item.updatedBy ? (
+                  <div className="text-gray-500 text-xs">
+                    編輯: {item.updatedBy.name}
+                  </div>
+                ) : null}
+                <div className="text-gray-500 text-xs">
+                  新增: {item.createdBy.name}
+                </div>
               </div>
             </div>
           )}

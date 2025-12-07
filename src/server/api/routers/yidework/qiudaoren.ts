@@ -61,6 +61,18 @@ export const qiudaorenRouter = createTRPCRouter({
         data: updateData,
       });
 
+      await ctx.db.qiudaorenOnActivity.update({
+        where: {
+          userId_activityId: {
+            userId,
+            activityId,
+          },
+        },
+        data: {
+          updatedById: ctx.session.user.id,
+        },
+      });
+
       return ctx.db.user.findUnique({
         where: { id: userId },
       });
@@ -110,6 +122,12 @@ export const qiudaorenRouter = createTRPCRouter({
               name: true,
             },
           },
+          updatedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       });
 
@@ -141,6 +159,12 @@ export const qiudaorenRouter = createTRPCRouter({
             },
           },
           createdBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          updatedBy: {
             select: {
               id: true,
               name: true,

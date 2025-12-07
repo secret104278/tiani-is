@@ -112,6 +112,7 @@ model User {
   etogetherActivityRegisters EtogetherActivityRegister[]
   qiudaorenOnActivities      QiudaorenOnActivity[]
   qiudaorenCreated           QiudaorenOnActivity[]       @relation("QiudaorenCreatedBy")
+  qiudaorenUpdated           QiudaorenOnActivity[]       @relation("QiudaorenUpdatedBy")
   yideWorkActivityStaffs     YideWorkActivityStaff[]
   TianiShopOrder             TianiShopOrder[]
   TianiShopListing           TianiShopListing[]
@@ -446,10 +447,14 @@ model QiudaorenOnActivity {
   createdBy   User   @relation("QiudaorenCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
 
+  updatedBy   User?   @relation("QiudaorenUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedById String?
+
   @@unique([userId, activityId])
   @@index([userId])
   @@index([activityId])
   @@index([createdById])
+  @@index([updatedById])
 }
 
 model YideWorkActivityStaff {
