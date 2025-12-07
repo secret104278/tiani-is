@@ -24,8 +24,13 @@ export default function VolunteerActivityCheckInDialogContent({
 
   return (
     <BaseCheckInDialogContent
-      onCheckIn={(latitude, longitude) =>
-        checkInActivity({ activityId, latitude, longitude })
+      onCheckIn={(data) =>
+        checkInActivity({
+          activityId,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          qrToken: data.qrToken,
+        })
       }
       checkInIsLoading={checkInActivityIsPending}
       checkInError={checkInActivityError?.message}

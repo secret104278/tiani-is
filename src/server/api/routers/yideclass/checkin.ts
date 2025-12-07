@@ -1,5 +1,6 @@
 import { isNil, sum } from "lodash";
 import { z } from "zod";
+import { isValidQrToken } from "~/config/checkin";
 import {
   activityIsOnGoing,
   differenceInHoursNoRound,
@@ -18,6 +19,7 @@ export const checkinRouter = createTRPCRouter({
       z.object({
         latitude: z.number().optional(),
         longitude: z.number().optional(),
+        qrToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -34,11 +36,19 @@ export const checkinRouter = createTRPCRouter({
         )
           throw new Error("非課程時間，無法簽到");
 
-        if (isNil(input.latitude) || isNil(input.longitude))
-          throw new Error("無法取得位置資訊");
+        const hasValidGeo =
+          !isNil(input.latitude) &&
+          !isNil(input.longitude) &&
+          !isOutOfRange(input.latitude, input.longitude);
 
-        if (isOutOfRange(input.latitude, input.longitude))
+        const hasValidQr =
+          !isNil(input.qrToken) && isValidQrToken(input.qrToken);
+
+        if (!hasValidGeo && !hasValidQr) {
+          if (isNil(input.latitude) || isNil(input.longitude))
+            throw new Error("無法取得位置資訊");
           throw new Error("超出打卡範圍");
+        }
       }
 
       return await ctx.db.classActivityCheckRecord.upsert({

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidQrToken } from "~/config/checkin";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,
@@ -10,12 +11,21 @@ export const checkinRouter = createTRPCRouter({
   checkInActivityMainRegister: activityPublishedOnlyProcedure
     .input(
       z.object({
-        latitude: z.number(),
-        longitude: z.number(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        qrToken: z.string().optional(),
       }),
     )
-    .mutation(({ ctx, input }) =>
-      ctx.db.$transaction(async (db) => {
+    .mutation(async ({ ctx, input }) => {
+      const hasValidGeo =
+        !Number.isNaN(input.latitude) && !Number.isNaN(input.longitude);
+      const hasValidQr = !!(input.qrToken && isValidQrToken(input.qrToken));
+
+      if (!hasValidGeo && !hasValidQr) {
+        throw new Error("無效的檢查方式");
+      }
+
+      return ctx.db.$transaction(async (db) => {
         const mainRegister =
           await db.etogetherActivityRegister.findUniqueOrThrow({
             where: {
@@ -47,8 +57,8 @@ export const checkinRouter = createTRPCRouter({
             registerId: e.id,
           })),
         });
-      }),
-    ),
+      });
+    }),
 
   checkInActivityIndividually: activityManageProcedure
     .input(

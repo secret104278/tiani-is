@@ -48,7 +48,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_CHECKIN_QR_TOKEN: z.string(),
   },
 
   /**
@@ -69,6 +69,8 @@ export const env = createEnv({
     CRON_SECRET: process.env.CRON_SECRET,
     LINE_NOTIFY_CLIENT_ID: process.env.LINE_NOTIFY_CLIENT_ID,
     LINE_NOTIFY_CLIENT_SECRET: process.env.LINE_NOTIFY_CLIENT_SECRET,
+    NEXT_PUBLIC_CHECKIN_QR_TOKEN:
+      process.env.NEXT_PUBLIC_CHECKIN_QR_TOKEN ?? "tiani-checkin-fallback",
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

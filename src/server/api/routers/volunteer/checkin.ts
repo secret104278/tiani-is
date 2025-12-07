@@ -2,6 +2,7 @@ import { TZDate } from "@date-fns/tz";
 import { startOfDay } from "date-fns";
 import { isNil } from "lodash";
 import { z } from "zod";
+import { isValidQrToken } from "~/config/checkin";
 import { activityIsOnGoing, isOutOfRange } from "~/utils/ui";
 import { calculateTotalWorkingHours } from "../../../../utils/volunteer";
 import {
@@ -16,6 +17,7 @@ export const checkinRouter = createTRPCRouter({
       z.object({
         latitude: z.number().optional(),
         longitude: z.number().optional(),
+        qrToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -31,11 +33,19 @@ export const checkinRouter = createTRPCRouter({
         )
           throw new Error("非課程時間，無法簽到");
 
-        if (isNil(input.latitude) || isNil(input.longitude))
-          throw new Error("無法取得位置資訊");
+        const hasValidGeo =
+          !isNil(input.latitude) &&
+          !isNil(input.longitude) &&
+          !isOutOfRange(input.latitude, input.longitude);
 
-        if (isOutOfRange(input.latitude, input.longitude))
+        const hasValidQr =
+          !isNil(input.qrToken) && isValidQrToken(input.qrToken);
+
+        if (!hasValidGeo && !hasValidQr) {
+          if (isNil(input.latitude) || isNil(input.longitude))
+            throw new Error("無法取得位置資訊");
           throw new Error("超出打卡範圍");
+        }
       }
 
       return await ctx.db.volunteerActivityCheckRecord.upsert({
@@ -72,18 +82,24 @@ export const checkinRouter = createTRPCRouter({
   casualCheckIn: protectedProcedure
     .input(
       z.object({
-        latitude: z.number(),
-        longitude: z.number(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        qrToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (isOutOfRange(input.latitude, input.longitude))
-        throw new Error("超出打卡範圍");
+      const hasValidGeo =
+        !isNil(input.latitude) &&
+        !isNil(input.longitude) &&
+        !isOutOfRange(input.latitude, input.longitude);
+
+      const hasValidQr = !isNil(input.qrToken) && isValidQrToken(input.qrToken);
+
+      if (!hasValidGeo && !hasValidQr) throw new Error("超出打卡範圍");
 
       const now = TZDate.tz("Asia/Taipei");
       const todayStart = startOfDay(now);
 
-      // TODO: lock or transaction
       const latestCheck = await ctx.db.casualCheckRecord.findFirst({
         select: { id: true, checkOutAt: true },
         where: {

@@ -24,11 +24,12 @@ export default function EtogetherActivityCheckInDialogContent({
 
   return (
     <BaseCheckInDialogContent
-      onCheckIn={(latitude, longitude) =>
+      onCheckIn={(data) =>
         checkInActivityMainRegister({
           activityId,
-          latitude,
-          longitude,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          qrToken: data.qrToken,
         })
       }
       checkInIsLoading={checkInActivityMainRegisterIsPending}

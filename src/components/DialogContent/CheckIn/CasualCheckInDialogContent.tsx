@@ -22,8 +22,12 @@ export default function CasualCheckInDialogContent({
 
   return (
     <BaseCheckInDialogContent
-      onCheckIn={(latitude, longitude) =>
-        casualCheckIn({ latitude, longitude })
+      onCheckIn={(data) =>
+        casualCheckIn({
+          latitude: data.latitude,
+          longitude: data.longitude,
+          qrToken: data.qrToken,
+        })
       }
       checkInIsLoading={casualCheckInIsPending}
       checkInError={casualCheckInError?.message}

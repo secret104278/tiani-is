@@ -1,4 +1,11 @@
-import { BellAlertIcon, HomeIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowLeftOnRectangleIcon,
+  BellAlertIcon,
+  Cog6ToothIcon,
+  HomeIcon,
+  QrCodeIcon,
+  UserIcon,
+} from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -6,6 +13,7 @@ import { type ReactNode, useState } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
 import { IS_LINE_NOTIFY_ENABLED, siteToTitle } from "~/utils/ui";
+import CheckInQrModal from "../CheckInQrModal";
 import LineNotifySetupTutorialDialog from "../LineNotifySetupTutorialDialog";
 import LineImage from "../utils/LineImage";
 
@@ -43,6 +51,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
   const { site } = useSiteContext();
   const router = useRouter();
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const { data: hasLineNotify } = api.user.hasLineNotify.useQuery(
     {},
@@ -82,24 +91,70 @@ export default function Layout({ children }: { children: ReactNode }) {
                 </li>
                 {sessionData.user.role.is_tiani_admin && (
                   <li>
-                    <Link href="/admin/users">帳號管理</Link>
+                    <Link
+                      href="/admin/users"
+                      className="flex items-center gap-2"
+                    >
+                      <Cog6ToothIcon className="h-4 w-4" />
+                      帳號管理
+                    </Link>
                   </li>
                 )}
                 {sessionData.user.role.is_volunteer_admin && (
                   <li>
-                    <Link href="/volunteer/admin/working">工作管理</Link>
+                    <Link
+                      href="/volunteer/admin/working"
+                      className="flex items-center gap-2"
+                    >
+                      <Cog6ToothIcon className="h-4 w-4" />
+                      工作管理
+                    </Link>
                   </li>
                 )}
                 {sessionData.user.role.is_yideclass_admin && (
                   <li>
-                    <Link href="/yideclass/admin/class">班務管理</Link>
+                    <Link
+                      href="/yideclass/admin/class"
+                      className="flex items-center gap-2"
+                    >
+                      <Cog6ToothIcon className="h-4 w-4" />
+                      班務管理
+                    </Link>
                   </li>
                 )}
+                {(sessionData.user.role.is_tiani_admin ||
+                  sessionData.user.role.is_yidework_admin ||
+                  sessionData.user.role.is_etogether_admin ||
+                  sessionData.user.role.is_volunteer_admin ||
+                  sessionData.user.role.is_yideclass_admin) && (
+                  <li>
+                    <button
+                      onClick={() => setShowQrModal(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <QrCodeIcon className="h-4 w-4" />
+                      簽到QR code
+                    </button>
+                  </li>
+                )}
+                <div className="divider my-1 h-0" />
                 <li>
-                  <Link href="/personal/account">個人資料</Link>
+                  <Link
+                    href="/personal/account"
+                    className="flex items-center gap-2"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    個人資料
+                  </Link>
                 </li>
                 <li>
-                  <a onClick={() => void signOut()}>登出</a>
+                  <a
+                    onClick={() => void signOut()}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                    登出
+                  </a>
                 </li>
               </ul>
             </div>
@@ -107,6 +162,11 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <div className="mx-auto max-w-xl px-4 pb-4">{children}</div>
+
+      <CheckInQrModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+      />
 
       {IS_LINE_NOTIFY_ENABLED && hasLineNotify === false && (
         <>
