@@ -108,11 +108,9 @@ export default function YideWorkActivityDetailPage() {
     !!session?.user.role.is_yidework_admin ||
     session?.user.id === activity.organiserId;
 
-  const isStaff =
-    !isManager &&
-    activity.staffs?.some((staff) => staff.user.id === session?.user.id);
-
-  const canViewQiudaorenList = isManager || isStaff;
+  const isStaff = activity.staffs?.some(
+    (staff) => staff.user.id === session?.user.id,
+  );
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
@@ -178,22 +176,19 @@ export default function YideWorkActivityDetailPage() {
         />
       </div>
       <YideWorkActivityStaffManagement activityId={activity.id} />
-      {isQiudaoYili && canViewQiudaorenList && (
-        <>
-          <div className="divider" />
-          <Link
-            href={`/yidework/activity/qiudaoren/${activity.id}`}
-            className="w-full"
-          >
-            <button className="btn w-full">
-              <QueueListIcon className="h-4 w-4" />
-              求道人清單
-            </button>
-          </Link>
-        </>
-      )}
-      <div className="divider" />
     </>
+  );
+
+  const QiudaorenPanel = () => (
+    <Link
+      href={`/yidework/activity/qiudaoren/${activity.id}`}
+      className="w-full"
+    >
+      <button className="btn w-full">
+        <QueueListIcon className="h-4 w-4" />
+        求道人清單
+      </button>
+    </Link>
   );
 
   // Fetch and display the details of the book with the given ID
@@ -202,12 +197,11 @@ export default function YideWorkActivityDetailPage() {
       <article className="prose">
         <h1>{activity.title}</h1>
       </article>
-
       <div className="flex items-center justify-end space-x-4">
         {!isManager && <ShareLineBtn />}
       </div>
-
       {isManager && <AdminPanel />}
+      {isQiudaoYili && (isManager || isStaff) && <QiudaorenPanel />}
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
 

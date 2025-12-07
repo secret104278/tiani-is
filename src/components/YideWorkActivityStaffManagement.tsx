@@ -95,59 +95,53 @@ export default function YideWorkActivityStaffManagement({
         </div>
       </div>
 
-      {staffs && staffs.length > 0 && (
-        <form className="collapse-arrow collapse bg-base-200">
-          <input type="checkbox" />
-          <div className="collapse-title">工作人員清單 ({staffs.length})</div>
-          <div className="collapse-content">
-            <ul className="space-y-2">
-              {staffs.map((staff) => (
-                <li
-                  key={staff.user.id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    {staff.user.image ? (
-                      <div className="avatar">
-                        <div className="w-8 rounded-full">
-                          <LineImage
-                            src={staff.user.image}
-                            alt={staff.user.name ?? ""}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="avatar placeholder">
-                        <div className="w-8 rounded-full bg-neutral-focus text-neutral-content text-sm">
-                          <span>{staff.user.name?.charAt(0)}</span>
-                        </div>
-                      </div>
-                    )}
-                    <span>{staff.user.name}</span>
-                  </div>
-                  <ReactiveButton
-                    type="button"
-                    className="btn btn-sm btn-error btn-square"
-                    onClick={() => handleRemoveStaff(staff.user.id)}
-                    loading={
-                      removeStaffVariables?.userId === staff.user.id &&
-                      removeStaffIsPending
-                    }
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </ReactiveButton>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </form>
-      )}
-
-      {staffs && staffs.length === 0 && (
-        <div className="rounded-lg bg-base-200 py-6 text-center text-base-content/60">
-          尚無工作人員
+      <form className="collapse-arrow collapse bg-base-200">
+        <input type="checkbox" />
+        <div className="collapse-title">
+          {staffs?.length ? `工作人員清單 (${staffs?.length})` : "尚無工作人員"}
         </div>
-      )}
+        <div className="collapse-content">
+          <ul className="space-y-2">
+            {staffs?.map((staff) => (
+              <li
+                key={staff.user.id}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  {staff.user.image ? (
+                    <div className="avatar">
+                      <div className="w-8 rounded-full">
+                        <LineImage
+                          src={staff.user.image}
+                          alt={staff.user.name ?? ""}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="avatar placeholder">
+                      <div className="w-8 rounded-full bg-neutral-focus text-neutral-content text-sm">
+                        <span>{staff.user.name?.charAt(0)}</span>
+                      </div>
+                    </div>
+                  )}
+                  <span>{staff.user.name}</span>
+                </div>
+                <ReactiveButton
+                  type="button"
+                  className="btn btn-sm btn-error btn-square"
+                  onClick={() => handleRemoveStaff(staff.user.id)}
+                  loading={
+                    removeStaffVariables?.userId === staff.user.id &&
+                    removeStaffIsPending
+                  }
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </ReactiveButton>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </form>
     </div>
   );
 }

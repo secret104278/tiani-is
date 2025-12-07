@@ -205,6 +205,14 @@ export default function QiudaorenList({
               </div>
             )}
           </div>
+
+          {item.createdBy && (
+            <div className="mt-2 flex items-center justify-end border-gray-100 border-t pt-2">
+              <div className="text-gray-500 text-xs">
+                新增: {item.createdBy.name}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
