@@ -42,7 +42,7 @@ export default function YideWorkAssignmentsSection() {
   const handleDualChange = (
     roleKey: string,
     position: "upper" | "lower",
-    value: string,
+    value: string
   ) => {
     const updated = { ...(assignments || {}) };
     const current = updated[roleKey as keyof YideWorkAssignments];
@@ -90,7 +90,7 @@ export default function YideWorkAssignmentsSection() {
   };
 
   const getDualValues = (
-    roleKey: string,
+    roleKey: string
   ): {
     upper: string;
     lower: string;
@@ -167,7 +167,7 @@ export default function YideWorkAssignmentsSection() {
                 <span className="label-text text-sm">{role.label}</span>
               </label>
               <textarea
-                className="textarea textarea-bordered w-full text-sm"
+                className="textarea textarea-bordered w-full"
                 placeholder="逗號分隔"
                 rows={2}
                 value={getMultipleValue(role.key)}
