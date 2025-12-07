@@ -1,6 +1,6 @@
 import { isEmpty, isNumber } from "lodash";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGeolocation } from "react-use";
 import { isValidQrToken, parseQrContent } from "~/config/checkin";
 import {
@@ -42,14 +42,24 @@ export default function BaseCheckInDialogContent({
   const geoState = useGeolocation();
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [qrError, setQrError] = useState<string | null>(null);
+  const [mapKey, setMapKey] = useState(0);
+
+  // When the dialog closes and reopens, React was reusing the same Leaflet map DOM element
+  // without reinitializing it, causing the Leaflet transform state to become corrupted.
+  // The key increment causes the map to remount with a fresh Leaflet initialization
+  useEffect(() => {
+    setMapKey((prev) => prev + 1);
+  }, []);
 
   const handleQrScan = (scannedText: string) => {
-    const token = parseQrContent(scannedText);
-    if (token && isValidQrToken(token)) {
-      onCheckIn({ qrToken: token });
-      setShowQrScanner(false);
-      setQrError(null);
-    } else {
+    try {
+      const token = parseQrContent(scannedText);
+      if (token && isValidQrToken(token)) {
+        onCheckIn({ qrToken: token });
+        setShowQrScanner(false);
+        setQrError(null);
+      }
+    } catch (error) {
       setQrError("無效的QR code");
     }
   };
@@ -82,7 +92,7 @@ export default function BaseCheckInDialogContent({
   return (
     <div className="flex flex-col space-y-4">
       <div className="h-96">
-        <CheckInMap>
+        <CheckInMap key={mapKey}>
           {!geoState.loading && (
             <ViewFocus
               showMarker

@@ -19,7 +19,11 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function CheckInMap({ children }: { children?: ReactNode }) {
   return (
-    <MapContainer center={TIANI_GPS_CENTERS[0]} zoom={16} className="flex-grow">
+    <MapContainer
+      center={TIANI_GPS_CENTERS[0]}
+      zoom={16}
+      className="h-full w-full"
+    >
       {TIANI_GPS_CENTERS.map((center, index) => (
         <Circle
           key={index}

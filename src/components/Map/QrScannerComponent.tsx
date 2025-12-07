@@ -11,7 +11,6 @@ export default function QrScannerComponent({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isScanning, setIsScanning] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -21,7 +20,6 @@ export default function QrScannerComponent({
       video,
       (result) => {
         onScan(result.data);
-        setIsScanning(false);
       },
       {
         onDecodeError: () => {
@@ -42,24 +40,16 @@ export default function QrScannerComponent({
     };
   }, [onScan]);
 
-  if (error) {
-    return <AlertWarning>{error}</AlertWarning>;
-  }
-
   return (
     <div className="relative w-full space-y-4">
+      {error && <AlertWarning>{error}</AlertWarning>}
       <div className="relative overflow-hidden rounded-lg bg-black">
         {/* biome-ignore lint/a11y/useMediaCaption: QR scanner doesn't need captions */}
         <video
           ref={videoRef}
-          className="aspect-square w-full"
+          className="aspect-square w-full object-cover"
           title="QR code scanner"
         />
-        {isScanning && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-40 w-40 border-4 border-green-400" />
-          </div>
-        )}
       </div>
       <button onClick={onClose} className="btn btn-block btn-secondary">
         取消
