@@ -15,6 +15,7 @@ import { useState } from "react";
 import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
 import QiudaorenList from "~/components/QiudaorenList";
 import YideWorkActivityStaffManagement from "~/components/YideWorkActivityStaffManagement";
+import YideWorkAssignmentsDisplay from "~/components/YideWorkAssignmentsDisplay";
 import { AlertWarning } from "~/components/utils/Alert";
 import ConfirmDialog from "~/components/utils/ConfirmDialog";
 import Dialog from "~/components/utils/Dialog";
@@ -23,7 +24,7 @@ import { useSiteContext } from "~/context/SiteContext";
 import { calculateTempleGender } from "~/server/api/routers/yidework/templeGenderUtils";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
-import type { OGMetaProps } from "~/utils/types";
+import type { OGMetaProps, YideWorkAssignments } from "~/utils/types";
 
 import {
   activityIsEnded,
@@ -220,15 +221,27 @@ export default function YideWorkActivityDetailPage() {
             {toDuration(activity.startDateTime, activity.endDateTime)}
           </p>
         </div>
-        <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
-          {!_.isEmpty(activity.preset) && (
+        {!_.isEmpty(activity.description?.trim()) && (
+          <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
+            {!_.isEmpty(activity.preset) && (
+              <>
+                {activity.preset.description}
+                <div className="divider" />
+              </>
+            )}
+            {activity.description}
+          </article>
+        )}
+
+        {!_.isEmpty(activity.assignments) &&
+          activity.title.includes("辦道") && (
             <>
-              {activity.preset.description}
-              <div className="divider" />
+              <div className="divider">工作分配</div>
+              <YideWorkAssignmentsDisplay
+                assignments={activity.assignments as YideWorkAssignments}
+              />
             </>
           )}
-          {activity.description}
-        </article>
       </div>
 
       {isQiudaoYili && (

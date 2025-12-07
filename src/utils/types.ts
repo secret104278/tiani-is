@@ -28,3 +28,33 @@ export interface CheckRecord {
   checkInAt: Date;
   checkOutAt: Date | null;
 }
+
+export interface YideWorkAssignments {
+  generalConvener?: string;
+  expoundingTao?: string;
+  conductor?: string;
+  documentPresentation?: string;
+  offering?: {
+    upper?: string;
+    lower?: string;
+  };
+  kneelingReception?: {
+    upper?: string;
+    lower?: string;
+  };
+  servingFruit?: string;
+  arrangingFruit?: string;
+  invokingAltar?: {
+    upper?: string;
+    lower?: string;
+  };
+  accompanyingAltar?: string;
+  performingCeremony?: {
+    upper?: string;
+    lower?: string;
+  };
+  guardingAltar?: string;
+  transmittingMasterService?: string;
+  towelsAndTea?: string;
+  threeTreasures?: string;
+}

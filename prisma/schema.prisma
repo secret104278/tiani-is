@@ -419,6 +419,8 @@ model YideWorkActivity {
 
   version Int @default(1)
 
+  assignments Json? // Role assignments structure
+
   qiudaorenOnActivities QiudaorenOnActivity[]
   staffs                YideWorkActivityStaff[]
 
