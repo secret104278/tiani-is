@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { birthYearSchema, phoneNumberSchema } from "~/utils/phoneValidation";
-import {
-  activityManageProcedure,
-  representableProcedure,
-} from "../../procedures/yidework";
+import { activityManageProcedure } from "../../procedures/yidework";
 import { createTRPCRouter } from "../../trpc";
 
 const qiudaorenSchema = z.object({
@@ -21,7 +18,7 @@ const qiudaorenSchema = z.object({
 });
 
 export const qiudaorenRouter = createTRPCRouter({
-  createQiudaoren: representableProcedure
+  createQiudaoren: activityManageProcedure
     .input(qiudaorenSchema)
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.db.user.create({
@@ -50,7 +47,7 @@ export const qiudaorenRouter = createTRPCRouter({
       return user;
     }),
 
-  updateQiudaoren: representableProcedure
+  updateQiudaoren: activityManageProcedure
     .input(
       qiudaorenSchema.extend({
         userId: z.string(),
