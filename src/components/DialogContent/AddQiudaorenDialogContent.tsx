@@ -156,14 +156,14 @@ export default function AddQiudaorenDialogContent({
 
       <div>
         <label className="label">
-          <span className="label-text">生日（年份）</span>
+          <span className="label-text">生日（民國年份）</span>
         </label>
         <input
           type="number"
           inputMode="numeric"
           step="1"
-          min={1900}
-          max={new Date().getFullYear()}
+          min={-11}
+          max={new Date().getFullYear() - 1911}
           className={`input input-bordered w-full ${
             errors.birthYear ? "input-error" : ""
           }`}
@@ -176,23 +176,26 @@ export default function AddQiudaorenDialogContent({
               if (value === "" || value === null || value === undefined) {
                 return undefined;
               }
-              const num = Number(value);
-              return Number.isNaN(num) ? undefined : num;
+              const rocYear = Number(value);
+              if (Number.isNaN(rocYear)) {
+                return undefined;
+              }
+              return rocYear + 1911;
             },
-            required: "生日年份為必填",
+            required: "生日民國年份為必填",
             min: {
-              value: 1900,
-              message: "年份必須在 1900 以後",
+              value: -11,
+              message: "民國年份必須在民國前 11 年以後",
             },
             max: {
-              value: new Date().getFullYear(),
-              message: "年份不能是未來年份",
+              value: new Date().getFullYear() - 1911,
+              message: "民國年份不能是未來年份",
             },
             validate: (value) => {
               if (!value) return true;
-              const yearStr = value.toString();
-              if (!(yearStr.startsWith("19") || yearStr.startsWith("20"))) {
-                return "年份必須是 19xx 或 20xx 格式";
+              const rocYear = value - 1911;
+              if (rocYear < -11 || rocYear > new Date().getFullYear() - 1911) {
+                return "民國年份超出有效範圍";
               }
               return true;
             },
