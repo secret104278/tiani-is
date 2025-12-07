@@ -39,6 +39,9 @@ export default function AddQiudaorenDialogContent({
       defaultValues: defaultValues
         ? {
             ...defaultValues,
+            birthYear: defaultValues.birthYear
+              ? defaultValues.birthYear - 1911
+              : undefined,
           }
         : undefined,
     });
@@ -47,10 +50,11 @@ export default function AddQiudaorenDialogContent({
 
   const gender = watch("gender");
   const birthYear = watch("birthYear");
+  const adBirthYear = lodashIsFinite(birthYear) ? birthYear + 1911 : undefined;
 
   const templeGender = useMemo(
-    () => calculateTempleGender(gender, birthYear),
-    [gender, birthYear],
+    () => calculateTempleGender(gender, adBirthYear),
+    [gender, adBirthYear],
   );
 
   const close = useClose();
@@ -88,11 +92,13 @@ export default function AddQiudaorenDialogContent({
         activityId,
         userId: defaultValues.userId,
         ...data,
+        birthYear: data.birthYear + 1911,
       });
     } else {
       void createQiudaoren({
         activityId,
         ...data,
+        birthYear: data.birthYear + 1911,
       });
     }
   });
@@ -176,11 +182,11 @@ export default function AddQiudaorenDialogContent({
               if (value === "" || value === null || value === undefined) {
                 return undefined;
               }
-              const rocYear = Number(value);
-              if (Number.isNaN(rocYear)) {
+              const adYear = Number(value);
+              if (Number.isNaN(adYear)) {
                 return undefined;
               }
-              return rocYear + 1911;
+              return adYear;
             },
             required: "生日民國年份為必填",
             min: {
@@ -193,8 +199,7 @@ export default function AddQiudaorenDialogContent({
             },
             validate: (value) => {
               if (!value) return true;
-              const rocYear = value - 1911;
-              if (rocYear < -11 || rocYear > new Date().getFullYear() - 1911) {
+              if (value < -11 || value > new Date().getFullYear() - 1911) {
                 return "民國年份超出有效範圍";
               }
               return true;
@@ -208,9 +213,9 @@ export default function AddQiudaorenDialogContent({
             </span>
           </label>
         )}
-        {birthYear && lodashIsFinite(birthYear) && !errors.birthYear && (
+        {adBirthYear && lodashIsFinite(adBirthYear) && !errors.birthYear && (
           <div className="mt-2 flex flex-col gap-1 text-gray-600 text-sm">
-            <div>年齡：{new Date().getFullYear() - birthYear} 歲</div>
+            <div>年齡：{new Date().getFullYear() - adBirthYear} 歲</div>
             {templeGender && (
               <div>求道性別：{TEMPLE_GENDER_LABELS[templeGender]}</div>
             )}
