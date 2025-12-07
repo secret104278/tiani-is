@@ -1,7 +1,7 @@
 import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
-import type { VolunteerActivityStatus } from "@prisma/client";
 import Link from "next/link";
 import { useSiteContext } from "~/context/SiteContext";
+import type { VolunteerActivityStatus } from "~/prisma-browser";
 import {
   Site,
   formatDateTime,

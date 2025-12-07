@@ -1,8 +1,8 @@
-import { type PrismaClient, type PrismaPromise, Role } from "@prisma/client";
-import type { ITXClientDenyList } from "@prisma/client/runtime/library";
 import { isNil } from "lodash";
 import { z } from "zod";
+import { Role } from "~/prisma-client";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { db } from "~/server/db";
 import { getLineImageURL } from "~/utils/server";
 import {
   adminProcedure,
@@ -12,8 +12,12 @@ import {
 } from "../procedures/tiani";
 
 const handleSetAdmin =
-  (userId: string, role: Role, set: boolean) =>
-  async (tx: Omit<PrismaClient, ITXClientDenyList>) => {
+  (
+    userId: string,
+    role: Role,
+    set: boolean,
+  ): Parameters<typeof db.$transaction>[0] =>
+  async (tx) => {
     const user = await tx.user.findUniqueOrThrow({
       select: { roles: true },
       where: {
@@ -25,7 +29,7 @@ const handleSetAdmin =
     if (set) {
       newRoles = [...user.roles, role];
       newRoles = Array.from(new Set(newRoles));
-    } else newRoles = user.roles.filter((_role) => role !== _role);
+    } else newRoles = user.roles.filter((_role: Role) => role !== _role);
 
     await tx.user.update({
       where: {
@@ -210,7 +214,7 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const promises: PrismaPromise<unknown>[] = [];
+      const promises = [];
 
       if (input.isAdmin)
         promises.push(

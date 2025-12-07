@@ -1,15 +1,18 @@
 import type { BrowserContext } from "@playwright/test";
-import { PrismaClient, type Role } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import type { Role } from "~/prisma-client";
+import { db } from "~/server/db";
 
 export async function loginAs(context: BrowserContext, roles: Role[]) {
   const timestamp = Date.now();
-  const email = `test-user-${timestamp}-${Math.floor(Math.random() * 1000)}@example.com`;
+  const email = `test-user-${timestamp}-${Math.floor(
+    Math.random() * 1000,
+  )}@example.com`;
   const userId = `user-${timestamp}-${Math.floor(Math.random() * 1000)}`;
-  const sessionToken = `session-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+  const sessionToken = `session-${timestamp}-${Math.floor(
+    Math.random() * 1000,
+  )}`;
 
-  const user = await prisma.user.create({
+  const user = await db.user.create({
     data: {
       id: userId,
       email,
@@ -20,7 +23,7 @@ export async function loginAs(context: BrowserContext, roles: Role[]) {
 
   const expires = new Date();
   expires.setDate(expires.getDate() + 1);
-  await prisma.session.create({
+  await db.session.create({
     data: {
       sessionToken,
       userId: user.id,

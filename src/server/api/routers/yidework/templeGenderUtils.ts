@@ -1,4 +1,4 @@
-import type { Gender } from "@prisma/client";
+import type { Gender } from "~/prisma-client";
 
 export type TempleGender = "QIAN" | "TONG" | "KUN" | "NV";
 

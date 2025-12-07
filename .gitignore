@@ -21,6 +21,7 @@ scripts/pull-remote-db.sh
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
 /prisma/pgdata
+/prisma/generated
 
 # next.js
 /.next/

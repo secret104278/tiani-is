@@ -1,5 +1,4 @@
 import { TZDate } from "@date-fns/tz";
-import type { VolunteerActivityStatus } from "@prisma/client";
 import {
   addHours,
   differenceInMilliseconds,
@@ -10,6 +9,7 @@ import {
 import { millisecondsInHour } from "date-fns/constants";
 import { zhTW } from "date-fns/locale";
 import _ from "lodash";
+import type { VolunteerActivityStatus } from "~/prisma-browser";
 import type { VolunteerActivityTopics } from "./types";
 
 export const getActivityStatusText = (status: VolunteerActivityStatus) => {
@@ -119,7 +119,7 @@ export const CLASS_ACTIVITY_LOCATION_MAP = new Map<
 ]);
 
 export const CLASS_ACTIVITY_LOCATIONS = Array.from(
-  CLASS_ACTIVITY_LOCATION_MAP.keys(),
+  CLASS_ACTIVITY_LOCATION_MAP.keys()
 );
 
 export const YIDE_WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
@@ -200,7 +200,7 @@ export function getDistance(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number,
+  lon2: number
 ): number {
   const R = 6371; // Radius of the Earth in kilometers
   const lat1Rad = degToRad(lat1);
@@ -229,7 +229,7 @@ export const isOutOfRange = (latitude: number, longitude: number) =>
   !TIANI_GPS_CENTERS.some(
     (center) =>
       getDistance(latitude, longitude, center[0], center[1]) <=
-      TIANI_GPS_RADIUS_KM,
+      TIANI_GPS_RADIUS_KM
   );
 
 function degToRad(deg: number) {
@@ -254,7 +254,7 @@ export const activityIsEnded = (endDateTime: Date, now?: Date) => {
 export const activityIsOnGoing = (
   startDateTime: Date,
   endDateTime: Date,
-  now?: Date,
+  now?: Date
 ) => {
   return (
     activityIsStarted(startDateTime, now) && !activityIsEnded(endDateTime, now)
@@ -273,7 +273,7 @@ export const formatDateTitle = (date: Date) =>
     "LLLdo(eeeee) hh:mm",
     {
       locale: DEFAULT_LOCALE,
-    },
+    }
   );
 
 export const formatDate = (date: Date) =>
@@ -292,7 +292,7 @@ export const toDuration = (startDateTime: Date, endDateTime: Date) =>
       start: startDateTime,
       end: endDateTime,
     }),
-    { locale: DEFAULT_LOCALE },
+    { locale: DEFAULT_LOCALE }
   );
 
 export const getDurationHour = (startDateTime: Date, endDateTime: Date) =>
@@ -317,7 +317,7 @@ export const urlBaseToSite = (urlBase?: string): Site | undefined => {
 
 export const userComparator = (
   a: { name: string | null },
-  b: { name: string | null },
+  b: { name: string | null }
 ) => {
   return !!a.name && !!b.name ? a.name.localeCompare(b.name, "zh-Hant-TW") : 0;
 };

@@ -1,7 +1,7 @@
-import type { VolunteerActivity } from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import type { VolunteerActivity } from "~/prisma-browser";
 import { api } from "~/utils/api";
 import {
   VOLUNTEER_ACTIVITY_TOPICS,
@@ -48,7 +48,7 @@ export default function VolunteerActivityForm({
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
         defaultActivity.startDateTime,
-        defaultActivity.endDateTime,
+        defaultActivity.endDateTime
       ),
       description: defaultActivity.description ?? "",
     };
@@ -87,7 +87,7 @@ export default function VolunteerActivityForm({
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
           isDraft: isDraft,
-        }),
+        })
       );
     }
 
@@ -100,7 +100,7 @@ export default function VolunteerActivityForm({
         endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
         isDraft: isDraft,
-      }),
+      })
     );
   };
 

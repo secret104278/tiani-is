@@ -1,6 +1,6 @@
-import { VolunteerActivityStatus } from "@prisma/client";
 import type { queueAsPromised } from "fastq";
 import * as fastq from "fastq";
+import { VolunteerActivityStatus } from "~/prisma-client";
 import { getActivityDetailURL } from "~/utils/url";
 import { db } from "../db";
 import { bot } from "../line";

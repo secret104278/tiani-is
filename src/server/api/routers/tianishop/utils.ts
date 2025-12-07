@@ -1,8 +1,8 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
 import { rgbaToThumbHash } from "thumbhash";
+import type { Prisma, PrismaClient } from "~/prisma-client";
 
 interface ImageInput {
   data: Uint8Array;

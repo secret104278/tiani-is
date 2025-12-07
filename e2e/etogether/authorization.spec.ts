@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { Role } from "@prisma/client";
+import { Role } from "~/prisma-client";
 import { loginAs } from "../utils/auth-helpers";
 import { createEtogetherActivity } from "../utils/etogether-helpers";
 

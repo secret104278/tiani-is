@@ -1,6 +1,6 @@
-import { Prisma } from "@prisma/client";
 import { isNumber, omit } from "lodash";
 import { z } from "zod";
+import { Prisma } from "~/prisma-client";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,

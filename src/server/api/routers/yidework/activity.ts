@@ -1,6 +1,6 @@
-import type { Prisma } from "@prisma/client";
 import _ from "lodash";
 import { z } from "zod";
+import type { Prisma } from "~/prisma-client";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,

@@ -1,6 +1,6 @@
-import type { PrismaClient } from "@prisma/client";
 import { isNil } from "lodash";
 import { env } from "~/env.mjs";
+import type { PrismaClient } from "~/prisma-client";
 
 const refreshLineToken = async (refreshToken: string) => {
   const res = await fetch("https://api.line.me/oauth2/v2.1/token", {

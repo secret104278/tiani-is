@@ -8,6 +8,7 @@
   "files": {
     "ignoreUnknown": false,
     "ignore": [
+      "prisma/generated",
       ".next",
       "node_modules",
       "playwright",

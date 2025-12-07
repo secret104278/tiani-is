@@ -1,6 +1,6 @@
-import type { PrismaClient } from "@prisma/client";
 import { isNil } from "lodash";
 import { z } from "zod";
+import type { PrismaClient } from "~/prisma-client";
 import { Site } from "~/utils/ui";
 import { enforceUserIsAuthed, trpcContext as t } from "../trpc";
 

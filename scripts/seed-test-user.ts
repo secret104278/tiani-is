@@ -1,6 +1,5 @@
-import { PrismaClient, Role } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Role } from "~/prisma-client";
+import { db } from "~/server/db";
 
 export async function seedTestUser() {
   const sessionToken = "e2e-test-session-token";
@@ -16,15 +15,15 @@ export async function seedTestUser() {
     const testUserEmail = `e2e-test-user-w${workerIndex}@example.com`;
 
     // Delete any user with the target email if it has a different ID
-    const existingUserByEmail = await prisma.user.findUnique({
+    const existingUserByEmail = await db.user.findUnique({
       where: { email: testUserEmail },
     });
     if (existingUserByEmail && existingUserByEmail.id !== testUserId) {
-      await prisma.user.delete({ where: { email: testUserEmail } });
+      await db.user.delete({ where: { email: testUserEmail } });
     }
 
     // Upsert User by ID
-    const user = await prisma.user.upsert({
+    const user = await db.user.upsert({
       where: { id: testUserId },
       update: {
         email: testUserEmail,
@@ -52,14 +51,14 @@ export async function seedTestUser() {
     });
 
     // Clean up check-ins for clean state
-    await prisma.casualCheckRecord.deleteMany({ where: { userId: user.id } });
-    await prisma.volunteerActivityCheckRecord.deleteMany({
+    await db.casualCheckRecord.deleteMany({ where: { userId: user.id } });
+    await db.volunteerActivityCheckRecord.deleteMany({
       where: { userId: user.id },
     });
-    await prisma.classActivityCheckRecord.deleteMany({
+    await db.classActivityCheckRecord.deleteMany({
       where: { userId: user.id },
     });
-    await prisma.etogetherActivityCheckRecord.deleteMany({
+    await db.etogetherActivityCheckRecord.deleteMany({
       where: { register: { userId: user.id } },
     });
 
@@ -75,7 +74,7 @@ export async function seedTestUser() {
   const expires = new Date();
   expires.setDate(expires.getDate() + 1); // Expires in 1 day
 
-  await prisma.session.upsert({
+  await db.session.upsert({
     where: { sessionToken: sessionToken },
     update: {
       expires,
@@ -94,11 +93,11 @@ export async function seedTestUser() {
 if (require.main === module) {
   seedTestUser()
     .then(async () => {
-      await prisma.$disconnect();
+      await db.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
-      await prisma.$disconnect();
+      await db.$disconnect();
       process.exit(1);
     });
 }

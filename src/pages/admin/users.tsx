@@ -3,7 +3,6 @@ import {
   PlusIcon,
   UserIcon,
 } from "@heroicons/react/20/solid";
-import { Role } from "@prisma/client";
 import { isEmpty, truncate } from "lodash";
 import lunisolar from "lunisolar";
 import { useSession } from "next-auth/react";
@@ -14,6 +13,7 @@ import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
+import { Role } from "~/prisma-browser";
 import { api } from "~/utils/api";
 import { userComparator } from "~/utils/ui";
 
@@ -40,7 +40,7 @@ function CreateUserDialogContent() {
         className="form-control space-y-4"
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={handleSubmit((data) =>
-          createUser({ username: data.username }),
+          createUser({ username: data.username })
         )}
       >
         <div>
@@ -255,7 +255,7 @@ function UserProfileDialogContent({
                 dianChuanShi: data.dianChuanShi || null,
                 yinShi: data.yinShi || null,
                 baoShi: data.baoShi || null,
-              }),
+              })
             )}
             loading={updateUserQiudaoInfoIsPending}
             isSuccess={updateUserQiudaoInfoIsSuccess}

@@ -1,10 +1,10 @@
-import type {
-  EtogetherActivity,
-  EtogetherActivitySubgroup,
-} from "@prisma/client";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useFieldArray, useForm } from "react-hook-form";
+import type {
+  EtogetherActivity,
+  EtogetherActivitySubgroup,
+} from "~/prisma-browser";
 import { api } from "~/utils/api";
 import {
   getCurrentDateTime,
@@ -48,7 +48,7 @@ export default function EtogetherActivityForm({
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
         defaultActivity.startDateTime,
-        defaultActivity.endDateTime,
+        defaultActivity.endDateTime
       ),
       subgroups: defaultActivity.subgroups ?? [],
       description: defaultActivity.description ?? "",
@@ -93,7 +93,7 @@ export default function EtogetherActivityForm({
           description: data.description,
           isDraft: isDraft,
           subgroups: data.subgroups,
-        }),
+        })
       );
     }
 
@@ -106,7 +106,7 @@ export default function EtogetherActivityForm({
         description: data.description,
         isDraft: isDraft,
         subgroups: data.subgroups,
-      }),
+      })
     );
   };
 
