@@ -1,8 +1,9 @@
 import lunisolar from "lunisolar";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
+import UnitSelector from "~/components/inputs/UnitSelector";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
@@ -24,9 +25,10 @@ export default function PersonalAccountPage() {
   const [qiudaoHour, setQiudaoHour] = useState<string>("");
   const [lunarDate, setLunarDate] = useState<string>("");
 
-  const { register, handleSubmit, watch, reset } = useForm<ProfileForm>({
-    mode: "all",
-  });
+  const { register, handleSubmit, watch, reset, control } =
+    useForm<ProfileForm>({
+      mode: "all",
+    });
 
   // Fetch current user profile data
   const { data: userProfile, isLoading: userProfileIsLoading } =
@@ -176,6 +178,19 @@ export default function PersonalAccountPage() {
 
         <div>
           <label className="label">
+            <span className="label-text">所屬單位</span>
+          </label>
+          <Controller
+            control={control}
+            name="affiliation"
+            render={({ field }) => (
+              <UnitSelector value={field.value} onChange={field.onChange} />
+            )}
+          />
+        </div>
+
+        <div>
+          <label className="label">
             <span className="label-text">求道日期（國曆）</span>
           </label>
           <input
@@ -210,16 +225,7 @@ export default function PersonalAccountPage() {
             {...register("qiudaoTanzhu")}
           />
         </div>
-        <div>
-          <label className="label">
-            <span className="label-text">所屬單位</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("affiliation")}
-          />
-        </div>
+
         <div>
           <label className="label">
             <span className="label-text">點傳師</span>

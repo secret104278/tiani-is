@@ -42,7 +42,7 @@ export default function YideWorkAssignmentsSection() {
   const handleDualChange = (
     roleKey: string,
     position: "upper" | "lower",
-    value: string
+    value: string,
   ) => {
     const updated = { ...(assignments || {}) };
     const current = updated[roleKey as keyof YideWorkAssignments];
@@ -90,7 +90,7 @@ export default function YideWorkAssignmentsSection() {
   };
 
   const getDualValues = (
-    roleKey: string
+    roleKey: string,
   ): {
     upper: string;
     lower: string;
