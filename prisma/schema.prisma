@@ -452,6 +452,8 @@ model QiudaorenOnActivity {
   updatedBy   User?   @relation("QiudaorenUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   updatedById String?
 
+  checkInDate DateTime?
+
   @@unique([userId, activityId])
   @@index([userId])
   @@index([activityId])

@@ -176,4 +176,38 @@ export const qiudaorenRouter = createTRPCRouter({
       return qiudaorens;
     },
   ),
+
+  toggleCheckIn: activityManageProcedure
+    .input(
+      z.object({
+        activityId: z.number(),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const qiudaoren = await ctx.db.qiudaorenOnActivity.findUniqueOrThrow({
+        where: {
+          userId_activityId: {
+            userId: input.userId,
+            activityId: input.activityId,
+          },
+        },
+      });
+
+      const newCheckInDate = qiudaoren.checkInDate ? null : new Date();
+
+      await ctx.db.qiudaorenOnActivity.update({
+        where: {
+          userId_activityId: {
+            userId: input.userId,
+            activityId: input.activityId,
+          },
+        },
+        data: {
+          checkInDate: newCheckInDate,
+        },
+      });
+
+      return { checkInDate: newCheckInDate };
+    }),
 });

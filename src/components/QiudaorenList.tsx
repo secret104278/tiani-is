@@ -1,14 +1,17 @@
 import {
+  CheckCircleIcon,
   EllipsisVerticalIcon,
   PencilSquareIcon,
   PhoneIcon,
   TrashIcon,
 } from "@heroicons/react/20/solid";
+import { CheckCircleIcon as CheckCircleIconOutline } from "@heroicons/react/24/outline";
 import type { inferRouterOutputs } from "@trpc/server";
 import _ from "lodash";
 import { useState } from "react";
 import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
 import Dialog from "~/components/utils/Dialog";
+import { cn } from "~/lib/utils";
 import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import {
   TEMPLE_GENDER_LABELS,
@@ -16,6 +19,7 @@ import {
 } from "~/server/api/routers/yidework/templeGenderUtils";
 import { calculateTempleGender } from "~/server/api/routers/yidework/templeGenderUtils";
 import { api } from "~/utils/api";
+import ReactiveButton from "./utils/ReactiveButton";
 
 type QiudaorensByActivity =
   inferRouterOutputs<YideWorkRouter>["getQiudaorensByActivity"];
@@ -53,6 +57,17 @@ export default function QiudaorenList({
       },
     });
 
+  const {
+    mutate: toggleCheckIn,
+    isPending: toggleCheckInIsPending,
+    variables: toggleCheckInVariables,
+  } = api.yideworkActivity.toggleCheckIn.useMutation({
+    onSuccess: () => {
+      apiUtils.yideworkActivity.getQiudaorensByActivity.invalidate();
+      apiUtils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+    },
+  });
+
   const hasAnyQiudaoren = qiudaorens.length > 0;
 
   if (!hasAnyQiudaoren) {
@@ -85,6 +100,7 @@ export default function QiudaorenList({
   };
 
   const QiudaorenCard = ({ item }: { item: QiudaorensByActivity[number] }) => {
+    const isCheckedIn = !!item.checkInDate;
     return (
       <div key={item.id} className="card card-bordered bg-base-100">
         <div className="card-body p-3">
@@ -99,42 +115,70 @@ export default function QiudaorenList({
               </div>
             </div>
 
-            <div className="dropdown dropdown-end">
-              <button
-                tabIndex={0}
-                className="btn btn-ghost btn-sm"
-                type="button"
-                aria-label="More options"
+            <div className="flex items-center gap-1">
+              <ReactiveButton
+                className={cn("btn btn-sm", {
+                  "btn-ghost text-gray-400": !isCheckedIn,
+                  "btn-success text-white": isCheckedIn,
+                })}
+                onClick={() =>
+                  toggleCheckIn({ activityId, userId: item.user.id })
+                }
+                loading={
+                  toggleCheckInIsPending &&
+                  toggleCheckInVariables?.userId === item.user.id
+                }
+                title={isCheckedIn ? "取消報到" : "報到"}
               >
-                <EllipsisVerticalIcon className="h-4 w-4" />
-              </button>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
-              >
-                <li>
-                  <a onClick={() => setEditingQiudaorenUserId(item.user.id)}>
-                    <PencilSquareIcon className="h-4 w-4" />
-                    編輯
-                  </a>
-                </li>
-                <li>
-                  <a
-                    onClick={() =>
-                      handleDeleteClick(item.user.id, item.user.name ?? "")
-                    }
-                    className={
-                      deleteQiudaorenIsPending &&
-                      deleteConfirm?.userId === item.user.id
-                        ? "loading"
-                        : ""
-                    }
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                    刪除
-                  </a>
-                </li>
-              </ul>
+                {isCheckedIn ? (
+                  <>
+                    <CheckCircleIcon className="h-4 w-4" />
+                    已到
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIconOutline className="h-4 w-4" />
+                    報到
+                  </>
+                )}
+              </ReactiveButton>
+              <div className="dropdown dropdown-end">
+                <button
+                  tabIndex={0}
+                  className="btn btn-ghost btn-sm"
+                  type="button"
+                  aria-label="More options"
+                >
+                  <EllipsisVerticalIcon className="h-4 w-4" />
+                </button>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
+                >
+                  <li>
+                    <a onClick={() => setEditingQiudaorenUserId(item.user.id)}>
+                      <PencilSquareIcon className="h-4 w-4" />
+                      編輯
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      onClick={() =>
+                        handleDeleteClick(item.user.id, item.user.name ?? "")
+                      }
+                      className={
+                        deleteQiudaorenIsPending &&
+                        deleteConfirm?.userId === item.user.id
+                          ? "loading"
+                          : ""
+                      }
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                      刪除
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -323,6 +367,7 @@ export default function QiudaorenList({
           {TEMPLE_GENDER_ORDER.map((genderKey) => {
             const items = groupedByGender[genderKey];
             if (!items || items.length === 0) return null;
+            const sortedItems = _.sortBy(items, (item) => item.user.name);
 
             return (
               <div key={genderKey}>
@@ -332,7 +377,7 @@ export default function QiudaorenList({
                   </span>
                 </div>
                 <div className="space-y-2">
-                  {items.map((item) => (
+                  {sortedItems.map((item) => (
                     <QiudaorenCard key={item.id} item={item} />
                   ))}
                 </div>
