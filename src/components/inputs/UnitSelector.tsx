@@ -16,72 +16,58 @@ export default function UnitSelector({
   onChange,
   disabled,
 }: UnitSelectorProps) {
-  // Internal State
   const [l1, setL1] = useState("");
   const [l2, setL2] = useState("");
   const [l3, setL3] = useState("");
   const [l4, setL4] = useState("");
 
   const [customFull, setCustomFull] = useState("");
+  const [customL2, setCustomL2] = useState("");
+  const [customL3, setCustomL3] = useState("");
 
-  // Track the last value we emitted to avoid loops when parent updates back
   const lastEmittedValue = useRef<string | undefined>(undefined);
 
-  // Sync from props (upstream changes)
   useEffect(() => {
     const currentValue = value ?? "";
 
-    // If the incoming value matches what we just emitted, do nothing
     if (currentValue === lastEmittedValue.current) {
       return;
     }
 
-    // Parse value
     const remaining = currentValue;
     let newL1 = "";
     let newL2 = "";
     let newL3 = "";
     let newL4 = "";
     let newCustomFull = "";
+    let newCustomL2 = "";
+    let newCustomL3 = "";
 
     if (remaining) {
-      // Try to match strict hierarchy
       const foundL1 = LEVEL_1_OPTIONS.find((opt) => remaining.startsWith(opt));
 
       if (foundL1) {
-        // It matches L1 standard. Now check if it matches the strict hierarchy down the line.
-        // If it deviates at any point, we might want to treat it as "Other" (Custom)?
-        // Or try to parse as much as possible?
-        // User said: "If not select Other, must follow menu".
-        // This implies existing data that follows menu is Standard.
-        // Data that doesn't follow strict menu is Custom.
-
-        // Let's try to verify strict path.
         let tempRemaining = remaining.substring(foundL1.length);
 
         const foundL2 = LEVEL_2_OPTIONS.find((opt) =>
-          tempRemaining.startsWith(opt),
+          tempRemaining.startsWith(opt)
         );
         if (foundL2) {
           tempRemaining = tempRemaining.substring(foundL2.length);
           const foundL3 = LEVEL_3_OPTIONS.find((opt) =>
-            tempRemaining.startsWith(opt),
+            tempRemaining.startsWith(opt)
           );
           if (foundL3) {
             tempRemaining = tempRemaining.substring(foundL3.length);
             const foundL4 = LEVEL_4_OPTIONS.find((opt) =>
-              tempRemaining.startsWith(opt),
+              tempRemaining.startsWith(opt)
             );
             if (foundL4) {
-              // Full match so far!
               newL1 = foundL1;
               newL2 = foundL2;
               newL3 = foundL3;
               newL4 = foundL4;
-              // What if there is still remaining text? E.g. "基礎忠恕瑞周天惠義德Extra"
-              // That would fall out of strict dropdowns. So it should be custom.
               if (tempRemaining.substring(foundL4.length).length > 0) {
-                // Fallback to custom
                 newL1 = "Other";
                 newCustomFull = currentValue;
                 newL2 = "";
@@ -89,22 +75,26 @@ export default function UnitSelector({
                 newL4 = "";
               }
             } else {
-              // L4 mismatch
               newL1 = "Other";
               newCustomFull = currentValue;
             }
+          } else if (tempRemaining.length > 0) {
+            newL1 = foundL1;
+            newL2 = foundL2;
+            newL3 = "Other";
+            newCustomL3 = tempRemaining;
           } else {
-            // L3 mismatch
-            newL1 = "Other";
-            newCustomFull = currentValue;
+            newL1 = foundL1;
+            newL2 = foundL2;
           }
+        } else if (tempRemaining.length > 0) {
+          newL1 = foundL1;
+          newL2 = "Other";
+          newCustomL2 = tempRemaining;
         } else {
-          // L2 mismatch
-          newL1 = "Other";
-          newCustomFull = currentValue;
+          newL1 = foundL1;
         }
       } else {
-        // L1 mismatch
         newL1 = "Other";
         newCustomFull = currentValue;
       }
@@ -115,21 +105,43 @@ export default function UnitSelector({
     setL3(newL3);
     setL4(newL4);
     setCustomFull(newCustomFull);
+    setCustomL2(newCustomL2);
+    setCustomL3(newCustomL3);
   }, [value]);
+
+  const buildValue = (
+    ucL1: string,
+    ucL2: string,
+    ucL3: string,
+    ucL4: string,
+    ucCustomFull: string,
+    ucCustomL2: string,
+    ucCustomL3: string
+  ) => {
+    if (ucL1 === "Other") {
+      return ucCustomFull;
+    }
+
+    const part1 = ucL1;
+    const part2 = ucL2 === "Other" ? ucCustomL2 : ucL2;
+    const part3 = ucL3 === "Other" ? ucCustomL3 : ucL3;
+    const part4 = ucL4;
+
+    return `${part1}${part2}${part3}${part4}`;
+  };
 
   const handleStandardUpdate = (
     ucL1: string,
     ucL2: string,
     ucL3: string,
-    ucL4: string,
+    ucL4: string
   ) => {
     setL1(ucL1);
     setL2(ucL2);
     setL3(ucL3);
     setL4(ucL4);
 
-    // Construct standard value
-    const newValue = `${ucL1}${ucL2}${ucL3}${ucL4}`;
+    const newValue = buildValue(ucL1, ucL2, ucL3, ucL4, customFull, customL2, customL3);
 
     lastEmittedValue.current = newValue;
     onChange(newValue);
@@ -137,42 +149,37 @@ export default function UnitSelector({
 
   const handleCustomUpdate = (val: string) => {
     setCustomFull(val);
-    lastEmittedValue.current = val;
-    onChange(val);
+    const newValue = buildValue(l1, l2, l3, l4, val, customL2, customL3);
+    lastEmittedValue.current = newValue;
+    onChange(newValue);
+  };
+
+  const handleCustomL2Update = (val: string) => {
+    setCustomL2(val);
+    const newValue = buildValue(l1, l2, l3, l4, customFull, val, customL3);
+    lastEmittedValue.current = newValue;
+    onChange(newValue);
+  };
+
+  const handleCustomL3Update = (val: string) => {
+    setCustomL3(val);
+    const newValue = buildValue(l1, l2, l3, l4, customFull, customL2, val);
+    lastEmittedValue.current = newValue;
+    onChange(newValue);
   };
 
   const handleL1Change = (val: string) => {
+    setL1(val);
     if (val === "Other") {
-      setL1("Other");
-      // When switching to other, clear standard parts?
-      setL2("");
-      setL3("");
-      setL4("");
-      // Initialize custom input? Empty or keep previous value?
-      // If we switch to Other, maybe we start empty.
       setCustomFull("");
-      lastEmittedValue.current = "";
-      onChange("");
-    } else {
-      // Switching to Standard
-      setL1(val);
-      setCustomFull(""); // Clear custom
-      // Reset children to empty or first option?
-      // UX: usually explicit selection is better.
-      setL2("");
-      setL3("");
-      setL4("");
-
-      // Value is now incomplete standard string.
-      // Should we emit partial string? "基礎忠恕"
-      lastEmittedValue.current = val;
-      onChange(val);
     }
+    const newValue = buildValue(val, l2, l3, l4, "", customL2, customL3);
+    lastEmittedValue.current = newValue;
+    onChange(newValue);
   };
 
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Level 1 */}
+    <div className="flex flex-col gap-2">
       <div className="flex flex-col space-y-1">
         <select
           className="select select-bordered w-full"
@@ -193,66 +200,109 @@ export default function UnitSelector({
       </div>
 
       {l1 === "Other" && (
-        <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+        <div className="flex flex-col space-y-1">
           <input
             type="text"
             className="input input-bordered w-full"
             placeholder="輸入完整單位名稱"
             value={customFull}
+            disabled={disabled}
             onChange={(e) => handleCustomUpdate(e.target.value)}
           />
         </div>
       )}
 
-      {/* Level 2 - Only show if L1 is NOT Other and L1 has value */}
-      {l1 !== "Other" && l1 !== "" && (
-        <div className="flex flex-col space-y-1">
-          <select
-            className="select select-bordered w-full"
-            value={l2}
-            disabled={disabled}
-            onChange={(e) => {
-              // Standard strict update
-              handleStandardUpdate(l1, e.target.value, "", ""); // Reset L3, L4 on L2 change
-            }}
-          >
-            <option value="" disabled>
-              次級單位
-            </option>
-            {LEVEL_2_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
+      {l1 !== "" && (
+        <>
+          <div className="flex flex-col space-y-1">
+            <select
+              className="select select-bordered w-full"
+              value={l2}
+              disabled={disabled}
+              onChange={(e) => {
+                const val = e.target.value;
+                setL2(val);
+                if (val === "Other") {
+                  setCustomL2("");
+                }
+                const newValue = buildValue(l1, val, l3, l4, customFull, "", customL3);
+                lastEmittedValue.current = newValue;
+                onChange(newValue);
+              }}
+            >
+              <option value="" disabled>
+                次級單位
               </option>
-            ))}
-          </select>
-        </div>
+              {LEVEL_2_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+              <option value="Other">其他</option>
+            </select>
+          </div>
+
+          {l2 === "Other" && (
+            <div className="flex flex-col space-y-1">
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                placeholder="輸入次級單位名稱"
+                value={customL2}
+                disabled={disabled}
+                onChange={(e) => handleCustomL2Update(e.target.value)}
+              />
+            </div>
+          )}
+        </>
       )}
 
-      {/* Level 3 */}
-      {l1 !== "Other" && l1 !== "" && l2 !== "" && (
-        <div className="flex flex-col space-y-1">
-          <select
-            className="select select-bordered w-full"
-            value={l3}
-            disabled={disabled}
-            onChange={(e) => {
-              handleStandardUpdate(l1, l2, e.target.value, ""); // Reset L4 on L3 change
-            }}
-          >
-            <option value="" disabled>
-              下級單位
-            </option>
-            {LEVEL_3_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
+      {l1 !== "" && l2 !== "" && (
+        <>
+          <div className="flex flex-col space-y-1">
+            <select
+              className="select select-bordered w-full"
+              value={l3}
+              disabled={disabled}
+              onChange={(e) => {
+                const val = e.target.value;
+                setL3(val);
+                if (val === "Other") {
+                  setCustomL3("");
+                }
+                const newValue = buildValue(l1, l2, val, l4, customFull, customL2, "");
+                lastEmittedValue.current = newValue;
+                onChange(newValue);
+              }}
+            >
+              <option value="" disabled>
+                下級單位
               </option>
-            ))}
-          </select>
-        </div>
+              {LEVEL_3_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+              <option value="Other">其他</option>
+            </select>
+          </div>
+
+          {l3 === "Other" && (
+            <div className="flex flex-col space-y-1">
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                placeholder="輸入下級單位名稱"
+                value={customL3}
+                disabled={disabled}
+                onChange={(e) => handleCustomL3Update(e.target.value)}
+              />
+            </div>
+          )}
+        </>
       )}
 
-      {/* Level 4 */}
-      {l1 !== "Other" && l1 !== "" && l2 !== "" && l3 !== "" && (
+      {l1 !== "" && l2 !== "" && l3 !== "" && (
         <div className="flex flex-col space-y-1">
           <select
             className="select select-bordered w-full"

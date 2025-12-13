@@ -14,3 +14,4 @@ export function parseQrContent(scannedText: string): string | null {
   }
   return null;
 }
+
