@@ -8,6 +8,9 @@ await import("./src/env.mjs");
 /** @type {import("next").NextConfig} */
 const innerConfig = {
   reactStrictMode: true,
+  experimental: {
+    reactCompiler: true,
+  },
 
   /**
    * If you are using `appDir` then you must comment the below `i18n` config out.

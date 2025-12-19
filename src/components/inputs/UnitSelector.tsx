@@ -50,17 +50,17 @@ export default function UnitSelector({
         let tempRemaining = remaining.substring(foundL1.length);
 
         const foundL2 = LEVEL_2_OPTIONS.find((opt) =>
-          tempRemaining.startsWith(opt)
+          tempRemaining.startsWith(opt),
         );
         if (foundL2) {
           tempRemaining = tempRemaining.substring(foundL2.length);
           const foundL3 = LEVEL_3_OPTIONS.find((opt) =>
-            tempRemaining.startsWith(opt)
+            tempRemaining.startsWith(opt),
           );
           if (foundL3) {
             tempRemaining = tempRemaining.substring(foundL3.length);
             const foundL4 = LEVEL_4_OPTIONS.find((opt) =>
-              tempRemaining.startsWith(opt)
+              tempRemaining.startsWith(opt),
             );
             if (foundL4) {
               newL1 = foundL1;
@@ -116,7 +116,7 @@ export default function UnitSelector({
     ucL4: string,
     ucCustomFull: string,
     ucCustomL2: string,
-    ucCustomL3: string
+    ucCustomL3: string,
   ) => {
     if (ucL1 === "Other") {
       return ucCustomFull;
@@ -134,14 +134,22 @@ export default function UnitSelector({
     ucL1: string,
     ucL2: string,
     ucL3: string,
-    ucL4: string
+    ucL4: string,
   ) => {
     setL1(ucL1);
     setL2(ucL2);
     setL3(ucL3);
     setL4(ucL4);
 
-    const newValue = buildValue(ucL1, ucL2, ucL3, ucL4, customFull, customL2, customL3);
+    const newValue = buildValue(
+      ucL1,
+      ucL2,
+      ucL3,
+      ucL4,
+      customFull,
+      customL2,
+      customL3,
+    );
 
     lastEmittedValue.current = newValue;
     onChange(newValue);
@@ -225,7 +233,15 @@ export default function UnitSelector({
                 if (val === "Other") {
                   setCustomL2("");
                 }
-                const newValue = buildValue(l1, val, l3, l4, customFull, "", customL3);
+                const newValue = buildValue(
+                  l1,
+                  val,
+                  l3,
+                  l4,
+                  customFull,
+                  "",
+                  customL3,
+                );
                 lastEmittedValue.current = newValue;
                 onChange(newValue);
               }}
@@ -270,7 +286,15 @@ export default function UnitSelector({
                 if (val === "Other") {
                   setCustomL3("");
                 }
-                const newValue = buildValue(l1, l2, val, l4, customFull, customL2, "");
+                const newValue = buildValue(
+                  l1,
+                  l2,
+                  val,
+                  l4,
+                  customFull,
+                  customL2,
+                  "",
+                );
                 lastEmittedValue.current = newValue;
                 onChange(newValue);
               }}
