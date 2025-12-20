@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import type { YideWorkAssignments } from "~/utils/types";
 
 const ASSIGNMENT_ROLES = [
@@ -24,10 +24,13 @@ const ASSIGNMENT_ROLES = [
 ];
 
 export default function YideWorkAssignmentsSection() {
-  const { watch, setValue } = useFormContext<{
+  const { setValue, control } = useFormContext<{
     assignments: YideWorkAssignments;
   }>();
-  const assignments = watch("assignments");
+  const assignments = useWatch({
+    control,
+    name: "assignments",
+  });
 
   const handleSingleChange = (roleKey: string, value: string) => {
     const updated = { ...(assignments || {}) };
@@ -36,13 +39,16 @@ export default function YideWorkAssignmentsSection() {
     } else {
       delete (updated as Record<string, string | object | string>)[roleKey];
     }
-    setValue("assignments", updated);
+    setValue("assignments", updated, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   const handleDualChange = (
     roleKey: string,
     position: "upper" | "lower",
-    value: string,
+    value: string
   ) => {
     const updated = { ...(assignments || {}) };
     const current = updated[roleKey as keyof YideWorkAssignments];
@@ -70,7 +76,10 @@ export default function YideWorkAssignmentsSection() {
       };
     }
 
-    setValue("assignments", updated);
+    setValue("assignments", updated, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   const handleMultipleChange = (roleKey: string, value: string) => {
@@ -80,7 +89,10 @@ export default function YideWorkAssignmentsSection() {
     } else {
       delete (updated as Record<string, string>)[roleKey];
     }
-    setValue("assignments", updated);
+    setValue("assignments", updated, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   const getSingleValue = (roleKey: string): string => {
@@ -90,7 +102,7 @@ export default function YideWorkAssignmentsSection() {
   };
 
   const getDualValues = (
-    roleKey: string,
+    roleKey: string
   ): {
     upper: string;
     lower: string;
