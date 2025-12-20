@@ -1,11 +1,15 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 test.describe("YiDeClass Enrollment", () => {
-  test("should manage class enrollment", async ({ page }) => {
+  test("should manage class enrollment", async ({
+    page,
+    loginAsAdmin,
+    testUser,
+  }) => {
     await page.goto("/yideclass/admin/class");
 
     const firstClassRow = page.locator("tbody tr").first();
-    const className = await firstClassRow.innerText();
+    const className = (await firstClassRow.innerText()).trim();
     await firstClassRow.click();
 
     await expect(page).toHaveURL(
@@ -14,19 +18,25 @@ test.describe("YiDeClass Enrollment", () => {
 
     await page.getByRole("button", { name: "班員管理" }).click();
 
-    await expect(page).toHaveURL(
-      new RegExp(
-        `/yideclass/admin/class/enroll/${encodeURIComponent(className)}`,
-      ),
-    );
+    // Verify we are on the enroll page
+    await expect(
+      page.getByRole("heading", { name: /班員管理$/ }),
+    ).toBeVisible();
 
-    const userRow = page.locator("tr", { hasText: /E2E Test User/ }).first();
-    const checkbox = userRow.locator('input[type="checkbox"]');
+    // Find the test user row and toggle enrollment
+    const userRow = page.getByRole("row", { name: testUser.name! });
+    const checkbox = userRow.getByRole("checkbox");
 
+    const isChecked = await checkbox.isChecked();
     await checkbox.click();
+
+    // Simple wait for network if needed or verify state change
+    if (isChecked) {
+      await expect(checkbox).not.toBeChecked();
+    } else {
+      await expect(checkbox).toBeChecked();
+    }
 
     await expect(page.locator(".alert-warning")).not.toBeVisible();
-
-    await checkbox.click();
   });
 });

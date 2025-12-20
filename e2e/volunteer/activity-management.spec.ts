@@ -1,8 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { VolunteerActivityStatus } from "@prisma/client";
+import { expect, test } from "../fixtures";
 import { createActivity } from "../utils/volunteer-helpers";
 
 test.describe("Volunteer Activity Management", () => {
-  test("should create a new activity", async ({ page }) => {
+  test("should create a new activity", async ({ page, loginAsUser }) => {
     await page.goto("/volunteer");
     await page.getByRole("link", { name: "建立新工作" }).click();
     await expect(page).toHaveURL("/volunteer/activity/new");
@@ -17,9 +18,16 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page.getByText("Description New")).toBeVisible();
   });
 
-  test("should approve an activity", async ({ page }) => {
-    await createActivity(page, { isDraft: true });
-    await page.getByRole("button", { name: "送出申請" }).click();
+  test("should approve an activity", async ({
+    page,
+    loginAsAdmin,
+    createVolunteerActivity,
+    testUser,
+  }) => {
+    const activity = await createVolunteerActivity(testUser.id, {
+      status: VolunteerActivityStatus.INREVIEW,
+    });
+    await page.goto(`/volunteer/activity/detail/${activity.id}`);
 
     await expect(page.getByRole("button", { name: "核准" })).toBeVisible();
     await page.getByRole("button", { name: "核准" }).click();
@@ -28,13 +36,21 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page.getByRole("button", { name: "核准" })).toBeHidden();
   });
 
-  test("should edit an activity", async ({ page }) => {
-    const { id } = await createActivity(page);
+  test("should edit an activity", async ({
+    page,
+    loginAsUser,
+    publishedActivity,
+  }) => {
+    const { id } = publishedActivity;
+
+    await page.goto(`/volunteer/activity/detail/${id}`);
+
     await page.getByRole("button", { name: "編輯" }).click();
     await expect(page).toHaveURL(`/volunteer/activity/edit/${id}`);
 
-    const workerIndex = test.info().workerIndex ?? 0;
-    const newLocation = `Updated Location w${workerIndex}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const newLocation = `Updated Location ${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
     await page.fill('input[name="location"]', newLocation);
     await page.getByRole("button", { name: "送出" }).click();
 
@@ -42,8 +58,15 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page.getByText(newLocation)).toBeVisible();
   });
 
-  test("should revoke an activity", async ({ page }) => {
-    const { id } = await createActivity(page);
+  test("should revoke an activity", async ({
+    page,
+    loginAsUser,
+    publishedActivity,
+  }) => {
+    const { id } = publishedActivity;
+
+    await page.goto(`/volunteer/activity/detail/${id}`);
+
     await page.getByRole("button", { name: "撤銷" }).click();
 
     await expect(page.getByText("確認撤銷")).toBeVisible();
@@ -58,15 +81,21 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
   });
 
-  test("should update activity details successfully", async ({ page }) => {
-    const { id } = await createActivity(page);
+  test("should update activity details successfully", async ({
+    page,
+    loginAsUser,
+    publishedActivity,
+  }) => {
+    const { id } = publishedActivity;
+
+    await page.goto(`/volunteer/activity/detail/${id}`);
+
     await page.getByRole("button", { name: "編輯" }).click();
 
-    const workerIndex = test.info().workerIndex ?? 0;
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 9);
-    const newLoc = `New Loc w${workerIndex}-${timestamp}-${random}`;
-    const newDesc = `New Desc w${workerIndex}-${timestamp}-${random}`;
+    const newLoc = `New Loc ${timestamp}-${random}`;
+    const newDesc = `New Desc ${timestamp}-${random}`;
 
     await page.fill('input[name="location"]', newLoc);
     await page.fill('textarea[name="description"]', newDesc);
@@ -77,8 +106,12 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page.getByText(newDesc)).toBeVisible();
   });
 
-  test("should submit a draft activity for review", async ({ page }) => {
-    await createActivity(page, { isDraft: true });
+  test("should submit a draft activity for review", async ({
+    page,
+    loginAsUser,
+    draftActivity,
+  }) => {
+    await page.goto(`/volunteer/activity/detail/${draftActivity.id}`);
 
     await expect(page.getByText("草稿")).toBeVisible();
 
@@ -88,8 +121,12 @@ test.describe("Volunteer Activity Management", () => {
     await expect(page.getByRole("button", { name: "送出申請" })).toBeHidden();
   });
 
-  test("should filter activities in list view", async ({ page }) => {
-    const { location: uniqueLocation } = await createActivity(page);
+  test("should filter activities in list view", async ({
+    page,
+    loginAsUser,
+    publishedActivity,
+  }) => {
+    const uniqueLocation = publishedActivity.location;
     await page.goto("/volunteer");
 
     const responsePromise = page.waitForResponse(

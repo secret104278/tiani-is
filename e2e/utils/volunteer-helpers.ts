@@ -77,51 +77,6 @@ export async function createActivity(
   };
 }
 
-export async function ensureCasualCheckOut(page: Page) {
-  const card = page.locator(".card", { hasText: "日常工作" });
-  await expect(card).toBeVisible();
-
-  const button = card.locator("button");
-  const initialText = await button.innerText();
-
-  if (initialText.includes("簽退")) {
-    await button.click();
-    await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-    await page.getByRole("button", { name: "打卡", exact: true }).click();
-    await expect(page.getByRole("dialog")).toBeHidden();
-    await expect(button).toContainText(/簽到|再次簽到/);
-  }
-}
-
-export async function performCasualCheckIn(page: Page) {
-  const card = page.locator(".card", { hasText: "日常工作" });
-  const button = card.locator("button");
-
-  await expect(button).toContainText(/簽到|再次簽到/);
-  await button.click();
-
-  await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-  const dialogButton = page.getByRole("button", { name: "打卡", exact: true });
-  await expect(dialogButton).toBeEnabled();
-  await dialogButton.click();
-
-  await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(button).toContainText("簽退");
-}
-
-export async function performCasualCheckOut(page: Page) {
-  const card = page.locator(".card", { hasText: "日常工作" });
-  const button = card.locator("button");
-
-  await expect(button).toContainText("簽退");
-  await button.click();
-
-  await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-  await page.getByRole("button", { name: "打卡", exact: true }).click();
-  await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(button).toContainText(/簽到|再次簽到/);
-}
-
 export async function performActivityCheckIn(page: Page) {
   const checkInBtn = page.getByRole("button", { name: "簽到" });
   await expect(checkInBtn).toBeEnabled();

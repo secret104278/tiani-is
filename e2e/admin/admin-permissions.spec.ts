@@ -1,14 +1,10 @@
-import { expect, test } from "@playwright/test";
-import { Role } from "@prisma/client";
-import { loginAs } from "../utils/auth-helpers";
+import { expect, test } from "../fixtures";
 
 test.describe("Admin Permissions", () => {
   test("should not show admin settings to non-admin user", async ({
     page,
-    context,
+    loginAsUser,
   }) => {
-    await loginAs(context, []);
-
     await page.goto("/");
 
     await page.locator(".avatar.btn").click();
@@ -22,10 +18,8 @@ test.describe("Admin Permissions", () => {
 
   test("should show admin settings to admin user", async ({
     page,
-    context,
+    loginAsAdmin,
   }) => {
-    await loginAs(context, [Role.TIANI_ADMIN]);
-
     await page.goto("/");
 
     await page.locator(".avatar.btn").click();

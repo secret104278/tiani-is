@@ -1,14 +1,21 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import {
-  createEtogetherActivity,
   performEtogetherCheckIn,
   registerForActivity,
 } from "../utils/etogether-helpers";
 
 test.describe("Etogether Participation - Check-in", () => {
-  test("should allow user to check in", async ({ page }) => {
-    await createEtogetherActivity(page);
-    await registerForActivity(page, "Group A");
+  test("should allow user to check in", async ({
+    page,
+    loginAsUser,
+    publishedEtogetherActivity,
+  }) => {
+    const subgroupTitle = publishedEtogetherActivity.subgroups[0]!.title;
+    await page.goto(
+      `/etogether/activity/detail/${publishedEtogetherActivity.id}`,
+    );
+
+    await registerForActivity(page, subgroupTitle);
 
     await performEtogetherCheckIn(page);
 
@@ -19,9 +26,15 @@ test.describe("Etogether Participation - Check-in", () => {
 
   test("should allow organizer to manually check in participant", async ({
     page,
+    loginAsAdmin,
+    publishedEtogetherActivity,
   }) => {
-    await createEtogetherActivity(page);
-    await registerForActivity(page, "Group A");
+    const subgroupTitle = publishedEtogetherActivity.subgroups[0]!.title;
+    await page.goto(
+      `/etogether/activity/detail/${publishedEtogetherActivity.id}`,
+    );
+
+    await registerForActivity(page, subgroupTitle);
 
     await page.getByRole("button", { name: "報名名單" }).click();
     await expect(page.getByRole("heading", { name: "報名名單" })).toBeVisible();

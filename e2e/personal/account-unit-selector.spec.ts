@@ -1,11 +1,14 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 test.describe("Personal Account - Unit Selector", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, loginAsUser }) => {
     await page.goto("/personal/account");
   });
 
-  test("should allow standard hierarchical selection", async ({ page }) => {
+  test("should allow standard hierarchical selection", async ({
+    page,
+    loginAsUser,
+  }) => {
     // Scroll to section
     await page
       .getByRole("heading", { name: "求道卡資料" })
@@ -32,7 +35,10 @@ test.describe("Personal Account - Unit Selector", () => {
     await l4.selectOption("義德");
   });
 
-  test("should have 'Other' option in L1, L2, and L3", async ({ page }) => {
+  test("should have 'Other' option in L1, L2, and L3", async ({
+    page,
+    loginAsUser,
+  }) => {
     await page
       .getByRole("heading", { name: "求道卡資料" })
       .scrollIntoViewIfNeeded();
@@ -62,6 +68,7 @@ test.describe("Personal Account - Unit Selector", () => {
 
   test("should support custom input when 'Other' is selected at Level 1", async ({
     page,
+    loginAsUser,
   }) => {
     await page
       .getByRole("heading", { name: "求道卡資料" })
@@ -96,6 +103,7 @@ test.describe("Personal Account - Unit Selector", () => {
 
   test("should support custom input when 'Other' is selected at Level 2", async ({
     page,
+    loginAsUser,
   }) => {
     await page
       .getByRole("heading", { name: "求道卡資料" })
@@ -124,6 +132,7 @@ test.describe("Personal Account - Unit Selector", () => {
 
   test("should support custom input when 'Other' is selected at Level 3", async ({
     page,
+    loginAsUser,
   }) => {
     await page
       .getByRole("heading", { name: "求道卡資料" })

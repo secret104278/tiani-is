@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 test.describe("Admin Users", () => {
-  test("should display user list", async ({ page }) => {
+  test("should display user list", async ({ page, loginAsAdmin, testUser }) => {
     await page.goto("/admin/users");
 
     await expect(page.getByRole("heading", { name: "帳號管理" })).toBeVisible();
@@ -25,7 +25,7 @@ test.describe("Admin Users", () => {
     await expect(page.locator("tbody tr")).not.toHaveCount(0);
 
     await expect(
-      page.locator("table").getByText("E2E", { exact: false }).first(),
+      page.locator("table").getByText("Tes...", { exact: false }).first(),
     ).toBeVisible();
 
     await expect(page.getByRole("button", { name: "新增帳號" })).toBeVisible();

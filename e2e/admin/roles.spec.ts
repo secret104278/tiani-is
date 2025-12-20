@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 test.describe("Role Management", () => {
-  test("should assign and revoke roles", async ({ page }) => {
+  test("should assign and revoke roles", async ({ page, loginAsAdmin }) => {
     await page.goto("/admin/users");
 
     const uniqueUserName = `Test User Role ${Date.now()}`;

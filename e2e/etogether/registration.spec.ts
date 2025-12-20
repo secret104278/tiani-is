@@ -1,29 +1,42 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import {
   cancelRegistration,
-  createEtogetherActivity,
   registerForActivity,
 } from "../utils/etogether-helpers";
 
 test.describe("Etogether Participation - Registration", () => {
-  test("should register for activity", async ({ page }) => {
-    const { subgroups } = await createEtogetherActivity(page);
-    const firstSubgroup = subgroups[0]!;
+  test("should register for activity", async ({
+    page,
+    loginAsUser,
+    publishedEtogetherActivity,
+  }) => {
+    const subgroupTitle = publishedEtogetherActivity.subgroups[0]!.title;
 
-    await registerForActivity(page, firstSubgroup.title);
+    await page.goto(
+      `/etogether/activity/detail/${publishedEtogetherActivity.id}`,
+    );
+
+    await registerForActivity(page, subgroupTitle);
 
     await expect(page.getByText("我的報名表")).toBeVisible();
     await expect(
-      page.getByText(new RegExp(`：${firstSubgroup.title}$`)),
+      page.getByText(new RegExp(`：${subgroupTitle}$`)),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "修改報名" })).toBeVisible();
     await expect(page.getByRole("button", { name: "取消報名" })).toBeVisible();
   });
 
-  test("should cancel registration", async ({ page }) => {
-    const { subgroups } = await createEtogetherActivity(page);
-    const firstSubgroup = subgroups[0]!;
-    await registerForActivity(page, firstSubgroup.title);
+  test("should cancel registration", async ({
+    page,
+    loginAsUser,
+    publishedEtogetherActivity,
+  }) => {
+    const subgroupTitle = publishedEtogetherActivity.subgroups[0]!.title;
+    await page.goto(
+      `/etogether/activity/detail/${publishedEtogetherActivity.id}`,
+    );
+
+    await registerForActivity(page, subgroupTitle);
 
     await expect(page.getByText("我的報名表")).toBeVisible();
 

@@ -1,21 +1,45 @@
-import { expect, test } from "@playwright/test";
 import { Role } from "@prisma/client";
+import { expect, test } from "../fixtures";
 import { loginAs } from "../utils/auth-helpers";
-import { createEtogetherActivity } from "../utils/etogether-helpers";
 
 test.describe
   .serial("Authorization", () => {
     let activityId: string;
 
-    test.beforeAll(async ({ browser }) => {
+    test.beforeAll(async ({ browser, db }) => {
       const context = await browser.newContext();
       await loginAs(context, [Role.ETOGETHER_ADMIN]);
       const page = await context.newPage();
 
-      const { id } = await createEtogetherActivity(page, {
-        title: "Auth Test Activity",
+      const adminUser = await db.user.create({
+        data: {
+          id: `etogether-admin-${Date.now()}`,
+          email: `etogether-admin-${Date.now()}@example.com`,
+          name: "Etogether Admin",
+          roles: [Role.ETOGETHER_ADMIN],
+        },
       });
-      activityId = id;
+
+      const now = new Date();
+      const startDateTime = new Date(now.getTime() + 3600000);
+      const endDateTime = new Date(startDateTime.getTime() + 7200000);
+
+      const activity = await db.etogetherActivity.create({
+        data: {
+          title: `Auth Test Activity ${Date.now()}`,
+          description: "Auth Test Description",
+          location: "Auth Test Location",
+          startDateTime,
+          endDateTime,
+          status: "PUBLISHED",
+          organiserId: adminUser.id,
+          subgroups: {
+            create: [{ title: "Group 1" }],
+          },
+        },
+      });
+
+      activityId = activity.id.toString();
 
       await context.close();
     });

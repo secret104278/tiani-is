@@ -148,7 +148,7 @@ export default function VolunteerActivityDetailPage() {
   if (isNil(activity)) return <AlertWarning>找不到工作</AlertWarning>;
 
   const isManager =
-    session?.user.role.is_volunteer_admin ??
+    session?.user.role.is_volunteer_admin ||
     session?.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);

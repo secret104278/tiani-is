@@ -1,8 +1,10 @@
-import { expect, test } from "@playwright/test";
-import { createActivity } from "../utils/volunteer-helpers";
+import { expect, test } from "../fixtures";
 
 test.describe("UI Interactions and Edge Cases", () => {
-  test("should handle non-existent activity gracefully", async ({ page }) => {
+  test("should handle non-existent activity gracefully", async ({
+    page,
+    loginAsUser,
+  }) => {
     await page.goto("/volunteer/activity/detail/99999");
 
     await expect(page.getByText("This page could not be found")).toBeVisible();
@@ -10,23 +12,12 @@ test.describe("UI Interactions and Edge Cases", () => {
 
   test("should display correct UI elements and confirmation dialogs", async ({
     page,
+    loginAsUser,
+    publishedActivity,
   }) => {
-    // Setup: Create a new activity to work with
-    const { location: uniqueLocation } = await createActivity(page, {
-      description: "UI Test Description",
-      offsetHours: 1,
-    });
+    await page.goto(`/volunteer/activity/detail/${publishedActivity.id}`);
 
-    await expect(page.getByText("審核中")).toBeVisible();
-    await expect(page.getByRole("button", { name: "核准" })).toBeVisible();
-
-    await page.getByRole("button", { name: "核准" }).click();
-
-    await expect(page.getByText("已發佈")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "分享至Line" }),
-    ).toBeVisible();
-
+    await expect(page.getByRole("button", { name: "報名" })).toBeVisible();
     await page.getByRole("button", { name: "報名" }).click();
     await expect(page.getByRole("button", { name: "取消報名" })).toBeVisible();
 

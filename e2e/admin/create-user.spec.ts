@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 test.describe("User Creation", () => {
-  test("should create a new offline user", async ({ page }) => {
+  test("should create a new offline user", async ({ page, loginAsAdmin }) => {
     await page.goto("/admin/users");
 
     await page.getByRole("button", { name: "新增帳號" }).click();
