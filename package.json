@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:mcp": "playwright run-test-mcp-server",
     "fmt": "pnpm typecheck && pnpm check:write"
   },
   "dependencies": {

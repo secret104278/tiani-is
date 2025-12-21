@@ -60,7 +60,7 @@ export const activityRouter = createTRPCRouter({
     ctx.db.yideWorkActivity.findUniqueOrThrow({
       where: { id: input.activityId },
       include: {
-        organiser: { select: { name: true } },
+        organiser: { select: { id: true, name: true } },
         location: { select: { name: true } },
         preset: true,
         staffs: {

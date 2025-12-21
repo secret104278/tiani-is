@@ -18,7 +18,6 @@ export const test = authTest.extend<YideClassFixtures>({
       overrides: Partial<ClassActivity> = {},
     ) => {
       const timestamp = Date.now();
-      const random = Math.random().toString(36).slice(2, 9);
 
       const startDateTime = new Date();
       startDateTime.setHours(startDateTime.getHours() + 1);

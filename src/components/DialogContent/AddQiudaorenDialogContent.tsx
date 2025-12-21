@@ -127,10 +127,10 @@ export default function AddQiudaorenDialogContent({
         )}
       </div>
 
-      <div>
-        <label className="label">
+      <fieldset>
+        <legend className="label">
           <span className="label-text">性別</span>
-        </label>
+        </legend>
         <div className="flex space-x-4">
           <label className="label cursor-pointer">
             <input
@@ -158,7 +158,7 @@ export default function AddQiudaorenDialogContent({
             </span>
           </label>
         )}
-      </div>
+      </fieldset>
 
       <div>
         <label className="label">
@@ -273,10 +273,10 @@ export default function AddQiudaorenDialogContent({
         )}
       </div>
 
-      <div>
-        <label className="label">
+      <fieldset>
+        <legend className="label">
           <span className="label-text">引師性別</span>
-        </label>
+        </legend>
         <div className="flex space-x-4">
           <label className="label cursor-pointer">
             <input
@@ -304,7 +304,7 @@ export default function AddQiudaorenDialogContent({
             </span>
           </label>
         )}
-      </div>
+      </fieldset>
 
       <div>
         <label className="label">
@@ -356,10 +356,10 @@ export default function AddQiudaorenDialogContent({
         )}
       </div>
 
-      <div>
-        <label className="label">
+      <fieldset>
+        <legend className="label">
           <span className="label-text">保師性別</span>
-        </label>
+        </legend>
         <div className="flex space-x-4">
           <label className="label cursor-pointer">
             <input
@@ -387,7 +387,7 @@ export default function AddQiudaorenDialogContent({
             </span>
           </label>
         )}
-      </div>
+      </fieldset>
 
       <div>
         <label className="label">

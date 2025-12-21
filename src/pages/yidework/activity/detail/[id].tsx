@@ -107,7 +107,7 @@ export default function YideWorkActivityDetailPage() {
 
   const isManager =
     !!session?.user.role.is_yidework_admin ||
-    session?.user.id === activity.organiserId;
+    session?.user.id === activity.organiser.id;
 
   const isStaff = activity.staffs?.some(
     (staff) => staff.user.id === session?.user.id,
