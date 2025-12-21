@@ -1,4 +1,5 @@
 import { Role, type User } from "@prisma/client";
+import { switchUser as switchUserUtil } from "../utils/auth-helpers";
 import { test as base } from "./base";
 
 type AuthFixtures = {
@@ -7,6 +8,9 @@ type AuthFixtures = {
   testAdmin: User;
   loginAsUser: User;
   loginAsAdmin: User;
+  switchUser: (
+    userId: string,
+  ) => Promise<{ sessionToken: string; expires: Date }>;
 };
 
 export const test = base.extend<AuthFixtures>({
@@ -132,5 +136,25 @@ export const test = base.extend<AuthFixtures>({
 
     // Cleanup: delete the session
     await db.session.delete({ where: { sessionToken } }).catch(() => {});
+  },
+
+  switchUser: async ({ context }, use) => {
+    const sessions: string[] = [];
+    const prisma = new (await import("@prisma/client")).PrismaClient();
+
+    const switcher = async (userId: string) => {
+      const result = await switchUserUtil(context, userId);
+      sessions.push(result.sessionToken);
+      return result;
+    };
+
+    await use(switcher);
+
+    // Cleanup: delete all sessions created via switchUser
+    for (const token of sessions) {
+      await prisma.session
+        .delete({ where: { sessionToken: token } })
+        .catch(() => {});
+    }
   },
 });
