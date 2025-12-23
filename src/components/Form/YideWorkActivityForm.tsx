@@ -20,14 +20,11 @@ import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
 import YideWorkAssignmentsSection from "./YideWorkAssignmentsSection";
 
-const EMPTY_PRESET_ID = -1;
-
 type YideWorkActivity = inferRouterOutputs<YideWorkRouter>["getActivity"];
 
 interface YideWorkActivityFormData {
   title: string;
   titleOther: string;
-  presetId: number;
   offeringFestival: string;
   offeringFestivalOther: string;
   locationId: number;
@@ -61,7 +58,6 @@ export default function YideWorkActivityForm({
       titleOther: defaultTitleIsOther ? defaultActivity.title : "",
 
       locationId: defaultActivity.locationId,
-      presetId: defaultActivity.presetId ?? EMPTY_PRESET_ID,
 
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
@@ -70,6 +66,7 @@ export default function YideWorkActivityForm({
       ),
       description: defaultActivity.description ?? "",
       assignments: (defaultActivity.assignments as YideWorkAssignments) ?? {},
+      offeringFestival: defaultActivity.festival ?? "",
     };
   }
 
@@ -82,18 +79,13 @@ export default function YideWorkActivityForm({
   const router = useRouter();
   const currentTitle = watch("title");
   const isOffering = currentTitle === "獻供通知";
-  const isTao = currentTitle === "辦道通知";
 
   const {
     data: locations,
     isLoading: locationIsLoading,
     error: locationsError,
   } = api.yideworkActivity.getLocations.useQuery();
-  const {
-    data: presets,
-    isLoading: presetsIsLoading,
-    error: presetsError,
-  } = api.yideworkActivity.getPresets.useQuery();
+
   const {
     mutate: createActivity,
     error: createActivityError,
@@ -111,24 +103,21 @@ export default function YideWorkActivityForm({
 
   const _handleSubmit = (isDraft = false) => {
     return handleSubmit((data) => {
-      let finalDescription = data.description;
+      let festival: string | null = null;
       if (isOffering && data.offeringFestival) {
-        const festivalName =
+        festival =
           data.offeringFestival === "其他（自行輸入）"
             ? data.offeringFestivalOther
             : data.offeringFestival;
-        if (festivalName) {
-          finalDescription = `【${festivalName}】${data.description}`;
-        }
       }
 
       const payload = {
         title: titleIsOther(data.title) ? data.titleOther : data.title,
         locationId: data.locationId,
-        presetId: data.presetId === EMPTY_PRESET_ID ? undefined : data.presetId,
         startDateTime: data.startDateTime as Date,
         endDateTime: getEndTime(data.startDateTime as Date, data.duration || 2),
-        description: finalDescription,
+        description: data.description,
+        festival: festival,
         assignments: data.assignments,
         isDraft: isDraft,
       };
@@ -150,9 +139,6 @@ export default function YideWorkActivityForm({
   if (locationIsLoading) return <div className="loading" />;
   if (!isNil(locationsError))
     return <AlertWarning>{locationsError.message}</AlertWarning>;
-  if (presetsIsLoading) return <div className="loading" />;
-  if (!isNil(presetsError))
-    return <AlertWarning>{presetsError.message}</AlertWarning>;
 
   return (
     <FormProvider {...methods}>
@@ -203,25 +189,6 @@ export default function YideWorkActivityForm({
                 {...register("offeringFestivalOther")}
               />
             )}
-          </div>
-        )}
-
-        {isTao && (
-          <div>
-            <label className="label">
-              <span className="label-text text-sm">預設活動</span>
-            </label>
-            <select
-              className="select select-bordered"
-              {...register("presetId", { valueAsNumber: true })}
-            >
-              <option value={EMPTY_PRESET_ID}> -- 請選擇 -- </option>
-              {presets?.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.description}
-                </option>
-              ))}
-            </select>
           </div>
         )}
 

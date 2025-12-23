@@ -13,7 +13,7 @@ export const activityRouter = createTRPCRouter({
       z.object({
         title: z.string(),
         description: z.string().nullable(),
-        presetId: z.number().optional(),
+        festival: z.string().nullable().optional(),
         locationId: z.number(),
         startDateTime: z.date(),
         endDateTime: z.date(),
@@ -26,18 +26,12 @@ export const activityRouter = createTRPCRouter({
         data: {
           title: input.title,
           description: input.description,
+          festival: input.festival,
           location: {
             connect: {
               id: input.locationId,
             },
           },
-          preset: _.isNil(input.presetId)
-            ? undefined
-            : {
-                connect: {
-                  id: input.presetId,
-                },
-              },
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           assignments: _.isEmpty(input.assignments)
@@ -62,7 +56,6 @@ export const activityRouter = createTRPCRouter({
       include: {
         organiser: { select: { id: true, name: true } },
         location: { select: { name: true } },
-        preset: true,
         staffs: {
           include: {
             user: { select: { id: true, name: true } },
@@ -77,7 +70,7 @@ export const activityRouter = createTRPCRouter({
       z.object({
         title: z.string(),
         description: z.string().nullable(),
-        presetId: z.number().optional(),
+        festival: z.string().nullable().optional(),
         locationId: z.number(),
         startDateTime: z.date(),
         endDateTime: z.date(),
@@ -93,18 +86,12 @@ export const activityRouter = createTRPCRouter({
         data: {
           title: input.title,
           description: input.description,
+          festival: input.festival,
           location: {
             connect: {
               id: input.locationId,
             },
           },
-          preset: _.isNil(input.presetId)
-            ? { disconnect: true }
-            : {
-                connect: {
-                  id: input.presetId,
-                },
-              },
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           assignments: _.isEmpty(input.assignments)

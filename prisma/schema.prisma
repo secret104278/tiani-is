@@ -400,9 +400,7 @@ model YideWorkActivity {
   id          Int     @id @default(autoincrement())
   title       String
   description String?
-
-  presetId Int?
-  preset   YideWorkPreset? @relation(fields: [presetId], references: [id])
+  festival    String?
 
   locationId Int
   location   YideWorkLocation       @relation(fields: [locationId], references: [id])
@@ -428,13 +426,6 @@ model YideWorkActivity {
   @@index([organiserId])
   @@index([startDateTime])
   @@index([locationId])
-}
-
-model YideWorkPreset {
-  id          Int    @id @default(autoincrement())
-  description String
-
-  activities YideWorkActivity[]
 }
 
 model QiudaorenOnActivity {

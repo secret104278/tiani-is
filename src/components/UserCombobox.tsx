@@ -13,7 +13,7 @@ import { api } from "~/utils/api";
 import { AlertWarning } from "./utils/Alert";
 import { Loading } from "./utils/Loading";
 
-export type User = inferRouterOutputs<UserRouter>["getUsers"][number];
+export type User = inferRouterOutputs<UserRouter>["getUsersBasic"][number];
 
 export type UserComboboxSelected = User | null;
 
@@ -30,7 +30,7 @@ export default function UserCombobox({
     data: users,
     isLoading: usersIsLoading,
     error: usersError,
-  } = api.user.getUsers.useQuery();
+  } = api.user.getUsersBasic.useQuery();
 
   if (usersIsLoading) return <Loading />;
   if (usersError) return <AlertWarning>{usersError.message}</AlertWarning>;

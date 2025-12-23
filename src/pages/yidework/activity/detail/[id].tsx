@@ -1,5 +1,6 @@
 import {
   ClockIcon,
+  FlagIcon,
   MapPinIcon,
   PencilSquareIcon,
   PlusIcon,
@@ -206,6 +207,12 @@ export default function YideWorkActivityDetailPage() {
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
 
+        {activity.festival && (
+          <div className="flex items-center">
+            <FlagIcon className="mr-1 h-4 w-4" />
+            <p>節日：{activity.festival}</p>
+          </div>
+        )}
         <div className="flex items-center">
           <MapPinIcon className="mr-1 h-4 w-4" />
           <p>佛堂：{activity.location.name}</p>
@@ -216,12 +223,6 @@ export default function YideWorkActivityDetailPage() {
         </div>
         {!_.isEmpty(activity.description?.trim()) && (
           <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
-            {!_.isEmpty(activity.preset) && (
-              <>
-                {activity.preset.description}
-                <div className="divider" />
-              </>
-            )}
             {activity.description}
           </article>
         )}
@@ -267,7 +268,7 @@ export default function YideWorkActivityDetailPage() {
         </Dialog>
       )}
 
-      {myQiudaorens && (
+      {isQiudaoYili && myQiudaorens && (
         <QiudaorenList
           qiudaorens={myQiudaorens}
           activityId={activity.id}

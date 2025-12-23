@@ -202,6 +202,16 @@ export const userRouter = createTRPCRouter({
     }),
   ),
 
+  getUsersBasic: protectedProcedure.query(async ({ ctx }) =>
+    ctx.db.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        roles: true,
+      },
+    }),
+  ),
+
   setIsTianiAdmin: adminProcedure
     .input(
       z.object({

@@ -166,6 +166,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
       .getByRole("group", { name: "引師性別", exact: true })
       .getByLabel("乾")
       .click();
+    await page.locator('input[name="yinShiPhone"]').fill("0912345678");
     await page.locator('input[name="baoShi"]').fill("Bao Person");
     await page
       .getByRole("group", { name: "保師性別", exact: true })

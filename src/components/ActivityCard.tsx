@@ -1,4 +1,9 @@
-import { ClockIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid";
+import {
+  ClockIcon,
+  FlagIcon,
+  MapPinIcon,
+  UsersIcon,
+} from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
 import Link from "next/link";
 import { useSiteContext } from "~/context/SiteContext";
@@ -24,6 +29,7 @@ export function ActivityCard({
     location: string;
     startDateTime: Date;
     endDateTime: Date;
+    festival?: string | null;
   };
   isEnd?: boolean;
 }) {
@@ -72,6 +78,12 @@ export function ActivityCard({
                 )} */}
             </div>
           </div>
+          {activity.festival && (
+            <div className="flex items-center">
+              <FlagIcon className="mr-1 h-4 w-4" />
+              <p>節日：{activity.festival}</p>
+            </div>
+          )}
           {activity.headcount && (
             <div className="flex items-center">
               <UsersIcon className="mr-1 h-4 w-4" />

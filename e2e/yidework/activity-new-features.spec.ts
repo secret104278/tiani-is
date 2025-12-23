@@ -40,7 +40,7 @@ test.describe("YideWork Activity New Features", () => {
     await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
-    await expect(page.getByText("【初一】")).toBeVisible();
+    await expect(page.getByText("節日：初一")).toBeVisible();
     await expect(page.getByText("上首：User A")).toBeVisible();
     await expect(page.getByText("下首：User B")).toBeVisible();
 
@@ -69,7 +69,7 @@ test.describe("YideWork Activity New Features", () => {
     await page.getByRole("button", { name: "送出" }).click();
 
     await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
-    await expect(page.getByText("【自定義法會】")).toBeVisible();
+    await expect(page.getByText("節日：自定義法會")).toBeVisible();
   });
 
   test("Create a 'Ban Dao' activity hides festival and shows all roles", async ({
@@ -83,8 +83,8 @@ test.describe("YideWork Activity New Features", () => {
     // Festival should be hidden
     await expect(page.getByText("獻供節日")).not.toBeVisible();
 
-    // Preset Activity should be visible
-    await expect(page.getByText("預設活動")).toBeVisible();
+    // Preset Activity should NOT be visible (removed in working directory changes)
+    await expect(page.getByText("預設活動")).not.toBeVisible();
 
     // All roles should be visible
     await expect(page.getByText("總招集", { exact: true })).toBeVisible();
