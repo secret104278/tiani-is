@@ -23,7 +23,11 @@ const ASSIGNMENT_ROLES = [
   { key: "threeTreasures", label: "三寶", type: "single" },
 ];
 
-export default function YideWorkAssignmentsSection() {
+export default function YideWorkAssignmentsSection({
+  title,
+}: {
+  title: string;
+}) {
   const { setValue, control } = useFormContext<{
     assignments: YideWorkAssignments;
   }>();
@@ -31,6 +35,18 @@ export default function YideWorkAssignmentsSection() {
     control,
     name: "assignments",
   });
+
+  const isOffering = title === "獻供通知";
+  const filteredRoles = isOffering
+    ? ASSIGNMENT_ROLES.filter((role) =>
+        [
+          "offering",
+          "kneelingReception",
+          "servingFruit",
+          "arrangingFruit",
+        ].includes(role.key),
+      )
+    : ASSIGNMENT_ROLES;
 
   const handleSingleChange = (roleKey: string, value: string) => {
     const updated = { ...(assignments || {}) };
@@ -129,7 +145,7 @@ export default function YideWorkAssignmentsSection() {
     <div className="space-y-4">
       <div className="divider">工作分配</div>
 
-      {ASSIGNMENT_ROLES.map((role) => (
+      {filteredRoles.map((role) => (
         <div key={role.key}>
           {role.type === "single" && (
             <div>

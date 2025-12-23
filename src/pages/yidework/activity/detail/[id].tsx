@@ -214,13 +214,6 @@ export default function YideWorkActivityDetailPage() {
           <ClockIcon className="mr-1 h-4 w-4" />
           <p>開始：{formatDateTime(activity.startDateTime)}</p>
         </div>
-        <div className="flex items-center">
-          <ClockIcon className="mr-1 h-4 w-4" />
-          <p>
-            時數：
-            {toDuration(activity.startDateTime, activity.endDateTime)}
-          </p>
-        </div>
         {!_.isEmpty(activity.description?.trim()) && (
           <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
             {!_.isEmpty(activity.preset) && (
@@ -234,7 +227,8 @@ export default function YideWorkActivityDetailPage() {
         )}
 
         {!_.isEmpty(activity.assignments) &&
-          activity.title.includes("辦道") && (
+          (activity.title.includes("辦道") ||
+            activity.title.includes("獻供")) && (
             <>
               <div className="divider">工作分配</div>
               <YideWorkAssignmentsDisplay

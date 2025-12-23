@@ -124,6 +124,38 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
 
 export const YIDE_WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
 
+export const OFFERING_FESTIVALS = [
+  "初一",
+  "十五",
+  "袁前人成道",
+  "金公祖師成道",
+  "慈佑帝君成道",
+  "太上老君聖誕",
+  "南海古佛聖誕",
+  "師母成道",
+  "春季大典",
+  "金公祖師聖誕",
+  "張老前人成道",
+  "關聖帝君成道",
+  "夏季大典",
+  "南海古佛得道",
+  "關聖帝君聖誕",
+  "師尊聖誕",
+  "地藏古佛聖誕",
+  "灶君聖誕",
+  "師尊成道",
+  "至聖先師聖誕",
+  "師母聖誕",
+  "關聖帝君",
+  "秋季大典",
+  "南海古佛成道",
+  "慈離大仙成道",
+  "慈化真君成道",
+  "冬季大典",
+  "諸天神聖",
+  "其他（自行輸入）",
+];
+
 export const IS_LINE_NOTIFY_ENABLED = false;
 
 export const getEndTime = (startDateTime: Date, duration: number) =>

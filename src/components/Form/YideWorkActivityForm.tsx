@@ -6,6 +6,7 @@ import type { YideWorkRouter } from "~/server/api/routers/yidework";
 import { api } from "~/utils/api";
 import type { YideWorkAssignments } from "~/utils/types";
 import {
+  OFFERING_FESTIVALS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   YIDE_WORK_ACTIVITY_TITLES,
   getCurrentDateTime,
@@ -27,6 +28,8 @@ interface YideWorkActivityFormData {
   title: string;
   titleOther: string;
   presetId: number;
+  offeringFestival: string;
+  offeringFestivalOther: string;
   locationId: number;
   startDateTime: Date | string;
   duration: number;
@@ -44,6 +47,9 @@ export default function YideWorkActivityForm({
     startDateTime: getCurrentDateTime(),
     description: "",
     assignments: {},
+    duration: 2, // 預設 2 小時，雖然隱藏但仍需數值
+    offeringFestival: "",
+    offeringFestivalOther: "",
   };
   if (defaultActivity) {
     const defaultTitleIsOther = titleIsOther(defaultActivity.title);
@@ -71,9 +77,13 @@ export default function YideWorkActivityForm({
     defaultValues: formDefaultValues,
     mode: "all",
   });
-  const { register, handleSubmit, watch } = methods;
+  const { register, handleSubmit, watch, setValue } = methods;
 
   const router = useRouter();
+  const currentTitle = watch("title");
+  const isOffering = currentTitle === "獻供通知";
+  const isTao = currentTitle === "辦道通知";
+
   const {
     data: locations,
     isLoading: locationIsLoading,
@@ -100,35 +110,38 @@ export default function YideWorkActivityForm({
   });
 
   const _handleSubmit = (isDraft = false) => {
-    if (defaultActivity) {
-      return handleSubmit((data) =>
-        updateActivity({
-          activityId: defaultActivity.id,
-          title: titleIsOther(data.title) ? data.titleOther : data.title,
-          locationId: data.locationId,
-          presetId:
-            data.presetId === EMPTY_PRESET_ID ? undefined : data.presetId,
-          startDateTime: data.startDateTime as Date,
-          endDateTime: getEndTime(data.startDateTime as Date, data.duration),
-          description: data.description,
-          assignments: data.assignments,
-          isDraft: isDraft,
-        }),
-      );
-    }
+    return handleSubmit((data) => {
+      let finalDescription = data.description;
+      if (isOffering && data.offeringFestival) {
+        const festivalName =
+          data.offeringFestival === "其他（自行輸入）"
+            ? data.offeringFestivalOther
+            : data.offeringFestival;
+        if (festivalName) {
+          finalDescription = `【${festivalName}】${data.description}`;
+        }
+      }
 
-    return handleSubmit((data) =>
-      createActivity({
+      const payload = {
         title: titleIsOther(data.title) ? data.titleOther : data.title,
         locationId: data.locationId,
         presetId: data.presetId === EMPTY_PRESET_ID ? undefined : data.presetId,
         startDateTime: data.startDateTime as Date,
-        endDateTime: getEndTime(data.startDateTime as Date, data.duration),
-        description: data.description,
+        endDateTime: getEndTime(data.startDateTime as Date, data.duration || 2),
+        description: finalDescription,
         assignments: data.assignments,
         isDraft: isDraft,
-      }),
-    );
+      };
+
+      if (defaultActivity) {
+        updateActivity({
+          activityId: defaultActivity.id,
+          ...payload,
+        });
+      } else {
+        createActivity(payload);
+      }
+    });
   };
 
   const canSaveDraft =
@@ -146,37 +159,75 @@ export default function YideWorkActivityForm({
       <form className="form-control max-w-xs">
         <div>
           <label className="label">
-            <span className="label-text">道務項目</span>
+            <span className="label-text text-sm">道務項目</span>
           </label>
-          <SelectWithCustomInput
-            selectProps={register("title")}
-            customInputProps={register("titleOther")}
-            showCustomInput={watch("title") === VOLUNTEER_ACTIVITY_TOPIC_OTHER}
+          <select
+            className="select select-bordered"
+            {...register("title")}
+            onChange={(e) => {
+              const val = e.target.value;
+              setValue("title", val);
+              // 切換時清除 assignments
+              setValue("assignments", {});
+            }}
           >
             {YIDE_WORK_ACTIVITY_TITLES.map((option, i) => (
               <option key={i}>{option}</option>
             ))}
-          </SelectWithCustomInput>
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">預設活動</span>
-          </label>
-          <select
-            className="select select-bordered"
-            {...register("presetId", { valueAsNumber: true })}
-          >
-            <option value={EMPTY_PRESET_ID}> -- 請選擇 -- </option>
-            {presets?.map((preset) => (
-              <option key={preset.id} value={preset.id}>
-                {preset.description}
-              </option>
-            ))}
           </select>
         </div>
+
+        {isOffering && (
+          <div className="space-y-2">
+            <div>
+              <label className="label">
+                <span className="label-text text-sm">獻供節日</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                {...register("offeringFestival")}
+              >
+                <option value=""> -- 請選擇 -- </option>
+                {OFFERING_FESTIVALS.map((festival, i) => (
+                  <option key={i} value={festival}>
+                    {festival}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {watch("offeringFestival") === "其他（自行輸入）" && (
+              <input
+                type="text"
+                placeholder="請輸入節日名稱"
+                className="tiani-input w-full"
+                {...register("offeringFestivalOther")}
+              />
+            )}
+          </div>
+        )}
+
+        {isTao && (
+          <div>
+            <label className="label">
+              <span className="label-text text-sm">預設活動</span>
+            </label>
+            <select
+              className="select select-bordered"
+              {...register("presetId", { valueAsNumber: true })}
+            >
+              <option value={EMPTY_PRESET_ID}> -- 請選擇 -- </option>
+              {presets?.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.description}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label className="label">
-            <span className="label-text">佛堂名稱</span>
+            <span className="label-text text-sm">佛堂名稱</span>
           </label>
           <select
             className="select select-bordered"
@@ -189,11 +240,13 @@ export default function YideWorkActivityForm({
             ))}
           </select>
         </div>
-        {watch("title").includes("辦道") && <YideWorkAssignmentsSection />}
+
+        <YideWorkAssignmentsSection title={currentTitle} />
+
         <div className="divider" />
         <div>
           <label className="label">
-            <span className="label-text">時間</span>
+            <span className="label-text text-sm">時間</span>
           </label>
           <input
             type="datetime-local"
@@ -202,23 +255,11 @@ export default function YideWorkActivityForm({
             {...register("startDateTime", { valueAsDate: true })}
           />
         </div>
-        <div>
-          <label className="label">
-            <span className="label-text">預估時數</span>
-          </label>
-          <input
-            type="number"
-            inputMode="decimal"
-            className="tiani-input"
-            step="0.1"
-            required
-            {...register("duration", { valueAsNumber: true })}
-          />
-        </div>
+
         <div className="divider" />
         <div>
           <label className="label">
-            <span className="label-text">補充說明</span>
+            <span className="label-text text-sm">補充說明</span>
           </label>
           <textarea
             className="textarea textarea-bordered w-full"

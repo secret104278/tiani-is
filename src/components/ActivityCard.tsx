@@ -86,13 +86,15 @@ export function ActivityCard({
             <ClockIcon className="mr-1 h-4 w-4" />
             <p>開始：{formatDateTime(activity.startDateTime)}</p>
           </div>
-          <div className="flex items-center">
-            <ClockIcon className="mr-1 h-4 w-4" />
-            <p>
-              {site === Site.Volunteer ? "預估時數：" : "開班時數："}
-              {toDuration(activity.startDateTime, activity.endDateTime)}
-            </p>
-          </div>
+          {site !== Site.YideWork && (
+            <div className="flex items-center">
+              <ClockIcon className="mr-1 h-4 w-4" />
+              <p>
+                {site === Site.Volunteer ? "預估時數：" : "開班時數："}
+                {toDuration(activity.startDateTime, activity.endDateTime)}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </Link>

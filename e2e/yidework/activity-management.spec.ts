@@ -13,7 +13,6 @@ test.describe("YideWork Activity Management", () => {
       .locator('select[name="locationId"]')
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill("2025-12-25T10:00");
-    await page.getByRole("spinbutton").fill("2");
 
     await page.getByRole("button", { name: "送出" }).click();
 
@@ -42,7 +41,6 @@ test.describe("YideWork Activity Management", () => {
       .locator('select[name="locationId"]')
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill("2025-12-26T09:00");
-    await page.getByRole("spinbutton").fill("3");
 
     await page.getByRole("textbox").first().fill("User A");
 
@@ -107,7 +105,6 @@ test.describe("YideWork Activity Management", () => {
       .locator('select[name="locationId"]')
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill("2025-12-30T10:00");
-    await page.getByRole("spinbutton").fill("2");
     await page.getByRole("button", { name: "送出" }).click();
     await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
 
