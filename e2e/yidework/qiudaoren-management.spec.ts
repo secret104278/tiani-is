@@ -13,10 +13,6 @@ test.describe("Qiudaoren (Candidate) Management", () => {
 
     await page.getByRole("button", { name: "新增求道人" }).click();
     await page.locator('input[name="name"]').fill("Test Person");
-    await page
-      .getByRole("group", { name: "性別", exact: true })
-      .getByLabel("乾")
-      .click();
     await page.getByRole("spinbutton").fill("80");
     await page.locator('input[name="phone"]').fill("0912345678");
     await page.locator('input[name="yinShi"]').fill("Yin Person");
@@ -30,6 +26,10 @@ test.describe("Qiudaoren (Candidate) Management", () => {
       .getByRole("group", { name: "保師性別", exact: true })
       .getByLabel("坤")
       .click();
+    await page
+      .getByRole("group", { name: "性別", exact: true })
+      .getByLabel("乾")
+      .click();
     await page.getByRole("button", { name: "新增", exact: true }).click();
 
     await expect(page.getByText("乾").first()).toBeVisible();
@@ -37,27 +37,21 @@ test.describe("Qiudaoren (Candidate) Management", () => {
 
     await page.getByRole("button", { name: "新增求道人" }).click();
     await page.locator('input[name="name"]').fill("Test Child");
-    await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .first()
-      .click();
     await page.getByRole("spinbutton").fill("110");
     await page.locator('input[name="yinShi"]').fill("Yin Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .nth(1)
+      .getByRole("group", { name: "引師性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.locator('input[name="yinShiPhone"]').fill("0912345678");
     await page.locator('input[name="baoShi"]').fill("Bao Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^坤$/ })
-      .last()
+      .getByRole("group", { name: "保師性別", exact: true })
+      .getByLabel("坤")
+      .click();
+    await page
+      .getByRole("group", { name: "性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.getByRole("button", { name: "新增", exact: true }).click();
 
@@ -77,12 +71,6 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     await page.getByRole("button", { name: "新增求道人" }).click();
 
     await page.locator('input[name="name"]').fill("Test Person");
-    await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .first()
-      .click();
     await page.getByRole("spinbutton").fill("200");
     await page.locator('input[name="phone"]').fill("123456");
 
@@ -97,17 +85,17 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     await page.locator('input[name="phone"]').fill("0912345678");
     await page.locator('input[name="yinShi"]').fill("Yin Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .nth(1)
+      .getByRole("group", { name: "引師性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.locator('input[name="baoShi"]').fill("Bao Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^坤$/ })
-      .last()
+      .getByRole("group", { name: "保師性別", exact: true })
+      .getByLabel("坤")
+      .click();
+    await page
+      .getByRole("group", { name: "性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.getByRole("button", { name: "新增", exact: true }).click();
 
@@ -125,27 +113,21 @@ test.describe("Qiudaoren (Candidate) Management", () => {
 
     await page.getByRole("button", { name: "新增求道人" }).click();
     await page.locator('input[name="name"]').fill("CheckIn Person");
-    await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .first()
-      .click();
     await page.getByRole("spinbutton").fill("80");
     await page.locator('input[name="phone"]').fill("0912345678");
     await page.locator('input[name="yinShi"]').fill("Yin Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .nth(1)
+      .getByRole("group", { name: "引師性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.locator('input[name="baoShi"]').fill("Bao Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^坤$/ })
-      .last()
+      .getByRole("group", { name: "保師性別", exact: true })
+      .getByLabel("坤")
+      .click();
+    await page
+      .getByRole("group", { name: "性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.getByRole("button", { name: "新增", exact: true }).click();
 
@@ -177,27 +159,21 @@ test.describe("Qiudaoren (Candidate) Management", () => {
 
     await page.getByRole("button", { name: "新增求道人" }).click();
     await page.locator('input[name="name"]').fill("Qiudaoren Person");
-    await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .first()
-      .click();
     await page.getByRole("spinbutton").fill("80");
     await page.locator('input[name="phone"]').fill("0912345678");
     await page.locator('input[name="yinShi"]').fill("Yin Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^乾$/ })
-      .nth(1)
+      .getByRole("group", { name: "引師性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.locator('input[name="baoShi"]').fill("Bao Person");
     await page
-      .getByLabel("新增求道人")
-      .locator("label")
-      .filter({ hasText: /^坤$/ })
-      .last()
+      .getByRole("group", { name: "保師性別", exact: true })
+      .getByLabel("坤")
+      .click();
+    await page
+      .getByRole("group", { name: "性別", exact: true })
+      .getByLabel("乾")
       .click();
     await page.getByRole("button", { name: "新增", exact: true }).click();
 
