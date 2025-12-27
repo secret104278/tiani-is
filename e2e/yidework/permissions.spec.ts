@@ -57,7 +57,7 @@ test.describe("YideWork Permissions", () => {
 
     await expect(page.getByRole("link", { name: "求道人清單" })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "新增求道人" }),
+      page.getByRole("button", { name: "我要帶人來求道" }),
     ).toBeVisible();
   });
 });

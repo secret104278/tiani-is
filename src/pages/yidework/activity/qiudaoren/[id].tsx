@@ -82,7 +82,7 @@ export default function YideWorkActivityQiudaorenPage() {
       </article>
       <ReactiveButton className="btn" onClick={() => setAddDialogOpen(true)}>
         <PlusIcon className="h-4 w-4" />
-        新增求道人
+        我要帶人來求道
       </ReactiveButton>
       <div className="stats shadow">
         <div className="stat">
@@ -134,7 +134,7 @@ export default function YideWorkActivityQiudaorenPage() {
         )}
       </div>
       <Dialog
-        title="新增求道人"
+        title="我要帶人來求道"
         show={addDialogOpen}
         closeModal={() => setAddDialogOpen(false)}
       >

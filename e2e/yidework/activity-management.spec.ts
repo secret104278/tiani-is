@@ -21,7 +21,7 @@ test.describe("YideWork Activity Management", () => {
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
     await expect(page.getByText("佛堂：天一聖道院")).toBeVisible();
     await expect(
-      page.getByText("開始：2025/12/25 (四) 上午 10:00"),
+      page.getByText("國曆：2025/12/25 (四) 上午 10:00"),
     ).toBeVisible();
 
     await expect(page.getByText("已發佈")).toBeVisible();

@@ -6,14 +6,21 @@ import {
   PlusIcon,
   QueueListIcon,
   TrashIcon,
+  UserMinusIcon,
+  UserPlusIcon,
 } from "@heroicons/react/20/solid";
 import _, { isNil } from "lodash";
+import lunisolar from "lunisolar";
 import type { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
+import {
+  getHourLabel,
+  getTimeToHourValue,
+} from "~/components/QiudaoLunarDisplay";
 import QiudaorenList from "~/components/QiudaorenList";
 import YideWorkActivityStaffManagement from "~/components/YideWorkActivityStaffManagement";
 import YideWorkAssignmentsDisplay from "~/components/YideWorkAssignmentsDisplay";
@@ -22,7 +29,6 @@ import ConfirmDialog from "~/components/utils/ConfirmDialog";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { useSiteContext } from "~/context/SiteContext";
-import { calculateTempleGender } from "~/server/api/routers/yidework/templeGenderUtils";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
 import type { OGMetaProps, YideWorkAssignments } from "~/utils/types";
@@ -32,7 +38,6 @@ import {
   formatDateTime,
   formatDateTitle,
   getActivityStatusText,
-  toDuration,
 } from "~/utils/ui";
 
 export const getServerSideProps: GetServerSideProps<{
@@ -77,6 +82,7 @@ export default function YideWorkActivityDetailPage() {
     data: activity,
     isLoading: activityIsLoading,
     error: activityError,
+    refetch,
   } = api.yideworkActivity.getActivity.useQuery({
     activityId: Number(id),
   });
@@ -99,24 +105,37 @@ export default function YideWorkActivityDetailPage() {
       activityId: Number(id),
     });
 
+  const {
+    mutate: participateActivity,
+    isPending: participateActivityIsPending,
+  } = api.yideworkActivity.participateActivity.useMutation({
+    onSuccess: () => refetch(),
+  });
+
+  const { mutate: leaveActivity, isPending: leaveActivityIsPending } =
+    api.yideworkActivity.leaveActivity.useMutation({
+      onSuccess: () => refetch(),
+    });
+
   if (!isNil(activityError))
     return <AlertWarning>{activityError.message}</AlertWarning>;
-  if (activityIsLoading) return <div className="loading" />;
+  if (activityIsLoading || sessionStatus === "loading")
+    return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到通知</AlertWarning>;
-  if (sessionStatus === "loading") return <div className="loading" />;
   if (isNil(session)) return <AlertWarning>請先登入</AlertWarning>;
 
   const isManager =
-    !!session?.user.role.is_yidework_admin ||
-    session?.user.id === activity.organiser.id;
+    !!session.user.role.is_yidework_admin ||
+    session.user.id === activity.organiser.id;
 
   const isStaff = activity.staffs?.some(
-    (staff) => staff.user.id === session?.user.id,
+    (staff) => staff.user.id === session.user.id,
   );
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
   const isQiudaoYili = activity.title.includes("辦道");
+  const isOffering = activity.title === "獻供通知";
 
   const ShareLineBtn = () => {
     return (
@@ -177,7 +196,9 @@ export default function YideWorkActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
-      <YideWorkActivityStaffManagement activityId={activity.id} />
+      {!isOffering && (
+        <YideWorkActivityStaffManagement activityId={activity.id} />
+      )}
     </>
   );
 
@@ -193,7 +214,83 @@ export default function YideWorkActivityDetailPage() {
     </Link>
   );
 
-  // Fetch and display the details of the book with the given ID
+  const ParticipateControl = () => {
+    if (!isOffering) return null;
+    if (isEnded) return null;
+
+    if (isStaff) {
+      return (
+        <ReactiveButton
+          className="btn btn-error"
+          onClick={() => leaveActivity({ activityId: activity.id })}
+          loading={leaveActivityIsPending}
+        >
+          <UserMinusIcon className="h-4 w-4" />
+          取消參加
+        </ReactiveButton>
+      );
+    }
+
+    return (
+      <ReactiveButton
+        className="btn btn-accent"
+        onClick={() => participateActivity({ activityId: activity.id })}
+        loading={participateActivityIsPending}
+      >
+        <UserPlusIcon className="h-4 w-4" />
+        我要參加
+      </ReactiveButton>
+    );
+  };
+
+  const StaffList = () => {
+    if (!isOffering) return null;
+    if (!isManager) return null;
+
+    return (
+      <form className="collapse-arrow collapse bg-base-200">
+        <input type="checkbox" />
+        <div className="collapse-title font-medium">
+          參與人員清單 ({activity.staffs?.length || 0})
+        </div>
+        <div className="collapse-content">
+          <ul className="space-y-2">
+            {activity.staffs?.map((staff) => (
+              <li key={staff.user.id} className="flex items-center">
+                {staff.user.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </form>
+    );
+  };
+
+  const TimeDisplay = () => {
+    const solarDate = activity.startDateTime;
+    const lunar = lunisolar(solarDate);
+    const lunarDateStr = lunar.format("cY年 lMlD");
+    const hourValue = getTimeToHourValue(solarDate);
+    const hourLabel = getHourLabel(hourValue);
+
+    return (
+      <div className="flex flex-col space-y-1">
+        <div className="flex items-center">
+          <ClockIcon className="mr-1 h-4 w-4" />
+          <p>國曆：{formatDateTime(solarDate)}</p>
+        </div>
+        {isQiudaoYili && (
+          <div className="flex items-center">
+            <ClockIcon className="mr-1 h-4 w-4" />
+            <p>
+              農曆：{lunarDateStr} {hourLabel}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
@@ -203,7 +300,13 @@ export default function YideWorkActivityDetailPage() {
         {!isManager && <ShareLineBtn />}
       </div>
       {isManager && <AdminPanel />}
-      {isQiudaoYili && (isManager || isStaff) && <QiudaorenPanel />}
+      {isOffering && <StaffList />}
+      {isQiudaoYili && (isManager || isStaff) && (
+        <div className="flex flex-row space-x-2">
+          <QiudaorenPanel />
+        </div>
+      )}
+      {isOffering && <ParticipateControl />}
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
 
@@ -217,10 +320,7 @@ export default function YideWorkActivityDetailPage() {
           <MapPinIcon className="mr-1 h-4 w-4" />
           <p>佛堂：{activity.location.name}</p>
         </div>
-        <div className="flex items-center">
-          <ClockIcon className="mr-1 h-4 w-4" />
-          <p>開始：{formatDateTime(activity.startDateTime)}</p>
-        </div>
+        <TimeDisplay />
         {!_.isEmpty(activity.description?.trim()) && (
           <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
             {activity.description}
@@ -248,14 +348,14 @@ export default function YideWorkActivityDetailPage() {
             }}
           >
             <PlusIcon className="h-4 w-4" />
-            新增求道人
+            我要帶人來求道
           </ReactiveButton>
         </div>
       )}
 
       {isQiudaoYili && (
         <Dialog
-          title="新增求道人"
+          title="我要帶人來求道"
           show={qiudaorenDialogOpen}
           closeModal={() => {
             setQiudaorenDialogOpen(false);

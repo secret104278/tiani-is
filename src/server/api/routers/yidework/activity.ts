@@ -194,6 +194,30 @@ export const activityRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  participateActivity: activityPublishedOnlyProcedure.mutation(
+    async ({ ctx, input }) => {
+      return await ctx.db.yideWorkActivityStaff.create({
+        data: {
+          activityId: input.activityId,
+          userId: ctx.session.user.id,
+        },
+      });
+    },
+  ),
+
+  leaveActivity: activityPublishedOnlyProcedure.mutation(
+    async ({ ctx, input }) => {
+      return await ctx.db.yideWorkActivityStaff.delete({
+        where: {
+          activityId_userId: {
+            activityId: input.activityId,
+            userId: ctx.session.user.id,
+          },
+        },
+      });
+    },
+  ),
+
   getStaffs: activityManageProcedure.query(({ ctx, input }) =>
     ctx.db.yideWorkActivityStaff.findMany({
       where: { activityId: input.activityId },

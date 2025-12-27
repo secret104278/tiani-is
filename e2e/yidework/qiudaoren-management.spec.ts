@@ -11,7 +11,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
 
     await page.getByRole("link", { name: "求道人清單" }).click();
 
-    await page.getByRole("button", { name: "新增求道人" }).click();
+    await page.getByRole("button", { name: "我要帶人來求道" }).click();
     await page.locator('input[name="name"]').fill("Test Person");
     await page.getByRole("spinbutton").fill("80");
     await page.locator('input[name="phone"]').fill("0912345678");
@@ -35,7 +35,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     await expect(page.getByText("乾").first()).toBeVisible();
     await expect(page.getByText("Test Person")).toBeVisible();
 
-    await page.getByRole("button", { name: "新增求道人" }).click();
+    await page.getByRole("button", { name: "我要帶人來求道" }).click();
     await page.locator('input[name="name"]').fill("Test Child");
     await page.getByRole("spinbutton").fill("110");
     await page.locator('input[name="yinShi"]').fill("Yin Person");
@@ -68,7 +68,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     await page.goto(`/yidework/activity/detail/${activity.id}`);
 
     await page.getByRole("link", { name: "求道人清單" }).click();
-    await page.getByRole("button", { name: "新增求道人" }).click();
+    await page.getByRole("button", { name: "我要帶人來求道" }).click();
 
     await page.locator('input[name="name"]').fill("Test Person");
     await page.getByRole("spinbutton").fill("200");
@@ -111,7 +111,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
     await page.goto(`/yidework/activity/detail/${activity.id}`);
 
-    await page.getByRole("button", { name: "新增求道人" }).click();
+    await page.getByRole("button", { name: "我要帶人來求道" }).click();
     await page.locator('input[name="name"]').fill("CheckIn Person");
     await page.getByRole("spinbutton").fill("80");
     await page.locator('input[name="phone"]').fill("0912345678");
@@ -157,7 +157,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     await page.goto(`/yidework/activity/detail/${activity.id}`);
     await page.getByRole("link", { name: "求道人清單" }).click();
 
-    await page.getByRole("button", { name: "新增求道人" }).click();
+    await page.getByRole("button", { name: "我要帶人來求道" }).click();
     await page.locator('input[name="name"]').fill("Qiudaoren Person");
     await page.getByRole("spinbutton").fill("80");
     await page.locator('input[name="phone"]').fill("0912345678");
