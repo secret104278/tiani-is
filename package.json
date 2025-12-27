@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
+    "db:seed-dev": "ts-node scripts/seed-dev.ts",
     "db:pull-remote": "bash scripts/pull-remote-db.sh",
     "dev": "next dev --turbo -p 3100",
     "postinstall": "prisma generate",

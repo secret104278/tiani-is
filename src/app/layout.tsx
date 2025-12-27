@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 
 import AutoSignInRedirect from "~/app/components/auto-signin-redirect";
+import AccountSwitcher from "~/components/Dev/AccountSwitcher";
 import { auth } from "~/server/auth";
 import { TRPCReactProvider } from "~/trpc/react";
 import { HydrateClient } from "~/trpc/server";
@@ -35,7 +36,10 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <AutoSignInRedirect />
           <TRPCReactProvider>
-            <HydrateClient>{children}</HydrateClient>
+            <HydrateClient>
+              {children}
+              {process.env.NODE_ENV === "development" && <AccountSwitcher />}
+            </HydrateClient>
           </TRPCReactProvider>
         </SessionProvider>
       </body>

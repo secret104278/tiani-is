@@ -9,6 +9,7 @@ import Head from "next/head";
 import AuthGaurd from "~/components/System/AuthGuard";
 import Layout from "~/components/System/Layout";
 
+import AccountSwitcher from "~/components/Dev/AccountSwitcher";
 import "leaflet/dist/leaflet.css";
 import { useRouter } from "next/router";
 import { NuqsAdapter } from "nuqs/adapters/next/pages";
@@ -98,6 +99,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
                 <Layout>
                   {isPageLoading ? <Loading /> : <Component {...pageProps} />}
                 </Layout>
+                {process.env.NODE_ENV === "development" && <AccountSwitcher />}
               </NuqsAdapter>
             </SentrySetup>
           </AuthGaurd>

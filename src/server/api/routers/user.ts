@@ -2,7 +2,11 @@ import { type PrismaClient, type PrismaPromise, Role } from "@prisma/client";
 import type { ITXClientDenyList } from "@prisma/client/runtime/library";
 import { isNil } from "lodash";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { getLineImageURL } from "~/utils/server";
 import {
   adminProcedure,
@@ -310,6 +314,28 @@ export const userRouter = createTRPCRouter({
       },
     });
     return !isNil(res);
+  }),
+
+  getDevUsers: publicProcedure.query(async ({ ctx }) => {
+    // Only allow in development
+    if (process.env.NODE_ENV !== "development") {
+      return [];
+    }
+
+    return ctx.db.user.findMany({
+      take: 20, // Limit to prevent massive lists
+      orderBy: [
+        { roles: "desc" }, // Prioritize admins
+        { name: "asc" },
+      ],
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        roles: true,
+        email: true,
+      },
+    });
   }),
 });
 
