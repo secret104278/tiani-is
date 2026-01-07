@@ -26,10 +26,13 @@ interface ClassActivityFormData {
   titleOther: string;
   location: string;
   locationOther: string;
+  unit: string;
   startDateTime: Date | string;
   duration: number;
   description: string;
 }
+
+export const YIDE_CLASS_UNITS = ["忠德", "孝德", "仁德", "愛德", "信德", "義德"];
 
 export default function ClassActivityForm({
   defaultActivity,
@@ -38,6 +41,7 @@ export default function ClassActivityForm({
 }) {
   let formDefaultValues: Partial<ClassActivityFormData> = {
     title: CLASS_ACTIVITY_TITLES?.[0],
+    unit: "義德",
     startDateTime: getCurrentDateTime(),
     description: "",
   };
@@ -56,6 +60,7 @@ export default function ClassActivityForm({
         : defaultActivity.location,
       locationOther: defaultLocationIsOther ? defaultActivity.location : "",
 
+      unit: defaultActivity.unit,
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
       duration: getDurationHour(
         defaultActivity.startDateTime,
@@ -95,6 +100,7 @@ export default function ClassActivityForm({
           location: locationIsOther(data.location)
             ? data.locationOther
             : data.location,
+          unit: data.unit,
           startDateTime: data.startDateTime as Date,
           endDateTime: getEndTime(data.startDateTime as Date, data.duration),
           description: data.description,
@@ -109,6 +115,7 @@ export default function ClassActivityForm({
         location: locationIsOther(data.location)
           ? data.locationOther
           : data.location,
+        unit: data.unit,
         startDateTime: data.startDateTime as Date,
         endDateTime: getEndTime(data.startDateTime as Date, data.duration),
         description: data.description,
@@ -122,6 +129,22 @@ export default function ClassActivityForm({
 
   return (
     <form className="form-control max-w-xs">
+      <div>
+        <label className="label">
+          <span className="label-text">所屬單位</span>
+        </label>
+        <select
+          className="select select-bordered w-full"
+          required
+          {...register("unit")}
+        >
+          {YIDE_CLASS_UNITS.map((u) => (
+            <option key={u} value={u}>
+              {u}
+            </option>
+          ))}
+        </select>
+      </div>
       <div>
         <label className="label">
           <span className="label-text">班別</span>

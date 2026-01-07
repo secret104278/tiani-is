@@ -40,6 +40,7 @@ export const getServerSideProps: GetServerSideProps<{
   const res = await db.classActivity.findUnique({
     select: {
       title: true,
+      unit: true,
       startDateTime: true,
     },
     where: { id: Number(context.query.id) },
@@ -51,12 +52,14 @@ export const getServerSideProps: GetServerSideProps<{
     };
   }
 
+  const unit = res.unit ?? "義德";
+
   return {
     props: {
       ogMeta: {
         ogTitle: `${res.title}・${formatDateTitle(
           res.startDateTime,
-        )}・義德班務網`,
+        )}・${unit}班務網`,
       },
     },
   };
@@ -136,7 +139,7 @@ export default function ClassActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/yideclass/activity/detail/${activity.id}?v=${activity.version}`,
+          `${window.location.origin}/yideclass/activity/detail/${activity.id}?v=${activity.version}&unit=${unit}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -156,9 +159,11 @@ export default function ClassActivityDetailPage() {
     if (activity.status === "PUBLISHED") return <ShareLineBtn />;
   };
 
+  const unit = activity.unit ?? "義德";
+
   const AdminPanel = () => (
     <>
-      <div className="divider">課程管理</div>
+      <div className="divider">{unit}班務管理</div>
       <div className="flex flex-row justify-end">
         <div className="badge badge-primary">
           {getActivityStatusText(activity.status)}

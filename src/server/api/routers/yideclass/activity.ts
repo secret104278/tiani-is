@@ -15,6 +15,7 @@ export const activityRouter = createTRPCRouter({
         title: z.string(),
         description: z.string().nullable(),
         location: z.string(),
+        unit: z.string().default("義德"),
         startDateTime: z.date(),
         endDateTime: z.date(),
         isDraft: z.boolean().optional(),
@@ -26,6 +27,7 @@ export const activityRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           location: input.location,
+          unit: input.unit,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           status: input.isDraft ? "DRAFT" : "PUBLISHED",
@@ -54,6 +56,7 @@ export const activityRouter = createTRPCRouter({
         title: z.string(),
         description: z.string().nullable(),
         location: z.string(),
+        unit: z.string().optional(),
         startDateTime: z.date(),
         endDateTime: z.date(),
         isDraft: z.boolean().optional(),
@@ -68,6 +71,7 @@ export const activityRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           location: input.location,
+          unit: input.unit,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
           status: input.isDraft ? "DRAFT" : undefined,
@@ -89,6 +93,7 @@ export const activityRouter = createTRPCRouter({
     .input(
       z.object({
         participatedByMe: z.boolean().optional(),
+        unit: z.string().optional(),
 
         limit: z.number().min(1).max(100).default(10),
         cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
@@ -96,6 +101,11 @@ export const activityRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const filters: Prisma.ClassActivityWhereInput[] = [];
+
+      if (input.unit) {
+        filters.push({ unit: input.unit });
+      }
+
       if (input.participatedByMe) {
         filters.push({
           classActivityCheckRecords: { some: { userId: ctx.session.user.id } },
@@ -103,7 +113,7 @@ export const activityRouter = createTRPCRouter({
       }
 
       const items = await ctx.db.classActivity.findMany({
-        where: filters.length === 0 ? undefined : { OR: filters },
+        where: filters.length === 0 ? undefined : { AND: filters },
         orderBy: { startDateTime: "desc" },
 
         take: input.limit + 1,

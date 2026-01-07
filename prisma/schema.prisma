@@ -233,10 +233,13 @@ model ClassActivity {
 
   version Int @default(1)
 
+  unit String @default("義德")
+
   classActivityCheckRecords ClassActivityCheckRecord[]
   classActivityLeaveRecords ClassActivityLeaveRecord[]
 
   @@index([title])
+  @@index([unit])
   @@index([organiserId])
   @@index([startDateTime])
 }
