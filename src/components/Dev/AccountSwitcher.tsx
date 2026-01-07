@@ -92,13 +92,11 @@ export default function AccountSwitcher() {
                             "border-primary/50 ring-1 ring-primary/30",
                         )}
                       >
-                        {user.image ? (
-                          <LineImage src={user.image} alt={user.name ?? ""} />
-                        ) : (
+                        {
                           <div className="flex h-full w-full items-center justify-center font-bold text-[10px] text-base-content/40 uppercase">
                             {user.name?.[0] || "?"}
                           </div>
-                        )}
+                        }
                       </div>
                       {isActive && (
                         <div className="-bottom-0.5 -right-0.5 absolute rounded-full bg-primary p-0.5 text-primary-content">
