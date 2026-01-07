@@ -323,7 +323,7 @@ export const userRouter = createTRPCRouter({
     }
 
     return ctx.db.user.findMany({
-      take: 20, // Limit to prevent massive lists
+      take: 100, // Limit to prevent massive lists
       orderBy: [
         { roles: "desc" }, // Prioritize admins
         { name: "asc" },

@@ -1,4 +1,4 @@
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { ChartBarIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -39,7 +39,13 @@ export default function EtogetherHome() {
         <h1>活動總覽</h1>
       </article>
       {session?.user.role.is_etogether_admin && (
-        <div className="flex flex-row justify-end space-x-4">
+        <div className="flex flex-row justify-end space-x-2">
+          <Link href="/etogether/admin/stats" className="flex-shrink-0">
+            <div className="btn btn-outline">
+              <ChartBarIcon className="h-4 w-4" />
+              活動統計
+            </div>
+          </Link>
           <Link href="/etogether/activity/new" className="flex-shrink-0">
             <div className="btn">
               <PlusIcon className="h-4 w-4" />
