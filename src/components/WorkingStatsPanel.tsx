@@ -41,6 +41,7 @@ export default function WorkingStatsPanel({
   const [activeTab, setActiveTab] = useState<"all" | "activity" | "casual">(
     "all",
   );
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
 
   const allActivityCheckHistories = sortBy(
     [
@@ -174,36 +175,47 @@ export default function WorkingStatsPanel({
     </table>
   );
 
+  const chartData = (() => {
+    // Create a Map to store aggregated hours by date
+    const aggregatedData = new Map<string, number>();
+
+    // Aggregate hours
+    for (const history of allActivityCheckHistories) {
+      const date = startOfDay(history.checkInAt);
+      const dateKey = format(date, "yyyy-MM-dd");
+      const hours = history.checkOutAt
+        ? (history.checkOutAt.getTime() - history.checkInAt.getTime()) /
+          (1000 * 60 * 60)
+        : 1;
+
+      aggregatedData.set(dateKey, (aggregatedData.get(dateKey) ?? 0) + hours);
+    }
+
+    // Convert Map back to array format expected by ActivityChart
+    return Array.from(aggregatedData, ([dateStr, hours]) => ({
+      date: new Date(dateStr),
+      workingHours: hours,
+    }));
+  })();
+
   return (
     <div className="space-y-4">
-      <div className="w-full">
-        <ActivityChart
-          chartData={(() => {
-            // Create a Map to store aggregated hours by date
-            const aggregatedData = new Map<string, number>();
-
-            // Aggregate hours
-            for (const history of allActivityCheckHistories) {
-              const date = startOfDay(history.checkInAt);
-              const dateKey = format(date, "yyyy-MM-dd");
-              const hours = history.checkOutAt
-                ? (history.checkOutAt.getTime() - history.checkInAt.getTime()) /
-                  (1000 * 60 * 60)
-                : 1;
-
-              aggregatedData.set(
-                dateKey,
-                (aggregatedData.get(dateKey) ?? 0) + hours,
-              );
-            }
-
-            // Convert Map back to array format expected by ActivityChart
-            return Array.from(aggregatedData, ([dateStr, hours]) => ({
-              date: new Date(dateStr),
-              workingHours: hours,
-            }));
-          })()}
-        />
+      <div className="w-full space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="text-base-content/60 text-sm">
+            {selectedYear} 年度回顧
+          </div>
+          <select
+            className="select select-bordered select-xs"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            <option value={2026}>2026 年</option>
+            <option value={2025}>2025 年</option>
+            <option value={2024}>2024 年</option>
+          </select>
+        </div>
+        <ActivityChart year={selectedYear} chartData={chartData} />
       </div>
       <div className="flex flex-row justify-center">
         <div className="tabs-boxed tabs">

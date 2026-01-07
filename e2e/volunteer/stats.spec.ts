@@ -20,7 +20,12 @@ test.describe("Volunteer Stats", () => {
     await casualCard.getByRole("button", { name: /簽到|再次簽到/ }).click();
     // Use expect() correctly and wait for inner content to bypass transition lag
     await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-    await page.getByRole("button", { name: "打卡", exact: true }).click();
+    const punchButton = page
+      .getByRole("button")
+      .filter({ hasText: /打卡|定位中|超出範圍/ });
+    // Wait longer for positioning to finish
+    await expect(punchButton).toHaveText("打卡", { timeout: 20000 });
+    await punchButton.click();
     await checkInPromise;
 
     // Perform Casual Check-Out
@@ -96,5 +101,16 @@ test.describe("Volunteer Stats", () => {
       .replace(/-/g, "/");
 
     await expect(statsTable).toContainText(today);
+
+    // 4. Verify Year Selection
+    const yearLabel = page.getByText("2025 年度回顧");
+    await expect(yearLabel).toBeVisible();
+
+    const yearSelect = page.getByRole("combobox").first();
+    await yearSelect.selectOption("2024");
+    await expect(page.getByText("2024 年度回顧")).toBeVisible();
+
+    await yearSelect.selectOption("2026");
+    await expect(page.getByText("2026 年度回顧")).toBeVisible();
   });
 });

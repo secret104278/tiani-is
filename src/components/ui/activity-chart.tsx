@@ -130,9 +130,12 @@ const ActivityCell = React.memo(function ActivityCell({
 });
 
 // Main Component
-export function ActivityChart({ chartData }: { chartData: ActivityData[] }) {
-  const endDate = endOfYear("2024");
-  const startDate = startOfYear("2024");
+export function ActivityChart({
+  chartData,
+  year,
+}: { chartData: ActivityData[]; year: number | string }) {
+  const endDate = endOfYear(new Date(Number(year), 11, 31));
+  const startDate = startOfYear(new Date(Number(year), 0, 1));
 
   const hoursMap = createHoursMap(chartData);
   const completeData = createCompleteData(startDate, endDate, hoursMap);
@@ -143,75 +146,71 @@ export function ActivityChart({ chartData }: { chartData: ActivityData[] }) {
   const weeksByMonth = groupWeeksByMonth(weeks, completeData);
 
   return (
-    <div className="space-y-2">
-      <div className="text-base-content/60">2024 年度回顧</div>
-      <div
-        className="overflow-x-auto overflow-y-hidden"
-        style={
-          {
-            "--cell-size": "13px",
-            "--cell-gap": "1.8px",
-            "--grid-size": "calc(var(--cell-size) + var(--cell-gap))",
-            "--header-height": "14px",
-          } as React.CSSProperties
-        }
-      >
-        <div className="grid grid-cols-[auto_1fr]">
-          <WeekdayLabels />
+    <div
+      className="overflow-x-auto overflow-y-hidden"
+      style={
+        {
+          "--cell-size": "13px",
+          "--cell-gap": "1.8px",
+          "--grid-size": "calc(var(--cell-size) + var(--cell-gap))",
+          "--header-height": "14px",
+        } as React.CSSProperties
+      }
+    >
+      <div className="grid grid-cols-[auto_1fr]">
+        <WeekdayLabels />
 
-          <div
-            className="grid"
-            style={{
-              gap: "var(--cell-gap)",
-              gridTemplateRows:
-                "var(--header-height) repeat(7, var(--grid-size))",
-              gridTemplateColumns: `repeat(${weeks.length}, var(--grid-size))`,
-            }}
-          >
-            {Object.entries(weeksByMonth).map(([month, monthWeeks]) => {
-              const date = new Date();
-              date.setMonth(Number(month));
-              return (
-                <div
-                  key={month}
-                  className="relative"
-                  style={{
-                    gridColumn: `span ${monthWeeks.length}`,
-                    height: "var(--header-height)",
-                  }}
+        <div
+          className="grid"
+          style={{
+            gap: "var(--cell-gap)",
+            gridTemplateRows:
+              "var(--header-height) repeat(7, var(--grid-size))",
+            gridTemplateColumns: `repeat(${weeks.length}, var(--grid-size))`,
+          }}
+        >
+          {Object.entries(weeksByMonth).map(([month, monthWeeks]) => {
+            const date = new Date();
+            date.setMonth(Number(month));
+            return (
+              <div
+                key={month}
+                className="relative"
+                style={{
+                  gridColumn: `span ${monthWeeks.length}`,
+                  height: "var(--header-height)",
+                }}
+              >
+                <span className="sr-only">
+                  {format(date, "MMMM", { locale: DEFAULT_LOCALE })}
+                </span>
+                <span
+                  className="absolute top-0 left-0 font-normal text-base-content text-xs"
+                  aria-hidden="true"
                 >
-                  <span className="sr-only">
-                    {format(date, "MMMM", { locale: DEFAULT_LOCALE })}
-                  </span>
-                  <span
-                    className="absolute top-0 left-0 font-normal text-base-content text-xs"
-                    aria-hidden="true"
-                  >
-                    {format(date, "MMM", { locale: DEFAULT_LOCALE })}
-                  </span>
-                </div>
+                  {format(date, "MMM", { locale: DEFAULT_LOCALE })}
+                </span>
+              </div>
+            );
+          })}
+
+          {Array.from({ length: 7 }, (_, dayIndex) =>
+            weeks.map((week) => {
+              const weekData = dataByWeek[week] ?? Array<number>(7).fill(0);
+              const hours = weekData[dayIndex] ?? 0;
+              const date = completeData.find(
+                (d) => getWeek(d.date) === week && getDay(d.date) === dayIndex,
+              )?.date;
+
+              return (
+                <ActivityCell
+                  key={`${week}-${dayIndex}`}
+                  hours={hours}
+                  date={date}
+                />
               );
-            })}
-
-            {Array.from({ length: 7 }, (_, dayIndex) =>
-              weeks.map((week) => {
-                const weekData = dataByWeek[week] ?? Array<number>(7).fill(0);
-                const hours = weekData[dayIndex] ?? 0;
-                const date = completeData.find(
-                  (d) =>
-                    getWeek(d.date) === week && getDay(d.date) === dayIndex,
-                )?.date;
-
-                return (
-                  <ActivityCell
-                    key={`${week}-${dayIndex}`}
-                    hours={hours}
-                    date={date}
-                  />
-                );
-              }),
-            )}
-          </div>
+            }),
+          )}
         </div>
       </div>
     </div>
