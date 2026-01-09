@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { YIDE_CLASS_UNITS } from "~/utils/ui";
+import { CLASS_UNITS } from "~/utils/ui";
 
 export default function ClassManagementHome() {
   return (
@@ -10,7 +10,7 @@ export default function ClassManagementHome() {
       </article>
 
       <div className="grid grid-cols-2 gap-4">
-        {YIDE_CLASS_UNITS.map((unit) => (
+        {CLASS_UNITS.map((unit) => (
           <Link href={`/class/${unit.slug}`} key={unit.slug}>
             <div
               className={`card cursor-pointer shadow-lg transition-shadow hover:shadow-xl ${unit.color}`}

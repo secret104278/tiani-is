@@ -10,7 +10,7 @@ import { activityIsEnded } from "~/utils/ui";
 
 export default function WorkHome() {
   const activitiesQuery =
-    api.yideworkActivity.getAllActivitiesInfinite.useInfiniteQuery(
+    api.workActivity.getAllActivitiesInfinite.useInfiniteQuery(
       {},
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,

@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   adminProcedure,
   representableProcedure,
-} from "../../procedures/yideclass";
+} from "../../procedures/class";
 import { createTRPCRouter } from "../../trpc";
 
 export const enrollRouter = createTRPCRouter({

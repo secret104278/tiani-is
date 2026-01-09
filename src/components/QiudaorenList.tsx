@@ -12,19 +12,19 @@ import { useState } from "react";
 import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
 import Dialog from "~/components/utils/Dialog";
 import { cn } from "~/lib/utils";
-import type { YideWorkRouter } from "~/server/api/routers/yidework";
+import type { WorkRouter } from "~/server/api/routers/work";
 import {
   TEMPLE_GENDER_LABELS,
   TEMPLE_GENDER_ORDER,
-} from "~/server/api/routers/yidework/templeGenderUtils";
-import { calculateTempleGender } from "~/server/api/routers/yidework/templeGenderUtils";
+} from "~/server/api/routers/work/templeGenderUtils";
+import { calculateTempleGender } from "~/server/api/routers/work/templeGenderUtils";
 import { api } from "~/utils/api";
 import ReactiveButton from "./utils/ReactiveButton";
 
 // --- Types ---
 
 type QiudaorensByActivity =
-  inferRouterOutputs<YideWorkRouter>["getQiudaorensByActivity"];
+  inferRouterOutputs<WorkRouter>["getQiudaorensByActivity"];
 type QiudaorenItem = QiudaorensByActivity[number];
 type GroupBy = "qiudaoren" | "yinBaoShi";
 
@@ -334,11 +334,11 @@ export default function QiudaorenList({
 
   const apiUtils = api.useUtils();
   const { mutate: deleteQiudaoren, isPending: deleteQiudaorenIsPending } =
-    api.yideworkActivity.deleteQiudaoren.useMutation({
+    api.workActivity.deleteQiudaoren.useMutation({
       onSuccess: () => {
         setDeleteConfirm(null);
-        apiUtils.yideworkActivity.getQiudaorensByActivity.invalidate();
-        apiUtils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+        apiUtils.workActivity.getQiudaorensByActivity.invalidate();
+        apiUtils.workActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
       },
     });
 
@@ -346,10 +346,10 @@ export default function QiudaorenList({
     mutate: toggleCheckIn,
     isPending: toggleCheckInIsPending,
     variables: toggleCheckInVariables,
-  } = api.yideworkActivity.toggleCheckIn.useMutation({
+  } = api.workActivity.toggleCheckIn.useMutation({
     onSuccess: () => {
-      apiUtils.yideworkActivity.getQiudaorensByActivity.invalidate();
-      apiUtils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+      apiUtils.workActivity.getQiudaorensByActivity.invalidate();
+      apiUtils.workActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
     },
   });
 

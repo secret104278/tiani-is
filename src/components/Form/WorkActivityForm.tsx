@@ -2,13 +2,13 @@ import type { inferRouterOutputs } from "@trpc/server";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { FormProvider, useForm } from "react-hook-form";
-import type { YideWorkRouter } from "~/server/api/routers/yidework";
+import type { WorkRouter } from "~/server/api/routers/work";
 import { api } from "~/utils/api";
-import type { YideWorkAssignments } from "~/utils/types";
+import type { WorkAssignments } from "~/utils/types";
 import {
   OFFERING_FESTIVALS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
-  YIDE_WORK_ACTIVITY_TITLES,
+  WORK_ACTIVITY_TITLES,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
@@ -18,11 +18,11 @@ import {
 import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
-import YideWorkAssignmentsSection from "./YideWorkAssignmentsSection";
+import WorkAssignmentsSection from "./WorkAssignmentsSection";
 
-type YideWorkActivity = inferRouterOutputs<YideWorkRouter>["getActivity"];
+type YideWorkActivity = inferRouterOutputs<WorkRouter>["getActivity"];
 
-interface YideWorkActivityFormData {
+interface WorkActivityFormData {
   title: string;
   titleOther: string;
   offeringFestival: string;
@@ -31,16 +31,16 @@ interface YideWorkActivityFormData {
   startDateTime: Date | string;
   duration: number;
   description: string;
-  assignments: YideWorkAssignments;
+  assignments: WorkAssignments;
 }
 
-export default function YideWorkActivityForm({
+export default function WorkActivityForm({
   defaultActivity,
 }: {
   defaultActivity?: YideWorkActivity;
 }) {
-  let formDefaultValues: Partial<YideWorkActivityFormData> = {
-    title: YIDE_WORK_ACTIVITY_TITLES?.[0],
+  let formDefaultValues: Partial<WorkActivityFormData> = {
+    title: WORK_ACTIVITY_TITLES?.[0],
     startDateTime: getCurrentDateTime(),
     description: "",
     assignments: {},
@@ -65,12 +65,12 @@ export default function YideWorkActivityForm({
         defaultActivity.endDateTime,
       ),
       description: defaultActivity.description ?? "",
-      assignments: (defaultActivity.assignments as YideWorkAssignments) ?? {},
+      assignments: (defaultActivity.assignments as WorkAssignments) ?? {},
       offeringFestival: defaultActivity.festival ?? "",
     };
   }
 
-  const methods = useForm<YideWorkActivityFormData>({
+  const methods = useForm<WorkActivityFormData>({
     defaultValues: formDefaultValues,
     mode: "all",
   });
@@ -84,20 +84,20 @@ export default function YideWorkActivityForm({
     data: locations,
     isLoading: locationIsLoading,
     error: locationsError,
-  } = api.yideworkActivity.getLocations.useQuery();
+  } = api.workActivity.getLocations.useQuery();
 
   const {
     mutate: createActivity,
     error: createActivityError,
     isPending: createActivityIsPending,
-  } = api.yideworkActivity.createActivity.useMutation({
+  } = api.workActivity.createActivity.useMutation({
     onSuccess: (data) => router.push(`/work/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isPending: updateActivityIsPending,
-  } = api.yideworkActivity.updateActivity.useMutation({
+  } = api.workActivity.updateActivity.useMutation({
     onSuccess: (data) => router.push(`/work/activity/detail/${data.id}`),
   });
 
@@ -157,7 +157,7 @@ export default function YideWorkActivityForm({
               setValue("assignments", {});
             }}
           >
-            {YIDE_WORK_ACTIVITY_TITLES.map((option, i) => (
+            {WORK_ACTIVITY_TITLES.map((option, i) => (
               <option key={i}>{option}</option>
             ))}
           </select>
@@ -208,7 +208,7 @@ export default function YideWorkActivityForm({
           </select>
         </div>
 
-        <YideWorkAssignmentsSection title={currentTitle} />
+        <WorkAssignmentsSection title={currentTitle} />
 
         <div className="divider" />
         <div>

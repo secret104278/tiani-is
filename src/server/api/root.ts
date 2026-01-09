@@ -3,8 +3,8 @@ import { etogetherRouter } from "./routers/etogether";
 import { tianiShopRouter } from "./routers/tianishop";
 import { userRouter } from "./routers/user";
 import { volunteerRouter } from "./routers/volunteer";
-import { yideclassRouter } from "./routers/yideclass";
-import { yideworkRouter } from "./routers/yidework";
+import { classRouter } from "./routers/class";
+import { workRouter } from "./routers/work";
 
 /**
  * This is the primary router for your server.
@@ -13,8 +13,8 @@ import { yideworkRouter } from "./routers/yidework";
  */
 export const appRouter = createTRPCRouter({
   volunteerActivity: volunteerRouter,
-  classActivity: yideclassRouter,
-  yideworkActivity: yideworkRouter,
+  classActivity: classRouter,
+  workActivity: workRouter,
   etogetherActivity: etogetherRouter,
   user: userRouter,
   tianiShop: tianiShopRouter,

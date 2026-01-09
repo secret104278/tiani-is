@@ -8,20 +8,20 @@ import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
-interface YideWorkActivityStaffManagementProps {
+interface WorkActivityStaffManagementProps {
   activityId: number;
 }
 
-export default function YideWorkActivityStaffManagement({
+export default function WorkActivityStaffManagement({
   activityId,
-}: YideWorkActivityStaffManagementProps) {
+}: WorkActivityStaffManagementProps) {
   const [selectedUser, setSelectedUser] = useState<UserComboboxSelected>(null);
 
   const {
     data: staffs,
     isLoading: staffsIsLoading,
     error: staffsError,
-  } = api.yideworkActivity.getStaffs.useQuery({
+  } = api.workActivity.getStaffs.useQuery({
     activityId,
   });
 
@@ -32,10 +32,10 @@ export default function YideWorkActivityStaffManagement({
     isPending: addStaffIsPending,
     isError: addStaffIsError,
     error: addStaffError,
-  } = api.yideworkActivity.addStaff.useMutation({
+  } = api.workActivity.addStaff.useMutation({
     onSuccess: () => {
       setSelectedUser(null);
-      void apiUtils.yideworkActivity.getStaffs.invalidate();
+      void apiUtils.workActivity.getStaffs.invalidate();
     },
   });
 
@@ -43,9 +43,9 @@ export default function YideWorkActivityStaffManagement({
     mutate: removeStaff,
     isPending: removeStaffIsPending,
     variables: removeStaffVariables,
-  } = api.yideworkActivity.removeStaff.useMutation({
+  } = api.workActivity.removeStaff.useMutation({
     onSuccess: () => {
-      void apiUtils.yideworkActivity.getStaffs.invalidate();
+      void apiUtils.workActivity.getStaffs.invalidate();
     },
   });
 

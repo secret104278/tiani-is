@@ -273,9 +273,9 @@ enum SortedType {
   NAME = 0,
   IS_TIANI_ADMIN = 1,
   IS_VOLUNTEER_ADMIN = 2,
-  IS_YIDECLASS_ADMIN = 3,
+  IS_CLASS_ADMIN = 3,
   IS_ETOGETHER_ADMIN = 4,
-  IS_YIDEWORK_ADMIN = 5,
+  IS_WORK_ADMIN = 5,
 }
 
 const getComparator = (sortedType: SortedType) => {
@@ -298,12 +298,12 @@ const getComparator = (sortedType: SortedType) => {
         const result = rolesComparator(Role.VOLUNTEER_ADMIN)(a, b);
         return result !== 0 ? result : userComparator(a, b);
       };
-    case SortedType.IS_YIDECLASS_ADMIN:
+    case SortedType.IS_CLASS_ADMIN:
       return (a: User, b: User) => {
         const result = rolesComparator(Role.YIDECLASS_ADMIN)(a, b);
         return result !== 0 ? result : userComparator(a, b);
       };
-    case SortedType.IS_YIDEWORK_ADMIN:
+    case SortedType.IS_WORK_ADMIN:
       return (a: User, b: User) => {
         const result = rolesComparator(Role.YIDEWORK_ADMIN)(a, b);
         return result !== 0 ? result : userComparator(a, b);
@@ -331,12 +331,12 @@ export default function AdminUsersPage() {
     api.user.setIsVolunteerAdmin.useMutation({
       onSettled: () => usersRefetch(),
     });
-  const { mutate: setIsYideclassAdmin } =
-    api.user.setIsYideclassAdmin.useMutation({
+  const { mutate: setIsClassAdmin } =
+    api.user.setIsClassAdmin.useMutation({
       onSettled: () => usersRefetch(),
     });
-  const { mutate: setIsYideworkAdmin } =
-    api.user.setIsYideworkAdmin.useMutation({
+  const { mutate: setIsWorkAdmin } =
+    api.user.setIsWorkAdmin.useMutation({
       onSettled: () => usersRefetch(),
     });
   const { mutate: setIsEtogetherAdmin } =
@@ -423,12 +423,12 @@ export default function AdminUsersPage() {
               <th>
                 <div
                   className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_YIDECLASS_ADMIN)}
+                  onClick={() => setSortedType(SortedType.IS_CLASS_ADMIN)}
                 >
-                  義德班務網
+                  班務網
                   <br />
                   管理者
-                  {sortedType === SortedType.IS_YIDECLASS_ADMIN && (
+                  {sortedType === SortedType.IS_CLASS_ADMIN && (
                     <BarsArrowDownIcon className="ml-1 w-4" />
                   )}
                 </div>
@@ -436,12 +436,12 @@ export default function AdminUsersPage() {
               <th>
                 <div
                   className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_YIDEWORK_ADMIN)}
+                  onClick={() => setSortedType(SortedType.IS_WORK_ADMIN)}
                 >
-                  義德道務網
+                  道務網
                   <br />
                   管理者
-                  {sortedType === SortedType.IS_YIDEWORK_ADMIN && (
+                  {sortedType === SortedType.IS_WORK_ADMIN && (
                     <BarsArrowDownIcon className="ml-1 w-4" />
                   )}
                 </div>
@@ -505,7 +505,7 @@ export default function AdminUsersPage() {
                     checked={user.roles.includes(Role.YIDECLASS_ADMIN)}
                     className="checkbox"
                     onChange={(e) =>
-                      setIsYideclassAdmin({
+                      setIsClassAdmin({
                         userId: user.id,
                         isAdmin: e.target.checked,
                       })
@@ -519,7 +519,7 @@ export default function AdminUsersPage() {
                     checked={user.roles.includes(Role.YIDEWORK_ADMIN)}
                     className="checkbox"
                     onChange={(e) =>
-                      setIsYideworkAdmin({
+                      setIsWorkAdmin({
                         userId: user.id,
                         isAdmin: e.target.checked,
                       })

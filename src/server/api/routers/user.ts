@@ -268,7 +268,7 @@ export const userRouter = createTRPCRouter({
       ),
     ),
 
-  setIsYideclassAdmin: adminProcedure
+  setIsClassAdmin: adminProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -281,7 +281,7 @@ export const userRouter = createTRPCRouter({
       ),
     ),
 
-  setIsYideworkAdmin: adminProcedure
+  setIsWorkAdmin: adminProcedure
     .input(
       z.object({
         userId: z.string(),

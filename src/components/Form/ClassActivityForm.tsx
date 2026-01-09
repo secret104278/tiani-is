@@ -2,13 +2,13 @@ import type { inferRouterOutputs } from "@trpc/server";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import type { YideClassRouter } from "~/server/api/routers/yideclass";
+import type { ClassRouter } from "~/server/api/routers/class";
 import { api } from "~/utils/api";
 import {
   CLASS_ACTIVITY_LOCATIONS,
   CLASS_ACTIVITY_TITLES,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
-  YIDE_CLASS_UNITS,
+  CLASS_UNITS,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
@@ -22,7 +22,7 @@ import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
 
-type ClassActivity = inferRouterOutputs<YideClassRouter>["getActivity"];
+type ClassActivity = inferRouterOutputs<ClassRouter>["getActivity"];
 
 interface ClassActivityFormData {
   title: string;
@@ -42,7 +42,7 @@ export default function ClassActivityForm({
 }) {
   let formDefaultValues: Partial<ClassActivityFormData> = {
     title: CLASS_ACTIVITY_TITLES?.[0],
-    unit: YIDE_CLASS_UNITS[5]!.name,
+    unit: CLASS_UNITS[5]!.name,
     startDateTime: getCurrentDateTime(),
     description: "",
   };
@@ -148,7 +148,7 @@ export default function ClassActivityForm({
           required
           {...register("unit")}
         >
-          {YIDE_CLASS_UNITS.map((u) => (
+          {CLASS_UNITS.map((u) => (
             <option key={u.name} value={u.name}>
               {u.name}
             </option>

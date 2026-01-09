@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { birthYearSchema, phoneNumberSchema } from "~/utils/phoneValidation";
-import { activityManageProcedure } from "../../procedures/yidework";
+import { activityManageProcedure } from "../../procedures/work";
 import { createTRPCRouter } from "../../trpc";
 
 const qiudaorenSchema = z.object({

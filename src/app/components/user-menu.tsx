@@ -3,9 +3,9 @@ import Link from "next/link";
 import { auth, signOut } from "~/server/auth";
 import {
   adminUsersHref,
+  classAdminClassHref,
   personalAccountHref,
   volunteerAdminWorkingHref,
-  yideclassAdminClassHref,
 } from "~/utils/navigation";
 import LineImage from "./line-image";
 
@@ -67,7 +67,7 @@ export default async function UserMenu() {
         )}
         {sessionData.user.role.is_class_admin && (
           <li>
-            <Link href={yideclassAdminClassHref()}>班務管理</Link>
+            <Link href={classAdminClassHref()}>班務管理</Link>
           </li>
         )}
         <li>

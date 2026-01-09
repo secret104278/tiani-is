@@ -29,7 +29,7 @@ export interface CheckRecord {
   checkOutAt: Date | null;
 }
 
-export interface YideWorkAssignments {
+export interface WorkAssignments {
   generalConvener?: string;
   expoundingTao?: string;
   conductor?: string;

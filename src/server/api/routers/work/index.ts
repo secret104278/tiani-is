@@ -3,10 +3,10 @@ import { activityRouter } from "./activity";
 import { locationRouter } from "./location";
 import { qiudaorenRouter } from "./qiudaoren";
 
-export const yideworkRouter = mergeTRPCRouters(
+export const workRouter = mergeTRPCRouters(
   activityRouter,
   locationRouter,
   qiudaorenRouter,
 );
 
-export type YideWorkRouter = typeof yideworkRouter;
+export type WorkRouter = typeof workRouter;

@@ -5,7 +5,7 @@ import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,
   adminProcedure,
-} from "../../procedures/yideclass";
+} from "../../procedures/class";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const activityRouter = createTRPCRouter({

@@ -21,7 +21,7 @@ export const volunteerAdminWorkingUserDetailHref = (userId: string) =>
   `/volunteer/admin/working/${userId}`;
 
 export const adminUsersHref = () => "/admin/users";
-export const yideclassAdminClassHref = () => "/class/admin/class";
+export const classAdminClassHref = () => "/class/admin/class";
 export const personalAccountHref = () => "/personal/account";
 
 // Tianishop navigation

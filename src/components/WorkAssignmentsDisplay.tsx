@@ -1,7 +1,7 @@
-import type { YideWorkAssignments } from "~/utils/types";
+import type { WorkAssignments } from "~/utils/types";
 
-interface YideWorkAssignmentsDisplayProps {
-  assignments: YideWorkAssignments;
+interface WorkAssignmentsDisplayProps {
+  assignments: WorkAssignments;
 }
 
 const ASSIGNMENT_ROLES = [
@@ -22,13 +22,13 @@ const ASSIGNMENT_ROLES = [
   { key: "threeTreasures", label: "三寶" },
 ];
 
-export default function YideWorkAssignmentsDisplay({
+export default function WorkAssignmentsDisplay({
   assignments,
-}: YideWorkAssignmentsDisplayProps) {
+}: WorkAssignmentsDisplayProps) {
   return (
     <div className="space-y-3">
       {ASSIGNMENT_ROLES.map((role) => {
-        const value = assignments[role.key as keyof YideWorkAssignments];
+        const value = assignments[role.key as keyof WorkAssignments];
 
         if (!value) return null;
 

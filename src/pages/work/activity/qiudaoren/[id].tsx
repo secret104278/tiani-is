@@ -12,7 +12,7 @@ import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
 
-export default function YideWorkActivityQiudaorenPage() {
+export default function WorkActivityQiudaorenPage() {
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession({
     required: true,
@@ -24,7 +24,7 @@ export default function YideWorkActivityQiudaorenPage() {
     data: activity,
     isLoading: activityIsLoading,
     error: activityError,
-  } = api.yideworkActivity.getActivity.useQuery({
+  } = api.workActivity.getActivity.useQuery({
     activityId: Number(id),
   });
 
@@ -32,7 +32,7 @@ export default function YideWorkActivityQiudaorenPage() {
     data: qiudaorens,
     isLoading: qiudaorenIsLoading,
     error: qiudaorenError,
-  } = api.yideworkActivity.getQiudaorensByActivity.useQuery(
+  } = api.workActivity.getQiudaorensByActivity.useQuery(
     {
       activityId: Number(id),
     },

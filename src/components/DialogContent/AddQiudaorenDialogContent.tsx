@@ -6,16 +6,16 @@ import type { inferRouterInputs } from "@trpc/server";
 import { isFinite as lodashIsFinite } from "lodash";
 import { useMemo } from "react";
 import { AlertWarning } from "~/components/utils/Alert";
-import type { YideWorkRouter } from "~/server/api/routers/yidework";
+import type { WorkRouter } from "~/server/api/routers/work";
 import {
   TEMPLE_GENDER_LABELS,
   calculateTempleGender,
-} from "~/server/api/routers/yidework/templeGenderUtils";
+} from "~/server/api/routers/work/templeGenderUtils";
 import { api } from "~/utils/api";
 import { validatePhoneNumber } from "~/utils/phoneValidation";
 
 type AddQiudaorenFormData = Omit<
-  inferRouterInputs<YideWorkRouter>["createQiudaoren"],
+  inferRouterInputs<WorkRouter>["createQiudaoren"],
   "activityId"
 >;
 
@@ -63,10 +63,10 @@ export default function AddQiudaorenDialogContent({
     mutate: createQiudaoren,
     isPending: createQiudaorenIsPending,
     error: createQiudaorenError,
-  } = api.yideworkActivity.createQiudaoren.useMutation({
+  } = api.workActivity.createQiudaoren.useMutation({
     onSuccess: () => {
-      void utils.yideworkActivity.getQiudaorensByActivity.invalidate();
-      void utils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+      void utils.workActivity.getQiudaorensByActivity.invalidate();
+      void utils.workActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
       close();
     },
   });
@@ -75,10 +75,10 @@ export default function AddQiudaorenDialogContent({
     mutate: updateQiudaoren,
     isPending: updateQiudaorenIsPending,
     error: updateQiudaorenError,
-  } = api.yideworkActivity.updateQiudaoren.useMutation({
+  } = api.workActivity.updateQiudaoren.useMutation({
     onSuccess: () => {
-      void utils.yideworkActivity.getQiudaorensByActivity.invalidate();
-      void utils.yideworkActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
+      void utils.workActivity.getQiudaorensByActivity.invalidate();
+      void utils.workActivity.getQiudaorensByActivityAndCreatedBy.invalidate();
       close();
     },
   });

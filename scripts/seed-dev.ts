@@ -18,12 +18,12 @@ async function main() {
     },
     {
       id: "dev-yideclass",
-      name: "義德班務網管理員",
+      name: "班務網管理員",
       roles: [Role.YIDECLASS_ADMIN],
     },
     {
       id: "dev-yidework",
-      name: "義德道務網管理員",
+      name: "道務網管理員",
       roles: [Role.YIDEWORK_ADMIN],
     },
     {

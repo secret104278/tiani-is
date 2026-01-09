@@ -22,8 +22,8 @@ import {
   getTimeToHourValue,
 } from "~/components/QiudaoLunarDisplay";
 import QiudaorenList from "~/components/QiudaorenList";
-import YideWorkActivityStaffManagement from "~/components/YideWorkActivityStaffManagement";
-import YideWorkAssignmentsDisplay from "~/components/YideWorkAssignmentsDisplay";
+import WorkActivityStaffManagement from "~/components/WorkActivityStaffManagement";
+import WorkAssignmentsDisplay from "~/components/WorkAssignmentsDisplay";
 import { AlertWarning } from "~/components/utils/Alert";
 import ConfirmDialog from "~/components/utils/ConfirmDialog";
 import Dialog from "~/components/utils/Dialog";
@@ -31,7 +31,7 @@ import ReactiveButton from "~/components/utils/ReactiveButton";
 import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
-import type { OGMetaProps, YideWorkAssignments } from "~/utils/types";
+import type { OGMetaProps, WorkAssignments } from "~/utils/types";
 
 import {
   activityIsEnded,
@@ -62,7 +62,7 @@ export const getServerSideProps: GetServerSideProps<{
       ogMeta: {
         ogTitle: `${res.title}・${formatDateTitle(
           res.startDateTime,
-        )}・義德道務網`,
+        )}・道務網`,
       },
     },
   };
@@ -83,7 +83,7 @@ export default function WorkActivityDetailPage() {
     isLoading: activityIsLoading,
     error: activityError,
     refetch,
-  } = api.yideworkActivity.getActivity.useQuery({
+  } = api.workActivity.getActivity.useQuery({
     activityId: Number(id),
   });
 
@@ -93,7 +93,7 @@ export default function WorkActivityDetailPage() {
     mutate: deleteActivity,
     isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
-  } = api.yideworkActivity.deleteActivity.useMutation({
+  } = api.workActivity.deleteActivity.useMutation({
     onSuccess: () => router.push(`/${site}`),
   });
 
@@ -101,19 +101,19 @@ export default function WorkActivityDetailPage() {
   const [qiudaorenDialogOpen, setQiudaorenDialogOpen] = useState(false);
 
   const { data: myQiudaorens } =
-    api.yideworkActivity.getQiudaorensByActivityAndCreatedBy.useQuery({
+    api.workActivity.getQiudaorensByActivityAndCreatedBy.useQuery({
       activityId: Number(id),
     });
 
   const {
     mutate: participateActivity,
     isPending: participateActivityIsPending,
-  } = api.yideworkActivity.participateActivity.useMutation({
+  } = api.workActivity.participateActivity.useMutation({
     onSuccess: () => refetch(),
   });
 
   const { mutate: leaveActivity, isPending: leaveActivityIsPending } =
-    api.yideworkActivity.leaveActivity.useMutation({
+    api.workActivity.leaveActivity.useMutation({
       onSuccess: () => refetch(),
     });
 
@@ -197,7 +197,7 @@ export default function WorkActivityDetailPage() {
         />
       </div>
       {!isOffering && (
-        <YideWorkActivityStaffManagement activityId={activity.id} />
+        <WorkActivityStaffManagement activityId={activity.id} />
       )}
     </>
   );
@@ -329,8 +329,8 @@ export default function WorkActivityDetailPage() {
             activity.title.includes("獻供")) && (
             <>
               <div className="divider">工作分配</div>
-              <YideWorkAssignmentsDisplay
-                assignments={activity.assignments as YideWorkAssignments}
+              <WorkAssignmentsDisplay
+                assignments={activity.assignments as WorkAssignments}
               />
             </>
           )}

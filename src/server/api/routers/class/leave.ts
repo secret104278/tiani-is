@@ -2,7 +2,7 @@ import { isNil } from "lodash";
 import {
   activityManageProcedure,
   activityRepresentableProcedure,
-} from "../../procedures/yideclass";
+} from "../../procedures/class";
 import { createTRPCRouter } from "../../trpc";
 
 export const leaveRouter = createTRPCRouter({

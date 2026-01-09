@@ -52,7 +52,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
 
   switch (site) {
     case Site.Class:
-      siteIcon = "/yideclass_logo.png";
+      siteIcon = "/class_logo.png";
       siteColor = "#5c7f67";
       break;
     case Site.Volunteer:

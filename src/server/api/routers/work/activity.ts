@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,
-} from "../../procedures/yidework";
+} from "../../procedures/work";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const activityRouter = createTRPCRouter({

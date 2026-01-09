@@ -1,5 +1,5 @@
 import { useFormContext, useWatch } from "react-hook-form";
-import type { YideWorkAssignments } from "~/utils/types";
+import type { WorkAssignments } from "~/utils/types";
 
 const ASSIGNMENT_ROLES = [
   { key: "generalConvener", label: "總招集", type: "single" },
@@ -23,13 +23,13 @@ const ASSIGNMENT_ROLES = [
   { key: "threeTreasures", label: "三寶", type: "single" },
 ];
 
-export default function YideWorkAssignmentsSection({
+export default function WorkAssignmentsSection({
   title,
 }: {
   title: string;
 }) {
   const { setValue, control } = useFormContext<{
-    assignments: YideWorkAssignments;
+    assignments: WorkAssignments;
   }>();
   const assignments = useWatch({
     control,
@@ -67,7 +67,7 @@ export default function YideWorkAssignmentsSection({
     value: string,
   ) => {
     const updated = { ...(assignments || {}) };
-    const current = updated[roleKey as keyof YideWorkAssignments];
+    const current = updated[roleKey as keyof WorkAssignments];
 
     if (
       typeof current === "object" &&
@@ -82,7 +82,7 @@ export default function YideWorkAssignmentsSection({
       }
 
       if (Object.keys(roleObj).length === 0) {
-        delete updated[roleKey as keyof YideWorkAssignments];
+        delete updated[roleKey as keyof WorkAssignments];
       } else {
         (updated as Record<string, Record<string, string>>)[roleKey] = roleObj;
       }
@@ -113,7 +113,7 @@ export default function YideWorkAssignmentsSection({
 
   const getSingleValue = (roleKey: string): string => {
     if (!assignments) return "";
-    const value = assignments[roleKey as keyof YideWorkAssignments];
+    const value = assignments[roleKey as keyof WorkAssignments];
     return typeof value === "string" ? value : "";
   };
 
@@ -124,7 +124,7 @@ export default function YideWorkAssignmentsSection({
     lower: string;
   } => {
     if (!assignments) return { upper: "", lower: "" };
-    const role = assignments[roleKey as keyof YideWorkAssignments];
+    const role = assignments[roleKey as keyof WorkAssignments];
     if (typeof role === "object" && role !== null && !Array.isArray(role)) {
       const roleObj = role as Record<string, string>;
       return {
@@ -137,7 +137,7 @@ export default function YideWorkAssignmentsSection({
 
   const getMultipleValue = (roleKey: string): string => {
     if (!assignments) return "";
-    const value = assignments[roleKey as keyof YideWorkAssignments];
+    const value = assignments[roleKey as keyof WorkAssignments];
     return typeof value === "string" ? value : "";
   };
 

@@ -4,11 +4,11 @@ import { checkinRouter } from "./checkin";
 import { enrollRouter } from "./enroll";
 import { leaveRouter } from "./leave";
 
-export const yideclassRouter = mergeTRPCRouters(
+export const classRouter = mergeTRPCRouters(
   activityRouter,
   checkinRouter,
   leaveRouter,
   enrollRouter,
 );
 
-export type YideClassRouter = typeof yideclassRouter;
+export type ClassRouter = typeof classRouter;

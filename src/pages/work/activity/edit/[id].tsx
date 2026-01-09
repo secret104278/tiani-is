@@ -1,7 +1,7 @@
 import { isNil } from "lodash";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import YideWorkActivityForm from "~/components/Form/YideWorkActivityForm";
+import WorkActivityForm from "~/components/Form/WorkActivityForm";
 import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
@@ -17,7 +17,7 @@ export default function EditWorkActivityPage() {
     data: activity,
     isLoading: activityIsLoading,
     error: activityError,
-  } = api.yideworkActivity.getActivity.useQuery({
+  } = api.workActivity.getActivity.useQuery({
     activityId: Number(id),
   });
 
@@ -47,7 +47,7 @@ export default function EditWorkActivityPage() {
         <h1>{activity.title}</h1>
       </article>
 
-      <YideWorkActivityForm defaultActivity={activity} />
+      <WorkActivityForm defaultActivity={activity} />
     </div>
   );
 }

@@ -122,7 +122,7 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
 
-export const YIDE_WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
+export const WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
 
 export const OFFERING_FESTIVALS = [
   "初一",
@@ -178,7 +178,7 @@ export const titleIsOther = (title: string) => {
   if (CLASS_ACTIVITY_TITLES.includes(title)) {
     return false;
   }
-  if (YIDE_WORK_ACTIVITY_TITLES.includes(title)) {
+  if (WORK_ACTIVITY_TITLES.includes(title)) {
     return false;
   }
   return true;
@@ -359,11 +359,11 @@ export const siteToTitle = (site?: Site) => {
     case Site.Volunteer:
       return "天一志工隊";
     case Site.Class:
-      return "義德班務網";
+      return "班務網";
     case Site.Etogether:
       return "活動e起來";
     case Site.Work:
-      return "義德道務網";
+      return "道務網";
     case Site.TianiShop:
       return "天一友購站";
     default:
@@ -371,7 +371,7 @@ export const siteToTitle = (site?: Site) => {
   }
 };
 
-export const YIDE_CLASS_UNITS = [
+export const CLASS_UNITS = [
   { name: "忠德", color: "bg-red-100 text-red-800", slug: "zhongde" },
   { name: "孝德", color: "bg-orange-100 text-orange-800", slug: "xiaode" },
   { name: "仁德", color: "bg-yellow-100 text-yellow-800", slug: "rende" },
@@ -381,11 +381,11 @@ export const YIDE_CLASS_UNITS = [
 ];
 
 export const getUnitBySlug = (slug?: string | string[]) => {
-  return YIDE_CLASS_UNITS.find((u) => u.slug === slug);
+  return CLASS_UNITS.find((u) => u.slug === slug);
 };
 
 export const getUnitByName = (name?: string) => {
-  return YIDE_CLASS_UNITS.find((u) => u.name === name);
+  return CLASS_UNITS.find((u) => u.name === name);
 };
 
 export const differenceInHoursNoRound = (dateLeft: Date, dateRight: Date) =>
