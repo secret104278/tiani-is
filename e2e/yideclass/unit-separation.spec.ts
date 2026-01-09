@@ -5,7 +5,10 @@ test.describe("Class Management - Unit Separation", () => {
   const yiDeTitle = `YiDe Activity ${timestamp}`;
   const xinDeTitle = `XinDe Activity ${timestamp}`;
 
-  test("should segregate activities by unit", async ({ page, loginAsAdmin }) => {
+  test("should segregate activities by unit", async ({
+    page,
+    loginAsAdmin,
+  }) => {
     // Use worker ID to avoid conflicts in parallel runs
     const workerIndex = test.info().workerIndex;
     const yiDeTitleUnique = `${yiDeTitle}-w${workerIndex}`;
@@ -21,10 +24,12 @@ test.describe("Class Management - Unit Separation", () => {
     const dateString = "2026-12-01T10:00";
     await page.fill('input[name="startDateTime"]', dateString);
     await page.fill('input[name="duration"]', "1");
-    
+
     // Submit using standard form submission logic
     await page.getByRole("button", { name: "送出" }).click();
-    await expect(page).toHaveURL(/\/yideclass\/activity\/detail\/\d+/, { timeout: 30000 });
+    await expect(page).toHaveURL(/\/yideclass\/activity\/detail\/\d+/, {
+      timeout: 30000,
+    });
 
     // 2. Create Activity for "信德"
     await page.goto("/yideclass/activity/new");
@@ -36,13 +41,15 @@ test.describe("Class Management - Unit Separation", () => {
     await page.fill('input[name="duration"]', "1");
 
     await page.getByRole("button", { name: "送出" }).click();
-    await expect(page).toHaveURL(/\/yideclass\/activity\/detail\/\d+/, { timeout: 30000 });
+    await expect(page).toHaveURL(/\/yideclass\/activity\/detail\/\d+/, {
+      timeout: 30000,
+    });
 
     // 3. Visit YiDe Dashboard
     await page.goto("/yideclass");
     await page.getByRole("link", { name: "義德", exact: true }).click();
     await expect(page).toHaveURL(/\/yideclass\/.*/);
-    
+
     await expect(page.getByText(yiDeTitleUnique)).toBeVisible();
     await expect(page.getByText(xinDeTitleUnique)).not.toBeVisible();
 

@@ -332,7 +332,7 @@ export const getDurationHour = (startDateTime: Date, endDateTime: Date) =>
 
 export enum Site {
   Volunteer = "volunteer",
-  Yideclass = "yideclass",
+  Yideclass = "class",
   Etogether = "etogether",
   YideWork = "yidework",
   TianiShop = "tianishop",
@@ -340,7 +340,7 @@ export enum Site {
 
 export const urlBaseToSite = (urlBase?: string): Site | undefined => {
   if (urlBase === "volunteer") return Site.Volunteer;
-  if (urlBase === "yideclass") return Site.Yideclass;
+  if (urlBase === "class") return Site.Yideclass;
   if (urlBase === "etogether") return Site.Etogether;
   if (urlBase === "yidework") return Site.YideWork;
   if (urlBase === "tianishop") return Site.TianiShop;
@@ -369,6 +369,23 @@ export const siteToTitle = (site?: Site) => {
     default:
       return "天一聖道院資訊系統";
   }
+};
+
+export const YIDE_CLASS_UNITS = [
+  { name: "忠德", color: "bg-red-100 text-red-800", slug: "zhongde" },
+  { name: "孝德", color: "bg-orange-100 text-orange-800", slug: "xiaode" },
+  { name: "仁德", color: "bg-yellow-100 text-yellow-800", slug: "rende" },
+  { name: "愛德", color: "bg-green-100 text-green-800", slug: "aide" },
+  { name: "信德", color: "bg-blue-100 text-blue-800", slug: "xinde" },
+  { name: "義德", color: "bg-purple-100 text-purple-800", slug: "yide" },
+];
+
+export const getUnitBySlug = (slug?: string | string[]) => {
+  return YIDE_CLASS_UNITS.find((u) => u.slug === slug);
+};
+
+export const getUnitByName = (name?: string) => {
+  return YIDE_CLASS_UNITS.find((u) => u.name === name);
 };
 
 export const differenceInHoursNoRound = (dateLeft: Date, dateRight: Date) =>

@@ -9,7 +9,7 @@ import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
-import { formatDate } from "~/utils/ui";
+import { formatDate, getUnitByName } from "~/utils/ui";
 
 export default function ClassActivityCheckRecordPage() {
   const { data: sessionData } = useSession();
@@ -43,15 +43,19 @@ export default function ClassActivityCheckRecordPage() {
     return <div className="loading" />;
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
+  const isManager = sessionData?.user.role.is_class_admin;
+  // @ts-ignore
+  const unitSlug = getUnitByName(activity?.unit)?.slug ?? "yide";
+
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/yideclass/activity/detail/${activity.id}`}>
+      <Link className="link" href={`/class/activity/detail/${activity.id}`}>
         ← {activity?.title}
       </Link>
       <article className="prose">
         <h1>打卡名單</h1>
       </article>
-      {sessionData?.user.role.is_yideclass_admin && (
+      {isManager && (
         <div className="flex items-center justify-between">
           <div className="stats shadow">
             <div className="stat">

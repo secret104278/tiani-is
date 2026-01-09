@@ -65,7 +65,7 @@ export default async function UserMenu() {
             <Link href={volunteerAdminWorkingHref()}>工作管理</Link>
           </li>
         )}
-        {sessionData.user.role.is_yideclass_admin && (
+        {sessionData.user.role.is_class_admin && (
           <li>
             <Link href={yideclassAdminClassHref()}>班務管理</Link>
           </li>

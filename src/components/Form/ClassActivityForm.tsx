@@ -8,13 +8,16 @@ import {
   CLASS_ACTIVITY_LOCATIONS,
   CLASS_ACTIVITY_TITLES,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
+  YIDE_CLASS_UNITS,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
   getEndTime,
+  getUnitByName,
   locationIsOther,
   titleIsOther,
 } from "~/utils/ui";
+
 import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
 import SelectWithCustomInput from "./SelectWithCustomInput";
@@ -32,8 +35,6 @@ interface ClassActivityFormData {
   description: string;
 }
 
-export const YIDE_CLASS_UNITS = ["忠德", "孝德", "仁德", "愛德", "信德", "義德"];
-
 export default function ClassActivityForm({
   defaultActivity,
 }: {
@@ -41,7 +42,7 @@ export default function ClassActivityForm({
 }) {
   let formDefaultValues: Partial<ClassActivityFormData> = {
     title: CLASS_ACTIVITY_TITLES?.[0],
-    unit: "義德",
+    unit: YIDE_CLASS_UNITS[5]!.name,
     startDateTime: getCurrentDateTime(),
     description: "",
   };
@@ -59,9 +60,10 @@ export default function ClassActivityForm({
         ? VOLUNTEER_ACTIVITY_TOPIC_OTHER
         : defaultActivity.location,
       locationOther: defaultLocationIsOther ? defaultActivity.location : "",
-
+      // @ts-ignore prisma type issue
       unit: defaultActivity.unit,
       startDateTime: getDateTimeString(defaultActivity.startDateTime),
+
       duration: getDurationHour(
         defaultActivity.startDateTime,
         defaultActivity.endDateTime,
@@ -81,14 +83,22 @@ export default function ClassActivityForm({
     error: createActivityError,
     isPending: createActivityIsPending,
   } = api.classActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/yideclass/activity/detail/${data.id}`),
+    onSuccess: (data) => {
+      // @ts-ignore prisma type issue
+      const unitSlug = getUnitByName(data.unit)?.slug ?? "yide";
+      void router.push(`/class/${unitSlug}`);
+    },
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isPending: updateActivityIsPending,
   } = api.classActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/yideclass/activity/detail/${data.id}`),
+    onSuccess: (data) => {
+      // @ts-ignore prisma type issue
+      const unitSlug = getUnitByName(data.unit)?.slug ?? "yide";
+      void router.push(`/class/${unitSlug}`);
+    },
   });
 
   const _handleSubmit = (isDraft = false) => {
@@ -139,8 +149,8 @@ export default function ClassActivityForm({
           {...register("unit")}
         >
           {YIDE_CLASS_UNITS.map((u) => (
-            <option key={u} value={u}>
-              {u}
+            <option key={u.name} value={u.name}>
+              {u.name}
             </option>
           ))}
         </select>

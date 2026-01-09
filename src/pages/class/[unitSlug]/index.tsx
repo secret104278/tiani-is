@@ -8,22 +8,23 @@ import { ActivityCard } from "~/components/ActivityCard";
 import { HourStats } from "~/components/HourStats";
 import { Loading } from "~/components/utils/Loading";
 import { api } from "~/utils/api";
-import { activityIsEnded } from "~/utils/ui";
+import { activityIsEnded, getUnitBySlug } from "~/utils/ui";
 
 export default function UnitActivityList() {
   const router = useRouter();
-  const { unit } = router.query;
+  const { unitSlug } = router.query;
+  const unitInfo = getUnitBySlug(unitSlug as string);
   const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
 
   const activitiesQuery =
     api.classActivity.getAllActivitiesInfinite.useInfiniteQuery(
       {
         participatedByMe: filterParticipatedByMe,
-        unit: typeof unit === "string" ? unit : undefined,
+        unit: unitInfo?.name,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
-        enabled: !!unit,
+        enabled: !!unitInfo,
       },
     );
 
@@ -41,14 +42,14 @@ export default function UnitActivityList() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="link" onClick={() => router.push("/yideclass")}>
+      <div className="link" onClick={() => router.push("/class")}>
         ← 回單位選擇
       </div>
       <article className="prose">
-        <h1>{unit}班務總覽</h1>
+        <h1>{unitInfo?.name}班務總覽</h1>
       </article>
       {!workingStatsIsLoading && (
-        <Link href="/yideclass/workingstats" className="flex flex-col">
+        <Link href="/class/workingstats" className="flex flex-col">
           <HourStats
             title="總開班時數"
             totalWorkingHours={workingStats?.totalWorkingHours}
@@ -56,7 +57,7 @@ export default function UnitActivityList() {
         </Link>
       )}
       <div className="flex flex-row justify-end space-x-4">
-        <Link href="/yideclass/activity/new" className="flex-shrink-0">
+        <Link href="/class/activity/new" className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
             建立新簽到單

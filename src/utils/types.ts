@@ -1,7 +1,7 @@
 export interface UserRole {
   is_tiani_admin: boolean;
   is_volunteer_admin: boolean;
-  is_yideclass_admin: boolean;
+  is_class_admin: boolean;
   is_etogether_admin: boolean;
   is_yidework_admin: boolean;
   is_tianishop_admin: boolean;

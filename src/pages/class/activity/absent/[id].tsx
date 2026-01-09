@@ -73,7 +73,7 @@ export default function ClassActivityAbsentPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/yideclass/activity/detail/${activity.id}`}>
+      <Link className="link" href={`/class/activity/detail/${activity.id}`}>
         ← {activity?.title}
       </Link>
       <article className="prose">

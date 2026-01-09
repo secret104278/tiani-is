@@ -31,6 +31,7 @@ import {
   formatDateTime,
   formatDateTitle,
   getActivityStatusText,
+  getUnitByName,
   toDuration,
 } from "~/utils/ui";
 
@@ -38,12 +39,8 @@ export const getServerSideProps: GetServerSideProps<{
   ogMeta: OGMetaProps;
 }> = async (context) => {
   const res = await db.classActivity.findUnique({
-    select: {
-      title: true,
-      unit: true,
-      startDateTime: true,
-    },
     where: { id: Number(context.query.id) },
+    include: { organiser: true },
   });
 
   if (isNil(res)) {
@@ -52,6 +49,7 @@ export const getServerSideProps: GetServerSideProps<{
     };
   }
 
+  // @ts-ignore
   const unit = res.unit ?? "義德";
 
   return {
@@ -130,16 +128,18 @@ export default function ClassActivityDetailPage() {
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   const isManager =
-    !!session?.user.role.is_yideclass_admin ||
+    !!session?.user.role.is_class_admin ||
     session?.user.id === activity.organiserId;
 
   const isEnded = activityIsEnded(activity.endDateTime);
+  // @ts-ignore
+  const unitInfo = getUnitByName(activity.unit ?? "義德");
 
   const ShareLineBtn = () => {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/yideclass/activity/detail/${activity.id}?v=${activity.version}&unit=${unit}`,
+          `${window.location.origin}/class/activity/detail/${activity.id}?v=${activity.version}&unit=${unitInfo?.slug}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -159,11 +159,12 @@ export default function ClassActivityDetailPage() {
     if (activity.status === "PUBLISHED") return <ShareLineBtn />;
   };
 
-  const unit = activity.unit ?? "義德";
+  // @ts-ignore
+  const unitName = activity.unit ?? "義德";
 
   const AdminPanel = () => (
     <>
-      <div className="divider">{unit}班務管理</div>
+      <div className="divider">{unitName}班務管理</div>
       <div className="flex flex-row justify-end">
         <div className="badge badge-primary">
           {getActivityStatusText(activity.status)}

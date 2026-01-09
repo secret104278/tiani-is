@@ -111,7 +111,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                     </Link>
                   </li>
                 )}
-                {sessionData.user.role.is_yideclass_admin && (
+                {sessionData.user.role.is_class_admin && (
                   <li>
                     <Link
                       href="/yideclass/admin/class"
@@ -126,7 +126,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   sessionData.user.role.is_yidework_admin ||
                   sessionData.user.role.is_etogether_admin ||
                   sessionData.user.role.is_volunteer_admin ||
-                  sessionData.user.role.is_yideclass_admin) && (
+                  sessionData.user.role.is_class_admin) && (
                   <li>
                     <button
                       onClick={() => setShowQrModal(true)}

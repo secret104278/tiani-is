@@ -88,7 +88,7 @@ export const authConfig = {
           is_volunteer_admin:
             (user as User).roles.includes(Role.VOLUNTEER_ADMIN) ||
             (user as User).roles.includes(Role.TIANI_ADMIN),
-          is_yideclass_admin:
+          is_class_admin:
             (user as User).roles.includes(Role.YIDECLASS_ADMIN) ||
             (user as User).roles.includes(Role.TIANI_ADMIN),
           is_yidework_admin:

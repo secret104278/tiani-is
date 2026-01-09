@@ -53,13 +53,13 @@ export default function ClassActivityLeaveRecordPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/yideclass/activity/detail/${activity.id}`}>
+      <Link className="link" href={`/class/activity/detail/${activity.id}`}>
         ← {activity?.title}
       </Link>
       <article className="prose">
         <h1>請假名單</h1>
       </article>
-      {sessionData?.user.role.is_yideclass_admin && (
+      {sessionData?.user.role.is_class_admin && (
         <div className="flex justify-end">
           <ReactiveButton
             className="btn"

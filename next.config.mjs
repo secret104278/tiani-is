@@ -51,6 +51,21 @@ const innerConfig = {
         destination: "/volunteer/activity/:path*",
         permanent: false,
       },
+      {
+        source: "/yideclass",
+        destination: "/class/yide",
+        permanent: false,
+      },
+      {
+        source: "/yideclass/activity/:path*",
+        destination: "/class/activity/:path*",
+        permanent: false,
+      },
+      {
+        source: "/yideclass/:unit",
+        destination: "/class/yide", // Fallback for old unit names to yide slug
+        permanent: false,
+      },
     ]);
   },
 };

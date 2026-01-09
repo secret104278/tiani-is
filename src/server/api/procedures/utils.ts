@@ -14,8 +14,8 @@ const getActivity = (db: PrismaClient, site: Site, activityId: number) => {
         },
       });
     case Site.Yideclass:
+      // @ts-ignore prisma type issue
       return db.classActivity.findUniqueOrThrow({
-        select: { organiserId: true, status: true },
         where: {
           id: activityId,
         },
