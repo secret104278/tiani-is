@@ -114,7 +114,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 {sessionData.user.role.is_class_admin && (
                   <li>
                     <Link
-                      href="/yideclass/admin/class"
+                      href="/class/admin/class"
                       className="flex items-center gap-2"
                     >
                       <Cog6ToothIcon className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   </li>
                 )}
                 {(sessionData.user.role.is_tiani_admin ||
-                  sessionData.user.role.is_yidework_admin ||
+                  sessionData.user.role.is_work_admin ||
                   sessionData.user.role.is_etogether_admin ||
                   sessionData.user.role.is_volunteer_admin ||
                   sessionData.user.role.is_class_admin) && (

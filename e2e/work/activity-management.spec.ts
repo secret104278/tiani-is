@@ -1,11 +1,8 @@
 import { expect, test } from "../fixtures";
 
 test.describe("YideWork Activity Management", () => {
-  test("Create a new standard activity", async ({
-    loginAsYideWorkAdmin,
-    page,
-  }) => {
-    await page.goto("/yidework");
+  test("Create a new standard activity", async ({ loginAsWorkAdmin, page }) => {
+    await page.goto("/work");
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
@@ -16,7 +13,7 @@ test.describe("YideWork Activity Management", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
     await expect(page.getByText("佛堂：天一聖道院")).toBeVisible();
@@ -28,10 +25,10 @@ test.describe("YideWork Activity Management", () => {
   });
 
   test("Create a 'Ban Dao' activity with role assignments", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/yidework");
+    await page.goto("/work");
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
@@ -49,7 +46,7 @@ test.describe("YideWork Activity Management", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "辦道通知" })).toBeVisible();
     await expect(page.getByText("User A")).toBeVisible();
@@ -58,16 +55,16 @@ test.describe("YideWork Activity Management", () => {
   });
 
   test("Manage activity staff", async ({
-    loginAsYideWorkAdmin,
-    createYideWorkActivity,
+    loginAsWorkAdmin,
+    createWorkActivity,
     createUser,
     page,
   }) => {
     const otherUser = await createUser();
     const targetStaff = otherUser.name!;
 
-    const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    const activity = await createWorkActivity(loginAsWorkAdmin.id);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     const staffCombobox = page.locator(
       'input[id^="headlessui-combobox-input-"]',
@@ -96,9 +93,9 @@ test.describe("YideWork Activity Management", () => {
     await expect(page.getByText("尚無工作人員")).toBeVisible();
   });
 
-  test("Delete an activity", async ({ loginAsYideWorkAdmin, page }) => {
+  test("Delete an activity", async ({ loginAsWorkAdmin, page }) => {
     const uniqueTitle = `To Delete ${Date.now()}`;
-    await page.goto("/yidework");
+    await page.goto("/work");
     await page.getByRole("link", { name: "建立新通知" }).click();
     await page.locator('select[name="title"]').selectOption(["辦道通知"]);
     await page
@@ -106,7 +103,7 @@ test.describe("YideWork Activity Management", () => {
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill("2025-12-30T10:00");
     await page.getByRole("button", { name: "送出" }).click();
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
 
     await page.getByRole("button", { name: "撤銷" }).click();
 
@@ -115,7 +112,7 @@ test.describe("YideWork Activity Management", () => {
       .getByRole("button", { name: "撤銷" })
       .click();
 
-    await expect(page).toHaveURL("/yidework");
+    await expect(page).toHaveURL("/work");
 
     await expect(page.getByText(uniqueTitle)).not.toBeVisible();
   });

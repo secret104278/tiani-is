@@ -6,14 +6,14 @@ test.describe("YiDeClass Enrollment", () => {
     loginAsAdmin,
     testUser,
   }) => {
-    await page.goto("/yideclass/admin/class");
+    await page.goto("/class/admin/class");
 
     const firstClassRow = page.locator("tbody tr").first();
     const className = (await firstClassRow.innerText()).trim();
     await firstClassRow.click();
 
     await expect(page).toHaveURL(
-      new RegExp(`/yideclass/admin/class/${encodeURIComponent(className)}`),
+      new RegExp(`/class/admin/class/${encodeURIComponent(className)}`),
     );
 
     await page.getByRole("button", { name: "班員管理" }).click();

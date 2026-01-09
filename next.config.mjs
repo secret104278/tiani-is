@@ -66,6 +66,16 @@ const innerConfig = {
         destination: "/class/yide", // Fallback for old unit names to yide slug
         permanent: false,
       },
+      {
+        source: "/yidework",
+        destination: "/work",
+        permanent: false,
+      },
+      {
+        source: "/yidework/:path*",
+        destination: "/work/:path*",
+        permanent: false,
+      },
     ]);
   },
 };

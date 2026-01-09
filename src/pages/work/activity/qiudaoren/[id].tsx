@@ -54,7 +54,7 @@ export default function YideWorkActivityQiudaorenPage() {
   if (!session) return <AlertWarning>請先登入</AlertWarning>;
 
   const isManager =
-    !!session.user.role.is_yidework_admin ||
+    !!session.user.role.is_work_admin ||
     session.user.id === activity.organiserId;
 
   const isStaff =
@@ -74,7 +74,7 @@ export default function YideWorkActivityQiudaorenPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/yidework/activity/detail/${activity.id}`}>
+      <Link className="link" href={`/work/activity/detail/${activity.id}`}>
         ← {activity.title}
       </Link>
       <article className="prose">

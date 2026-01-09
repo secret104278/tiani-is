@@ -1,32 +1,27 @@
 import {
+  type Prisma,
   Role,
   type User,
   type YideWorkActivity,
-  YideWorkActivityStatus,
 } from "@prisma/client";
-import _ from "lodash";
 import { test as base } from "./auth";
 
-type YideWorkFixtures = {
-  testYideWorkAdmin: User;
-  loginAsYideWorkAdmin: User;
-  createYideWorkActivity: (
+type WorkFixtures = {
+  testWorkAdmin: User;
+  loginAsWorkAdmin: User;
+  createWorkActivity: (
     organiserId: string,
     overrides?: Partial<YideWorkActivity>,
   ) => Promise<YideWorkActivity>;
 };
 
-export const test = base.extend<YideWorkFixtures>({
-  testYideWorkAdmin: async ({ createUser }, use) => {
+export const test = base.extend<WorkFixtures>({
+  testWorkAdmin: async ({ createUser }, use) => {
     const user = await createUser([Role.YIDEWORK_ADMIN]);
     await use(user);
   },
 
-  loginAsYideWorkAdmin: async (
-    { page, context, db, testYideWorkAdmin },
-    use,
-  ) => {
-    // Ensure locations exist
+  loginAsWorkAdmin: async ({ context, db, testWorkAdmin }, use) => {
     await db.yideWorkLocation
       .upsert({
         where: { id: 1 },
@@ -35,7 +30,6 @@ export const test = base.extend<YideWorkFixtures>({
       })
       .catch(() => {});
 
-    // Create session in DB
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 1000);
     const sessionToken = `session-${timestamp}-${random}`;
@@ -46,12 +40,11 @@ export const test = base.extend<YideWorkFixtures>({
     await db.session.create({
       data: {
         sessionToken,
-        userId: testYideWorkAdmin.id,
+        userId: testWorkAdmin.id,
         expires,
       },
     });
 
-    // Inject cookies
     await context.addCookies([
       {
         name: "next-auth.session-token",
@@ -71,13 +64,12 @@ export const test = base.extend<YideWorkFixtures>({
       },
     ]);
 
-    await use(testYideWorkAdmin);
+    await use(testWorkAdmin);
 
-    // Cleanup: delete the session
     await db.session.delete({ where: { sessionToken } }).catch(() => {});
   },
 
-  createYideWorkActivity: async ({ db }, use) => {
+  createWorkActivity: async ({ db }, use) => {
     const activities: YideWorkActivity[] = [];
 
     const factory = async (
@@ -92,13 +84,12 @@ export const test = base.extend<YideWorkFixtures>({
           description: "Test Description",
           startDateTime: new Date(),
           endDateTime: new Date(),
-          status: YideWorkActivityStatus.PUBLISHED,
+          status: "PUBLISHED",
           locationId: 1,
           organiserId,
           ...overrides,
-          assignments: overrides?.assignments
-            ? overrides?.assignments
-            : undefined,
+          assignments:
+            (overrides?.assignments as Prisma.InputJsonValue) ?? undefined,
         },
       });
       activities.push(activity);
@@ -107,7 +98,6 @@ export const test = base.extend<YideWorkFixtures>({
 
     await use(factory);
 
-    // Cleanup: delete all created activities
     for (const activity of activities) {
       await db.yideWorkActivity
         .delete({ where: { id: activity.id } })

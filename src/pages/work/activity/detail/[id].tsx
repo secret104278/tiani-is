@@ -68,7 +68,7 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-export default function YideWorkActivityDetailPage() {
+export default function WorkActivityDetailPage() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -125,7 +125,7 @@ export default function YideWorkActivityDetailPage() {
   if (isNil(session)) return <AlertWarning>請先登入</AlertWarning>;
 
   const isManager =
-    !!session.user.role.is_yidework_admin ||
+    !!session.user.role.is_work_admin ||
     session.user.id === activity.organiser.id;
 
   const isStaff = activity.staffs?.some(
@@ -141,7 +141,7 @@ export default function YideWorkActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/yidework/activity/detail/${activity.id}?v=${activity.version}`,
+          `${window.location.origin}/work/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -172,7 +172,7 @@ export default function YideWorkActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <Link href={`/yidework/activity/edit/${activity.id}`}>
+        <Link href={`/work/activity/edit/${activity.id}`}>
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
             編輯
@@ -203,10 +203,7 @@ export default function YideWorkActivityDetailPage() {
   );
 
   const QiudaorenPanel = () => (
-    <Link
-      href={`/yidework/activity/qiudaoren/${activity.id}`}
-      className="w-full"
-    >
+    <Link href={`/work/activity/qiudaoren/${activity.id}`} className="w-full">
       <button className="btn w-full">
         <QueueListIcon className="h-4 w-4" />
         求道人清單

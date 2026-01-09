@@ -4,12 +4,12 @@ test.describe("YideWork Permissions", () => {
   test("Public read-only access", async ({
     loginAsUser,
     page,
-    createYideWorkActivity,
-    testYideWorkAdmin,
+    createWorkActivity,
+    testWorkAdmin,
   }) => {
-    const activity = await createYideWorkActivity(testYideWorkAdmin.id);
+    const activity = await createWorkActivity(testWorkAdmin.id);
 
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     await expect(
       page.getByText("地點：").or(page.getByText("佛堂：")),
@@ -25,7 +25,7 @@ test.describe("YideWork Permissions", () => {
       page.getByRole("link", { name: "求道人清單" }),
     ).not.toBeVisible();
 
-    await page.goto(`/yidework/activity/edit/${activity.id}`);
+    await page.goto(`/work/activity/edit/${activity.id}`);
 
     await expect(
       page.getByText("只有管理員可以進行此操作").or(page.getByText("無權限")),
@@ -33,15 +33,15 @@ test.describe("YideWork Permissions", () => {
   });
 
   test("Staff access to specific activity", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     testUser,
     db,
     page,
-    createYideWorkActivity,
+    createWorkActivity,
     switchUser,
   }) => {
-    const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    const activity = await createWorkActivity(loginAsWorkAdmin.id);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     const staffCombobox = page.locator(
       'input[id^="headlessui-combobox-input-"]',
@@ -53,7 +53,7 @@ test.describe("YideWork Permissions", () => {
 
     await switchUser(testUser.id);
 
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     await expect(page.getByRole("link", { name: "求道人清單" })).toBeVisible();
     await expect(

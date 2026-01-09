@@ -7,18 +7,14 @@ import {
   buildRepresentableProcedure,
 } from "./utils";
 
-export const activityManageProcedure = buildActivityManageProcedure(
-  Site.YideWork,
-);
+export const activityManageProcedure = buildActivityManageProcedure(Site.Work);
 
 export const activityRepresentableProcedure =
-  buildActivityRepresentableProcedure(Site.YideWork);
+  buildActivityRepresentableProcedure(Site.Work);
 
 export const activityPublishedOnlyProcedure =
-  buildActivityPublishedOnlyProcedure(Site.YideWork);
+  buildActivityPublishedOnlyProcedure(Site.Work);
 
-export const adminProcedure = buildAdminProcedure(Site.YideWork);
+export const adminProcedure = buildAdminProcedure(Site.Work);
 
-export const representableProcedure = buildRepresentableProcedure(
-  Site.YideWork,
-);
+export const representableProcedure = buildRepresentableProcedure(Site.Work);

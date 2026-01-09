@@ -7,10 +7,10 @@ test.describe("YideWork Activity New Features", () => {
   const futureDateDisplay = format(futureDate, "yyyy/MM/dd");
 
   test("Create an 'Offering' activity with festival and filtered roles", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/yidework");
+    await page.goto("/work");
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
@@ -42,7 +42,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
     await expect(page.getByText("我要參加")).toBeVisible();
@@ -65,20 +65,20 @@ test.describe("YideWork Activity New Features", () => {
   });
 
   test("Offering activity staff list visibility (Admin vs User)", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     testUser,
     switchUser,
     page,
   }) => {
     // 1. Create an offering activity as Admin
-    await page.goto("/yidework/activity/new");
+    await page.goto("/work/activity/new");
     await page.locator('select[name="title"]').selectOption("獻供通知");
     await page
       .locator('select[name="locationId"]')
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill(futureDateIso);
     await page.getByRole("button", { name: "送出" }).click();
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
     const activityUrl = page.url();
 
     // Admin should see staff list (even if empty)
@@ -96,10 +96,10 @@ test.describe("YideWork Activity New Features", () => {
   });
 
   test("Create a 'Ban Dao' activity hides festival and shows lunar/time info", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/yidework/activity/new");
+    await page.goto("/work/activity/new");
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 
@@ -113,7 +113,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
 
     // Verify lunar and traditional time display for "Ban Dao"
     await expect(page.getByText(`國曆：${futureDateDisplay}`)).toBeVisible();
@@ -125,10 +125,10 @@ test.describe("YideWork Activity New Features", () => {
   });
 
   test("Create an 'Offering' activity with 'Other' festival", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/yidework/activity/new");
+    await page.goto("/work/activity/new");
 
     await page
       .locator('select[name="offeringFestival"]')
@@ -144,15 +144,15 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
     await expect(page.getByText("節日：自定義法會")).toBeVisible();
   });
 
   test("Create a 'Ban Dao' activity hides festival and shows all roles", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/yidework/activity/new");
+    await page.goto("/work/activity/new");
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 
@@ -174,7 +174,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/yidework\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
     await expect(page.getByText("時數：")).not.toBeVisible();
   });
 });

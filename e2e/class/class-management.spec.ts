@@ -2,10 +2,11 @@ import { expect, test } from "../fixtures";
 
 test.describe("YiDeClass Management", () => {
   test("should create a new class activity", async ({ page, loginAsAdmin }) => {
-    await page.goto("/yideclass");
+    await page.goto("/class");
+    await page.getByRole("link", { name: "義德" }).click();
     await page.getByRole("link", { name: "建立新簽到單" }).click();
 
-    await expect(page).toHaveURL("/yideclass/activity/new");
+    await expect(page).toHaveURL("/class/activity/new");
 
     // Fill form
     await page.locator('select[name="title"]').selectOption({ index: 0 });
@@ -24,7 +25,7 @@ test.describe("YiDeClass Management", () => {
     await page.getByRole("button", { name: "送出" }).click();
 
     // Verify
-    await expect(page).toHaveURL(/\/yideclass\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/class\/[^\/]+/);
     await expect(page.getByText("E2E Test Class Activity")).toBeVisible();
   });
 });

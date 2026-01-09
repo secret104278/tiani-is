@@ -91,7 +91,7 @@ export const authConfig = {
           is_class_admin:
             (user as User).roles.includes(Role.YIDECLASS_ADMIN) ||
             (user as User).roles.includes(Role.TIANI_ADMIN),
-          is_yidework_admin:
+          is_work_admin:
             (user as User).roles.includes(Role.YIDEWORK_ADMIN) ||
             (user as User).roles.includes(Role.TIANI_ADMIN),
           is_etogether_admin:

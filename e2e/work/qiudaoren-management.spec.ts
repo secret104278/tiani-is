@@ -2,12 +2,12 @@ import { expect, test } from "../fixtures";
 
 test.describe("Qiudaoren (Candidate) Management", () => {
   test("Add a new Qiudaoren with valid data", async ({
-    loginAsYideWorkAdmin,
-    createYideWorkActivity,
+    loginAsWorkAdmin,
+    createWorkActivity,
     page,
   }) => {
-    const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    const activity = await createWorkActivity(loginAsWorkAdmin.id);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     await page.getByRole("link", { name: "求道人清單" }).click();
 
@@ -60,12 +60,12 @@ test.describe("Qiudaoren (Candidate) Management", () => {
   });
 
   test("Validate Qiudaoren form inputs", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
-    createYideWorkActivity,
+    createWorkActivity,
   }) => {
-    const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    const activity = await createWorkActivity(loginAsWorkAdmin.id);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     await page.getByRole("link", { name: "求道人清單" }).click();
     await page.getByRole("button", { name: "我要帶人來求道" }).click();
@@ -104,12 +104,12 @@ test.describe("Qiudaoren (Candidate) Management", () => {
   });
 
   test("Toggle Qiudaoren check-in status", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
-    createYideWorkActivity,
+    createWorkActivity,
   }) => {
-    const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    const activity = await createWorkActivity(loginAsWorkAdmin.id);
+    await page.goto(`/work/activity/detail/${activity.id}`);
 
     await page.getByRole("button", { name: "我要帶人來求道" }).click();
     await page.locator('input[name="name"]').fill("CheckIn Person");
@@ -149,12 +149,12 @@ test.describe("Qiudaoren (Candidate) Management", () => {
   });
 
   test("View by Yin-Bao Shi (Introducer/Guarantor)", async ({
-    loginAsYideWorkAdmin,
+    loginAsWorkAdmin,
     page,
-    createYideWorkActivity,
+    createWorkActivity,
   }) => {
-    const activity = await createYideWorkActivity(loginAsYideWorkAdmin.id);
-    await page.goto(`/yidework/activity/detail/${activity.id}`);
+    const activity = await createWorkActivity(loginAsWorkAdmin.id);
+    await page.goto(`/work/activity/detail/${activity.id}`);
     await page.getByRole("link", { name: "求道人清單" }).click();
 
     await page.getByRole("button", { name: "我要帶人來求道" }).click();

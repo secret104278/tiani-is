@@ -5,7 +5,7 @@ import YideWorkActivityForm from "~/components/Form/YideWorkActivityForm";
 import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 
-export default function EditYideWorkActivityPage() {
+export default function EditWorkActivityPage() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -30,7 +30,7 @@ export default function EditYideWorkActivityPage() {
   if (isNil(activity)) return <AlertWarning>找不到通知</AlertWarning>;
 
   const isManager =
-    !!session?.user.role.is_yidework_admin ||
+    !!session?.user.role.is_work_admin ||
     session?.user.id === activity.organiserId;
 
   const isStaff = activity.staffs?.some(

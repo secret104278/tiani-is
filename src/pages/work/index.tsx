@@ -8,7 +8,7 @@ import { Loading } from "~/components/utils/Loading";
 import { api } from "~/utils/api";
 import { activityIsEnded } from "~/utils/ui";
 
-export default function YideWorkHome() {
+export default function WorkHome() {
   const activitiesQuery =
     api.yideworkActivity.getAllActivitiesInfinite.useInfiniteQuery(
       {},
@@ -32,7 +32,7 @@ export default function YideWorkHome() {
         <h1>道務總覽</h1>
       </article>
       <div className="flex flex-row justify-end space-x-4">
-        <Link href="/yidework/activity/new" className="flex-shrink-0">
+        <Link href="/work/activity/new" className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
             建立新通知

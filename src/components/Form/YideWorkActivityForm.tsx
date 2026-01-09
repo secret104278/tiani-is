@@ -91,14 +91,14 @@ export default function YideWorkActivityForm({
     error: createActivityError,
     isPending: createActivityIsPending,
   } = api.yideworkActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/yidework/activity/detail/${data.id}`),
+    onSuccess: (data) => router.push(`/work/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isPending: updateActivityIsPending,
   } = api.yideworkActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/yidework/activity/detail/${data.id}`),
+    onSuccess: (data) => router.push(`/work/activity/detail/${data.id}`),
   });
 
   const _handleSubmit = (isDraft = false) => {

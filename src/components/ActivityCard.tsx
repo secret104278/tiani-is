@@ -98,7 +98,7 @@ export function ActivityCard({
             <ClockIcon className="mr-1 h-4 w-4" />
             <p>開始：{formatDateTime(activity.startDateTime)}</p>
           </div>
-          {site !== Site.YideWork && (
+          {site !== Site.Work && (
             <div className="flex items-center">
               <ClockIcon className="mr-1 h-4 w-4" />
               <p>

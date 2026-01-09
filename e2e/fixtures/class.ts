@@ -1,7 +1,7 @@
 import { type ClassActivity, ClassActivityStatus } from "@prisma/client";
 import { test as authTest } from "./auth";
 
-type YideClassFixtures = {
+type ClassFixtures = {
   createClassActivity: (
     organiserId: string,
     overrides?: Partial<ClassActivity>,
@@ -9,7 +9,7 @@ type YideClassFixtures = {
   publishedClassActivity: ClassActivity;
 };
 
-export const test = authTest.extend<YideClassFixtures>({
+export const test = authTest.extend<ClassFixtures>({
   createClassActivity: async ({ db }, use) => {
     const activities: ClassActivity[] = [];
 

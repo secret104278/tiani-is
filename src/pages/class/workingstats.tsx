@@ -24,9 +24,7 @@ export default function WorkingStatsPage() {
             className="hover hover:cursor-pointer"
             key={history.activityId}
             onClick={() =>
-              void router.push(
-                `/yideclass/activity/detail/${history.activityId}`,
-              )
+              void router.push(`/class/activity/detail/${history.activityId}`)
             }
           >
             <td>{history.activity.title}</td>

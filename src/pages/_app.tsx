@@ -32,7 +32,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
 
   useEffect(() => {
     switch (site) {
-      case Site.Yideclass:
+      case Site.Class:
         document.documentElement.setAttribute("data-theme", "garden");
         break;
       case Site.Volunteer:
@@ -51,7 +51,7 @@ const MyApp: AppType<{ session: Session | null; ogMeta?: OGMetaProps }> = ({
   const siteTitle = siteToTitle(site);
 
   switch (site) {
-    case Site.Yideclass:
+    case Site.Class:
       siteIcon = "/yideclass_logo.png";
       siteColor = "#5c7f67";
       break;

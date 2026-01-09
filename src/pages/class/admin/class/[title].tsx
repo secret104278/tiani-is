@@ -40,7 +40,7 @@ export default function YiDeAdminClassDetail() {
       <article className="prose">
         <h1>{title}</h1>
       </article>
-      <Link href={`/yideclass/admin/class/enroll/${String(title)}`}>
+      <Link href={`/class/admin/class/enroll/${String(title)}`}>
         <button className="btn">班員管理</button>
       </Link>
       <div className="stats shadow">
@@ -67,9 +67,7 @@ export default function YiDeAdminClassDetail() {
                   key={idx}
                   className="hover hover:cursor-pointer"
                   onClick={() =>
-                    void router.push(
-                      `/yideclass/activity/detail/${activity.id}`,
-                    )
+                    void router.push(`/class/activity/detail/${activity.id}`)
                   }
                 >
                   <td>{formatDate(activity.startDateTime)}</td>

@@ -332,17 +332,17 @@ export const getDurationHour = (startDateTime: Date, endDateTime: Date) =>
 
 export enum Site {
   Volunteer = "volunteer",
-  Yideclass = "class",
+  Class = "class",
   Etogether = "etogether",
-  YideWork = "yidework",
+  Work = "work",
   TianiShop = "tianishop",
 }
 
 export const urlBaseToSite = (urlBase?: string): Site | undefined => {
   if (urlBase === "volunteer") return Site.Volunteer;
-  if (urlBase === "class") return Site.Yideclass;
+  if (urlBase === "class") return Site.Class;
   if (urlBase === "etogether") return Site.Etogether;
-  if (urlBase === "yidework") return Site.YideWork;
+  if (urlBase === "work") return Site.Work;
   if (urlBase === "tianishop") return Site.TianiShop;
   return undefined;
 };
@@ -358,11 +358,11 @@ export const siteToTitle = (site?: Site) => {
   switch (site) {
     case Site.Volunteer:
       return "天一志工隊";
-    case Site.Yideclass:
+    case Site.Class:
       return "義德班務網";
     case Site.Etogether:
       return "活動e起來";
-    case Site.YideWork:
+    case Site.Work:
       return "義德道務網";
     case Site.TianiShop:
       return "天一友購站";

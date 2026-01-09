@@ -13,7 +13,7 @@ const getActivity = (db: PrismaClient, site: Site, activityId: number) => {
           id: activityId,
         },
       });
-    case Site.Yideclass:
+    case Site.Class:
       // @ts-ignore prisma type issue
       return db.classActivity.findUniqueOrThrow({
         where: {
@@ -27,7 +27,7 @@ const getActivity = (db: PrismaClient, site: Site, activityId: number) => {
           id: activityId,
         },
       });
-    case Site.YideWork:
+    case Site.Work:
       return db.yideWorkActivity.findUniqueOrThrow({
         select: {
           organiserId: true,
@@ -55,7 +55,7 @@ export const buildCollectActivity = (site: Site) =>
         ctx.session.user.role[`is_${site}_admin`];
 
       // Check if user is a staff for YideWork activities
-      if (site === Site.YideWork && !isManager && "staffs" in activity) {
+      if (site === Site.Work && !isManager && "staffs" in activity) {
         isManager = activity.staffs.some(
           (staff) => staff.userId === ctx.session.user.id,
         );

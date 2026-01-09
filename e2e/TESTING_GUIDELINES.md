@@ -25,10 +25,15 @@ e2e/
 │   ├── registration.spec.ts
 │   ├── stats.spec.ts
 │   └── ui-interactions.spec.ts
-├── yideclass/                   # YiDeClass module tests
+├── class/                       # Class module tests
 │   ├── attendance.spec.ts
 │   ├── class-management.spec.ts
 │   └── enrollment.spec.ts
+├── work/                        # Work module tests
+│   ├── activity-management.spec.ts
+│   ├── activity-new-features.spec.ts
+│   ├── permissions.spec.ts
+│   └── qiudaoren-management.spec.ts
 ├── utils/
 │   ├── auth-helpers.ts          # Authentication utilities
 │   └── volunteer-helpers.ts     # Module-specific helpers
@@ -42,8 +47,9 @@ e2e/
 |--------|--------------|-------------|
 | Admin | `/admin` | User management, role assignment |
 | Volunteer | `/volunteer` | Volunteer activities and check-ins |
-| YiDeClass | `/yideclass` | Class management and attendance |
+| Class | `/class` | Class management and attendance |
 | Etogether | `/etogether` | Group activities and registration |
+| Work | `/work` | Work management and information |
 | TianiShop | `/tianishop` | Shop and orders (App Router) |
 
 ## Test File Organization
@@ -116,13 +122,13 @@ test("custom auth test", async ({ browser }) => {
 ```
 
 ### Available Roles
-```typescript
-Role.TIANI_ADMIN       // System-wide admin
-Role.VOLUNTEER_ADMIN   // Volunteer module admin
-Role.YIDECLASS_ADMIN   // YiDeClass module admin
-Role.ETOGETHER_ADMIN   // Etogether module admin
-Role.YIDEWORK_ADMIN    // YiDeWork module admin
+Role.TIANI_ADMIN       // System-wide admin (is_tiani_admin)
+Role.VOLUNTEER_ADMIN   // Volunteer module admin (is_volunteer_admin)
+Role.YIDECLASS_ADMIN   // Class module admin (is_class_admin)
+Role.ETOGETHER_ADMIN   // Etogether module admin (is_etogether_admin)
+Role.YIDEWORK_ADMIN    // Work module admin (is_work_admin)
 []                     // Regular user (no special permissions)
+
 ```
 
 ## Selector Best Practices

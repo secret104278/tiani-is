@@ -173,7 +173,7 @@ export default function ClassActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <Link href={`/yideclass/activity/edit/${activity.id}`}>
+        <Link href={`/class/activity/edit/${activity.id}`}>
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
             編輯
@@ -198,19 +198,19 @@ export default function ClassActivityDetailPage() {
         />
       </div>
 
-      <Link href={`/yideclass/activity/checkrecord/${activity.id}`}>
+      <Link href={`/class/activity/checkrecord/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           打卡名單
         </button>
       </Link>
-      <Link href={`/yideclass/activity/leaverecord/${activity.id}`}>
+      <Link href={`/class/activity/leaverecord/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           請假名單
         </button>
       </Link>
-      <Link href={`/yideclass/activity/absent/${activity.id}`}>
+      <Link href={`/class/activity/absent/${activity.id}`}>
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           缺席名單
