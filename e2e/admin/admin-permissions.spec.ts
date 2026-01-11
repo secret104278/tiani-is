@@ -30,6 +30,8 @@ test.describe("Admin Permissions", () => {
     await expect(page).toHaveURL(/\/admin\/users/);
 
     await expect(page.getByText("只有管理員可以進行此操作")).not.toBeVisible();
-    await expect(page.getByRole("heading", { name: "權限管理" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "權限管理", exact: true, level: 1 }),
+    ).toBeVisible();
   });
 });

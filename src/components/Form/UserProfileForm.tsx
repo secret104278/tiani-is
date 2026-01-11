@@ -120,6 +120,7 @@ export function UserProfileForm({
 
       <div className="flex justify-end pt-4">
         <ReactiveButton
+          className="btn btn-primary"
           type="submit"
           loading={isLoading}
           isSuccess={isSuccess}

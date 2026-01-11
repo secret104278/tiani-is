@@ -8,27 +8,31 @@ test.describe("Admin Users", () => {
   }) => {
     await page.goto("/admin/users");
 
-    await expect(page.getByRole("heading", { name: "權限管理" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "權限管理", exact: true, level: 1 }),
+    ).toBeVisible();
 
     // Check filters
-    await expect(page.getByRole("button", { name: "全部" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "全部" })).toHaveCount(2);
     await expect(page.getByRole("button", { name: "無權限" })).toBeVisible();
 
     // Check search input
     await expect(page.getByPlaceholder(/搜尋 .* 的人員.../)).toBeVisible();
 
     // Check sections
-    // Default unit is "義德"
-    await expect(page.getByRole("button", { name: "義德" })).toHaveClass(
-      /bg-base-content/,
-    );
+    // Default unit filter should be "全部"
+    await expect(
+      page.getByRole("button", { name: "全部" }).first(),
+    ).toHaveClass(/bg-base-content/);
 
     // Initial state might show "查無名單" or user cards
     const noResults = page.getByText("查無名單");
-    const staffSection = page.getByText("權限管理人員");
-    const regularSection = page.getByText("一般人員");
+    const staffSection = page.getByRole("heading", { name: /權限管理人員/ });
+    const regularSection = page.getByRole("heading", { name: /一般人員/ });
 
-    await expect(noResults.or(staffSection).or(regularSection)).toBeVisible();
+    await expect(
+      noResults.or(staffSection).or(regularSection).first(),
+    ).toBeVisible();
 
     await expect(page.getByRole("button", { name: "新增帳號" })).toBeVisible();
   });

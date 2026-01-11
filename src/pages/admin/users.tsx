@@ -1,6 +1,7 @@
 import { TZDate } from "@date-fns/tz";
 import {
   AdjustmentsHorizontalIcon,
+  IdentificationIcon,
   MagnifyingGlassIcon,
   PlusIcon,
   ShieldCheckIcon,
@@ -80,7 +81,7 @@ function RoleEditorDialog({
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="divide-y divide-base-200">
         {availableRoles.map((role) => {
           const isActive = user.roles.includes(role);
           const isTianiAdmin = user.roles.includes(Role.TIANI_ADMIN);
@@ -91,7 +92,7 @@ function RoleEditorDialog({
           return (
             <div
               key={role}
-              className={`flex items-center justify-between rounded-lg border border-base-200 p-3 ${disabled ? "opacity-50" : ""}`}
+              className={`flex items-center justify-between py-3 ${disabled ? "opacity-50" : ""}`}
             >
               <span className="font-medium text-sm">{roleLabels[role]}</span>
               <input
@@ -245,7 +246,7 @@ function UserProfileDialogContent({
 }
 
 export default function AdminUsersPage() {
-  const [selectedUnit, setSelectedUnit] = useState<string>("義德");
+  const [selectedUnit, setSelectedUnit] = useState<string>("全部");
   const [search, setSearch] = useState("");
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [roleFilter, setRoleFilter] = useState<Role | "ALL" | "NONE">("ALL");
@@ -330,8 +331,10 @@ export default function AdminUsersPage() {
         const matchUnit =
           selectedUnit === "其他"
             ? !u.affiliation ||
-              !UNITS.some((unit) => unit.name === u.affiliation)
-            : u.affiliation === selectedUnit;
+              !UNITS.some((unit) => u.affiliation?.endsWith(unit.name))
+            : selectedUnit === "全部"
+              ? true
+              : u.affiliation?.endsWith(selectedUnit);
         const matchSearch =
           u.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
 
@@ -393,7 +396,7 @@ export default function AdminUsersPage() {
 
       <div className="sticky top-0 z-30 space-y-3 bg-base-100/95 px-1 pt-2 pb-4 backdrop-blur">
         <div className="scrollbar-hide flex gap-2 overflow-x-auto py-1">
-          {[...UNITS, { name: "其他" }].map((u) => (
+          {[{ name: "全部" }, ...UNITS, { name: "其他" }].map((u) => (
             <button
               key={u.name}
               onClick={() => setSelectedUnit(u.name)}
@@ -470,19 +473,10 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
                 <div className="grow">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
                     <p className="font-bold text-base leading-none">
                       {user.name}
                     </p>
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      onClick={() => {
-                        setSelectedUserId(user.id);
-                        setUserProfileDialogOpen(true);
-                      }}
-                    >
-                      詳情
-                    </button>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {user.roles.map((r: Role) => {
@@ -504,12 +498,23 @@ export default function AdminUsersPage() {
                     })}
                   </div>
                 </div>
-                <button
-                  className="btn btn-circle btn-ghost"
-                  onClick={() => setEditingUser(user)}
-                >
-                  <AdjustmentsHorizontalIcon className="h-6 w-6" />
-                </button>
+                <div className="flex flex-shrink-0 items-center gap-1">
+                  <button
+                    className="btn btn-circle btn-ghost"
+                    onClick={() => {
+                      setSelectedUserId(user.id);
+                      setUserProfileDialogOpen(true);
+                    }}
+                  >
+                    <IdentificationIcon className="h-6 w-6" />
+                  </button>
+                  <button
+                    className="btn btn-circle btn-ghost"
+                    onClick={() => setEditingUser(user)}
+                  >
+                    <AdjustmentsHorizontalIcon className="h-6 w-6" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -533,23 +538,25 @@ export default function AdminUsersPage() {
                   </div>
                   <div className="flex grow items-center justify-between gap-2">
                     <span className="font-medium text-base">{user.name}</span>
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      onClick={() => {
-                        setSelectedUserId(user.id);
-                        setUserProfileDialogOpen(true);
-                      }}
-                    >
-                      詳情
-                    </button>
                   </div>
                 </div>
-                <button
-                  className="btn btn-circle btn-ghost"
-                  onClick={() => setEditingUser(user)}
-                >
-                  <AdjustmentsHorizontalIcon className="h-6 w-6 text-primary" />
-                </button>
+                <div className="flex flex-shrink-0 items-center gap-1">
+                  <button
+                    className="btn btn-circle btn-ghost"
+                    onClick={() => {
+                      setSelectedUserId(user.id);
+                      setUserProfileDialogOpen(true);
+                    }}
+                  >
+                    <IdentificationIcon className="h-6 w-6 text-primary" />
+                  </button>
+                  <button
+                    className="btn btn-circle btn-ghost"
+                    onClick={() => setEditingUser(user)}
+                  >
+                    <AdjustmentsHorizontalIcon className="h-6 w-6 text-primary" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -573,23 +580,25 @@ export default function AdminUsersPage() {
                   </div>
                   <div className="flex grow items-center justify-between gap-2">
                     <span className="font-medium text-base">{user.name}</span>
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      onClick={() => {
-                        setSelectedUserId(user.id);
-                        setUserProfileDialogOpen(true);
-                      }}
-                    >
-                      詳情
-                    </button>
                   </div>
                 </div>
-                <button
-                  className="btn btn-circle btn-ghost"
-                  onClick={() => setEditingUser(user)}
-                >
-                  <AdjustmentsHorizontalIcon className="h-6 w-6 text-primary" />
-                </button>
+                <div className="flex flex-shrink-0 items-center gap-1">
+                  <button
+                    className="btn btn-circle btn-ghost"
+                    onClick={() => {
+                      setSelectedUserId(user.id);
+                      setUserProfileDialogOpen(true);
+                    }}
+                  >
+                    <IdentificationIcon className="h-6 w-6 text-primary" />
+                  </button>
+                  <button
+                    className="btn btn-circle btn-ghost"
+                    onClick={() => setEditingUser(user)}
+                  >
+                    <AdjustmentsHorizontalIcon className="h-6 w-6 text-primary" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

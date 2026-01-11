@@ -20,7 +20,7 @@ test.describe("4. Profile Management", () => {
     );
 
     // 2. Open Profile Dialog
-    const profileButton = userCard.getByRole("button", { name: "詳情" });
+    const profileButton = userCard.getByRole("button").first();
     await profileButton.click();
 
     // Use specific locator and rely on actionability (Playwright will wait for animation)
@@ -36,9 +36,7 @@ test.describe("4. Profile Management", () => {
     await expect(profileDialog.getByText("壬寅年")).toBeVisible();
     await expect(profileDialog.getByText("十二月初十")).toBeVisible();
 
-    await profileDialog
-      .getByLabel("時辰")
-      .selectOption("子時 (23:00-01:00)");
+    await profileDialog.getByLabel("時辰").selectOption("子時 (23:00-01:00)");
 
     await profileDialog
       .locator('input[name="qiudaoTemple"]')
@@ -72,7 +70,7 @@ test.describe("4. Profile Management", () => {
       },
     );
 
-    await reUserCard.getByRole("button", { name: "詳情" }).click();
+    await reUserCard.getByRole("button").first().click();
 
     await expect(
       profileDialog.locator('input[name="qiudaoDateSolar"]'),
@@ -84,10 +82,12 @@ test.describe("4. Profile Management", () => {
     await expect(
       profileDialog.locator('input[name="qiudaoTanzhu"]'),
     ).toHaveValue("Test Host");
-    await expect(profileDialog.getByRole("combobox").first()).toHaveValue("Other");
-    await expect(profileDialog.getByPlaceholder("輸入完整單位名稱")).toHaveValue(
-      "Test Unit",
+    await expect(profileDialog.getByRole("combobox").first()).toHaveValue(
+      "Other",
     );
+    await expect(
+      profileDialog.getByPlaceholder("輸入完整單位名稱"),
+    ).toHaveValue("Test Unit");
     await expect(
       profileDialog.locator('input[name="dianChuanShi"]'),
     ).toHaveValue("Test Transmitter");
