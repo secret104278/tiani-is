@@ -68,10 +68,11 @@ export default function QiudaoLunarDisplay({
       {/* 時辰選擇器 */}
       {!readonly && (
         <div>
-          <label className="label">
+          <label className="label" htmlFor="qiudao-hour-select">
             <span className="label-text">時辰</span>
           </label>
           <select
+            id="qiudao-hour-select"
             className="select select-bordered w-full"
             value={hour || ""}
             onChange={(e) => onHourChange?.(e.target.value)}

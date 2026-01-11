@@ -58,3 +58,15 @@ export interface WorkAssignments {
   towelsAndTea?: string;
   threeTreasures?: string;
 }
+
+export interface UserProfileFormData {
+  name?: string;
+  qiudaoDateSolar: string;
+  qiudaoHour: string;
+  qiudaoTemple: string;
+  qiudaoTanzhu: string;
+  affiliation: string;
+  dianChuanShi: string;
+  yinShi: string;
+  baoShi: string;
+}

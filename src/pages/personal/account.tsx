@@ -1,76 +1,16 @@
-import lunisolar from "lunisolar";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
-import UnitSelector from "~/components/inputs/UnitSelector";
+import { UserProfileForm } from "~/components/Form/UserProfileForm";
 import LineImage from "~/components/utils/LineImage";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
-
-type ProfileForm = {
-  name: string;
-  qiudaoDateSolar: string;
-  qiudaoHour: string;
-  qiudaoTemple: string;
-  qiudaoTanzhu: string;
-  affiliation: string;
-  dianChuanShi: string;
-  yinShi: string;
-  baoShi: string;
-};
+import type { UserProfileFormData } from "~/utils/types";
 
 export default function PersonalAccountPage() {
   const { data: sessionData, update: updateSession } = useSession();
-  const [qiudaoHour, setQiudaoHour] = useState<string>("");
-  const [lunarDate, setLunarDate] = useState<string>("");
-
-  const { register, handleSubmit, watch, reset, control } =
-    useForm<ProfileForm>({
-      mode: "all",
-    });
 
   // Fetch current user profile data
   const { data: userProfile, isLoading: userProfileIsLoading } =
     api.user.getCurrentUserProfile.useQuery();
-
-  // Set form default values when user profile is loaded
-  useEffect(() => {
-    if (userProfile && !userProfileIsLoading) {
-      reset({
-        name: userProfile.name ?? "",
-        qiudaoDateSolar: userProfile.qiudaoDateSolar
-          ? new Date(userProfile.qiudaoDateSolar).toISOString().split("T")[0]
-          : "",
-        qiudaoHour: userProfile.qiudaoHour ?? "",
-        qiudaoTemple: userProfile.qiudaoTemple ?? "",
-        qiudaoTanzhu: userProfile.qiudaoTanzhu ?? "",
-        affiliation: userProfile.affiliation ?? "",
-        dianChuanShi: userProfile.dianChuanShi ?? "",
-        yinShi: userProfile.yinShi ?? "",
-        baoShi: userProfile.baoShi ?? "",
-      });
-      setQiudaoHour(userProfile.qiudaoHour ?? "");
-    }
-  }, [userProfile, userProfileIsLoading, reset]);
-
-  // Watch for solar date changes and auto-calculate lunar date
-  const qiudaoDateSolar = watch("qiudaoDateSolar");
-
-  // Auto-calculate lunar date when solar date changes
-  useEffect(() => {
-    if (qiudaoDateSolar) {
-      try {
-        const lunar = lunisolar(qiudaoDateSolar);
-        const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
-        setLunarDate(lunarStr);
-      } catch (e) {
-        setLunarDate("");
-      }
-    } else {
-      setLunarDate("");
-    }
-  }, [qiudaoDateSolar]);
 
   const {
     data: lineImage,
@@ -98,21 +38,33 @@ export default function PersonalAccountPage() {
     return <span className="loading loading-ring loading-md" />;
   }
 
-  const handleFormSubmit = handleSubmit((data) => {
-    // Update profile and image first
+  const initialData: Partial<UserProfileFormData> = {
+    name: userProfile?.name ?? "",
+    qiudaoDateSolar: userProfile?.qiudaoDateSolar
+      ? new Date(userProfile.qiudaoDateSolar).toISOString().split("T")[0]
+      : "",
+    qiudaoHour: userProfile?.qiudaoHour ?? "",
+    qiudaoTemple: userProfile?.qiudaoTemple ?? "",
+    qiudaoTanzhu: userProfile?.qiudaoTanzhu ?? "",
+    affiliation: userProfile?.affiliation ?? "",
+    dianChuanShi: userProfile?.dianChuanShi ?? "",
+    yinShi: userProfile?.yinShi ?? "",
+    baoShi: userProfile?.baoShi ?? "",
+  };
+
+  const handleFormSubmit = (data: UserProfileFormData) => {
     updateProfile(
       {
-        name: data.name,
+        name: data.name ?? "",
         image: lineImage ?? sessionData.user.image,
       },
       {
         onSuccess: () => {
-          // Then update qiudao info
           updateQiudaoInfo({
             qiudaoDateSolar: data.qiudaoDateSolar
               ? new Date(data.qiudaoDateSolar)
               : null,
-            qiudaoHour: qiudaoHour || null,
+            qiudaoHour: data.qiudaoHour || null,
             qiudaoTemple: data.qiudaoTemple || null,
             qiudaoTanzhu: data.qiudaoTanzhu || null,
             affiliation: data.affiliation || null,
@@ -123,17 +75,15 @@ export default function PersonalAccountPage() {
         },
       },
     );
-  });
+  };
 
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
         <h1>個人資料</h1>
       </article>
-      <form
-        className="form-control max-w-xs space-y-4"
-        onSubmit={(e) => e.preventDefault()}
-      >
+
+      <div className="max-w-xs space-y-4">
         <div>
           <label className="label">
             <span className="label-text">大頭照</span>
@@ -158,17 +108,6 @@ export default function PersonalAccountPage() {
             </ReactiveButton>
           </div>
         </div>
-        <div>
-          <label className="label">
-            <span className="label-text">姓名（APP 裡顯示的名字）</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered invalid:input-error w-full"
-            required
-            {...register("name")}
-          />
-        </div>
 
         <div className="divider" />
 
@@ -176,97 +115,15 @@ export default function PersonalAccountPage() {
           <h2>求道卡資料</h2>
         </article>
 
-        <div>
-          <label className="label">
-            <span className="label-text">所屬單位</span>
-          </label>
-          <Controller
-            control={control}
-            name="affiliation"
-            render={({ field }) => (
-              <UnitSelector value={field.value} onChange={field.onChange} />
-            )}
-          />
-        </div>
-
-        <div>
-          <label className="label">
-            <span className="label-text">求道日期（國曆）</span>
-          </label>
-          <input
-            type="date"
-            className="input input-bordered w-full"
-            {...register("qiudaoDateSolar")}
-          />
-        </div>
-
-        <QiudaoLunarDisplay
-          solarDate={qiudaoDateSolar}
-          hour={qiudaoHour}
-          onHourChange={setQiudaoHour}
-        />
-        <div>
-          <label className="label">
-            <span className="label-text">求道佛堂</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("qiudaoTemple")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">壇主（姓名）</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("qiudaoTanzhu")}
-          />
-        </div>
-
-        <div>
-          <label className="label">
-            <span className="label-text">點傳師</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("dianChuanShi")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">引師</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("yinShi")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">保師</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("baoShi")}
-          />
-        </div>
-        <ReactiveButton
-          className="btn btn-primary"
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={handleFormSubmit}
-          loading={updateProfileIsPending || updateQiudaoInfoIsPending}
+        <UserProfileForm
+          initialData={initialData}
+          onSubmit={handleFormSubmit}
+          isLoading={updateProfileIsPending || updateQiudaoInfoIsPending}
           isSuccess={updateProfileIsSuccess}
           error={updateProfileError?.message}
-        >
-          儲存
-        </ReactiveButton>
-      </form>
+          showNameField={true}
+        />
+      </div>
     </div>
   );
 }

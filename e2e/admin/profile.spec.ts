@@ -37,21 +37,23 @@ test.describe("4. Profile Management", () => {
     await expect(profileDialog.getByText("十二月初十")).toBeVisible();
 
     await profileDialog
-      .getByRole("combobox")
+      .getByLabel("時辰")
       .selectOption("子時 (23:00-01:00)");
 
     await profileDialog
       .locator('input[name="qiudaoTemple"]')
       .fill("Test Temple");
     await profileDialog.locator('input[name="qiudaoTanzhu"]').fill("Test Host");
-    await profileDialog.locator('input[name="affiliation"]').fill("Test Unit");
+    const unitSelects = profileDialog.getByRole("combobox");
+    await unitSelects.first().selectOption("Other");
+    await profileDialog.getByPlaceholder("輸入完整單位名稱").fill("Test Unit");
     await profileDialog
       .locator('input[name="dianChuanShi"]')
       .fill("Test Transmitter");
     await profileDialog.locator('input[name="yinShi"]').fill("Test Introducer");
     await profileDialog.locator('input[name="baoShi"]').fill("Test Guarantor");
 
-    await profileDialog.getByRole("button", { name: "儲存" }).click();
+    await profileDialog.getByRole("button", { name: "儲存設定" }).click();
 
     // Ensure dialog is closed before reload
     await expect(profileDialog).toBeHidden();
@@ -75,16 +77,17 @@ test.describe("4. Profile Management", () => {
     await expect(
       profileDialog.locator('input[name="qiudaoDateSolar"]'),
     ).toHaveValue("2023-01-01");
-    await expect(profileDialog.getByRole("combobox")).toHaveValue("子");
+    await expect(profileDialog.getByLabel("時辰")).toHaveValue("子");
     await expect(
       profileDialog.locator('input[name="qiudaoTemple"]'),
     ).toHaveValue("Test Temple");
     await expect(
       profileDialog.locator('input[name="qiudaoTanzhu"]'),
     ).toHaveValue("Test Host");
-    await expect(
-      profileDialog.locator('input[name="affiliation"]'),
-    ).toHaveValue("Test Unit");
+    await expect(profileDialog.getByRole("combobox").first()).toHaveValue("Other");
+    await expect(profileDialog.getByPlaceholder("輸入完整單位名稱")).toHaveValue(
+      "Test Unit",
+    );
     await expect(
       profileDialog.locator('input[name="dianChuanShi"]'),
     ).toHaveValue("Test Transmitter");
