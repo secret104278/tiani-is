@@ -10,7 +10,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work");
+    await page.goto("/work/yide");
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
@@ -71,7 +71,7 @@ test.describe("YideWork Activity New Features", () => {
     page,
   }) => {
     // 1. Create an offering activity as Admin
-    await page.goto("/work/activity/new");
+    await page.goto("/work/activity/new?unitSlug=yide");
     await page.locator('select[name="title"]').selectOption("獻供通知");
     await page
       .locator('select[name="locationId"]')
@@ -99,7 +99,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work/activity/new");
+    await page.goto("/work/activity/new?unitSlug=yide");
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 
@@ -128,7 +128,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work/activity/new");
+    await page.goto("/work/activity/new?unitSlug=yide");
 
     await page
       .locator('select[name="offeringFestival"]')
@@ -152,7 +152,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work/activity/new");
+    await page.goto("/work/activity/new?unitSlug=yide");
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 

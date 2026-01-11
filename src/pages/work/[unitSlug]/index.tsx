@@ -2,36 +2,27 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ActivityCard } from "~/components/ActivityCard";
-import { HourStats } from "~/components/HourStats";
 import { Loading } from "~/components/utils/Loading";
 import { api } from "~/utils/api";
-import { activityIsEnded, getUnitBySlug } from "~/utils/ui";
+import { Site, activityIsEnded, getUnitBySlug, siteToTitle } from "~/utils/ui";
 
-export default function UnitActivityList() {
+export default function WorkHome() {
   const router = useRouter();
   const { unitSlug } = router.query;
-  const unitInfo = getUnitBySlug(unitSlug as string);
-  const [filterParticipatedByMe, setFilterParticipatedByMe] = useState(false);
+  const unit = getUnitBySlug(unitSlug as string);
 
   const activitiesQuery =
-    api.classActivity.getAllActivitiesInfinite.useInfiniteQuery(
+    api.workActivity.getAllActivitiesInfinite.useInfiniteQuery(
+      { unit: unit?.name ?? "" },
       {
-        participatedByMe: filterParticipatedByMe,
-        unit: unitInfo?.name,
-      },
-      {
+        enabled: !!unit,
         getNextPageParam: (lastPage) => lastPage.nextCursor,
-        enabled: !!unitInfo,
       },
     );
 
   const activities = activitiesQuery.data?.pages?.flatMap((page) => page.items);
-
-  const { data: workingStats, isLoading: workingStatsIsLoading } =
-    api.classActivity.getWorkingStats.useQuery({});
 
   const onGoingActivities = activities?.filter(
     (activity) => !activityIsEnded(activity.endDateTime),
@@ -43,34 +34,18 @@ export default function UnitActivityList() {
   return (
     <div className="flex flex-col space-y-4">
       <article className="prose">
-        <h1>{unitInfo?.name}班務總覽</h1>
+        <h1>{siteToTitle(Site.Work, unit?.name)}</h1>
       </article>
-      {!workingStatsIsLoading && (
-        <Link href="/class/workingstats" className="flex flex-col">
-          <HourStats
-            title="總開班時數"
-            totalWorkingHours={workingStats?.totalWorkingHours}
-          />
-        </Link>
-      )}
       <div className="flex flex-row justify-end space-x-4">
-        <Link href="/class/activity/new" className="flex-shrink-0">
+        <Link
+          href={`/work/activity/new?unitSlug=${unitSlug}`}
+          className="flex-shrink-0"
+        >
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
-            建立新簽到單
+            建立新通知
           </div>
         </Link>
-      </div>
-      <div className="flex flex-row flex-wrap">
-        <label className="label cursor-pointer space-x-2">
-          <span className="label-text">我參加的</span>
-          <input
-            type="checkbox"
-            className="toggle toggle-primary"
-            checked={filterParticipatedByMe}
-            onChange={() => setFilterParticipatedByMe((prev) => !prev)}
-          />
-        </label>
       </div>
       <div>
         {activitiesQuery.isLoading && <Loading />}
@@ -84,13 +59,20 @@ export default function UnitActivityList() {
         >
           <div className="flex flex-col space-y-4">
             {onGoingActivities?.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} />
+              <ActivityCard
+                key={activity.id}
+                activity={{ ...activity, location: activity.location.name }}
+              />
             ))}
           </div>
           {!isEmpty(endedActivities) && <div className="divider">已結束</div>}
           <div className="flex flex-col space-y-4">
             {endedActivities?.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} isEnd />
+              <ActivityCard
+                key={activity.id}
+                activity={{ ...activity, location: activity.location.name }}
+                isEnd
+              />
             ))}
           </div>
         </InfiniteScroll>

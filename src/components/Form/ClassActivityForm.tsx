@@ -7,8 +7,8 @@ import { api } from "~/utils/api";
 import {
   CLASS_ACTIVITY_LOCATIONS,
   CLASS_ACTIVITY_TITLES,
-  VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   CLASS_UNITS,
+  VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,

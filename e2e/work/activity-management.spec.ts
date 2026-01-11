@@ -2,7 +2,7 @@ import { expect, test } from "../fixtures";
 
 test.describe("YideWork Activity Management", () => {
   test("Create a new standard activity", async ({ loginAsWorkAdmin, page }) => {
-    await page.goto("/work");
+    await page.goto("/work/yide");
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
@@ -28,7 +28,7 @@ test.describe("YideWork Activity Management", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work");
+    await page.goto("/work/yide");
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
@@ -95,7 +95,7 @@ test.describe("YideWork Activity Management", () => {
 
   test("Delete an activity", async ({ loginAsWorkAdmin, page }) => {
     const uniqueTitle = `To Delete ${Date.now()}`;
-    await page.goto("/work");
+    await page.goto("/work/yide");
     await page.getByRole("link", { name: "建立新通知" }).click();
     await page.locator('select[name="title"]').selectOption(["辦道通知"]);
     await page
@@ -112,7 +112,7 @@ test.describe("YideWork Activity Management", () => {
       .getByRole("button", { name: "撤銷" })
       .click();
 
-    await expect(page).toHaveURL("/work");
+    await expect(page).toHaveURL("/work/yide");
 
     await expect(page.getByText(uniqueTitle)).not.toBeVisible();
   });

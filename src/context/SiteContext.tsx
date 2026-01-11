@@ -1,12 +1,13 @@
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { type Site, urlBaseToSite } from "~/utils/ui";
+import { type Site, getUnitBySlug, urlBaseToSite } from "~/utils/ui";
 
 // Define the context type
 type SiteContextType = {
   site: Site | undefined;
   setSite: React.Dispatch<React.SetStateAction<Site | undefined>>;
+  unitName: string | undefined;
 };
 
 // Create the context
@@ -19,12 +20,15 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     urlBaseToSite(router.pathname.split("/")[1]),
   );
 
+  const unitSlug = router.query.unitSlug as string;
+  const unitName = getUnitBySlug(unitSlug)?.name;
+
   useEffect(() => {
     setSite(urlBaseToSite(router.pathname.split("/")[1]));
   }, [router.pathname]);
 
   return (
-    <SiteContext.Provider value={{ site, setSite }}>
+    <SiteContext.Provider value={{ site, setSite, unitName }}>
       {children}
     </SiteContext.Provider>
   );

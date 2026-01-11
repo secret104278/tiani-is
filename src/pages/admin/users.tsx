@@ -331,14 +331,12 @@ export default function AdminUsersPage() {
     api.user.setIsVolunteerAdmin.useMutation({
       onSettled: () => usersRefetch(),
     });
-  const { mutate: setIsClassAdmin } =
-    api.user.setIsClassAdmin.useMutation({
-      onSettled: () => usersRefetch(),
-    });
-  const { mutate: setIsWorkAdmin } =
-    api.user.setIsWorkAdmin.useMutation({
-      onSettled: () => usersRefetch(),
-    });
+  const { mutate: setIsClassAdmin } = api.user.setIsClassAdmin.useMutation({
+    onSettled: () => usersRefetch(),
+  });
+  const { mutate: setIsWorkAdmin } = api.user.setIsWorkAdmin.useMutation({
+    onSettled: () => usersRefetch(),
+  });
   const { mutate: setIsEtogetherAdmin } =
     api.user.setIsEtogetherAdmin.useMutation({
       onSettled: () => usersRefetch(),

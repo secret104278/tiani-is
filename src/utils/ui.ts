@@ -354,7 +354,18 @@ export const userComparator = (
   return !!a.name && !!b.name ? a.name.localeCompare(b.name, "zh-Hant-TW") : 0;
 };
 
-export const siteToTitle = (site?: Site) => {
+export const siteToTitle = (site?: Site, unitName?: string) => {
+  const suffix =
+    site === Site.Volunteer
+      ? ""
+      : site === Site.Work
+        ? "道務網"
+        : site === Site.Class
+          ? "班務網"
+          : "";
+
+  if (unitName && suffix) return `${unitName}${suffix}`;
+
   switch (site) {
     case Site.Volunteer:
       return "天一志工隊";
@@ -371,7 +382,7 @@ export const siteToTitle = (site?: Site) => {
   }
 };
 
-export const CLASS_UNITS = [
+export const UNITS = [
   { name: "忠德", color: "bg-red-100 text-red-800", slug: "zhongde" },
   { name: "孝德", color: "bg-orange-100 text-orange-800", slug: "xiaode" },
   { name: "仁德", color: "bg-yellow-100 text-yellow-800", slug: "rende" },
@@ -380,12 +391,14 @@ export const CLASS_UNITS = [
   { name: "義德", color: "bg-purple-100 text-purple-800", slug: "yide" },
 ];
 
+export const CLASS_UNITS = UNITS;
+
 export const getUnitBySlug = (slug?: string | string[]) => {
-  return CLASS_UNITS.find((u) => u.slug === slug);
+  return UNITS.find((u) => u.slug === slug);
 };
 
 export const getUnitByName = (name?: string) => {
-  return CLASS_UNITS.find((u) => u.name === name);
+  return UNITS.find((u) => u.name === name);
 };
 
 export const differenceInHoursNoRound = (dateLeft: Date, dateRight: Date) =>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CLASS_UNITS } from "~/utils/ui";
+import { UNITS } from "~/utils/ui";
 
 export default function ClassManagementHome() {
   return (
@@ -10,11 +10,9 @@ export default function ClassManagementHome() {
       </article>
 
       <div className="grid grid-cols-2 gap-4">
-        {CLASS_UNITS.map((unit) => (
+        {UNITS.map((unit) => (
           <Link href={`/class/${unit.slug}`} key={unit.slug}>
-            <div
-              className={`card cursor-pointer shadow-lg transition-shadow hover:shadow-xl ${unit.color}`}
-            >
+            <div className="card card-bordered cursor-pointer transition-colors hover:bg-base-200">
               <div className="card-body items-center text-center">
                 <h2 className="card-title text-2xl">{unit.name}</h2>
               </div>

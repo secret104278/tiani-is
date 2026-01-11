@@ -7,11 +7,13 @@ import {
   UserIcon,
 } from "@heroicons/react/20/solid";
 import { signOut, useSession } from "next-auth/react";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ReactNode, useState } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
+import { siteHomeHref } from "~/utils/navigation";
 import { IS_LINE_NOTIFY_ENABLED, siteToTitle } from "~/utils/ui";
 import CheckInQrModal from "../CheckInQrModal";
 import LineNotifySetupTutorialDialog from "../LineNotifySetupTutorialDialog";
@@ -49,7 +51,7 @@ function UserAvatar() {
 /** @deprecated */
 export default function Layout({ children }: { children: ReactNode }) {
   const { data: sessionData } = useSession();
-  const { site } = useSiteContext();
+  const { site, unitName } = useSiteContext();
   const router = useRouter();
   const [showQrModal, setShowQrModal] = useState(false);
 
@@ -59,20 +61,26 @@ export default function Layout({ children }: { children: ReactNode }) {
   );
   const [showLineNotifySetup, setShowLineNotifySetup] = useState(false);
 
+  const title = siteToTitle(site, unitName);
+  const homeHref = siteHomeHref(site, router.query.unitSlug as string);
+
   return (
     <>
+      <Head>
+        <title>{title}</title>
+      </Head>
       <div className="navbar mb-4 bg-base-100 shadow-md">
         <div className="navbar-start">
-          <Link href={site ? `/${site}` : "/personal/account"}>
+          <Link href={homeHref}>
             <button className="btn btn-circle btn-ghost">
               <HomeIcon className="h-6 w-6" />
             </button>
           </Link>
         </div>
         <div className="navbar-center">
-          <Link href={site ? `/${site}` : "/personal/account"}>
+          <Link href={homeHref}>
             <button className="btn btn-ghost text-xl normal-case">
-              {siteToTitle(site)}
+              {title}
             </button>
           </Link>
         </div>

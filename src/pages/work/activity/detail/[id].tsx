@@ -60,9 +60,7 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       ogMeta: {
-        ogTitle: `${res.title}・${formatDateTitle(
-          res.startDateTime,
-        )}・道務網`,
+        ogTitle: `${res.title}・${formatDateTitle(res.startDateTime)}・道務網`,
       },
     },
   };
@@ -70,7 +68,7 @@ export const getServerSideProps: GetServerSideProps<{
 
 export default function WorkActivityDetailPage() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id, unitSlug } = router.query;
 
   const { site } = useSiteContext();
 
@@ -94,7 +92,7 @@ export default function WorkActivityDetailPage() {
     isPending: deleteActivityIsPending,
     isError: deleteActivityIsError,
   } = api.workActivity.deleteActivity.useMutation({
-    onSuccess: () => router.push(`/${site}`),
+    onSuccess: () => router.push(`/${site}${unitSlug ? `/${unitSlug}` : ""}`),
   });
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -141,7 +139,7 @@ export default function WorkActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/work/activity/detail/${activity.id}?v=${activity.version}`,
+          `${window.location.origin}/work/activity/detail/${activity.id}?v=${activity.version}${unitSlug ? `&unitSlug=${unitSlug}` : ""}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -172,7 +170,9 @@ export default function WorkActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <Link href={`/work/activity/edit/${activity.id}`}>
+        <Link
+          href={`/work/activity/edit/${activity.id}${unitSlug ? `?unitSlug=${unitSlug}` : ""}`}
+        >
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
             編輯
@@ -196,14 +196,15 @@ export default function WorkActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
-      {!isOffering && (
-        <WorkActivityStaffManagement activityId={activity.id} />
-      )}
+      {!isOffering && <WorkActivityStaffManagement activityId={activity.id} />}
     </>
   );
 
   const QiudaorenPanel = () => (
-    <Link href={`/work/activity/qiudaoren/${activity.id}`} className="w-full">
+    <Link
+      href={`/work/activity/qiudaoren/${activity.id}${unitSlug ? `?unitSlug=${unitSlug}` : ""}`}
+      className="w-full"
+    >
       <button className="btn w-full">
         <QueueListIcon className="h-4 w-4" />
         求道人清單

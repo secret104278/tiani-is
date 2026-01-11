@@ -19,6 +19,7 @@ export const activityRouter = createTRPCRouter({
         endDateTime: z.date(),
         assignments: z.record(z.any()).optional(),
         isDraft: z.boolean().optional(),
+        unit: z.string(),
       }),
     )
     .mutation(({ ctx, input }) =>
@@ -27,6 +28,7 @@ export const activityRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           festival: input.festival,
+          unit: input.unit,
           location: {
             connect: {
               id: input.locationId,
@@ -76,6 +78,7 @@ export const activityRouter = createTRPCRouter({
         endDateTime: z.date(),
         assignments: z.record(z.any()).optional(),
         isDraft: z.boolean().optional(),
+        unit: z.string().optional(),
       }),
     )
     .mutation(({ ctx, input }) =>
@@ -87,6 +90,7 @@ export const activityRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           festival: input.festival,
+          unit: input.unit,
           location: {
             connect: {
               id: input.locationId,
@@ -116,13 +120,16 @@ export const activityRouter = createTRPCRouter({
     .input(
       z.object({
         participatedByMe: z.boolean().optional(),
+        unit: z.string(),
 
         limit: z.number().min(1).max(100).default(10),
         cursor: z.object({ startDateTime: z.date(), id: z.number() }).nullish(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const filters: Prisma.YideWorkActivityWhereInput[] = [];
+      const filters: Prisma.YideWorkActivityWhereInput[] = [
+        { unit: input.unit },
+      ];
       // if (input.participatedByMe) {
       //   filters.push({
       //     classActivityCheckRecords: { some: { userId: ctx.session.user.id } },
@@ -130,7 +137,7 @@ export const activityRouter = createTRPCRouter({
       // }
 
       const items = await ctx.db.yideWorkActivity.findMany({
-        where: filters.length === 0 ? undefined : { OR: filters },
+        where: { AND: filters },
         orderBy: { startDateTime: "desc" },
         include: {
           location: {

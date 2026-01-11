@@ -1,6 +1,11 @@
-import type { Site } from "./ui";
+import { Site } from "./ui";
 
-export const siteHomeHref = (site?: Site) => `/${site}`;
+export const siteHomeHref = (site?: Site, unitSlug?: string) => {
+  if (unitSlug && (site === Site.Class || site === Site.Work)) {
+    return `/${site}/${unitSlug}`;
+  }
+  return `/${site}`;
+};
 
 export const siteActivityDetailHref = (site: Site, activityId: number) =>
   `/${site}/activity/${activityId}/detail`;

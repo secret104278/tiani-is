@@ -13,6 +13,7 @@ import {
   getDateTimeString,
   getDurationHour,
   getEndTime,
+  getUnitBySlug,
   titleIsOther,
 } from "~/utils/ui";
 import { AlertWarning } from "../utils/Alert";
@@ -77,6 +78,9 @@ export default function WorkActivityForm({
   const { register, handleSubmit, watch, setValue } = methods;
 
   const router = useRouter();
+  const unitSlug = router.query.unitSlug as string;
+  const unitName = getUnitBySlug(unitSlug)?.name;
+
   const currentTitle = watch("title");
   const isOffering = currentTitle === "獻供通知";
 
@@ -91,14 +95,16 @@ export default function WorkActivityForm({
     error: createActivityError,
     isPending: createActivityIsPending,
   } = api.workActivity.createActivity.useMutation({
-    onSuccess: (data) => router.push(`/work/activity/detail/${data.id}`),
+    onSuccess: (data) =>
+      router.push(`/work/activity/detail/${data.id}?unitSlug=${unitSlug}`),
   });
   const {
     mutate: updateActivity,
     error: updateActivityError,
     isPending: updateActivityIsPending,
   } = api.workActivity.updateActivity.useMutation({
-    onSuccess: (data) => router.push(`/work/activity/detail/${data.id}`),
+    onSuccess: (data) =>
+      router.push(`/work/activity/detail/${data.id}?unitSlug=${unitSlug}`),
   });
 
   const _handleSubmit = (isDraft = false) => {
@@ -120,6 +126,7 @@ export default function WorkActivityForm({
         festival: festival,
         assignments: data.assignments,
         isDraft: isDraft,
+        unit: unitName ?? "義德",
       };
 
       if (defaultActivity) {
