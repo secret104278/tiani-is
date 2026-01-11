@@ -1,322 +1,127 @@
 import {
-  BarsArrowDownIcon,
-  PlusIcon,
+  AdjustmentsHorizontalIcon,
+  MagnifyingGlassIcon,
+  ShieldCheckIcon,
   UserIcon,
 } from "@heroicons/react/20/solid";
 import { Role } from "@prisma/client";
-import { isEmpty, truncate } from "lodash";
-import lunisolar from "lunisolar";
+import { isEmpty } from "lodash";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
+import { useMemo, useState } from "react";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
-import ReactiveButton from "~/components/utils/ReactiveButton";
+import LineImage from "~/components/utils/LineImage";
+import { Loading } from "~/components/utils/Loading";
 import { api } from "~/utils/api";
-import { userComparator } from "~/utils/ui";
+import { UNITS } from "~/utils/ui";
 
-function CreateUserDialogContent() {
-  const router = useRouter();
-
-  const {
-    mutate: createUser,
-    isPending: createUserIsPending,
-    error: createUserError,
-  } = api.user.createUser.useMutation({ onSuccess: () => router.reload() });
-
-  const { register, handleSubmit } = useForm<{ username: string }>();
-
-  return (
-    <>
-      <AlertWarning>
-        新增帳號僅限用於道親沒有 Line 帳號也沒有使用 3C
-        產品，且短期內也不會嘗試使用。
-        <br />
-        此帳號建立後將主要用於管理員或壇務協助手動打卡
-      </AlertWarning>
-      <form
-        className="form-control space-y-4"
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onSubmit={handleSubmit((data) =>
-          createUser({ username: data.username }),
-        )}
-      >
-        <div>
-          <label className="label">
-            <span className="label-text">姓名</span>
-          </label>
-          <input
-            type="text"
-            className="tiani-input"
-            required
-            {...register("username", { required: true })}
-          />
-        </div>
-        <div className="flex flex-row justify-end space-x-4">
-          <ReactiveButton
-            type="submit"
-            className="btn btn-primary"
-            loading={createUserIsPending}
-            error={createUserError?.message}
-          >
-            建立
-          </ReactiveButton>
-        </div>
-      </form>
-    </>
-  );
+interface AdminUser {
+  id: string;
+  name: string | null;
+  roles: Role[];
+  affiliation: string | null;
+  image: string | null;
 }
 
-type QiudaoInfoForm = {
-  qiudaoDateSolar: string;
-  qiudaoTemple: string;
-  qiudaoTanzhu: string;
-  affiliation: string;
-  dianChuanShi: string;
-  yinShi: string;
-  baoShi: string;
-};
-
-function UserProfileDialogContent({
-  userId,
+// --- Sub-component: Permission Editor ("Careful UI") ---
+function RoleEditorDialog({
+  user,
   onClose,
+  onUpdate,
+  isMe,
 }: {
-  userId: string;
+  user: AdminUser;
   onClose: () => void;
+  onUpdate: (role: Role, val: boolean) => void;
+  isMe: boolean;
 }) {
-  const [qiudaoHour, setQiudaoHour] = useState<string>("");
-  const [lunarDate, setLunarDate] = useState<string>("");
+  const roleLabels: Record<Role, string> = {
+    [Role.TIANI_ADMIN]: "最高管理者",
+    [Role.VOLUNTEER_ADMIN]: "志工隊管理者",
+    [Role.YIDECLASS_ADMIN]: "班務網管理者",
+    [Role.YIDEWORK_ADMIN]: "道務網管理者",
+    [Role.ETOGETHER_ADMIN]: "活動e起來管理者",
+  };
 
-  const {
-    data: user,
-    isLoading: userIsLoading,
-    error: userError,
-    refetch: userRefetch,
-  } = api.user.getUser.useQuery({ userId });
-
-  const {
-    mutate: updateUserQiudaoInfo,
-    isPending: updateUserQiudaoInfoIsPending,
-    isSuccess: updateUserQiudaoInfoIsSuccess,
-    error: updateUserQiudaoInfoError,
-  } = api.user.updateUserQiudaoInfo.useMutation({
-    onSuccess: () => {
-      void userRefetch();
-      // Close dialog after successful save
-      onClose();
-    },
-  });
-
-  const { register, handleSubmit, reset, watch } = useForm<QiudaoInfoForm>({
-    mode: "all",
-  });
-
-  // Watch for solar date changes
-  const qiudaoDateSolar = watch("qiudaoDateSolar");
-
-  // Auto-calculate lunar date when solar date changes
-  useEffect(() => {
-    if (qiudaoDateSolar) {
-      try {
-        const lunar = lunisolar(qiudaoDateSolar);
-        const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
-        setLunarDate(lunarStr);
-      } catch (e) {
-        setLunarDate("");
-      }
-    } else {
-      setLunarDate("");
-    }
-  }, [qiudaoDateSolar]);
-
-  // Reset form when user data is loaded
-  useEffect(() => {
-    if (user && !userIsLoading) {
-      reset({
-        qiudaoDateSolar: user.qiudaoDateSolar
-          ? new Date(user.qiudaoDateSolar).toISOString().split("T")[0]
-          : "",
-        qiudaoTemple: user.qiudaoTemple ?? "",
-        qiudaoTanzhu: user.qiudaoTanzhu ?? "",
-        affiliation: user.affiliation ?? "",
-        dianChuanShi: user.dianChuanShi ?? "",
-        yinShi: user.yinShi ?? "",
-        baoShi: user.baoShi ?? "",
-      });
-      setQiudaoHour(user.qiudaoHour ?? "");
-    }
-  }, [user, userIsLoading, reset]);
-
-  if (userIsLoading) return <div className="loading" />;
-  if (userError) return <AlertWarning>{userError.message}</AlertWarning>;
-  if (!user) return <AlertWarning>找不到用戶資料</AlertWarning>;
+  const availableRoles = [
+    Role.TIANI_ADMIN,
+    Role.VOLUNTEER_ADMIN,
+    Role.YIDECLASS_ADMIN,
+    Role.YIDEWORK_ADMIN,
+    Role.ETOGETHER_ADMIN,
+  ];
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="alert alert-info">
-        <span>用戶：{user.name}</span>
-      </div>
-      <form
-        className="form-control space-y-4"
-        onSubmit={(e) => e.preventDefault()}
-      >
-        <div>
-          <label className="label">
-            <span className="label-text">求道日期（國曆）</span>
-          </label>
-          <input
-            type="date"
-            className="input input-bordered w-full"
-            {...register("qiudaoDateSolar")}
-          />
-        </div>
-
-        <QiudaoLunarDisplay
-          solarDate={qiudaoDateSolar}
-          hour={qiudaoHour}
-          onHourChange={setQiudaoHour}
-        />
-        <div>
-          <label className="label">
-            <span className="label-text">求道佛堂</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("qiudaoTemple")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">壇主（姓名）</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("qiudaoTanzhu")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">所屬單位</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("affiliation")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">點傳師</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("dianChuanShi")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">引師</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("yinShi")}
-          />
-        </div>
-        <div>
-          <label className="label">
-            <span className="label-text">保師</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            {...register("baoShi")}
-          />
-        </div>
-        <div className="flex flex-row justify-end space-x-4">
-          <ReactiveButton
-            className="btn btn-primary"
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={handleSubmit((data) =>
-              updateUserQiudaoInfo({
-                userId,
-                qiudaoDateSolar: data.qiudaoDateSolar
-                  ? new Date(data.qiudaoDateSolar)
-                  : null,
-                qiudaoHour: qiudaoHour || null,
-                qiudaoTemple: data.qiudaoTemple || null,
-                qiudaoTanzhu: data.qiudaoTanzhu || null,
-                affiliation: data.affiliation || null,
-                dianChuanShi: data.dianChuanShi || null,
-                yinShi: data.yinShi || null,
-                baoShi: data.baoShi || null,
-              }),
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 rounded-xl bg-base-200 p-3">
+        <div className="avatar">
+          <div className="w-10 rounded-full bg-base-300">
+            {user.image ? (
+              <LineImage src={user.image} alt={user.name ?? ""} />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <UserIcon className="h-6 w-6 opacity-20" />
+              </div>
             )}
-            loading={updateUserQiudaoInfoIsPending}
-            isSuccess={updateUserQiudaoInfoIsSuccess}
-            error={updateUserQiudaoInfoError?.message}
-          >
-            儲存
-          </ReactiveButton>
+          </div>
         </div>
-      </form>
+        <div>
+          <p className="font-bold">{user.name}</p>
+          <p className="text-xs opacity-60">
+            {user.affiliation ?? "未設定單位"}
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        {availableRoles.map((role) => {
+          const isActive = user.roles.includes(role);
+          const isTianiAdmin = user.roles.includes(Role.TIANI_ADMIN);
+          // Safety: Don't allow self-removal of Tiani Admin or modification if user is Tiani Admin (except for Tiani Admin role itself)
+          const disabled =
+            (role === Role.TIANI_ADMIN && isMe) ||
+            (role !== Role.TIANI_ADMIN && isTianiAdmin);
+
+          return (
+            <div
+              key={role}
+              className={`flex items-center justify-between rounded-lg border border-base-200 p-3 ${disabled ? "opacity-50" : ""}`}
+            >
+              <span className="font-medium text-sm">{roleLabels[role]}</span>
+              <input
+                type="checkbox"
+                className="toggle toggle-primary toggle-sm"
+                checked={isActive}
+                disabled={disabled}
+                onChange={(e) => onUpdate(role, e.target.checked)}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="pt-2">
+        <button className="btn btn-block btn-ghost" onClick={onClose}>
+          關閉
+        </button>
+      </div>
     </div>
   );
 }
 
-enum SortedType {
-  NAME = 0,
-  IS_TIANI_ADMIN = 1,
-  IS_VOLUNTEER_ADMIN = 2,
-  IS_CLASS_ADMIN = 3,
-  IS_ETOGETHER_ADMIN = 4,
-  IS_WORK_ADMIN = 5,
-}
-
-const getComparator = (sortedType: SortedType) => {
-  type User = { name: string | null; roles: Role[] };
-
-  const rolesComparator = (role: Role) => (a: User, b: User) =>
-    Number(b.roles.includes(role) || b.roles.includes(Role.TIANI_ADMIN)) -
-    Number(a.roles.includes(role) || a.roles.includes(Role.TIANI_ADMIN));
-
-  switch (sortedType) {
-    case SortedType.NAME:
-      return userComparator;
-    case SortedType.IS_TIANI_ADMIN:
-      return (a: User, b: User) => {
-        const result = rolesComparator(Role.TIANI_ADMIN)(a, b);
-        return result !== 0 ? result : userComparator(a, b);
-      };
-    case SortedType.IS_VOLUNTEER_ADMIN:
-      return (a: User, b: User) => {
-        const result = rolesComparator(Role.VOLUNTEER_ADMIN)(a, b);
-        return result !== 0 ? result : userComparator(a, b);
-      };
-    case SortedType.IS_CLASS_ADMIN:
-      return (a: User, b: User) => {
-        const result = rolesComparator(Role.YIDECLASS_ADMIN)(a, b);
-        return result !== 0 ? result : userComparator(a, b);
-      };
-    case SortedType.IS_WORK_ADMIN:
-      return (a: User, b: User) => {
-        const result = rolesComparator(Role.YIDEWORK_ADMIN)(a, b);
-        return result !== 0 ? result : userComparator(a, b);
-      };
-    case SortedType.IS_ETOGETHER_ADMIN:
-      return (a: User, b: User) => {
-        const result = rolesComparator(Role.ETOGETHER_ADMIN)(a, b);
-        return result !== 0 ? result : userComparator(a, b);
-      };
-  }
-};
-
 export default function AdminUsersPage() {
+  const [selectedUnit, setSelectedUnit] = useState<string>("義德");
+  const [search, setSearch] = useState("");
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [roleFilter, setRoleFilter] = useState<Role | "ALL">("ALL");
+
+  const roleLabels: Record<Role, string> = {
+    [Role.TIANI_ADMIN]: "最高",
+    [Role.VOLUNTEER_ADMIN]: "志工",
+    [Role.YIDECLASS_ADMIN]: "班務",
+    [Role.YIDEWORK_ADMIN]: "道務",
+    [Role.ETOGETHER_ADMIN]: "活動",
+  };
+
   const {
     data: users,
     isLoading: usersIsLoading,
@@ -324,251 +129,265 @@ export default function AdminUsersPage() {
     refetch: usersRefetch,
   } = api.user.getUsers.useQuery();
 
+  const { data: sessionData } = useSession();
+
+  // Mutations
   const { mutate: setIsTianiAdmin } = api.user.setIsTianiAdmin.useMutation({
-    onSettled: () => usersRefetch(),
+    onSettled: () => void usersRefetch(),
   });
   const { mutate: setIsVolunteerAdmin } =
     api.user.setIsVolunteerAdmin.useMutation({
-      onSettled: () => usersRefetch(),
+      onSettled: () => void usersRefetch(),
     });
   const { mutate: setIsClassAdmin } = api.user.setIsClassAdmin.useMutation({
-    onSettled: () => usersRefetch(),
+    onSettled: () => void usersRefetch(),
   });
   const { mutate: setIsWorkAdmin } = api.user.setIsWorkAdmin.useMutation({
-    onSettled: () => usersRefetch(),
+    onSettled: () => void usersRefetch(),
   });
   const { mutate: setIsEtogetherAdmin } =
     api.user.setIsEtogetherAdmin.useMutation({
-      onSettled: () => usersRefetch(),
+      onSettled: () => void usersRefetch(),
     });
 
-  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
-  const [userProfileDialogOpen, setUserProfileDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const handleRoleUpdate = (role: Role, val: boolean) => {
+    if (!editingUser) return;
+    const input = { userId: editingUser.id, isAdmin: val };
 
-  const [sortedType, setSortedType] = useState(SortedType.NAME);
+    switch (role) {
+      case Role.TIANI_ADMIN:
+        setIsTianiAdmin(input);
+        break;
+      case Role.VOLUNTEER_ADMIN:
+        setIsVolunteerAdmin(input);
+        break;
+      case Role.YIDECLASS_ADMIN:
+        setIsClassAdmin(input);
+        break;
+      case Role.YIDEWORK_ADMIN:
+        setIsWorkAdmin(input);
+        break;
+      case Role.ETOGETHER_ADMIN:
+        setIsEtogetherAdmin(input);
+        break;
+    }
 
-  const { data: sessionData } = useSession();
+    // Optimistically update local state for the dialog UI
+    setEditingUser((prev) => {
+      if (!prev) return null;
+      let newRoles = [...prev.roles];
+      if (val) {
+        newRoles.push(role);
+      } else {
+        newRoles = newRoles.filter((r) => r !== role);
+      }
+      return { ...prev, roles: newRoles };
+    });
+  };
 
-  if (usersIsLoading) return <div className="loading" />;
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    return users
+      .filter((u) => {
+        const matchUnit =
+          selectedUnit === "其他"
+            ? !u.affiliation ||
+              !UNITS.some((unit) => unit.name === u.affiliation)
+            : u.affiliation === selectedUnit;
+        const matchSearch =
+          u.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
+        const matchRole =
+          roleFilter === "ALL" ||
+          u.roles.includes(roleFilter) ||
+          (roleFilter !== Role.TIANI_ADMIN &&
+            u.roles.includes(Role.TIANI_ADMIN));
+        return matchUnit && matchSearch && matchRole;
+      })
+      .sort((a, b) => {
+        const nameA = a.name ?? "";
+        const nameB = b.name ?? "";
+        return nameA.localeCompare(nameB, "zh-Hant-TW");
+      });
+  }, [users, selectedUnit, search, roleFilter]);
+
+  const staff = useMemo(
+    () => filteredUsers.filter((u) => u.roles.length > 0),
+    [filteredUsers],
+  );
+  const regular = useMemo(
+    () => filteredUsers.filter((u) => u.roles.length === 0),
+    [filteredUsers],
+  );
+
+  if (usersIsLoading) return <Loading />;
   if (!isEmpty(usersError))
     return <AlertWarning>{usersError.message}</AlertWarning>;
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex justify-between">
-        <article className="prose">
-          <h1>帳號管理</h1>
-        </article>
-        <div>
-          <ReactiveButton
-            className="btn"
-            onClick={() => setCreateUserDialogOpen(true)}
+    <div className="mx-auto max-w-md space-y-4 pb-20">
+      <div className="px-1 pt-4">
+        <h1 className="font-black text-2xl tracking-tight">權限管理</h1>
+      </div>
+
+      {/* Sticky Header with Unit, Role, and Name Filter */}
+      <div className="sticky top-0 z-30 space-y-3 bg-base-100/95 px-1 pt-2 pb-4 backdrop-blur">
+        {/* 1. Unit Selector */}
+        <div className="scrollbar-hide flex gap-2 overflow-x-auto py-1">
+          {[...UNITS, { name: "其他" }].map((u) => (
+            <button
+              key={u.name}
+              onClick={() => setSelectedUnit(u.name)}
+              className={`btn btn-sm h-10 flex-shrink-0 rounded-lg border-none px-4 ${
+                selectedUnit === u.name
+                  ? "bg-base-content font-bold text-base-100"
+                  : "bg-base-200 opacity-70"
+              }`}
+            >
+              {u.name}
+            </button>
+          ))}
+        </div>
+
+        {/* 2. Role Quick Filter */}
+        <div className="scrollbar-hide flex gap-2 overflow-x-auto py-1">
+          <button
+            onClick={() => setRoleFilter("ALL")}
+            className={`btn btn-sm h-10 flex-shrink-0 rounded-lg border-none px-4 ${roleFilter === "ALL" ? "bg-primary font-bold text-primary-content" : "bg-base-200 opacity-70"}`}
           >
-            <PlusIcon className="h-4 w-4" />
-            新增帳號
-          </ReactiveButton>
-          <Dialog
-            title="新增帳號"
-            show={createUserDialogOpen}
-            closeModal={() => setCreateUserDialogOpen(false)}
-          >
-            <CreateUserDialogContent />
-          </Dialog>
+            全部
+          </button>
+          {Object.entries(roleLabels).map(([role, label]) => (
+            <button
+              key={role}
+              onClick={() => setRoleFilter(role as Role)}
+              className={`btn btn-sm h-10 flex-shrink-0 rounded-lg border-none px-4 ${roleFilter === role ? "bg-primary font-bold text-primary-content" : "bg-base-200 opacity-70"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* 3. Name Search */}
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute top-2.5 left-3 h-4 w-4 opacity-40" />
+          <input
+            className="input input-sm input-bordered h-10 w-full rounded-full pl-9"
+            placeholder={`搜尋 ${selectedUnit} 的人員...`}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
-      <div className=" h-[calc(100vh-11rem)] overflow-x-auto">
-        <table className="table-pin-rows table-sm table">
-          <thead>
-            <tr className="z-20 bg-base-300">
-              <th className="tiani-table-pin-col bg-base-300">
-                <div
-                  className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.NAME)}
-                >
-                  姓名
-                  {sortedType === SortedType.NAME && (
-                    <BarsArrowDownIcon className="ml-1 w-4" />
-                  )}
-                </div>
-              </th>
-              <th>
-                <div
-                  className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_TIANI_ADMIN)}
-                >
-                  最高
-                  <br />
-                  管理者
-                  {sortedType === SortedType.IS_TIANI_ADMIN && (
-                    <BarsArrowDownIcon className="ml-1 w-4" />
-                  )}
-                </div>
-              </th>
-              <th>
-                <div
-                  className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_VOLUNTEER_ADMIN)}
-                >
-                  天一志工隊
-                  <br />
-                  管理者
-                  {sortedType === SortedType.IS_VOLUNTEER_ADMIN && (
-                    <BarsArrowDownIcon className="ml-1 w-4" />
-                  )}
-                </div>
-              </th>
-              <th>
-                <div
-                  className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_CLASS_ADMIN)}
-                >
-                  班務網
-                  <br />
-                  管理者
-                  {sortedType === SortedType.IS_CLASS_ADMIN && (
-                    <BarsArrowDownIcon className="ml-1 w-4" />
-                  )}
-                </div>
-              </th>
-              <th>
-                <div
-                  className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_WORK_ADMIN)}
-                >
-                  道務網
-                  <br />
-                  管理者
-                  {sortedType === SortedType.IS_WORK_ADMIN && (
-                    <BarsArrowDownIcon className="ml-1 w-4" />
-                  )}
-                </div>
-              </th>
-              <th>
-                <div
-                  className="flex cursor-pointer"
-                  onClick={() => setSortedType(SortedType.IS_ETOGETHER_ADMIN)}
-                >
-                  活動e起來
-                  <br />
-                  管理者
-                  {sortedType === SortedType.IS_ETOGETHER_ADMIN && (
-                    <BarsArrowDownIcon className="ml-1 w-4" />
-                  )}
-                </div>
-              </th>
-              <th>個人資料</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users?.sort(getComparator(sortedType))?.map((user) => (
-              <tr key={user.id} className="hover">
-                <td className="tiani-table-pin-col bg-base-200">
-                  <div className="tooltip tooltip-right" data-tip={user.name}>
-                    {truncate(user.name ?? undefined, { length: 6 })}
+
+      {/* Staff Section */}
+      <section className="space-y-2 px-1">
+        <h2 className="flex items-center gap-1 px-2 font-bold text-sm uppercase opacity-60">
+          <ShieldCheckIcon className="h-4 w-4" /> 權限管理人員 ({staff.length})
+        </h2>
+        {staff.length === 0 ? (
+          <div className="py-6 text-center text-sm italic opacity-30">
+            尚無權限人員
+          </div>
+        ) : (
+          staff.map((user) => (
+            <div
+              key={user.id}
+              className="card card-compact border border-primary/20 bg-primary/5 shadow-sm"
+            >
+              <div className="card-body flex-row items-center gap-3 p-3">
+                <div className="avatar">
+                  <div className="w-10 rounded-full border border-primary/30 bg-base-300">
+                    {user.image ? (
+                      <LineImage src={user.image} alt={user.name ?? ""} />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <UserIcon className="h-6 w-6 opacity-20" />
+                      </div>
+                    )}
                   </div>
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={user.roles.includes(Role.TIANI_ADMIN)}
-                    className="checkbox"
-                    disabled={user.id === sessionData?.user.id}
-                    onChange={(e) =>
-                      setIsTianiAdmin({
-                        userId: user.id,
-                        isAdmin: e.target.checked,
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    disabled={user.roles.includes(Role.TIANI_ADMIN)}
-                    checked={user.roles.includes(Role.VOLUNTEER_ADMIN)}
-                    className="checkbox"
-                    onChange={(e) =>
-                      setIsVolunteerAdmin({
-                        userId: user.id,
-                        isAdmin: e.target.checked,
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    disabled={user.roles.includes(Role.TIANI_ADMIN)}
-                    checked={user.roles.includes(Role.YIDECLASS_ADMIN)}
-                    className="checkbox"
-                    onChange={(e) =>
-                      setIsClassAdmin({
-                        userId: user.id,
-                        isAdmin: e.target.checked,
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    disabled={user.roles.includes(Role.TIANI_ADMIN)}
-                    checked={user.roles.includes(Role.YIDEWORK_ADMIN)}
-                    className="checkbox"
-                    onChange={(e) =>
-                      setIsWorkAdmin({
-                        userId: user.id,
-                        isAdmin: e.target.checked,
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    disabled={user.roles.includes(Role.TIANI_ADMIN)}
-                    checked={user.roles.includes(Role.ETOGETHER_ADMIN)}
-                    className="checkbox"
-                    onChange={(e) =>
-                      setIsEtogetherAdmin({
-                        userId: user.id,
-                        isAdmin: e.target.checked,
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <button
-                    className="btn btn-sm btn-ghost"
-                    onClick={() => {
-                      setSelectedUserId(user.id);
-                      setUserProfileDialogOpen(true);
-                    }}
-                  >
-                    <UserIcon className="h-4 w-4" />
-                  </button>
-                </td>
-              </tr>
+                </div>
+                <div className="grow">
+                  <p className="font-bold text-base leading-none">
+                    {user.name}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {user.roles.map((r: Role) => {
+                      const labelMap: Record<Role, string> = {
+                        [Role.TIANI_ADMIN]: "最高",
+                        [Role.VOLUNTEER_ADMIN]: "志工",
+                        [Role.YIDECLASS_ADMIN]: "班務",
+                        [Role.YIDEWORK_ADMIN]: "道務",
+                        [Role.ETOGETHER_ADMIN]: "活動",
+                      };
+                      return (
+                        <span
+                          key={r}
+                          className="badge badge-primary badge-sm px-2 py-2.5 font-bold"
+                        >
+                          {labelMap[r] || r}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                <button
+                  className="btn btn-circle btn-ghost"
+                  onClick={() => setEditingUser(user)}
+                >
+                  <AdjustmentsHorizontalIcon className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
+
+      {/* Regular Users Section */}
+      <section className="space-y-1 px-1">
+        <h2 className="px-2 pt-4 font-bold text-sm uppercase opacity-60">
+          一般人員 ({regular.length})
+        </h2>
+        {regular.length === 0 ? (
+          <div className="py-6 text-center text-sm italic opacity-30">
+            查無名單
+          </div>
+        ) : (
+          <div className="divide-y divide-base-100 rounded-xl border border-base-200 bg-base-100">
+            {regular.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-base-200">
+                    <UserIcon className="h-5 w-5 opacity-30" />
+                  </div>
+                  <span className="font-medium text-base">{user.name}</span>
+                </div>
+                <button
+                  className="btn btn-circle btn-ghost"
+                  onClick={() => setEditingUser(user)}
+                >
+                  <AdjustmentsHorizontalIcon className="h-6 w-6 text-primary" />
+                </button>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      </section>
+
+      {/* Careful UI Dialog */}
       <Dialog
-        title="個人資料"
-        show={userProfileDialogOpen}
-        closeModal={() => {
-          setUserProfileDialogOpen(false);
-          setSelectedUserId(null);
-        }}
+        title="人員權限設定"
+        show={!!editingUser}
+        closeModal={() => setEditingUser(null)}
       >
-        {selectedUserId && (
-          <UserProfileDialogContent
-            userId={selectedUserId}
-            onClose={() => {
-              setUserProfileDialogOpen(false);
-              setSelectedUserId(null);
-            }}
+        {editingUser && (
+          <RoleEditorDialog
+            user={editingUser}
+            onClose={() => setEditingUser(null)}
+            onUpdate={handleRoleUpdate}
+            isMe={editingUser.id === sessionData?.user.id}
           />
         )}
       </Dialog>

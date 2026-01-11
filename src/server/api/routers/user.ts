@@ -202,6 +202,8 @@ export const userRouter = createTRPCRouter({
         id: true,
         name: true,
         roles: true,
+        affiliation: true,
+        image: true,
       },
     }),
   ),
