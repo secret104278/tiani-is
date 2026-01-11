@@ -1,19 +1,26 @@
+import { TZDate } from "@date-fns/tz";
 import {
   AdjustmentsHorizontalIcon,
   MagnifyingGlassIcon,
+  PlusIcon,
   ShieldCheckIcon,
   UserIcon,
 } from "@heroicons/react/20/solid";
 import { Role } from "@prisma/client";
+import { format } from "date-fns";
 import { isEmpty } from "lodash";
+import lunisolar from "lunisolar";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import QiudaoLunarDisplay from "~/components/QiudaoLunarDisplay";
 import { AlertWarning } from "~/components/utils/Alert";
 import Dialog from "~/components/utils/Dialog";
 import LineImage from "~/components/utils/LineImage";
 import { Loading } from "~/components/utils/Loading";
+import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
-import { UNITS } from "~/utils/ui";
+import { DEFAULT_TIMEZONE, UNITS } from "~/utils/ui";
 
 interface AdminUser {
   id: string;
@@ -22,6 +29,16 @@ interface AdminUser {
   affiliation: string | null;
   image: string | null;
 }
+
+type QiudaoInfoForm = {
+  qiudaoDateSolar: string;
+  qiudaoTemple: string;
+  qiudaoTanzhu: string;
+  affiliation: string;
+  dianChuanShi: string;
+  yinShi: string;
+  baoShi: string;
+};
 
 // --- Sub-component: Permission Editor ("Careful UI") ---
 function RoleEditorDialog({
@@ -77,7 +94,6 @@ function RoleEditorDialog({
         {availableRoles.map((role) => {
           const isActive = user.roles.includes(role);
           const isTianiAdmin = user.roles.includes(Role.TIANI_ADMIN);
-          // Safety: Don't allow self-removal of Tiani Admin or modification if user is Tiani Admin (except for Tiani Admin role itself)
           const disabled =
             (role === Role.TIANI_ADMIN && isMe) ||
             (role !== Role.TIANI_ADMIN && isTianiAdmin);
@@ -108,11 +124,258 @@ function RoleEditorDialog({
   );
 }
 
+function CreateUserDialogContent({ onClose }: { onClose: () => void }) {
+  const {
+    mutate: createUser,
+    isPending: createUserIsPending,
+    error: createUserError,
+  } = api.user.createUser.useMutation({
+    onSuccess: () => {
+      onClose();
+    },
+  });
+
+  const { register, handleSubmit } = useForm<{ username: string }>();
+
+  return (
+    <>
+      <AlertWarning>
+        新增帳號僅限用於道親沒有 Line 帳號也沒有使用 3C
+        產品，且短期內也不會嘗試使用。
+        <br />
+        此帳號建立後將主要用於管理員或壇務協助手動打卡
+      </AlertWarning>
+      <form
+        className="form-control space-y-4"
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onSubmit={handleSubmit((data) =>
+          createUser({ username: data.username }),
+        )}
+      >
+        <div>
+          <label className="label">
+            <span className="label-text">姓名</span>
+          </label>
+          <input
+            type="text"
+            className="tiani-input"
+            required
+            {...register("username", { required: true })}
+          />
+        </div>
+        <div className="flex flex-row justify-end space-x-4">
+          <ReactiveButton
+            type="submit"
+            className="btn btn-primary"
+            loading={createUserIsPending}
+            error={createUserError?.message}
+          >
+            建立
+          </ReactiveButton>
+        </div>
+      </form>
+    </>
+  );
+}
+
+function UserProfileDialogContent({
+  userId,
+  onClose,
+}: {
+  userId: string;
+  onClose: () => void;
+}) {
+  const [qiudaoHour, setQiudaoHour] = useState<string>("");
+  const [lunarDate, setLunarDate] = useState<string>("");
+
+  const {
+    data: user,
+    isLoading: userIsLoading,
+    error: userError,
+    refetch: userRefetch,
+  } = api.user.getUser.useQuery({ userId });
+
+  const {
+    mutate: updateUserQiudaoInfo,
+    isPending: updateUserQiudaoInfoIsPending,
+    isSuccess: updateUserQiudaoInfoIsSuccess,
+    error: updateUserQiudaoInfoError,
+  } = api.user.updateUserQiudaoInfo.useMutation({
+    onSuccess: () => {
+      void userRefetch();
+      // Close dialog after successful save
+      onClose();
+    },
+  });
+
+  const { register, handleSubmit, reset, watch } = useForm<QiudaoInfoForm>({
+    mode: "all",
+  });
+
+  // Watch for solar date changes
+  const qiudaoDateSolar = watch("qiudaoDateSolar");
+
+  // Auto-calculate lunar date when solar date changes
+  useEffect(() => {
+    if (qiudaoDateSolar) {
+      try {
+        const lunar = lunisolar(qiudaoDateSolar);
+        const lunarStr = `${lunar.format("cY年lMMMM lD")}`;
+        setLunarDate(lunarStr);
+      } catch (e) {
+        setLunarDate("");
+      }
+    } else {
+      setLunarDate("");
+    }
+  }, [qiudaoDateSolar]);
+
+  // Reset form when user data is loaded
+  useEffect(() => {
+    if (user && !userIsLoading) {
+      reset({
+        qiudaoDateSolar: user.qiudaoDateSolar
+          ? new Date(user.qiudaoDateSolar).toISOString().split("T")[0]
+          : "",
+        qiudaoTemple: user.qiudaoTemple ?? "",
+        qiudaoTanzhu: user.qiudaoTanzhu ?? "",
+        affiliation: user.affiliation ?? "",
+        dianChuanShi: user.dianChuanShi ?? "",
+        yinShi: user.yinShi ?? "",
+        baoShi: user.baoShi ?? "",
+      });
+      setQiudaoHour(user.qiudaoHour ?? "");
+    }
+  }, [user, userIsLoading, reset]);
+
+  if (userIsLoading) return <Loading />;
+  if (userError) return <AlertWarning>{userError.message}</AlertWarning>;
+  if (!user) return <AlertWarning>找不到用戶資料</AlertWarning>;
+
+  return (
+    <div className="flex flex-col space-y-4">
+      <div className="alert alert-info">
+        <span>用戶：{user.name}</span>
+      </div>
+      <form
+        className="form-control space-y-4"
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <div>
+          <label className="label">
+            <span className="label-text">求道日期（國曆）</span>
+          </label>
+          <input
+            type="date"
+            className="input input-bordered w-full"
+            {...register("qiudaoDateSolar")}
+          />
+        </div>
+
+        <QiudaoLunarDisplay
+          solarDate={qiudaoDateSolar}
+          hour={qiudaoHour}
+          onHourChange={setQiudaoHour}
+        />
+        <div>
+          <label className="label">
+            <span className="label-text">求道佛堂</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...register("qiudaoTemple")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">壇主（姓名）</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...register("qiudaoTanzhu")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">所屬單位</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...register("affiliation")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">點傳師</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...register("dianChuanShi")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">引師</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...register("yinShi")}
+          />
+        </div>
+        <div>
+          <label className="label">
+            <span className="label-text">保師</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            {...register("baoShi")}
+          />
+        </div>
+        <div className="flex flex-row justify-end space-x-4">
+          <ReactiveButton
+            className="btn btn-primary"
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onClick={handleSubmit((data) =>
+              updateUserQiudaoInfo({
+                userId,
+                qiudaoDateSolar: data.qiudaoDateSolar
+                  ? new Date(data.qiudaoDateSolar)
+                  : null,
+                qiudaoHour: qiudaoHour || null,
+                qiudaoTemple: data.qiudaoTemple || null,
+                qiudaoTanzhu: data.qiudaoTanzhu || null,
+                affiliation: data.affiliation || null,
+                dianChuanShi: data.dianChuanShi || null,
+                yinShi: data.yinShi || null,
+                baoShi: data.baoShi || null,
+              }),
+            )}
+            loading={updateUserQiudaoInfoIsPending}
+            isSuccess={updateUserQiudaoInfoIsSuccess}
+            error={updateUserQiudaoInfoError?.message}
+          >
+            儲存
+          </ReactiveButton>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function AdminUsersPage() {
   const [selectedUnit, setSelectedUnit] = useState<string>("義德");
   const [search, setSearch] = useState("");
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
-  const [roleFilter, setRoleFilter] = useState<Role | "ALL">("ALL");
+  const [roleFilter, setRoleFilter] = useState<Role | "ALL" | "NONE">("ALL");
+  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+  const [userProfileDialogOpen, setUserProfileDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const roleLabels: Record<Role, string> = {
     [Role.TIANI_ADMIN]: "最高",
@@ -172,7 +435,6 @@ export default function AdminUsersPage() {
         break;
     }
 
-    // Optimistically update local state for the dialog UI
     setEditingUser((prev) => {
       if (!prev) return null;
       let newRoles = [...prev.roles];
@@ -196,11 +458,17 @@ export default function AdminUsersPage() {
             : u.affiliation === selectedUnit;
         const matchSearch =
           u.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
-        const matchRole =
-          roleFilter === "ALL" ||
-          u.roles.includes(roleFilter) ||
-          (roleFilter !== Role.TIANI_ADMIN &&
-            u.roles.includes(Role.TIANI_ADMIN));
+
+        let matchRole = false;
+        if (roleFilter === "ALL") {
+          matchRole = true;
+        } else if (roleFilter === "NONE") {
+          matchRole = u.roles.length === 0;
+        } else {
+          matchRole =
+            u.roles.includes(roleFilter) || u.roles.includes(Role.TIANI_ADMIN);
+        }
+
         return matchUnit && matchSearch && matchRole;
       })
       .sort((a, b) => {
@@ -219,19 +487,35 @@ export default function AdminUsersPage() {
     [filteredUsers],
   );
 
+  if (!sessionData?.user.role.is_tiani_admin) {
+    return <AlertWarning>只有最高管理者可以進行此操作</AlertWarning>;
+  }
   if (usersIsLoading) return <Loading />;
-  if (!isEmpty(usersError))
+  if (!isEmpty(usersError)) {
+    if (
+      usersError.data?.code === "UNAUTHORIZED" ||
+      usersError.data?.code === "FORBIDDEN"
+    ) {
+      window.location.href = "/auth/signin";
+      return null;
+    }
     return <AlertWarning>{usersError.message}</AlertWarning>;
+  }
 
   return (
     <div className="mx-auto max-w-md space-y-4 pb-20">
-      <div className="px-1 pt-4">
+      <div className="flex items-center justify-between px-1 pt-4">
         <h1 className="font-black text-2xl tracking-tight">權限管理</h1>
+        <button
+          className="btn btn-ghost btn-sm gap-1"
+          onClick={() => setCreateUserDialogOpen(true)}
+        >
+          <PlusIcon className="h-4 w-4" />
+          新增帳號
+        </button>
       </div>
 
-      {/* Sticky Header with Unit, Role, and Name Filter */}
       <div className="sticky top-0 z-30 space-y-3 bg-base-100/95 px-1 pt-2 pb-4 backdrop-blur">
-        {/* 1. Unit Selector */}
         <div className="scrollbar-hide flex gap-2 overflow-x-auto py-1">
           {[...UNITS, { name: "其他" }].map((u) => (
             <button
@@ -248,7 +532,6 @@ export default function AdminUsersPage() {
           ))}
         </div>
 
-        {/* 2. Role Quick Filter */}
         <div className="scrollbar-hide flex gap-2 overflow-x-auto py-1">
           <button
             onClick={() => setRoleFilter("ALL")}
@@ -265,9 +548,14 @@ export default function AdminUsersPage() {
               {label}
             </button>
           ))}
+          <button
+            onClick={() => setRoleFilter("NONE")}
+            className={`btn btn-sm h-10 flex-shrink-0 rounded-lg border-none px-4 ${roleFilter === "NONE" ? "bg-primary font-bold text-primary-content" : "bg-base-200 opacity-70"}`}
+          >
+            無權限
+          </button>
         </div>
 
-        {/* 3. Name Search */}
         <div className="relative">
           <MagnifyingGlassIcon className="absolute top-2.5 left-3 h-4 w-4 opacity-40" />
           <input
@@ -279,17 +567,16 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Staff Section */}
-      <section className="space-y-2 px-1">
-        <h2 className="flex items-center gap-1 px-2 font-bold text-sm uppercase opacity-60">
-          <ShieldCheckIcon className="h-4 w-4" /> 權限管理人員 ({staff.length})
-        </h2>
-        {staff.length === 0 ? (
-          <div className="py-6 text-center text-sm italic opacity-30">
-            尚無權限人員
-          </div>
-        ) : (
-          staff.map((user) => (
+      {staff.length > 0 && (
+        <section className="space-y-2 px-1">
+          <h2 className="flex items-center gap-1 px-2 font-bold text-sm uppercase opacity-60">
+            <ShieldCheckIcon className="h-4 w-4" />{" "}
+            {roleFilter === "ALL"
+              ? "權限管理人員"
+              : `${roleFilter === "NONE" ? "" : roleLabels[roleFilter as Role]}管理人員`}{" "}
+            ({staff.length})
+          </h2>
+          {staff.map((user) => (
             <div
               key={user.id}
               className="card card-compact border border-primary/20 bg-primary/5 shadow-sm"
@@ -307,9 +594,20 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
                 <div className="grow">
-                  <p className="font-bold text-base leading-none">
-                    {user.name}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-base leading-none">
+                      {user.name}
+                    </p>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => {
+                        setSelectedUserId(user.id);
+                        setUserProfileDialogOpen(true);
+                      }}
+                    >
+                      詳情
+                    </button>
+                  </div>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {user.roles.map((r: Role) => {
                       const labelMap: Record<Role, string> = {
@@ -338,31 +636,37 @@ export default function AdminUsersPage() {
                 </button>
               </div>
             </div>
-          ))
-        )}
-      </section>
+          ))}
+        </section>
+      )}
 
-      {/* Regular Users Section */}
-      <section className="space-y-1 px-1">
-        <h2 className="px-2 pt-4 font-bold text-sm uppercase opacity-60">
-          一般人員 ({regular.length})
-        </h2>
-        {regular.length === 0 ? (
-          <div className="py-6 text-center text-sm italic opacity-30">
-            查無名單
-          </div>
-        ) : (
+      {roleFilter === "ALL" && regular.length > 0 && (
+        <section className="space-y-1 px-1">
+          <h2 className="px-2 pt-4 font-bold text-sm uppercase opacity-60">
+            一般人員 ({regular.length})
+          </h2>
           <div className="divide-y divide-base-100 rounded-xl border border-base-200 bg-base-100">
             {regular.map((user) => (
               <div
                 key={user.id}
                 className="flex items-center justify-between p-4"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-base-200">
+                <div className="flex grow items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-base-200">
                     <UserIcon className="h-5 w-5 opacity-30" />
                   </div>
-                  <span className="font-medium text-base">{user.name}</span>
+                  <div className="flex grow items-center justify-between gap-2">
+                    <span className="font-medium text-base">{user.name}</span>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => {
+                        setSelectedUserId(user.id);
+                        setUserProfileDialogOpen(true);
+                      }}
+                    >
+                      詳情
+                    </button>
+                  </div>
                 </div>
                 <button
                   className="btn btn-circle btn-ghost"
@@ -373,10 +677,55 @@ export default function AdminUsersPage() {
               </div>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Careful UI Dialog */}
+      {roleFilter === "NONE" && regular.length > 0 && (
+        <section className="space-y-1 px-1">
+          <h2 className="px-2 font-bold text-sm uppercase opacity-60">
+            無權限人員 ({regular.length})
+          </h2>
+          <div className="divide-y divide-base-100 rounded-xl border border-base-200 bg-base-100">
+            {regular.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-4"
+              >
+                <div className="flex grow items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-base-200">
+                    <UserIcon className="h-5 w-5 opacity-30" />
+                  </div>
+                  <div className="flex grow items-center justify-between gap-2">
+                    <span className="font-medium text-base">{user.name}</span>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => {
+                        setSelectedUserId(user.id);
+                        setUserProfileDialogOpen(true);
+                      }}
+                    >
+                      詳情
+                    </button>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-circle btn-ghost"
+                  onClick={() => setEditingUser(user)}
+                >
+                  <AdjustmentsHorizontalIcon className="h-6 w-6 text-primary" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {staff.length === 0 && regular.length === 0 && (
+        <div className="py-20 text-center text-sm italic opacity-30">
+          查無名單
+        </div>
+      )}
+
       <Dialog
         title="人員權限設定"
         show={!!editingUser}
@@ -388,6 +737,39 @@ export default function AdminUsersPage() {
             onClose={() => setEditingUser(null)}
             onUpdate={handleRoleUpdate}
             isMe={editingUser.id === sessionData?.user.id}
+          />
+        )}
+      </Dialog>
+
+      <Dialog
+        title="新增帳號"
+        show={createUserDialogOpen}
+        closeModal={() => setCreateUserDialogOpen(false)}
+      >
+        <CreateUserDialogContent
+          onClose={() => {
+            setCreateUserDialogOpen(false);
+            void usersRefetch();
+          }}
+        />
+      </Dialog>
+
+      <Dialog
+        title="個人資料"
+        show={userProfileDialogOpen}
+        closeModal={() => {
+          setUserProfileDialogOpen(false);
+          setSelectedUserId(null);
+        }}
+      >
+        {selectedUserId && (
+          <UserProfileDialogContent
+            userId={selectedUserId}
+            onClose={() => {
+              setUserProfileDialogOpen(false);
+              setSelectedUserId(null);
+              void usersRefetch();
+            }}
           />
         )}
       </Dialog>

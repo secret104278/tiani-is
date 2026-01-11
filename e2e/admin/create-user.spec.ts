@@ -4,6 +4,8 @@ test.describe("User Creation", () => {
   test("should create a new offline user", async ({ page, loginAsAdmin }) => {
     await page.goto("/admin/users");
 
+    const uniqueUserName = `Test User B ${Date.now()}`;
+
     await page.getByRole("button", { name: "新增帳號" }).click();
 
     await expect(
@@ -12,12 +14,13 @@ test.describe("User Creation", () => {
       ),
     ).toBeVisible();
 
-    await page.getByRole("textbox").fill("Test User B");
+    await page.getByRole("textbox").fill(uniqueUserName);
 
     await page.getByRole("button", { name: "建立" }).click();
 
-    await expect(
-      page.getByRole("cell", { name: "Test User B" }).first(),
-    ).toBeVisible();
+    // Switch to "Other" unit as new users default to no affiliation
+    await page.getByRole("button", { name: "其他" }).click();
+
+    await expect(page.getByText(uniqueUserName).first()).toBeVisible();
   });
 });

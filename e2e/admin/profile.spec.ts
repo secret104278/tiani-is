@@ -7,52 +7,91 @@ test.describe("4. Profile Management", () => {
     testUser,
   }) => {
     await page.goto("/admin/users");
-    await page
-      .getByRole("row", { name: testUser.name || "Test User" })
-      .first()
-      .getByRole("button")
-      .click();
 
-    await page.locator('input[name="qiudaoDateSolar"]').fill("2023-01-01");
+    // 1. Ensure user is visible (testUser usually has no affiliation)
+    await page.getByRole("button", { name: "其他" }).click();
+    await page.getByPlaceholder(/搜尋 .* 的人員.../).fill(testUser.name || "");
 
-    await page.getByRole("combobox").selectOption("子時 (23:00-01:00)");
+    const userCard = page.locator(
+      ".card, .flex.items-center.justify-between.p-4",
+      {
+        hasText: testUser.name || "Test User",
+      },
+    );
 
-    await page.locator('input[name="qiudaoTemple"]').fill("Test Temple");
-    await page.locator('input[name="qiudaoTanzhu"]').fill("Test Host");
-    await page.locator('input[name="affiliation"]').fill("Test Unit");
-    await page.locator('input[name="dianChuanShi"]').fill("Test Transmitter");
-    await page.locator('input[name="yinShi"]').fill("Test Introducer");
-    await page.locator('input[name="baoShi"]').fill("Test Guarantor");
+    // 2. Open Profile Dialog
+    const profileButton = userCard.getByRole("button", { name: "詳情" });
+    await profileButton.click();
 
-    await page.getByRole("button", { name: "儲存" }).click();
+    // Use specific locator and rely on actionability (Playwright will wait for animation)
+    const profileDialog = page.getByRole("dialog", { name: "個人資料" });
+
+    await profileDialog
+      .locator('input[name="qiudaoDateSolar"]')
+      .fill("2023-01-01");
+
+    // Verify lunar conversion display (Gap 4)
+    // 2023-01-01 is 壬寅年 十二月初十 (or 臘月初十 depending on formatter)
+    // Based on actual snapshot, it shows "十二月初十"
+    await expect(profileDialog.getByText("壬寅年")).toBeVisible();
+    await expect(profileDialog.getByText("十二月初十")).toBeVisible();
+
+    await profileDialog
+      .getByRole("combobox")
+      .selectOption("子時 (23:00-01:00)");
+
+    await profileDialog
+      .locator('input[name="qiudaoTemple"]')
+      .fill("Test Temple");
+    await profileDialog.locator('input[name="qiudaoTanzhu"]').fill("Test Host");
+    await profileDialog.locator('input[name="affiliation"]').fill("Test Unit");
+    await profileDialog
+      .locator('input[name="dianChuanShi"]')
+      .fill("Test Transmitter");
+    await profileDialog.locator('input[name="yinShi"]').fill("Test Introducer");
+    await profileDialog.locator('input[name="baoShi"]').fill("Test Guarantor");
+
+    await profileDialog.getByRole("button", { name: "儲存" }).click();
+
+    // Ensure dialog is closed before reload
+    await expect(profileDialog).toBeHidden();
+
+    // Add a small delay or verify something to ensure DB is updated
+    await page.waitForTimeout(1000);
 
     await page.reload();
-    await page
-      .getByRole("row", { name: testUser.name || "Test User" })
-      .first()
-      .getByRole("button")
-      .click();
+    await page.getByRole("button", { name: "其他" }).click();
+    await page.getByPlaceholder(/搜尋 .* 的人員.../).fill(testUser.name || "");
 
-    await expect(page.locator('input[name="qiudaoDateSolar"]')).toHaveValue(
-      "2023-01-01",
+    const reUserCard = page.locator(
+      ".card, .flex.items-center.justify-between.p-4",
+      {
+        hasText: testUser.name || "Test User",
+      },
     );
-    await expect(page.getByRole("combobox")).toHaveValue("子");
-    await expect(page.locator('input[name="qiudaoTemple"]')).toHaveValue(
-      "Test Temple",
-    );
-    await expect(page.locator('input[name="qiudaoTanzhu"]')).toHaveValue(
-      "Test Host",
-    );
-    await expect(page.locator('input[name="affiliation"]')).toHaveValue(
-      "Test Unit",
-    );
-    await expect(page.locator('input[name="dianChuanShi"]')).toHaveValue(
-      "Test Transmitter",
-    );
-    await expect(page.locator('input[name="yinShi"]')).toHaveValue(
+
+    await reUserCard.getByRole("button", { name: "詳情" }).click();
+
+    await expect(
+      profileDialog.locator('input[name="qiudaoDateSolar"]'),
+    ).toHaveValue("2023-01-01");
+    await expect(profileDialog.getByRole("combobox")).toHaveValue("子");
+    await expect(
+      profileDialog.locator('input[name="qiudaoTemple"]'),
+    ).toHaveValue("Test Temple");
+    await expect(
+      profileDialog.locator('input[name="qiudaoTanzhu"]'),
+    ).toHaveValue("Test Host");
+    await expect(
+      profileDialog.locator('input[name="affiliation"]'),
+    ).toHaveValue("Test Unit");
+    await expect(
+      profileDialog.locator('input[name="dianChuanShi"]'),
+    ).toHaveValue("Test Transmitter");
+    await expect(profileDialog.locator('input[name="yinShi"]')).toHaveValue(
       "Test Introducer",
     );
-    await expect(page.locator('input[name="baoShi"]')).toHaveValue(
+    await expect(profileDialog.locator('input[name="baoShi"]')).toHaveValue(
       "Test Guarantor",
     );
   });
