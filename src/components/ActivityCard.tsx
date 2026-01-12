@@ -6,8 +6,8 @@ import {
 } from "@heroicons/react/20/solid";
 import type { VolunteerActivityStatus } from "@prisma/client";
 import Link from "next/link";
-import { useSiteContext } from "~/context/SiteContext";
 import { useRouter } from "next/router";
+import { useSiteContext } from "~/context/SiteContext";
 import {
   Site,
   formatDateTime,
@@ -50,11 +50,7 @@ export function ActivityCard({
 
   if (isEnd)
     return (
-      <Link
-        key={activity.id}
-        href={href}
-        style={{ textDecoration: "none" }}
-      >
+      <Link key={activity.id} href={href} style={{ textDecoration: "none" }}>
         <div className="card card-compact w-full bg-base-200 shadow">
           <div className="card-body">
             <h2 className="card-title">{activity.title}</h2>
@@ -72,10 +68,7 @@ export function ActivityCard({
     );
 
   return (
-    <Link
-      href={href}
-      style={{ textDecoration: "none" }}
-    >
+    <Link href={href} style={{ textDecoration: "none" }}>
       <div className="card-compact card w-full bg-accent text-accent-content shadow">
         <div className="card-body">
           <div className="flex flex-row items-center justify-between">

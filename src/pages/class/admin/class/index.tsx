@@ -21,7 +21,11 @@ export default function YiDeAdminClassList() {
               <tr
                 key={idx}
                 className="hover hover:cursor-pointer"
-                onClick={() => void router.push(`/class/admin/class/${encodeURIComponent(title)}`)}
+                onClick={() =>
+                  void router.push(
+                    `/class/admin/class/${encodeURIComponent(title)}`,
+                  )
+                }
               >
                 <td>{title}</td>
               </tr>

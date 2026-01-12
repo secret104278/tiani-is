@@ -14,11 +14,7 @@ import { type ReactNode, useState } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
 import { siteHomeHref } from "~/utils/navigation";
-import {
-  IS_LINE_NOTIFY_ENABLED,
-  getUnitByName,
-  siteToTitle,
-} from "~/utils/ui";
+import { IS_LINE_NOTIFY_ENABLED, getUnitByName, siteToTitle } from "~/utils/ui";
 import CheckInQrModal from "../CheckInQrModal";
 import LineNotifySetupTutorialDialog from "../LineNotifySetupTutorialDialog";
 import LineImage from "../utils/LineImage";

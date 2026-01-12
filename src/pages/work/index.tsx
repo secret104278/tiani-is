@@ -12,7 +12,7 @@ export default function WorkManagementHome() {
       <div className="grid grid-cols-2 gap-4">
         {UNITS.map((unit) => (
           <Link href={`/work/${unit.slug}`} key={unit.slug}>
-            <div className="card card-bordered cursor-pointer transition-colors hover:bg-base-200">
+            <div className="card cursor-pointer bg-accent shadow transition-colors hover:bg-base-200">
               <div className="card-body items-center text-center">
                 <h2 className="card-title text-2xl">{unit.name}</h2>
               </div>

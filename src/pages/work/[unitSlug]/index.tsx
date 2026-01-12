@@ -37,10 +37,7 @@ export default function WorkHome() {
         <h1>{siteToTitle(Site.Work, unit?.name)}</h1>
       </article>
       <div className="flex flex-row justify-end space-x-4">
-        <Link
-          href={`/work/${unitSlug}/activity/new`}
-          className="flex-shrink-0"
-        >
+        <Link href={`/work/${unitSlug}/activity/new`} className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
             建立新通知

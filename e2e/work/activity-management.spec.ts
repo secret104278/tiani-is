@@ -12,7 +12,9 @@ test.describe("YideWork Activity Management", () => {
     await bandaoSection.getByPlaceholder("上首").fill("User B");
     await bandaoSection.getByPlaceholder("下首").fill("User C");
 
-    const dianchuanshiSection = page.locator('div:has(> label:has-text("點傳師服務"))');
+    const dianchuanshiSection = page.locator(
+      'div:has(> label:has-text("點傳師服務"))',
+    );
     await dianchuanshiSection.getByPlaceholder("逗號分隔").fill("User A");
 
     await page

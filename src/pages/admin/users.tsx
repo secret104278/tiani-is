@@ -65,7 +65,11 @@ function RoleEditorDialog({
         <div className="avatar">
           <div className="w-10 rounded-full bg-base-300">
             {user.image ? (
-              <LineImage src={user.image} alt={user.name ?? ""} />
+              <LineImage
+                src={user.image}
+                alt={user.name ?? ""}
+                loading="lazy"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
                 <UserIcon className="h-6 w-6 opacity-20" />
@@ -464,7 +468,11 @@ export default function AdminUsersPage() {
                 <div className="avatar">
                   <div className="w-10 rounded-full border border-primary/30 bg-base-300">
                     {user.image ? (
-                      <LineImage src={user.image} alt={user.name ?? ""} />
+                      <LineImage
+                        src={user.image}
+                        alt={user.name ?? ""}
+                        loading="lazy"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
                         <UserIcon className="h-6 w-6 opacity-20" />
@@ -533,8 +541,20 @@ export default function AdminUsersPage() {
                 className="flex items-center justify-between p-4"
               >
                 <div className="flex grow items-center gap-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-base-200">
-                    <UserIcon className="h-5 w-5 opacity-30" />
+                  <div className="avatar">
+                    <div className="w-10 rounded-full border border-base-300 bg-base-200">
+                      {user.image ? (
+                        <LineImage
+                          src={user.image}
+                          alt={user.name ?? ""}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <UserIcon className="h-5 w-5 opacity-30" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex grow items-center justify-between gap-2">
                     <span className="font-medium text-base">{user.name}</span>
@@ -575,8 +595,20 @@ export default function AdminUsersPage() {
                 className="flex items-center justify-between p-4"
               >
                 <div className="flex grow items-center gap-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-base-200">
-                    <UserIcon className="h-5 w-5 opacity-30" />
+                  <div className="avatar">
+                    <div className="w-10 rounded-full border border-base-300 bg-base-200">
+                      {user.image ? (
+                        <LineImage
+                          src={user.image}
+                          alt={user.name ?? ""}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <UserIcon className="h-5 w-5 opacity-30" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex grow items-center justify-between gap-2">
                     <span className="font-medium text-base">{user.name}</span>

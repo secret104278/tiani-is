@@ -173,7 +173,9 @@ export default function ClassActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <Link href={`/class/${router.query.unitSlug}/activity/edit/${activity.id}`}>
+        <Link
+          href={`/class/${router.query.unitSlug}/activity/edit/${activity.id}`}
+        >
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
             編輯

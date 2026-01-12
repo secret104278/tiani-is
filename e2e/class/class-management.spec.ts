@@ -27,6 +27,8 @@ test.describe("YiDeClass Management", () => {
 
     // Verify
     await expect(page).toHaveURL(/\/class\/[^\/]+/);
-    await expect(page.getByRole("heading", { name: "E2E Test Class Activity" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "E2E Test Class Activity" }),
+    ).toBeVisible();
   });
 });
