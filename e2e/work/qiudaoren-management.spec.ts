@@ -7,7 +7,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     page,
   }) => {
     const activity = await createWorkActivity(loginAsWorkAdmin.id);
-    await page.goto(`/work/activity/detail/${activity.id}`);
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
 
     await page.getByRole("link", { name: "求道人清單" }).click();
 
@@ -65,7 +65,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     createWorkActivity,
   }) => {
     const activity = await createWorkActivity(loginAsWorkAdmin.id);
-    await page.goto(`/work/activity/detail/${activity.id}`);
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
 
     await page.getByRole("link", { name: "求道人清單" }).click();
     await page.getByRole("button", { name: "我要帶人來求道" }).click();
@@ -109,7 +109,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     createWorkActivity,
   }) => {
     const activity = await createWorkActivity(loginAsWorkAdmin.id);
-    await page.goto(`/work/activity/detail/${activity.id}`);
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
 
     await page.getByRole("button", { name: "我要帶人來求道" }).click();
     await page.locator('input[name="name"]').fill("CheckIn Person");
@@ -154,7 +154,7 @@ test.describe("Qiudaoren (Candidate) Management", () => {
     createWorkActivity,
   }) => {
     const activity = await createWorkActivity(loginAsWorkAdmin.id);
-    await page.goto(`/work/activity/detail/${activity.id}`);
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
     await page.getByRole("link", { name: "求道人清單" }).click();
 
     await page.getByRole("button", { name: "我要帶人來求道" }).click();

@@ -7,7 +7,7 @@ import { api } from "~/utils/api";
 
 export default function EditWorkActivityPage() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id, unitSlug } = router.query;
 
   const { data: session, status: sessionStatus } = useSession({
     required: true,
@@ -47,7 +47,10 @@ export default function EditWorkActivityPage() {
         <h1>{activity.title}</h1>
       </article>
 
-      <WorkActivityForm defaultActivity={activity} />
+      <WorkActivityForm
+        defaultActivity={activity}
+        unitSlug={unitSlug as string}
+      />
     </div>
   );
 }

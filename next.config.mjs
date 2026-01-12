@@ -68,12 +68,12 @@ const innerConfig = {
       },
       {
         source: "/yidework",
-        destination: "/work",
+        destination: "/work/yide",
         permanent: false,
       },
       {
-        source: "/yidework/:path*",
-        destination: "/work/:path*",
+        source: "/yidework/activity/:path*",
+        destination: "/work/activity/:path*",
         permanent: false,
       },
     ]);

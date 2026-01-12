@@ -14,7 +14,7 @@ export default function ClassActivityLeaveRecordPage() {
   const { data: sessionData } = useSession();
 
   const router = useRouter();
-  const { id } = router.query;
+  const { id, unitSlug } = router.query;
 
   const {
     data: activity,
@@ -53,7 +53,7 @@ export default function ClassActivityLeaveRecordPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/class/activity/detail/${activity.id}`}>
+      <Link className="link" href={`/class/${unitSlug}/activity/detail/${activity.id}`}>
         ← {activity?.title}
       </Link>
       <article className="prose">

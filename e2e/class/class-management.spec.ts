@@ -6,7 +6,7 @@ test.describe("YiDeClass Management", () => {
     await page.getByRole("link", { name: "義德", exact: true }).click();
     await page.getByRole("link", { name: "建立新簽到單" }).click();
 
-    await expect(page).toHaveURL("/class/activity/new");
+    await expect(page).toHaveURL(/\/class\/[^\/]+\/activity\/new/);
 
     // Fill form
     await page.locator('select[name="title"]').selectOption("自行輸入");
@@ -27,6 +27,6 @@ test.describe("YiDeClass Management", () => {
 
     // Verify
     await expect(page).toHaveURL(/\/class\/[^\/]+/);
-    await expect(page.getByText("E2E Test Class Activity")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "E2E Test Class Activity" })).toBeVisible();
   });
 });

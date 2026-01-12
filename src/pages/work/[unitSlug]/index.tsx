@@ -38,7 +38,7 @@ export default function WorkHome() {
       </article>
       <div className="flex flex-row justify-end space-x-4">
         <Link
-          href={`/work/activity/new?unitSlug=${unitSlug}`}
+          href={`/work/${unitSlug}/activity/new`}
           className="flex-shrink-0"
         >
           <div className="btn">
@@ -62,6 +62,7 @@ export default function WorkHome() {
               <ActivityCard
                 key={activity.id}
                 activity={{ ...activity, location: activity.location.name }}
+                unitSlug={unitSlug as string}
               />
             ))}
           </div>
@@ -72,6 +73,7 @@ export default function WorkHome() {
                 key={activity.id}
                 activity={{ ...activity, location: activity.location.name }}
                 isEnd
+                unitSlug={unitSlug as string}
               />
             ))}
           </div>

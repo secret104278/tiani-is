@@ -54,7 +54,7 @@ export default function UnitActivityList() {
         </Link>
       )}
       <div className="flex flex-row justify-end space-x-4">
-        <Link href="/class/activity/new" className="flex-shrink-0">
+        <Link href={`/class/${unitSlug}/activity/new`} className="flex-shrink-0">
           <div className="btn">
             <PlusIcon className="h-4 w-4" />
             建立新簽到單
@@ -84,13 +84,22 @@ export default function UnitActivityList() {
         >
           <div className="flex flex-col space-y-4">
             {onGoingActivities?.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} />
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                unitSlug={unitSlug as string}
+              />
             ))}
           </div>
           {!isEmpty(endedActivities) && <div className="divider">已結束</div>}
           <div className="flex flex-col space-y-4">
             {endedActivities?.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} isEnd />
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                isEnd
+                unitSlug={unitSlug as string}
+              />
             ))}
           </div>
         </InfiniteScroll>

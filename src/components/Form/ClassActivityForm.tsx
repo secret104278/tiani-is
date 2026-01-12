@@ -86,7 +86,7 @@ export default function ClassActivityForm({
     onSuccess: (data) => {
       // @ts-ignore prisma type issue
       const unitSlug = getUnitByName(data.unit)?.slug ?? "yide";
-      void router.push(`/class/${unitSlug}`);
+      void router.push(`/class/${unitSlug}/activity/detail/${data.id}`);
     },
   });
   const {
@@ -97,7 +97,7 @@ export default function ClassActivityForm({
     onSuccess: (data) => {
       // @ts-ignore prisma type issue
       const unitSlug = getUnitByName(data.unit)?.slug ?? "yide";
-      void router.push(`/class/${unitSlug}`);
+      void router.push(`/class/${unitSlug}/activity/detail/${data.id}`);
     },
   });
 

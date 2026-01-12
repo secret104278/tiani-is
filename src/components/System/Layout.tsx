@@ -14,7 +14,11 @@ import { type ReactNode, useState } from "react";
 import { useSiteContext } from "~/context/SiteContext";
 import { api } from "~/utils/api";
 import { siteHomeHref } from "~/utils/navigation";
-import { IS_LINE_NOTIFY_ENABLED, siteToTitle } from "~/utils/ui";
+import {
+  IS_LINE_NOTIFY_ENABLED,
+  getUnitByName,
+  siteToTitle,
+} from "~/utils/ui";
 import CheckInQrModal from "../CheckInQrModal";
 import LineNotifySetupTutorialDialog from "../LineNotifySetupTutorialDialog";
 import LineImage from "../utils/LineImage";
@@ -62,7 +66,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [showLineNotifySetup, setShowLineNotifySetup] = useState(false);
 
   const title = siteToTitle(site, unitName);
-  const homeHref = siteHomeHref(site, router.query.unitSlug as string);
+  const currentUnit = getUnitByName(unitName);
+  const homeHref = siteHomeHref(
+    site,
+    currentUnit?.slug ?? (router.query.unitSlug as string),
+  );
 
   return (
     <>

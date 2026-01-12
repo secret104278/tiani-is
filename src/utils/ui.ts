@@ -355,16 +355,10 @@ export const userComparator = (
 };
 
 export const siteToTitle = (site?: Site, unitName?: string) => {
-  const suffix =
-    site === Site.Volunteer
-      ? ""
-      : site === Site.Work
-        ? "道務網"
-        : site === Site.Class
-          ? "班務網"
-          : "";
-
-  if (unitName && suffix) return `${unitName}${suffix}`;
+  if (unitName) {
+    if (site === Site.Work) return `${unitName}道務網`;
+    if (site === Site.Class) return `${unitName}班務網`;
+  }
 
   switch (site) {
     case Site.Volunteer:

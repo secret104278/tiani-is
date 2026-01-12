@@ -5,6 +5,8 @@ import { AlertWarning } from "~/components/utils/Alert";
 import { api } from "~/utils/api";
 import { formatDate } from "~/utils/ui";
 
+import { getUnitByName } from "~/utils/ui";
+
 export default function YiDeAdminClassDetail() {
   const router = useRouter();
   const { title } = router.query;
@@ -62,20 +64,26 @@ export default function YiDeAdminClassDetail() {
           <tbody>
             {sortBy(activities, "startDateTime")
               ?.reverse()
-              .map((activity, idx) => (
-                <tr
-                  key={idx}
-                  className="hover hover:cursor-pointer"
-                  onClick={() =>
-                    void router.push(`/class/activity/detail/${activity.id}`)
-                  }
-                >
-                  <td>{formatDate(activity.startDateTime)}</td>
-                  <td>{activity.checkInUserCount}</td>
-                  <td>{activity.leaveUserCount}</td>
-                  <td>{activity.absentUserCount}</td>
-                </tr>
-              ))}
+              .map((activity, idx) => {
+                // @ts-ignore
+                const unitSlug = getUnitByName(activity.unit)?.slug ?? "yide";
+                return (
+                  <tr
+                    key={idx}
+                    className="hover hover:cursor-pointer"
+                    onClick={() =>
+                      void router.push(
+                        `/class/${unitSlug}/activity/detail/${activity.id}`,
+                      )
+                    }
+                  >
+                    <td>{formatDate(activity.startDateTime)}</td>
+                    <td>{activity.checkInUserCount}</td>
+                    <td>{activity.leaveUserCount}</td>
+                    <td>{activity.absentUserCount}</td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>

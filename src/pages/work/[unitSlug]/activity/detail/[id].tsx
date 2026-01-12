@@ -139,7 +139,7 @@ export default function WorkActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/work/activity/detail/${activity.id}?v=${activity.version}${unitSlug ? `&unitSlug=${unitSlug}` : ""}`,
+          `${window.location.origin}/work/${unitSlug}/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -171,7 +171,7 @@ export default function WorkActivityDetailPage() {
         {!isEnded && <FlowControl />}
         <div className="grow" />
         <Link
-          href={`/work/activity/edit/${activity.id}${unitSlug ? `?unitSlug=${unitSlug}` : ""}`}
+          href={`/work/${unitSlug}/activity/edit/${activity.id}`}
         >
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
@@ -202,7 +202,7 @@ export default function WorkActivityDetailPage() {
 
   const QiudaorenPanel = () => (
     <Link
-      href={`/work/activity/qiudaoren/${activity.id}${unitSlug ? `?unitSlug=${unitSlug}` : ""}`}
+      href={`/work/${unitSlug}/activity/qiudaoren/${activity.id}`}
       className="w-full"
     >
       <button className="btn w-full">

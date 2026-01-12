@@ -15,7 +15,7 @@ export default function ClassActivityCheckRecordPage() {
   const { data: sessionData } = useSession();
 
   const router = useRouter();
-  const { id } = router.query;
+  const { id, unitSlug } = router.query;
 
   const {
     data: activity,
@@ -44,12 +44,13 @@ export default function ClassActivityCheckRecordPage() {
   if (isNil(activity)) return <AlertWarning>找不到課程</AlertWarning>;
 
   const isManager = sessionData?.user.role.is_class_admin;
-  // @ts-ignore
-  const unitSlug = getUnitByName(activity?.unit)?.slug ?? "yide";
 
   return (
     <div className="flex flex-col space-y-4">
-      <Link className="link" href={`/class/activity/detail/${activity.id}`}>
+      <Link
+        className="link"
+        href={`/class/${unitSlug}/activity/detail/${activity.id}`}
+      >
         ← {activity?.title}
       </Link>
       <article className="prose">

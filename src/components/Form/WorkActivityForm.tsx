@@ -37,8 +37,10 @@ interface WorkActivityFormData {
 
 export default function WorkActivityForm({
   defaultActivity,
+  unitSlug,
 }: {
   defaultActivity?: YideWorkActivity;
+  unitSlug: string;
 }) {
   let formDefaultValues: Partial<WorkActivityFormData> = {
     title: WORK_ACTIVITY_TITLES?.[0],
@@ -78,7 +80,6 @@ export default function WorkActivityForm({
   const { register, handleSubmit, watch, setValue } = methods;
 
   const router = useRouter();
-  const unitSlug = router.query.unitSlug as string;
   const unitName = getUnitBySlug(unitSlug)?.name;
 
   const currentTitle = watch("title");
@@ -96,7 +97,7 @@ export default function WorkActivityForm({
     isPending: createActivityIsPending,
   } = api.workActivity.createActivity.useMutation({
     onSuccess: (data) =>
-      router.push(`/work/activity/detail/${data.id}?unitSlug=${unitSlug}`),
+      router.push(`/work/${unitSlug}/activity/detail/${data.id}`),
   });
   const {
     mutate: updateActivity,
@@ -104,7 +105,7 @@ export default function WorkActivityForm({
     isPending: updateActivityIsPending,
   } = api.workActivity.updateActivity.useMutation({
     onSuccess: (data) =>
-      router.push(`/work/activity/detail/${data.id}?unitSlug=${unitSlug}`),
+      router.push(`/work/${unitSlug}/activity/detail/${data.id}`),
   });
 
   const _handleSubmit = (isDraft = false) => {

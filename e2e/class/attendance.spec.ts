@@ -7,7 +7,7 @@ test.describe("YiDeClass Attendance", () => {
     publishedClassActivity,
   }) => {
     // 1. Go to detail page of the activity created by fixture
-    await page.goto(`/class/activity/detail/${publishedClassActivity.id}`);
+    await page.goto(`/class/yide/activity/detail/${publishedClassActivity.id}`);
 
     // 2. Perform Check-in
 

@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { api } from "~/utils/api";
-import { formatDate } from "~/utils/ui";
+import { formatDate, getUnitByName } from "~/utils/ui";
 
 export default function WorkingStatsPage() {
   const router = useRouter();
@@ -19,22 +19,28 @@ export default function WorkingStatsPage() {
         </tr>
       </thead>
       <tbody>
-        {workingStats?.activityCheckHistories.map((history) => (
-          <tr
-            className="hover hover:cursor-pointer"
-            key={history.activityId}
-            onClick={() =>
-              void router.push(`/class/activity/detail/${history.activityId}`)
-            }
-          >
-            <td>{history.activity.title}</td>
-            <td>
-              {formatDate(history.checkAt)}
-              <br />
-              {history.checkAt.toLocaleTimeString()}
-            </td>
-          </tr>
-        ))}
+        {workingStats?.activityCheckHistories.map((history) => {
+          // @ts-ignore
+          const unitSlug = getUnitByName(history.activity.unit)?.slug ?? "yide";
+          return (
+            <tr
+              className="hover hover:cursor-pointer"
+              key={history.activityId}
+              onClick={() =>
+                void router.push(
+                  `/class/${unitSlug}/activity/detail/${history.activityId}`,
+                )
+              }
+            >
+              <td>{history.activity.title}</td>
+              <td>
+                {formatDate(history.checkAt)}
+                <br />
+                {history.checkAt.toLocaleTimeString()}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

@@ -7,16 +7,20 @@ import {
 import type { VolunteerActivityStatus } from "@prisma/client";
 import Link from "next/link";
 import { useSiteContext } from "~/context/SiteContext";
+import { useRouter } from "next/router";
 import {
   Site,
   formatDateTime,
   getActivityStatusText,
+  getUnitByName,
   toDuration,
+  urlBaseToSite,
 } from "~/utils/ui";
 
 export function ActivityCard({
   activity,
   isEnd,
+  unitSlug: propUnitSlug,
 }: {
   activity: {
     id: number;
@@ -32,14 +36,23 @@ export function ActivityCard({
     festival?: string | null;
   };
   isEnd?: boolean;
+  unitSlug?: string;
 }) {
-  const { site } = useSiteContext();
+  const router = useRouter();
+  const { site: contextSite, unitName } = useSiteContext();
+  const site = contextSite ?? urlBaseToSite(router.pathname.split("/")[1]);
+  const unitSlug = propUnitSlug ?? getUnitByName(unitName)?.slug;
+
+  const href =
+    site === Site.Class || site === Site.Work
+      ? `/${site}/${unitSlug}/activity/detail/${activity.id}`
+      : `/${site}/activity/detail/${activity.id}`;
 
   if (isEnd)
     return (
       <Link
         key={activity.id}
-        href={`/${site}/activity/detail/${activity.id}`}
+        href={href}
         style={{ textDecoration: "none" }}
       >
         <div className="card card-compact w-full bg-base-200 shadow">
@@ -60,7 +73,7 @@ export function ActivityCard({
 
   return (
     <Link
-      href={`/${site}/activity/detail/${activity.id}`}
+      href={href}
       style={{ textDecoration: "none" }}
     >
       <div className="card-compact card w-full bg-accent text-accent-content shadow">

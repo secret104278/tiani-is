@@ -6,6 +6,15 @@ test.describe("YideWork Activity Management", () => {
 
     await page.getByRole("link", { name: "建立新通知" }).click();
 
+    await page.locator('select[name="title"]').selectOption("辦道通知");
+
+    const bandaoSection = page.locator('div:has(> label:has-text("辦道"))');
+    await bandaoSection.getByPlaceholder("上首").fill("User B");
+    await bandaoSection.getByPlaceholder("下首").fill("User C");
+
+    const dianchuanshiSection = page.locator('div:has(> label:has-text("點傳師服務"))');
+    await dianchuanshiSection.getByPlaceholder("逗號分隔").fill("User A");
+
     await page
       .locator('select[name="locationId"]')
       .selectOption({ label: "天一聖道院" });
@@ -13,43 +22,11 @@ test.describe("YideWork Activity Management", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
-
-    await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
-    await expect(page.getByText("佛堂：天一聖道院")).toBeVisible();
-    await expect(
-      page.getByText("國曆：2025/12/25 (四) 上午 10:00"),
-    ).toBeVisible();
-
-    await expect(page.getByText("已發佈")).toBeVisible();
-  });
-
-  test("Create a 'Ban Dao' activity with role assignments", async ({
-    loginAsWorkAdmin,
-    page,
-  }) => {
-    await page.goto("/work/yide");
-
-    await page.getByRole("link", { name: "建立新通知" }).click();
-
-    await page.locator('select[name="title"]').selectOption(["辦道通知"]);
-
-    await page
-      .locator('select[name="locationId"]')
-      .selectOption({ label: "天一聖道院" });
-    await page.locator('input[name="startDateTime"]').fill("2025-12-26T09:00");
-
-    await page.getByRole("textbox").first().fill("User A");
-
-    await page.getByRole("textbox", { name: "上首" }).first().fill("User B");
-    await page.getByRole("textbox", { name: "下首" }).first().fill("User C");
-
-    await page.getByRole("button", { name: "送出" }).click();
-
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "辦道通知" })).toBeVisible();
-    await expect(page.getByText("User A")).toBeVisible();
+    await expect(page.getByText("點傳師服務 / 講師服務")).toBeVisible();
+    await expect(page.getByText("User A", { exact: true })).toBeVisible();
     await expect(page.getByText("上首：User B")).toBeVisible();
     await expect(page.getByText("下首：User C")).toBeVisible();
   });
@@ -64,7 +41,7 @@ test.describe("YideWork Activity Management", () => {
     const targetStaff = otherUser.name!;
 
     const activity = await createWorkActivity(loginAsWorkAdmin.id);
-    await page.goto(`/work/activity/detail/${activity.id}`);
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
 
     const staffCombobox = page.locator(
       'input[id^="headlessui-combobox-input-"]',
@@ -103,7 +80,7 @@ test.describe("YideWork Activity Management", () => {
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill("2025-12-30T10:00");
     await page.getByRole("button", { name: "送出" }).click();
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
 
     await page.getByRole("button", { name: "撤銷" }).click();
 

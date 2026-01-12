@@ -139,7 +139,7 @@ export default function ClassActivityDetailPage() {
     return (
       <a
         href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-          `${window.location.origin}/class/activity/detail/${activity.id}?v=${activity.version}&unit=${unitInfo?.slug}`,
+          `${window.location.origin}/class/${unitInfo?.slug}/activity/detail/${activity.id}?v=${activity.version}`,
         )}`}
         target="_blank"
         rel="noreferrer"
@@ -173,7 +173,7 @@ export default function ClassActivityDetailPage() {
       <div className="flex flex-row space-x-2">
         {!isEnded && <FlowControl />}
         <div className="grow" />
-        <Link href={`/class/activity/edit/${activity.id}`}>
+        <Link href={`/class/${router.query.unitSlug}/activity/edit/${activity.id}`}>
           <button className="btn">
             <PencilSquareIcon className="h-4 w-4" />
             編輯

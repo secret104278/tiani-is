@@ -42,7 +42,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
     await expect(page.getByText("我要參加")).toBeVisible();
@@ -71,14 +71,14 @@ test.describe("YideWork Activity New Features", () => {
     page,
   }) => {
     // 1. Create an offering activity as Admin
-    await page.goto("/work/activity/new?unitSlug=yide");
+    await page.goto("/work/yide/activity/new");
     await page.locator('select[name="title"]').selectOption("獻供通知");
     await page
       .locator('select[name="locationId"]')
       .selectOption({ label: "天一聖道院" });
     await page.locator('input[name="startDateTime"]').fill(futureDateIso);
     await page.getByRole("button", { name: "送出" }).click();
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
     const activityUrl = page.url();
 
     // Admin should see staff list (even if empty)
@@ -99,7 +99,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work/activity/new?unitSlug=yide");
+    await page.goto("/work/yide/activity/new");
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 
@@ -113,7 +113,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
 
     // Verify lunar and traditional time display for "Ban Dao"
     await expect(page.getByText(`國曆：${futureDateDisplay}`)).toBeVisible();
@@ -128,7 +128,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work/activity/new?unitSlug=yide");
+    await page.goto("/work/yide/activity/new");
 
     await page
       .locator('select[name="offeringFestival"]')
@@ -144,7 +144,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
     await expect(page.getByText("節日：自定義法會")).toBeVisible();
   });
 
@@ -152,7 +152,7 @@ test.describe("YideWork Activity New Features", () => {
     loginAsWorkAdmin,
     page,
   }) => {
-    await page.goto("/work/activity/new?unitSlug=yide");
+    await page.goto("/work/yide/activity/new");
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 
@@ -174,7 +174,7 @@ test.describe("YideWork Activity New Features", () => {
 
     await page.getByRole("button", { name: "送出" }).click();
 
-    await expect(page).toHaveURL(/\/work\/activity\/detail\/\d+/);
+    await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
     await expect(page.getByText("時數：")).not.toBeVisible();
   });
 });
