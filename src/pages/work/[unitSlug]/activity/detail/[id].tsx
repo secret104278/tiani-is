@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import AddQiudaorenDialogContent from "~/components/DialogContent/AddQiudaorenDialogContent";
+import WorkParticipateDialogContent from "~/components/DialogContent/WorkParticipateDialogContent";
 import {
   getHourLabel,
   getTimeToHourValue,
@@ -97,18 +98,12 @@ export default function WorkActivityDetailPage() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [qiudaorenDialogOpen, setQiudaorenDialogOpen] = useState(false);
+  const [participateDialogOpen, setParticipateDialogOpen] = useState(false);
 
   const { data: myQiudaorens } =
     api.workActivity.getQiudaorensByActivityAndCreatedBy.useQuery({
       activityId: Number(id),
     });
-
-  const {
-    mutate: participateActivity,
-    isPending: participateActivityIsPending,
-  } = api.workActivity.participateActivity.useMutation({
-    onSuccess: () => refetch(),
-  });
 
   const { mutate: leaveActivity, isPending: leaveActivityIsPending } =
     api.workActivity.leaveActivity.useMutation({
@@ -211,7 +206,10 @@ export default function WorkActivityDetailPage() {
   );
 
   const ParticipateControl = () => {
-    if (!isOffering) return null;
+    const isBandaoNotice = activity.title === "辦道通知";
+    const isOfferingNotice = activity.title === "獻供通知";
+
+    if (!isOfferingNotice && !isBandaoNotice) return null;
     if (isEnded) return null;
 
     if (isStaff) {
@@ -227,15 +225,30 @@ export default function WorkActivityDetailPage() {
       );
     }
 
+    const buttonLabel = isBandaoNotice ? "我可以參與幫辦" : "我可以參加";
+    const dialogTitle = isBandaoNotice ? "我可以參與幫辦" : "我可以參加";
+
     return (
-      <ReactiveButton
-        className="btn btn-accent"
-        onClick={() => participateActivity({ activityId: activity.id })}
-        loading={participateActivityIsPending}
-      >
-        <UserPlusIcon className="h-4 w-4" />
-        我要參加
-      </ReactiveButton>
+      <>
+        <ReactiveButton
+          className="btn btn-accent"
+          onClick={() => setParticipateDialogOpen(true)}
+        >
+          <UserPlusIcon className="h-4 w-4" />
+          {buttonLabel}
+        </ReactiveButton>
+        <Dialog
+          title={dialogTitle}
+          show={participateDialogOpen}
+          closeModal={() => setParticipateDialogOpen(false)}
+        >
+          <WorkParticipateDialogContent
+            activityId={activity.id}
+            title={activity.title}
+            onSuccess={() => refetch()}
+          />
+        </Dialog>
+      </>
     );
   };
 
@@ -302,7 +315,7 @@ export default function WorkActivityDetailPage() {
           <QiudaorenPanel />
         </div>
       )}
-      {isOffering && <ParticipateControl />}
+      <ParticipateControl />
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
 

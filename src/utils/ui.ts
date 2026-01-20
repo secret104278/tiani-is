@@ -124,6 +124,28 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
 
 export const WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
 
+export const WORK_ASSIGNMENT_ROLES = [
+  { key: "generalConvener", label: "總招集", type: "single" },
+  { key: "expoundingTao", label: "開釋道義", type: "single" },
+  { key: "conductor", label: "操持", type: "single" },
+  { key: "documentPresentation", label: "表文", type: "single" },
+  { key: "offering", label: "獻供", type: "dual" },
+  { key: "kneelingReception", label: "跪接", type: "dual" },
+  { key: "servingFruit", label: "端果", type: "single" },
+  { key: "arrangingFruit", label: "整果", type: "multiple" },
+  { key: "invokingAltar", label: "請壇", type: "dual" },
+  { key: "accompanyingAltar", label: "陪壇", type: "multiple" },
+  { key: "performingCeremony", label: "辦道", type: "dual" },
+  { key: "guardingAltar", label: "護壇", type: "multiple" },
+  {
+    key: "transmittingMasterService",
+    label: "點傳師服務 / 講師服務",
+    type: "multiple",
+  },
+  { key: "towelsAndTea", label: "毛巾 & 茶水", type: "multiple" },
+  { key: "threeTreasures", label: "三寶", type: "single" },
+] as const;
+
 export const OFFERING_FESTIVALS = [
   "初一",
   "十五",

@@ -92,6 +92,22 @@ export default function WorkActivityForm({
   } = api.workActivity.getLocations.useQuery();
 
   const {
+    data: staffs,
+    isLoading: staffsIsLoading,
+    error: staffsError,
+  } = api.workActivity.getStaffs.useQuery(
+    {
+      activityId: defaultActivity?.id ?? 0,
+    },
+    {
+      enabled: !!defaultActivity?.id,
+    },
+  );
+
+  const staffNames =
+    (staffs?.map((staff) => staff.user.name).filter(Boolean) as string[]) ?? [];
+
+  const {
     mutate: createActivity,
     error: createActivityError,
     isPending: createActivityIsPending,
@@ -208,7 +224,7 @@ export default function WorkActivityForm({
             className="select select-bordered"
             {...register("locationId", { valueAsNumber: true })}
           >
-            {locations?.map((location) => (
+            {locations?.map((location: { id: number; name: string }) => (
               <option key={location.id} value={location.id}>
                 {location.name}
               </option>
@@ -216,7 +232,7 @@ export default function WorkActivityForm({
           </select>
         </div>
 
-        <WorkAssignmentsSection title={currentTitle} />
+        <WorkAssignmentsSection title={currentTitle} staffNames={staffNames} />
 
         <div className="divider" />
         <div>

@@ -1,6 +1,11 @@
 import type { Prisma } from "@prisma/client";
 import _ from "lodash";
 import { z } from "zod";
+import type { WorkAssignments } from "~/utils/types";
+import {
+  addUserToAssignments,
+  removeUserFromAssignments,
+} from "~/server/utils/assignmentUtils";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,
@@ -201,27 +206,102 @@ export const activityRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  participateActivity: activityPublishedOnlyProcedure.mutation(
-    async ({ ctx, input }) => {
-      return await ctx.db.yideWorkActivityStaff.create({
-        data: {
-          activityId: input.activityId,
+  participateActivity: activityPublishedOnlyProcedure
+    .input(
+      z.object({
+        roles: z
+          .array(
+            z.object({
+              roleKey: z.string(),
+              position: z.enum(["upper", "lower"]).optional(),
+            }),
+          )
+          .optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { activityId, roles } = input;
+
+      // Create/link staff record once
+      const staffRecord = await ctx.db.yideWorkActivityStaff.upsert({
+        where: {
+          activityId_userId: {
+            activityId,
+            userId: ctx.session.user.id,
+          },
+        },
+        create: {
+          activityId,
           userId: ctx.session.user.id,
         },
+        update: {},
       });
-    },
-  ),
+
+      // If no roles provided, just return the staff record
+      if (!roles || roles.length === 0) {
+        return staffRecord;
+      }
+
+      // Fetch the activity to update assignments
+      const activity = await ctx.db.yideWorkActivity.findUniqueOrThrow({
+        where: { id: activityId },
+      });
+
+      const assignments = (activity.assignments ||
+        {}) as Partial<WorkAssignments>;
+      const userName = ctx.session.user.name || "Unknown";
+
+      // Add user to assignments
+      const updatedAssignments = addUserToAssignments(
+        assignments,
+        userName,
+        roles,
+      );
+
+      // Update the activity with new assignments
+      await ctx.db.yideWorkActivity.update({
+        where: { id: activityId },
+        data: {
+          assignments: updatedAssignments,
+        },
+      });
+
+      return staffRecord;
+    }),
 
   leaveActivity: activityPublishedOnlyProcedure.mutation(
     async ({ ctx, input }) => {
-      return await ctx.db.yideWorkActivityStaff.delete({
+      const { activityId } = input;
+
+      // Delete staff record
+      await ctx.db.yideWorkActivityStaff.delete({
         where: {
           activityId_userId: {
-            activityId: input.activityId,
+            activityId,
             userId: ctx.session.user.id,
           },
         },
       });
+
+      // Remove user from all assignments
+      const activity = await ctx.db.yideWorkActivity.findUniqueOrThrow({
+        where: { id: activityId },
+      });
+
+      const assignments = (activity.assignments || {}) as Partial<WorkAssignments>;
+      const userName = ctx.session.user.name || "Unknown";
+
+      const updatedAssignments = removeUserFromAssignments(assignments, userName);
+
+      // Update activity with cleaned assignments
+      await ctx.db.yideWorkActivity.update({
+        where: { id: activityId },
+        data: {
+          assignments: updatedAssignments,
+        },
+      });
+
+      return { success: true };
     },
   ),
 

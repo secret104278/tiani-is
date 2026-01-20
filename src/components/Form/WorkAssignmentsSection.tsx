@@ -1,33 +1,17 @@
 import { useFormContext, useWatch } from "react-hook-form";
+import SuggestiveInput from "~/components/inputs/SuggestiveInput";
 import type { WorkAssignments } from "~/utils/types";
+import { WORK_ASSIGNMENT_ROLES } from "~/utils/ui";
 
-const ASSIGNMENT_ROLES = [
-  { key: "generalConvener", label: "總招集", type: "single" },
-  { key: "expoundingTao", label: "開釋道義", type: "single" },
-  { key: "conductor", label: "操持", type: "single" },
-  { key: "documentPresentation", label: "表文", type: "single" },
-  { key: "offering", label: "獻供", type: "dual" },
-  { key: "kneelingReception", label: "跪接", type: "dual" },
-  { key: "servingFruit", label: "端果", type: "single" },
-  { key: "arrangingFruit", label: "整果", type: "multiple" },
-  { key: "invokingAltar", label: "請壇", type: "dual" },
-  { key: "accompanyingAltar", label: "陪壇", type: "multiple" },
-  { key: "performingCeremony", label: "辦道", type: "dual" },
-  { key: "guardingAltar", label: "護壇", type: "multiple" },
-  {
-    key: "transmittingMasterService",
-    label: "點傳師服務 / 講師服務",
-    type: "multiple",
-  },
-  { key: "towelsAndTea", label: "毛巾 & 茶水", type: "multiple" },
-  { key: "threeTreasures", label: "三寶", type: "single" },
-];
+interface WorkAssignmentsSectionProps {
+  title: string;
+  staffNames?: string[];
+}
 
 export default function WorkAssignmentsSection({
   title,
-}: {
-  title: string;
-}) {
+  staffNames = [],
+}: WorkAssignmentsSectionProps) {
   const { setValue, control } = useFormContext<{
     assignments: WorkAssignments;
   }>();
@@ -38,7 +22,7 @@ export default function WorkAssignmentsSection({
 
   const isOffering = title === "獻供通知";
   const filteredRoles = isOffering
-    ? ASSIGNMENT_ROLES.filter((role) =>
+    ? WORK_ASSIGNMENT_ROLES.filter((role) =>
         [
           "offering",
           "kneelingReception",
@@ -46,7 +30,7 @@ export default function WorkAssignmentsSection({
           "arrangingFruit",
         ].includes(role.key),
       )
-    : ASSIGNMENT_ROLES;
+    : WORK_ASSIGNMENT_ROLES;
 
   const handleSingleChange = (roleKey: string, value: string) => {
     const updated = { ...(assignments || {}) };
@@ -152,10 +136,11 @@ export default function WorkAssignmentsSection({
               <label className="label">
                 <span className="label-text text-sm">{role.label}</span>
               </label>
-              <input
+              <SuggestiveInput
                 type="text"
                 className="tiani-input"
                 value={getSingleValue(role.key)}
+                options={staffNames}
                 onChange={(e) => handleSingleChange(role.key, e.target.value)}
               />
             </div>
@@ -167,20 +152,22 @@ export default function WorkAssignmentsSection({
                 <span className="label-text text-sm">{role.label}</span>
               </label>
               <div className="flex gap-2">
-                <input
+                <SuggestiveInput
                   type="text"
                   className="tiani-input flex-1"
                   placeholder="上首"
                   value={getDualValues(role.key).upper}
+                  options={staffNames}
                   onChange={(e) =>
                     handleDualChange(role.key, "upper", e.target.value)
                   }
                 />
-                <input
+                <SuggestiveInput
                   type="text"
                   className="tiani-input flex-1"
                   placeholder="下首"
                   value={getDualValues(role.key).lower}
+                  options={staffNames}
                   onChange={(e) =>
                     handleDualChange(role.key, "lower", e.target.value)
                   }

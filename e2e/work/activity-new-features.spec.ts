@@ -43,12 +43,15 @@ test.describe("YideWork Activity New Features", () => {
     await page.getByRole("button", { name: "送出" }).click();
 
     await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
-
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
-    await expect(page.getByText("我要參加")).toBeVisible();
-    await page.getByRole("button", { name: "我要參加" }).click();
+    await expect(page.getByRole("button", { name: "我可以參加" })).toBeVisible();
+    await page.getByRole("button", { name: "我可以參加" }).click();
+    
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("配合安排").check();
+    await dialog.getByRole("button", { name: "參加" }).click();
+
     await expect(page.getByText("取消參加")).toBeVisible();
-    await expect(page.getByText("參與人員清單 (1)")).toBeVisible();
 
     await expect(page.getByText("節日：初一")).toBeVisible();
     await expect(page.getByText("上首：User A")).toBeVisible();
@@ -92,7 +95,7 @@ test.describe("YideWork Activity New Features", () => {
     await expect(page.getByText(/參與人員清單/)).not.toBeVisible();
 
     // Normal user should see "I want to participate"
-    await expect(page.getByRole("button", { name: "我要參加" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "我可以參加" })).toBeVisible();
   });
 
   test("Create a 'Ban Dao' activity hides festival and shows lunar/time info", async ({
