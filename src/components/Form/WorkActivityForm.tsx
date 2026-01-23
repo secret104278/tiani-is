@@ -1,4 +1,5 @@
 import type { inferRouterOutputs } from "@trpc/server";
+import _ from "lodash";
 import { isNil } from "lodash";
 import { useRouter } from "next/router";
 import { FormProvider, useForm } from "react-hook-form";
@@ -6,9 +7,11 @@ import type { WorkRouter } from "~/server/api/routers/work";
 import { api } from "~/utils/api";
 import type { WorkAssignments } from "~/utils/types";
 import {
+  MASTER_WORK_ROLES,
   OFFERING_FESTIVALS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   WORK_ACTIVITY_TITLES,
+  WORK_ROLE_PRESETS,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
@@ -18,7 +21,6 @@ import {
 } from "~/utils/ui";
 import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
-import SelectWithCustomInput from "./SelectWithCustomInput";
 import WorkAssignmentsSection from "./WorkAssignmentsSection";
 
 type YideWorkActivity = inferRouterOutputs<WorkRouter>["getActivity"];
@@ -33,6 +35,8 @@ interface WorkActivityFormData {
   duration: number;
   description: string;
   assignments: WorkAssignments;
+  preset: string;
+  rolesConfig: string[];
 }
 
 export default function WorkActivityForm({
@@ -50,9 +54,35 @@ export default function WorkActivityForm({
     duration: 2, // 預設 2 小時，雖然隱藏但仍需數值
     offeringFestival: "",
     offeringFestivalOther: "",
+    preset: "offering",
+    rolesConfig: [...WORK_ROLE_PRESETS.offering.roles],
   };
   if (defaultActivity) {
     const defaultTitleIsOther = titleIsOther(defaultActivity.title);
+
+    let rolesConfig = (defaultActivity.rolesConfig as string[]) ?? [];
+    let preset = "full";
+
+    // Legacy data fallback
+    if (_.isEmpty(rolesConfig)) {
+      if (defaultActivity.title === "獻供通知") {
+        preset = "offering";
+        rolesConfig = [...WORK_ROLE_PRESETS.offering.roles];
+      } else if (defaultActivity.title === "辦道通知") {
+        preset = "taoCeremony";
+        rolesConfig = [...WORK_ROLE_PRESETS.taoCeremony.roles];
+      }
+    } else {
+      // Try to find matching preset
+      const matchedPreset = Object.entries(WORK_ROLE_PRESETS).find(
+        ([, def]) =>
+          def.roles.length === rolesConfig.length &&
+          def.roles.every((r) => rolesConfig.includes(r)),
+      );
+      if (matchedPreset) {
+        preset = matchedPreset[0];
+      }
+    }
 
     formDefaultValues = {
       title: defaultTitleIsOther
@@ -70,6 +100,8 @@ export default function WorkActivityForm({
       description: defaultActivity.description ?? "",
       assignments: (defaultActivity.assignments as WorkAssignments) ?? {},
       offeringFestival: defaultActivity.festival ?? "",
+      preset,
+      rolesConfig,
     };
   }
 
@@ -142,6 +174,7 @@ export default function WorkActivityForm({
         description: data.description,
         festival: festival,
         assignments: data.assignments,
+        rolesConfig: data.rolesConfig,
         isDraft: isDraft,
         unit: unitName ?? "義德",
       };
@@ -156,6 +189,11 @@ export default function WorkActivityForm({
       }
     });
   };
+
+  const currentRoleKeys = watch("rolesConfig") || [];
+  const activeRoleDefinitions = MASTER_WORK_ROLES.filter((r) =>
+    currentRoleKeys.includes(r.key),
+  );
 
   const canSaveDraft =
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
@@ -177,8 +215,22 @@ export default function WorkActivityForm({
             onChange={(e) => {
               const val = e.target.value;
               setValue("title", val);
-              // 切換時清除 assignments
-              setValue("assignments", {});
+
+              // Auto-switch preset based on title if it's a new activity
+              if (!defaultActivity) {
+                if (val === "獻供通知") {
+                  setValue("preset", "offering");
+                  setValue("rolesConfig", [
+                    ...WORK_ROLE_PRESETS.offering.roles,
+                  ]);
+                } else if (val === "辦道通知") {
+                  setValue("preset", "taoCeremony");
+                  setValue("rolesConfig", [
+                    ...WORK_ROLE_PRESETS.taoCeremony.roles,
+                  ]);
+                }
+                setValue("assignments", {});
+              }
             }}
           >
             {WORK_ACTIVITY_TITLES.map((option, i) => (
@@ -232,7 +284,35 @@ export default function WorkActivityForm({
           </select>
         </div>
 
-        <WorkAssignmentsSection title={currentTitle} staffNames={staffNames} />
+        <div>
+          <label className="label">
+            <span className="label-text text-sm">工作分配模式</span>
+          </label>
+          <select
+            className="select select-bordered"
+            {...register("preset")}
+            onChange={(e) => {
+              const presetKey = e.target
+                .value as keyof typeof WORK_ROLE_PRESETS;
+              const preset = WORK_ROLE_PRESETS[presetKey];
+              setValue("preset", presetKey);
+              setValue("rolesConfig", [...preset.roles]);
+              // Reset assignments when preset changes to avoid stale data in UI
+              setValue("assignments", {});
+            }}
+          >
+            {Object.entries(WORK_ROLE_PRESETS).map(([key, def]) => (
+              <option key={key} value={key}>
+                {def.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <WorkAssignmentsSection
+          roleDefinitions={activeRoleDefinitions}
+          staffNames={staffNames}
+        />
 
         <div className="divider" />
         <div>

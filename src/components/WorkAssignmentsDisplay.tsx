@@ -1,33 +1,22 @@
 import type { WorkAssignments } from "~/utils/types";
+import { MASTER_WORK_ROLES } from "~/utils/ui";
 
 interface WorkAssignmentsDisplayProps {
   assignments: WorkAssignments;
+  rolesConfig?: string[] | null;
 }
-
-const ASSIGNMENT_ROLES = [
-  { key: "generalConvener", label: "總招集" },
-  { key: "expoundingTao", label: "開釋道義" },
-  { key: "conductor", label: "操持" },
-  { key: "documentPresentation", label: "表文" },
-  { key: "offering", label: "獻供" },
-  { key: "kneelingReception", label: "跪接" },
-  { key: "servingFruit", label: "端果" },
-  { key: "arrangingFruit", label: "整果" },
-  { key: "invokingAltar", label: "請壇" },
-  { key: "accompanyingAltar", label: "陪壇" },
-  { key: "performingCeremony", label: "辦道" },
-  { key: "guardingAltar", label: "護壇" },
-  { key: "transmittingMasterService", label: "點傳師服務 / 講師服務" },
-  { key: "towelsAndTea", label: "毛巾 & 茶水" },
-  { key: "threeTreasures", label: "三寶" },
-];
 
 export default function WorkAssignmentsDisplay({
   assignments,
+  rolesConfig,
 }: WorkAssignmentsDisplayProps) {
+  const rolesToDisplay = rolesConfig
+    ? MASTER_WORK_ROLES.filter((r) => rolesConfig.includes(r.key))
+    : MASTER_WORK_ROLES;
+
   return (
     <div className="space-y-3">
-      {ASSIGNMENT_ROLES.map((role) => {
+      {rolesToDisplay.map((role) => {
         const value = assignments[role.key as keyof WorkAssignments];
 
         if (!value) return null;

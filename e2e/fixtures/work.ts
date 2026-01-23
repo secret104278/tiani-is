@@ -90,6 +90,8 @@ export const test = base.extend<WorkFixtures>({
           ...overrides,
           assignments:
             (overrides?.assignments as Prisma.InputJsonValue) ?? undefined,
+          rolesConfig:
+            (overrides?.rolesConfig as Prisma.InputJsonValue) ?? undefined,
         },
       });
       activities.push(activity);

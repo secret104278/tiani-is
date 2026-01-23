@@ -23,6 +23,7 @@ export const activityRouter = createTRPCRouter({
         startDateTime: z.date(),
         endDateTime: z.date(),
         assignments: z.record(z.any()).optional(),
+        rolesConfig: z.array(z.string()).optional(),
         isDraft: z.boolean().optional(),
         unit: z.string(),
       }),
@@ -44,6 +45,7 @@ export const activityRouter = createTRPCRouter({
           assignments: _.isEmpty(input.assignments)
             ? undefined
             : input.assignments,
+          rolesConfig: input.rolesConfig,
           status: input.isDraft ? "DRAFT" : "PUBLISHED",
           organiser: {
             connect: {
@@ -82,6 +84,7 @@ export const activityRouter = createTRPCRouter({
         startDateTime: z.date(),
         endDateTime: z.date(),
         assignments: z.record(z.any()).optional(),
+        rolesConfig: z.array(z.string()).optional(),
         isDraft: z.boolean().optional(),
         unit: z.string().optional(),
       }),
@@ -106,6 +109,7 @@ export const activityRouter = createTRPCRouter({
           assignments: _.isEmpty(input.assignments)
             ? undefined
             : input.assignments,
+          rolesConfig: input.rolesConfig,
           status: input.isDraft ? "DRAFT" : undefined,
           version: {
             increment: 1,

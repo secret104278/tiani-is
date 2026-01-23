@@ -1,15 +1,15 @@
 import { useFormContext, useWatch } from "react-hook-form";
 import SuggestiveInput from "~/components/inputs/SuggestiveInput";
 import type { WorkAssignments } from "~/utils/types";
-import { WORK_ASSIGNMENT_ROLES } from "~/utils/ui";
+import { type MASTER_WORK_ROLES } from "~/utils/ui";
 
 interface WorkAssignmentsSectionProps {
-  title: string;
+  roleDefinitions: (typeof MASTER_WORK_ROLES)[number][];
   staffNames?: string[];
 }
 
 export default function WorkAssignmentsSection({
-  title,
+  roleDefinitions,
   staffNames = [],
 }: WorkAssignmentsSectionProps) {
   const { setValue, control } = useFormContext<{
@@ -19,18 +19,6 @@ export default function WorkAssignmentsSection({
     control,
     name: "assignments",
   });
-
-  const isOffering = title === "獻供通知";
-  const filteredRoles = isOffering
-    ? WORK_ASSIGNMENT_ROLES.filter((role) =>
-        [
-          "offering",
-          "kneelingReception",
-          "servingFruit",
-          "arrangingFruit",
-        ].includes(role.key),
-      )
-    : WORK_ASSIGNMENT_ROLES;
 
   const handleSingleChange = (roleKey: string, value: string) => {
     const updated = { ...(assignments || {}) };
@@ -129,7 +117,7 @@ export default function WorkAssignmentsSection({
     <div className="space-y-4">
       <div className="divider">工作分配</div>
 
-      {filteredRoles.map((role) => (
+      {roleDefinitions.map((role) => (
         <div key={role.key}>
           {role.type === "single" && (
             <div>

@@ -337,12 +337,14 @@ export default function WorkActivityDetailPage() {
         )}
 
         {!_.isEmpty(activity.assignments) &&
-          (activity.title.includes("辦道") ||
+          (activity.rolesConfig ||
+            activity.title.includes("辦道") ||
             activity.title.includes("獻供")) && (
             <>
               <div className="divider">工作分配</div>
               <WorkAssignmentsDisplay
                 assignments={activity.assignments as WorkAssignments}
+                rolesConfig={activity.rolesConfig as string[]}
               />
             </>
           )}

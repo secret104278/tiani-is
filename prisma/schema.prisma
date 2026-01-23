@@ -423,6 +423,7 @@ model YideWorkActivity {
   unit String @default("義德")
 
   assignments Json? // Role assignments structure
+  rolesConfig Json? // Stores the array of role keys enabled for this activity
 
   qiudaorenOnActivities QiudaorenOnActivity[]
   staffs                YideWorkActivityStaff[]

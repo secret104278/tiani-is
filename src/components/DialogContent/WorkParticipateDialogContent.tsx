@@ -43,17 +43,19 @@ export default function WorkParticipateDialogContent({
   });
 
   // Determine which roles to show
-  const isOffering = title === "獻供通知";
-  const availableRoles = isOffering
-    ? WORK_ASSIGNMENT_ROLES.filter((role) =>
-        [
-          "offering",
-          "kneelingReception",
-          "servingFruit",
-          "arrangingFruit",
-        ].includes(role.key),
-      )
-    : WORK_ASSIGNMENT_ROLES;
+  const rolesConfig = activity?.rolesConfig as string[] | null;
+  const availableRoles = rolesConfig
+    ? WORK_ASSIGNMENT_ROLES.filter((role) => rolesConfig.includes(role.key))
+    : title === "獻供通知"
+      ? WORK_ASSIGNMENT_ROLES.filter((role) =>
+          [
+            "offering",
+            "kneelingReception",
+            "servingFruit",
+            "arrangingFruit",
+          ].includes(role.key),
+        )
+      : WORK_ASSIGNMENT_ROLES;
 
   // Get current assignments to check what's taken
   const assignments = (activity?.assignments || {}) as Partial<WorkAssignments>;
@@ -166,7 +168,7 @@ export default function WorkParticipateDialogContent({
           <div className="space-y-2">
             {availableRoles.map((role) => {
               const assignees = getAssignees(role.key);
-              const value = assignments[role.key];
+              const value = assignments[role.key as keyof WorkAssignments];
               const isDual = role.type === "dual";
 
               // For dual roles, always show both positions as separate options

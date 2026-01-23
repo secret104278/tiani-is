@@ -31,7 +31,7 @@ test.describe("YideWork Activity New Features", () => {
 
     // Fill filtered assignments
     const offeringSection = page.locator(
-      'div:has(> label > span:text-is("獻供"))',
+      'div:has(> label > span:text-is("獻供執禮"))',
     );
     await offeringSection.getByPlaceholder("上首").fill("User A");
     await offeringSection.getByPlaceholder("下首").fill("User B");
@@ -168,7 +168,7 @@ test.describe("YideWork Activity New Features", () => {
     // All roles should be visible
     await expect(page.getByText("總招集", { exact: true })).toBeVisible();
     await expect(page.getByText("操持", { exact: true })).toBeVisible();
-    await expect(page.getByText("辦道", { exact: true })).toBeVisible();
+    await expect(page.getByText("辦道執禮", { exact: true })).toBeVisible();
 
     await page
       .locator('select[name="locationId"]')
