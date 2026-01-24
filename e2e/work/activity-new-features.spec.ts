@@ -46,10 +46,10 @@ test.describe("YideWork Activity New Features", () => {
     await expect(page.getByRole("heading", { name: "獻供通知" })).toBeVisible();
     await expect(page.getByRole("button", { name: "我可以參加" })).toBeVisible();
     await page.getByRole("button", { name: "我可以參加" }).click();
-    
+
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("配合安排").check();
-    await dialog.getByRole("button", { name: "參加" }).click();
+    await expect(dialog.getByText("點擊下方按鈕即可報名")).toBeVisible();
+    await dialog.getByRole("button", { name: "我可以參加" }).click();
 
     await expect(page.getByText("取消參加")).toBeVisible();
 

@@ -122,7 +122,9 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
   CLASS_ACTIVITY_LOCATION_MAP.keys(),
 );
 
-export const WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知"];
+export const WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知", "執禮通知"];
+
+export const CUSTOM_ROLE_KEY = "_custom_roles";
 
 export const MASTER_WORK_ROLES = [
   { key: "generalConvener", label: "總招集", type: "single" },

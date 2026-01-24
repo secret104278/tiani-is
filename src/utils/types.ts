@@ -57,6 +57,7 @@ export interface WorkAssignments {
   transmittingMasterService?: string;
   towelsAndTea?: string;
   threeTreasures?: string;
+  _custom_roles?: { role: string; name: string }[];
 }
 
 export interface UserProfileFormData {

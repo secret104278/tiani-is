@@ -67,6 +67,29 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
+const VolunteerListDialog = ({
+  show,
+  onClose,
+  assignments,
+  rolesConfig,
+}: {
+  show: boolean;
+  onClose: () => void;
+  assignments: WorkAssignments;
+  rolesConfig?: string[] | null;
+}) => {
+  return (
+    <Dialog title="志願幫辦名單" show={show} closeModal={onClose}>
+      <div className="max-h-[60vh] overflow-y-auto">
+        <WorkAssignmentsDisplay
+          assignments={assignments}
+          rolesConfig={rolesConfig}
+        />
+      </div>
+    </Dialog>
+  );
+};
+
 export default function WorkActivityDetailPage() {
   const router = useRouter();
   const { id, unitSlug } = router.query;
@@ -87,6 +110,7 @@ export default function WorkActivityDetailPage() {
   });
 
   const [shareBtnLoading, setShareBtnLoading] = useState(false);
+  const [showVolunteerList, setShowVolunteerList] = useState(false);
 
   const {
     mutate: deleteActivity,
@@ -189,6 +213,22 @@ export default function WorkActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
+      {!isOffering && (
+        <button
+          className="btn btn-outline mt-2 w-full"
+          onClick={() => setShowVolunteerList(true)}
+        >
+          <QueueListIcon className="h-4 w-4" />
+          志願幫辦名單
+        </button>
+      )}
+
+      <VolunteerListDialog
+        show={showVolunteerList}
+        onClose={() => setShowVolunteerList(false)}
+        assignments={activity.assignments as WorkAssignments}
+        rolesConfig={activity.rolesConfig as string[]}
+      />
       {!isOffering && <WorkActivityStaffManagement activityId={activity.id} />}
     </>
   );
@@ -206,10 +246,8 @@ export default function WorkActivityDetailPage() {
   );
 
   const ParticipateControl = () => {
-    const isBandaoNotice = activity.title === "辦道通知";
     const isOfferingNotice = activity.title === "獻供通知";
 
-    if (!isOfferingNotice && !isBandaoNotice) return null;
     if (isEnded) return null;
 
     if (isStaff) {
@@ -225,8 +263,8 @@ export default function WorkActivityDetailPage() {
       );
     }
 
-    const buttonLabel = isBandaoNotice ? "我可以參與幫辦" : "我可以參加";
-    const dialogTitle = isBandaoNotice ? "我可以參與幫辦" : "我可以參加";
+    const buttonLabel = !isOfferingNotice ? "我可以參與幫辦" : "我可以參加";
+    const dialogTitle = !isOfferingNotice ? "我可以參與幫辦" : "我可以參加";
 
     return (
       <>

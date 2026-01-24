@@ -57,6 +57,9 @@ export default function WorkParticipateDialogContent({
         )
       : WORK_ASSIGNMENT_ROLES;
 
+  const isOffering = title === "獻供通知";
+  const showRoleSelection = !isOffering;
+
   // Get current assignments to check what's taken
   const assignments = (activity?.assignments || {}) as Partial<WorkAssignments>;
 
@@ -79,43 +82,41 @@ export default function WorkParticipateDialogContent({
   };
 
   const handleParticipate = () => {
-    if (selectedRoles.size === 0) return;
+    if (showRoleSelection && selectedRoles.size === 0) return;
 
     // Build array of roles to submit
     const roles: Array<{ roleKey: string; position?: "upper" | "lower" }> = [];
 
-    for (const selectedRole of selectedRoles) {
-      if (selectedRole === "配合安排") {
-        // "配合安排" means just join without a specific role - no roleKey
-        // We'll handle this by sending empty roles array, or we can skip it
-        // since it doesn't add to assignments
-      } else if (selectedRole.includes("-")) {
-        // Flattened dual role format: "roleKey-position"
-        const parts = selectedRole.split("-");
-        const roleKey = parts[0];
-        const position = parts[1];
-        if (
-          roleKey &&
-          position &&
-          (position === "upper" || position === "lower")
-        ) {
+    if (showRoleSelection) {
+      for (const selectedRole of selectedRoles) {
+        if (selectedRole === "配合安排") {
+          // Skip
+        } else if (selectedRole.includes("-")) {
+          const parts = selectedRole.split("-");
+          const roleKey = parts[0];
+          const position = parts[1];
+          if (
+            roleKey &&
+            position &&
+            (position === "upper" || position === "lower")
+          ) {
+            roles.push({
+              roleKey,
+              position: position as "upper" | "lower",
+            });
+          }
+        } else {
           roles.push({
-            roleKey,
-            position: position as "upper" | "lower",
+            roleKey: selectedRole,
           });
         }
-      } else {
-        // Regular single or multiple role
-        roles.push({
-          roleKey: selectedRole,
-        });
       }
     }
 
     // Make single mutation call with all roles
     participateActivity({
       activityId,
-      roles: roles.length > 0 ? roles : undefined,
+      roles: roles.length > 0 ? roles : [],
     });
 
     // Clear selections after submitting
@@ -144,35 +145,48 @@ export default function WorkParticipateDialogContent({
         <AlertWarning>{participateActivityError.message}</AlertWarning>
       )}
 
-      <div>
-        <label className="label">
-          <span className="label-text font-semibold">選擇您要幫辦的項目</span>
-        </label>
-        <div className="space-y-3">
-          {/* 配合安排 option */}
-          <div className="rounded-lg border border-base-300 bg-base-100 p-3">
-            <label className="label cursor-pointer justify-start gap-3">
-              <input
-                type="checkbox"
-                className="checkbox"
-                checked={selectedRoles.has("配合安排")}
-                onChange={() => toggleRole("配合安排")}
-              />
-              <span className="label-text flex-1">配合安排</span>
-            </label>
-          </div>
+      {isOffering && (
+        <div className="alert alert-info text-sm">
+          <span>點擊下方按鈕即可報名，將由壇務安排工作。</span>
+        </div>
+      )}
 
-          <div className="divider my-2">具體項目</div>
+      {showRoleSelection && (
+        <div>
+          <label className="label">
+            <span className="label-text font-semibold">選擇您要學習的項目</span>
+          </label>
+          <div className="space-y-3">
+            {/* 配合安排 option */}
+            <div className="rounded-lg border border-base-300 bg-base-100 p-3">
+              <label className="label cursor-pointer justify-start gap-3">
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  checked={selectedRoles.has("配合安排")}
+                  onChange={() => toggleRole("配合安排")}
+                />
+                <span className="label-text flex-1">配合安排</span>
+              </label>
+            </div>
 
-          {/* Listed roles */}
-          <div className="space-y-2">
-            {availableRoles.map((role) => {
+            <div className="divider my-2">學習項目</div>
+
+            {/* Listed roles */}
+            <div className="space-y-2">
+              {availableRoles.map((role) => {
               const assignees = getAssignees(role.key);
               const value = assignments[role.key as keyof WorkAssignments];
               const isDual = role.type === "dual";
 
               // For dual roles, always show both positions as separate options
-              if (isDual && typeof value === "object" && value !== null) {
+              if (
+                isDual &&
+                typeof value === "object" &&
+                value !== null &&
+                !("length" in value)
+              ) {
+                const dualValue = value as { upper?: string; lower?: string };
                 return (
                   <div key={role.key} className="space-y-2">
                     {/* Show upper position */}
@@ -187,9 +201,9 @@ export default function WorkParticipateDialogContent({
                         <div className="label-text font-medium">
                           {role.label} (上首)
                         </div>
-                        {value.upper && (
+                        {dualValue.upper && (
                           <div className="mt-1 text-base-600 text-xs">
-                            {value.upper}
+                            {dualValue.upper}
                           </div>
                         )}
                       </div>
@@ -207,9 +221,9 @@ export default function WorkParticipateDialogContent({
                         <div className="label-text font-medium">
                           {role.label} (下首)
                         </div>
-                        {value.lower && (
+                        {dualValue.lower && (
                           <div className="mt-1 text-base-600 text-xs">
-                            {value.lower}
+                            {dualValue.lower}
                           </div>
                         )}
                       </div>
@@ -243,6 +257,7 @@ export default function WorkParticipateDialogContent({
           </div>
         </div>
       </div>
+    )}
 
       <div className="divider" />
 
@@ -251,11 +266,9 @@ export default function WorkParticipateDialogContent({
         className="btn btn-primary w-full"
         onClick={handleParticipate}
         loading={participateActivityIsPending}
-        disabled={selectedRoles.size === 0}
+        disabled={showRoleSelection && selectedRoles.size === 0}
       >
-        {selectedRoles.has("配合安排") && selectedRoles.size === 1
-          ? "參加"
-          : "我要幫辦"}
+        {isOffering ? "我可以參加" : "我可以參與幫辦"}
       </ReactiveButton>
     </div>
   );

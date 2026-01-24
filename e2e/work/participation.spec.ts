@@ -29,10 +29,11 @@ test.describe("Work Participation Flow", () => {
 
     // 3. Select Role (Ban Dao -> Cao Chi)
     const dialog = page.getByRole("dialog");
+    await expect(dialog.getByText("學習項目")).toBeVisible();
     await dialog.getByLabel("操持").check();
 
     // 4. Submit
-    await dialog.getByRole("button", { name: "我要幫辦" }).click();
+    await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
 
     // 5. Assertions
     await expect(dialog).not.toBeVisible();
@@ -63,7 +64,7 @@ test.describe("Work Participation Flow", () => {
 
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("配合安排").check();
-    await dialog.getByRole("button", { name: "參加" }).click();
+    await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
 
     await expect(dialog).not.toBeVisible();
 
@@ -94,10 +95,9 @@ test.describe("Work Participation Flow", () => {
     // 2. Submit simplified dialog
     await participateBtn.click();
     const dialog = page.getByRole("dialog");
-    // For offering, roles are filtered. But we just click confirm if we want to join.
-    // We need to select something or just click if "配合安排" is enough.
-    await dialog.getByLabel("配合安排").check();
-    await dialog.getByRole("button", { name: "參加" }).click();
+    // For offering, no checkboxes. Just click button.
+    await expect(dialog.getByText("點擊下方按鈕即可報名")).toBeVisible();
+    await dialog.getByRole("button", { name: "我可以參加" }).click();
 
     // 3. Assertions
     await expect(page.getByRole("button", { name: "取消參加" })).toBeVisible();
@@ -119,7 +119,7 @@ test.describe("Work Participation Flow", () => {
     await page.getByRole("button", { name: "我可以參與幫辦" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("表文").check();
-    await dialog.getByRole("button", { name: "我要幫辦" }).click();
+    await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
 
     const assignmentsSection = page.locator(".divider", { hasText: "工作分配" }).locator("..");
     await expect(assignmentsSection.getByRole("paragraph").filter({ hasText: new RegExp(`^${loginAsUser.name!}$`) })).toBeVisible();
