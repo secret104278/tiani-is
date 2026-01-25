@@ -242,30 +242,22 @@ export default function WorkActivityForm({
             <span className="label-text text-sm">道務項目</span>
           </label>
           <select
-            className="select select-bordered"
+            className="select select-bordered w-full"
             {...register("title")}
             onChange={(e) => {
               const val = e.target.value;
               setValue("title", val);
 
-              // Auto-switch preset based on title if it's a new activity
-              if (!defaultActivity) {
-                if (val === "獻供通知") {
-                  setValue("preset", "offering");
-                  setValue("rolesConfig", [
-                    ...WORK_ROLE_PRESETS.offering.roles,
-                  ]);
-                } else if (val === "辦道通知") {
-                  setValue("preset", "taoCeremony");
-                  setValue("rolesConfig", [
-                    ...WORK_ROLE_PRESETS.taoCeremony.roles,
-                  ]);
-                } else if (val === "執禮通知") {
-                  setValue("preset", "full");
-                  setValue("rolesConfig", []);
-                }
-                setValue("assignments", {});
-              }
+              // Unified logic: Title selection determines the role configuration
+              let targetPreset: keyof typeof WORK_ROLE_PRESETS = "taoCeremony";
+              if (val === "獻供通知") targetPreset = "offering";
+              if (val === "辦道通知") targetPreset = "taoCeremony";
+              if (val === "執禮通知") targetPreset = "ceremony";
+
+              const presetDef = WORK_ROLE_PRESETS[targetPreset];
+              setValue("preset", targetPreset);
+              setValue("rolesConfig", [...presetDef.roles]);
+              setValue("assignments", {});
             }}
           >
             {WORK_ACTIVITY_TITLES.map((option, i) => (
@@ -328,31 +320,6 @@ export default function WorkActivityForm({
             {locations?.map((location: { id: number; name: string }) => (
               <option key={location.id} value={location.id}>
                 {location.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="label">
-            <span className="label-text text-sm">工作分配模式</span>
-          </label>
-          <select
-            className="select select-bordered"
-            {...register("preset")}
-            onChange={(e) => {
-              const presetKey = e.target
-                .value as keyof typeof WORK_ROLE_PRESETS;
-              const preset = WORK_ROLE_PRESETS[presetKey];
-              setValue("preset", presetKey);
-              setValue("rolesConfig", [...preset.roles]);
-              // Reset assignments when preset changes to avoid stale data in UI
-              setValue("assignments", {});
-            }}
-          >
-            {Object.entries(WORK_ROLE_PRESETS).map(([key, def]) => (
-              <option key={key} value={key}>
-                {def.label}
               </option>
             ))}
           </select>

@@ -124,6 +124,50 @@ export const CLASS_ACTIVITY_LOCATIONS = Array.from(
 
 export const WORK_ACTIVITY_TITLES = ["獻供通知", "辦道通知", "執禮通知"];
 
+export const WORK_ACTIVITY_CONFIG = {
+  offering: {
+    label: "獻供通知",
+    title: "獻供通知",
+    roles: ["offering", "kneelingReception", "servingFruit", "arrangingFruit"],
+    workType: "OFFERING",
+  },
+  taoCeremony: {
+    label: "辦道通知",
+    title: "辦道通知",
+    roles: [
+      "generalConvener",
+      "expoundingTao",
+      "conductor",
+      "documentPresentation",
+      "invokingAltar",
+      "accompanyingAltar",
+      "performingCeremony",
+      "guardingAltar",
+      "transmittingMasterService",
+      "towelsAndTea",
+      "threeTreasures",
+    ],
+    workType: "TAO",
+  },
+  ceremony: {
+    label: "執禮通知 (大典/法會)",
+    title: "執禮通知",
+    roles: [
+      "conductor",
+      "offering",
+      "kneelingReception",
+      "servingFruit",
+      "arrangingFruit",
+      "towelsAndTea",
+      "invokingAltar",
+      "performingCeremony",
+      "incenseOffering",
+      "greetingAndFarewell",
+    ],
+    workType: "CEREMONY",
+  },
+} as const;
+
 export const CUSTOM_ROLE_KEY = "_custom_roles";
 
 export const MASTER_WORK_ROLES = [
@@ -173,18 +217,7 @@ export const WORK_ROLE_PRESETS = {
   },
   ceremony: {
     label: "執禮模式",
-    roles: [
-      "conductor",
-      "offering",
-      "kneelingReception",
-      "servingFruit",
-      "arrangingFruit",
-      "towelsAndTea",
-      "invokingAltar",
-      "performingCeremony",
-      "incenseOffering",
-      "greetingAndFarewell",
-    ],
+    roles: [],
   },
 } as const;
 
