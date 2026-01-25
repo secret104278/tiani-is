@@ -13,14 +13,15 @@ test.describe("YideWork Activity Ceremony & Volunteer List", () => {
 
     await page.locator('select[name="title"]').selectOption("執禮通知");
 
+    // Verify fixed roles (e.g. "操持") should NOT be visible
+    await expect(page.getByText("操持")).not.toBeVisible();
+
     // Verify "Ceremony Name" input is visible
     await expect(page.getByText("道務名稱")).toBeVisible();
     const customTitle = `春季大典 ${Date.now()}`;
     await page.locator('input[name="roleTitleInput"]').fill(customTitle);
 
-    await page
-      .locator('select[name="locationId"]')
-      .selectOption({ label: "天一聖道院" });
+    await page.locator('select[name="locationId"]').selectOption({ index: 0 });
     await page.locator('input[name="startDateTime"]').fill(futureDateIso);
 
     // Add custom roles
@@ -31,32 +32,35 @@ test.describe("YideWork Activity Ceremony & Volunteer List", () => {
     await page.getByRole("button", { name: "送出" }).click();
 
     await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
-    await expect(page.getByRole("heading", { name: customTitle })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: customTitle }),
+    ).toBeVisible();
 
     // Verify custom role display
     await expect(page.getByText("交通")).toBeVisible();
     await expect(page.getByText("張三")).toBeVisible();
 
     // Verify "Volunteer List" button is visible for ceremony
-    await expect(page.getByRole("button", { name: "志願幫辦名單" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "志願幫辦名單" }),
+    ).toBeVisible();
+
+    // Verify "Staff Management" (工作人員管理) is HIDDEN for ceremony
+    await expect(page.getByText("工作人員管理")).not.toBeVisible();
   });
 
-  test("Volunteer List Dialog shows current assignments", async ({
+  test("Volunteer List Dialog shows empty state when no volunteers", async ({
     loginAsWorkAdmin,
     page,
   }) => {
     const timestamp = Date.now();
     const customTitle = `夏季大典 ${timestamp}`;
-    
+
     await page.goto("/work/yide/activity/new");
     await page.locator('select[name="title"]').selectOption("執禮通知");
     await page.locator('input[name="roleTitleInput"]').fill(customTitle);
-    
-    // Fill a standard role
-    const conductorSection = page.locator('div:has(> label > span:text-is("操持"))');
-    await conductorSection.locator('input').fill("李四");
 
-    await page.locator('select[name="locationId"]').selectOption({ label: "天一聖道院" });
+    await page.locator('select[name="locationId"]').selectOption({ index: 0 });
     await page.locator('input[name="startDateTime"]').fill(futureDateIso);
     await page.getByRole("button", { name: "送出" }).click();
 
@@ -67,17 +71,12 @@ test.describe("YideWork Activity Ceremony & Volunteer List", () => {
 
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByText("志願幫辦名單")).toBeVisible();
-    
-    // Verify assignments in dialog
-    await expect(dialog.getByText("操持")).toBeVisible();
-    await expect(dialog.getByText("李四")).toBeVisible();
 
-    // Even empty roles should be visible now
-    await expect(dialog.getByText("操持")).toBeVisible();
-    await expect(dialog.getByText("護壇")).toBeVisible();
-    
+    // Verify empty state in dialog (it no longer shows assignments)
+    await expect(dialog.getByText("目前尚無志願幫辦人員")).toBeVisible();
+
     // Close the dialog
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();
   });
 });

@@ -9,6 +9,7 @@ import {
   UserMinusIcon,
   UserPlusIcon,
 } from "@heroicons/react/20/solid";
+import { YideWorkType } from "@prisma/client";
 import _, { isNil } from "lodash";
 import lunisolar from "lunisolar";
 import type { GetServerSideProps } from "next";
@@ -32,9 +33,13 @@ import ReactiveButton from "~/components/utils/ReactiveButton";
 import { useSiteContext } from "~/context/SiteContext";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
-import type { OGMetaProps, WorkAssignments } from "~/utils/types";
-
+import type {
+  OGMetaProps,
+  VolunteerRole,
+  WorkAssignments,
+} from "~/utils/types";
 import {
+  MASTER_WORK_ROLES,
   activityIsEnded,
   formatDateTime,
   formatDateTitle,
@@ -70,21 +75,70 @@ export const getServerSideProps: GetServerSideProps<{
 const VolunteerListDialog = ({
   show,
   onClose,
-  assignments,
-  rolesConfig,
+  staffs,
 }: {
   show: boolean;
   onClose: () => void;
-  assignments: WorkAssignments;
-  rolesConfig?: string[] | null;
+  staffs: {
+    user: { id: string; name: string | null };
+    volunteerRoles: unknown;
+  }[];
 }) => {
+  const volunteerMap: Record<
+    string,
+    { upper: string[]; lower: string[]; multiple: string[] }
+  > = {};
+
+  for (const staff of staffs) {
+    const roles = (staff.volunteerRoles as VolunteerRole[]) || [];
+    for (const role of roles) {
+      if (!volunteerMap[role.roleKey]) {
+        volunteerMap[role.roleKey] = { upper: [], lower: [], multiple: [] };
+      }
+      const entry = volunteerMap[role.roleKey];
+      if (!entry) continue;
+
+      const name = staff.user.name || "未具名";
+      if (role.position === "upper") {
+        entry.upper.push(name);
+      } else if (role.position === "lower") {
+        entry.lower.push(name);
+      } else {
+        entry.multiple.push(name);
+      }
+    }
+  }
+
   return (
     <Dialog title="志願幫辦名單" show={show} closeModal={onClose}>
-      <div className="max-h-[60vh] overflow-y-auto">
-        <WorkAssignmentsDisplay
-          assignments={assignments}
-          rolesConfig={rolesConfig}
-        />
+      <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+        {Object.entries(volunteerMap).map(([roleKey, data]) => {
+          const roleDef = MASTER_WORK_ROLES.find((r) => r.key === roleKey);
+          if (!roleDef) return null;
+
+          return (
+            <div key={roleKey} className="flex flex-col gap-1">
+              <p className="font-semibold">{roleDef.label}</p>
+              <div className="ml-4 space-y-1 text-sm">
+                {roleDef.type === "dual" ? (
+                  <>
+                    {data.upper.length > 0 && (
+                      <p>上首：{data.upper.join(", ")}</p>
+                    )}
+                    {data.lower.length > 0 && (
+                      <p>下首：{data.lower.join(", ")}</p>
+                    )}
+                  </>
+                ) : (
+                  <p>{data.multiple.join(", ")}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {Object.keys(volunteerMap).length === 0 && (
+          <p className="py-4 text-center text-gray-500">目前尚無志願幫辦人員</p>
+        )}
       </div>
     </Dialog>
   );
@@ -151,8 +205,10 @@ export default function WorkActivityDetailPage() {
 
   const isEnded = activityIsEnded(activity.endDateTime);
 
-  const isQiudaoYili = activity.title.includes("辦道");
-  const isOffering = activity.title === "獻供通知";
+  const isOffering = activity.workType === YideWorkType.OFFERING;
+  const isCeremony = activity.workType === YideWorkType.CEREMONY;
+  const isTaoActivity = activity.workType === YideWorkType.TAO;
+  const isQiudaoYili = isTaoActivity; // Keep this for lunar display logic compatibility
 
   const ShareLineBtn = () => {
     return (
@@ -226,10 +282,11 @@ export default function WorkActivityDetailPage() {
       <VolunteerListDialog
         show={showVolunteerList}
         onClose={() => setShowVolunteerList(false)}
-        assignments={activity.assignments as WorkAssignments}
-        rolesConfig={activity.rolesConfig as string[]}
+        staffs={activity.staffs}
       />
-      {!isOffering && <WorkActivityStaffManagement activityId={activity.id} />}
+      {!isOffering && !isCeremony && (
+        <WorkActivityStaffManagement activityId={activity.id} />
+      )}
     </>
   );
 
@@ -377,7 +434,21 @@ export default function WorkActivityDetailPage() {
         {!_.isEmpty(activity.assignments) &&
           (activity.rolesConfig ||
             activity.title.includes("辦道") ||
-            activity.title.includes("獻供")) && (
+            activity.title.includes("獻供")) &&
+          (isTaoActivity ? (
+            <div className="collapse-arrow collapse mt-4 bg-base-200">
+              <input type="checkbox" />
+              <div className="collapse-title divider font-medium">
+                工作分配 (點擊展開)
+              </div>
+              <div className="collapse-content">
+                <WorkAssignmentsDisplay
+                  assignments={activity.assignments as WorkAssignments}
+                  rolesConfig={activity.rolesConfig as string[]}
+                />
+              </div>
+            </div>
+          ) : (
             <>
               <div className="divider">工作分配</div>
               <WorkAssignmentsDisplay
@@ -385,7 +456,7 @@ export default function WorkActivityDetailPage() {
                 rolesConfig={activity.rolesConfig as string[]}
               />
             </>
-          )}
+          ))}
       </div>
 
       {isQiudaoYili && (

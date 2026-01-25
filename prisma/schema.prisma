@@ -399,11 +399,20 @@ enum YideWorkActivityStatus {
   PUBLISHED
 }
 
+enum YideWorkType {
+  OFFERING
+  TAO
+  CEREMONY
+  OTHER
+}
+
 model YideWorkActivity {
   id          Int     @id @default(autoincrement())
   title       String
   description String?
   festival    String?
+
+  workType    YideWorkType @default(OTHER)
 
   locationId Int
   location   YideWorkLocation       @relation(fields: [locationId], references: [id])
@@ -464,6 +473,8 @@ model YideWorkActivityStaff {
   activityId Int
   user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
+
+  volunteerRoles Json?
 
   @@unique([activityId, userId])
   @@index([activityId])

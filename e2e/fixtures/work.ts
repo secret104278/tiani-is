@@ -3,6 +3,7 @@ import {
   Role,
   type User,
   type YideWorkActivity,
+  YideWorkType,
 } from "@prisma/client";
 import { test as base } from "./auth";
 
@@ -82,6 +83,7 @@ export const test = base.extend<WorkFixtures>({
         data: {
           title: `辦道 ${timestamp}`,
           description: "Test Description",
+          workType: YideWorkType.TAO,
           startDateTime: new Date(),
           endDateTime: new Date(),
           status: "PUBLISHED",

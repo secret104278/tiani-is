@@ -175,89 +175,87 @@ export default function WorkParticipateDialogContent({
             {/* Listed roles */}
             <div className="space-y-2">
               {availableRoles.map((role) => {
-              const assignees = getAssignees(role.key);
-              const value = assignments[role.key as keyof WorkAssignments];
-              const isDual = role.type === "dual";
+                const assignees = getAssignees(role.key);
+                const value = assignments[role.key as keyof WorkAssignments];
+                const isDual = role.type === "dual";
 
-              // For dual roles, always show both positions as separate options
-              if (
-                isDual &&
-                typeof value === "object" &&
-                value !== null &&
-                !("length" in value)
-              ) {
-                const dualValue = value as { upper?: string; lower?: string };
-                return (
-                  <div key={role.key} className="space-y-2">
-                    {/* Show upper position */}
-                    <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-base-300 bg-base-100 p-3">
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        checked={selectedRoles.has(`${role.key}-upper`)}
-                        onChange={() => toggleRole(`${role.key}-upper`)}
-                      />
-                      <div className="flex-1 text-left">
-                        <div className="label-text font-medium">
-                          {role.label} (上首)
-                        </div>
-                        {dualValue.upper && (
-                          <div className="mt-1 text-base-600 text-xs">
-                            {dualValue.upper}
+                // For dual roles, always show both positions as separate options
+                if (isDual) {
+                  const dualValue =
+                    (value as { upper?: string; lower?: string }) || {};
+                  return (
+                    <div key={role.key} className="space-y-2">
+                      {/* Show upper position */}
+                      <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-base-300 bg-base-100 p-3">
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          checked={selectedRoles.has(`${role.key}-upper`)}
+                          onChange={() => toggleRole(`${role.key}-upper`)}
+                        />
+                        <div className="flex-1 text-left">
+                          <div className="label-text font-medium">
+                            {role.label} (上首)
                           </div>
-                        )}
-                      </div>
-                    </label>
+                          {dualValue.upper && (
+                            <div className="mt-1 text-base-600 text-xs">
+                              {dualValue.upper}
+                            </div>
+                          )}
+                        </div>
+                      </label>
 
-                    {/* Show lower position */}
+                      {/* Show lower position */}
+                      <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-base-300 bg-base-100 p-3">
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          checked={selectedRoles.has(`${role.key}-lower`)}
+                          onChange={() => toggleRole(`${role.key}-lower`)}
+                        />
+                        <div className="flex-1 text-left">
+                          <div className="label-text font-medium">
+                            {role.label} (下首)
+                          </div>
+                          {dualValue.lower && (
+                            <div className="mt-1 text-base-600 text-xs">
+                              {dualValue.lower}
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  );
+                }
+
+                // For single and multiple roles, show standard option
+                return (
+                  <div key={role.key}>
                     <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-base-300 bg-base-100 p-3">
                       <input
                         type="checkbox"
                         className="checkbox"
-                        checked={selectedRoles.has(`${role.key}-lower`)}
-                        onChange={() => toggleRole(`${role.key}-lower`)}
+                        checked={selectedRoles.has(role.key)}
+                        onChange={() => toggleRole(role.key)}
                       />
                       <div className="flex-1 text-left">
                         <div className="label-text font-medium">
-                          {role.label} (下首)
+                          {role.label}
                         </div>
-                        {dualValue.lower && (
+                        {assignees && (
                           <div className="mt-1 text-base-600 text-xs">
-                            {dualValue.lower}
+                            {assignees}
                           </div>
                         )}
                       </div>
                     </label>
                   </div>
                 );
-              }
-
-              // For single and multiple roles, show standard option
-              return (
-                <div key={role.key}>
-                  <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-base-300 bg-base-100 p-3">
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      checked={selectedRoles.has(role.key)}
-                      onChange={() => toggleRole(role.key)}
-                    />
-                    <div className="flex-1 text-left">
-                      <div className="label-text font-medium">{role.label}</div>
-                      {assignees && (
-                        <div className="mt-1 text-base-600 text-xs">
-                          {assignees}
-                        </div>
-                      )}
-                    </div>
-                  </label>
-                </div>
-              );
-            })}
+              })}
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
       <div className="divider" />
 

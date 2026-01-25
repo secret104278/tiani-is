@@ -1,4 +1,5 @@
 import { PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
+import { YideWorkType } from "@prisma/client";
 import type { inferRouterOutputs } from "@trpc/server";
 import _ from "lodash";
 import { isNil } from "lodash";
@@ -74,13 +75,12 @@ export default function WorkActivityForm({
       if (defaultActivity.title === "獻供通知") {
         preset = "offering";
         rolesConfig = [...WORK_ROLE_PRESETS.offering.roles];
-      } else if (
-        defaultActivity.title === "辦道通知" ||
-        defaultActivity.title === "執禮通知" ||
-        isCustomTitle
-      ) {
+      } else if (defaultActivity.title === "辦道通知" || isCustomTitle) {
         preset = "taoCeremony";
         rolesConfig = [...WORK_ROLE_PRESETS.taoCeremony.roles];
+      } else if (defaultActivity.title === "執禮通知") {
+        preset = "full";
+        rolesConfig = [];
       }
     } else {
       // Try to find matching preset
@@ -108,7 +108,8 @@ export default function WorkActivityForm({
       description: defaultActivity.description ?? "",
       assignments: (defaultActivity.assignments as WorkAssignments) ?? {},
       customRoles:
-        (defaultActivity.assignments as any)?.[CUSTOM_ROLE_KEY] || [],
+        (defaultActivity.assignments as WorkAssignments)?.[CUSTOM_ROLE_KEY] ||
+        [],
       offeringFestival: defaultActivity.festival ?? "",
       preset,
       rolesConfig,
@@ -188,8 +189,14 @@ export default function WorkActivityForm({
 
       const finalTitle = isCeremonyMode ? data.roleTitleInput : data.title;
 
+      let workType: YideWorkType = YideWorkType.OTHER;
+      if (data.title === "獻供通知") workType = YideWorkType.OFFERING;
+      else if (data.title === "辦道通知") workType = YideWorkType.TAO;
+      else if (data.title === "執禮通知") workType = YideWorkType.CEREMONY;
+
       const payload = {
         title: finalTitle,
+        workType: workType,
         locationId: data.locationId,
         startDateTime: data.startDateTime as Date,
         endDateTime: getEndTime(data.startDateTime as Date, data.duration || 2),
@@ -248,11 +255,14 @@ export default function WorkActivityForm({
                   setValue("rolesConfig", [
                     ...WORK_ROLE_PRESETS.offering.roles,
                   ]);
-                } else if (val === "辦道通知" || val === "執禮通知") {
+                } else if (val === "辦道通知") {
                   setValue("preset", "taoCeremony");
                   setValue("rolesConfig", [
                     ...WORK_ROLE_PRESETS.taoCeremony.roles,
                   ]);
+                } else if (val === "執禮通知") {
+                  setValue("preset", "full");
+                  setValue("rolesConfig", []);
                 }
                 setValue("assignments", {});
               }
@@ -350,12 +360,14 @@ export default function WorkActivityForm({
 
         {isCeremonyMode && (
           <div className="my-4 rounded-md border border-base-300 bg-base-100 p-4">
-            <div className="mb-2 font-bold text-sm">自訂職務欄位 (自行輸入)</div>
+            <div className="mb-2 font-bold text-sm">
+              自訂職務欄位 (自行輸入)
+            </div>
             <div className="space-y-4">
               {customRoleFields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="relative flex flex-col gap-2 border-b border-base-300 pb-4 last:border-0 last:pb-0"
+                  className="relative flex flex-col gap-2 border-base-300 border-b pb-4 last:border-0 last:pb-0"
                 >
                   <div className="flex items-center gap-2">
                     <input

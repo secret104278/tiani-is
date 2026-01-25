@@ -17,9 +17,7 @@ test.describe("YideWork Activity Management", () => {
     );
     await dianchuanshiSection.getByPlaceholder("逗號分隔").fill("User A");
 
-    await page
-      .locator('select[name="locationId"]')
-      .selectOption({ label: "天一聖道院" });
+    await page.locator('select[name="locationId"]').selectOption({ index: 0 });
     await page.locator('input[name="startDateTime"]').fill("2025-12-25T10:00");
 
     await page.getByRole("button", { name: "送出" }).click();
@@ -27,6 +25,12 @@ test.describe("YideWork Activity Management", () => {
     await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);
 
     await expect(page.getByRole("heading", { name: "辦道通知" })).toBeVisible();
+
+    // Open collapsed assignments
+    await page
+      .locator(".collapse-title", { hasText: "工作分配" })
+      .click({ force: true });
+
     await expect(page.getByText("點傳師服務 / 講師服務")).toBeVisible();
     await expect(page.getByText("User A", { exact: true })).toBeVisible();
     await expect(page.getByText("上首：User B")).toBeVisible();
@@ -77,9 +81,7 @@ test.describe("YideWork Activity Management", () => {
     await page.goto("/work/yide");
     await page.getByRole("link", { name: "建立新通知" }).click();
     await page.locator('select[name="title"]').selectOption(["辦道通知"]);
-    await page
-      .locator('select[name="locationId"]')
-      .selectOption({ label: "天一聖道院" });
+    await page.locator('select[name="locationId"]').selectOption({ index: 0 });
     await page.locator('input[name="startDateTime"]').fill("2025-12-30T10:00");
     await page.getByRole("button", { name: "送出" }).click();
     await expect(page).toHaveURL(/\/work\/yide\/activity\/detail\/\d+/);

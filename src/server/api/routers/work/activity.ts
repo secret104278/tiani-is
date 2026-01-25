@@ -1,11 +1,11 @@
-import type { Prisma } from "@prisma/client";
+import { type Prisma, YideWorkType } from "@prisma/client";
 import _ from "lodash";
 import { z } from "zod";
-import type { WorkAssignments } from "~/utils/types";
 import {
   addUserToAssignments,
   removeUserFromAssignments,
 } from "~/server/utils/assignmentUtils";
+import type { WorkAssignments } from "~/utils/types";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,
@@ -26,6 +26,7 @@ export const activityRouter = createTRPCRouter({
         rolesConfig: z.array(z.string()).optional(),
         isDraft: z.boolean().optional(),
         unit: z.string(),
+        workType: z.nativeEnum(YideWorkType).optional(),
       }),
     )
     .mutation(({ ctx, input }) =>
@@ -35,6 +36,7 @@ export const activityRouter = createTRPCRouter({
           description: input.description,
           festival: input.festival,
           unit: input.unit,
+          workType: input.workType ?? YideWorkType.OTHER,
           location: {
             connect: {
               id: input.locationId,
@@ -87,6 +89,7 @@ export const activityRouter = createTRPCRouter({
         rolesConfig: z.array(z.string()).optional(),
         isDraft: z.boolean().optional(),
         unit: z.string().optional(),
+        workType: z.nativeEnum(YideWorkType).optional(),
       }),
     )
     .mutation(({ ctx, input }) =>
@@ -99,6 +102,7 @@ export const activityRouter = createTRPCRouter({
           description: input.description,
           festival: input.festival,
           unit: input.unit,
+          workType: input.workType,
           location: {
             connect: {
               id: input.locationId,
@@ -226,7 +230,7 @@ export const activityRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { activityId, roles } = input;
 
-      // Create/link staff record once
+      // Create/link staff record once with volunteerRoles
       const staffRecord = await ctx.db.yideWorkActivityStaff.upsert({
         where: {
           activityId_userId: {
@@ -237,36 +241,10 @@ export const activityRouter = createTRPCRouter({
         create: {
           activityId,
           userId: ctx.session.user.id,
+          volunteerRoles: roles,
         },
-        update: {},
-      });
-
-      // If no roles provided, just return the staff record
-      if (!roles || roles.length === 0) {
-        return staffRecord;
-      }
-
-      // Fetch the activity to update assignments
-      const activity = await ctx.db.yideWorkActivity.findUniqueOrThrow({
-        where: { id: activityId },
-      });
-
-      const assignments = (activity.assignments ||
-        {}) as Partial<WorkAssignments>;
-      const userName = ctx.session.user.name || "Unknown";
-
-      // Add user to assignments
-      const updatedAssignments = addUserToAssignments(
-        assignments,
-        userName,
-        roles,
-      );
-
-      // Update the activity with new assignments
-      await ctx.db.yideWorkActivity.update({
-        where: { id: activityId },
-        data: {
-          assignments: updatedAssignments,
+        update: {
+          volunteerRoles: roles,
         },
       });
 
@@ -284,24 +262,6 @@ export const activityRouter = createTRPCRouter({
             activityId,
             userId: ctx.session.user.id,
           },
-        },
-      });
-
-      // Remove user from all assignments
-      const activity = await ctx.db.yideWorkActivity.findUniqueOrThrow({
-        where: { id: activityId },
-      });
-
-      const assignments = (activity.assignments || {}) as Partial<WorkAssignments>;
-      const userName = ctx.session.user.name || "Unknown";
-
-      const updatedAssignments = removeUserFromAssignments(assignments, userName);
-
-      // Update activity with cleaned assignments
-      await ctx.db.yideWorkActivity.update({
-        where: { id: activityId },
-        data: {
-          assignments: updatedAssignments,
         },
       });
 

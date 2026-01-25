@@ -1,5 +1,5 @@
-import { WORK_ASSIGNMENT_ROLES } from "~/utils/ui";
 import type { WorkAssignments } from "~/utils/types";
+import { WORK_ASSIGNMENT_ROLES } from "~/utils/ui";
 
 const SEPARATOR = "，";
 
@@ -25,7 +25,9 @@ export function addUserToAssignments(
 
     if (roleDefinition.type === "single") {
       const existing = (result as Record<string, string>)[roleKey] || "";
-      const names = existing ? existing.split(SEPARATOR).map((n) => n.trim()) : [];
+      const names = existing
+        ? existing.split(SEPARATOR).map((n) => n.trim())
+        : [];
       if (!names.includes(userName)) {
         names.push(userName);
       }
@@ -40,7 +42,9 @@ export function addUserToAssignments(
       const dualValue = result[roleKey as keyof WorkAssignments];
       if (typeof dualValue === "object" && dualValue !== null) {
         const existing = (dualValue as Record<string, string>)[position] || "";
-        const names = existing ? existing.split(SEPARATOR).map((n) => n.trim()) : [];
+        const names = existing
+          ? existing.split(SEPARATOR).map((n) => n.trim())
+          : [];
         if (!names.includes(userName)) {
           names.push(userName);
         }
@@ -48,7 +52,9 @@ export function addUserToAssignments(
       }
     } else if (roleDefinition.type === "multiple") {
       const existing = (result as Record<string, string>)[roleKey] || "";
-      const names = existing ? existing.split(SEPARATOR).map((n) => n.trim()) : [];
+      const names = existing
+        ? existing.split(SEPARATOR).map((n) => n.trim())
+        : [];
       if (!names.includes(userName)) {
         names.push(userName);
       }

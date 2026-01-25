@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { addUserToAssignments, removeUserFromAssignments } from "./assignmentUtils";
 import type { WorkAssignments } from "~/utils/types";
+import {
+  addUserToAssignments,
+  removeUserFromAssignments,
+} from "./assignmentUtils";
 
 describe("assignmentUtils", () => {
   describe("addUserToAssignments", () => {
@@ -69,6 +72,7 @@ describe("assignmentUtils", () => {
     it("should ignore invalid role keys", () => {
       const assignments: Partial<WorkAssignments> = {};
       const result = addUserToAssignments(assignments, "張三", [
+        // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
         { roleKey: "invalidRole" as any },
       ]);
       expect(result).toEqual({});

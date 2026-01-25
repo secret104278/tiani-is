@@ -1,7 +1,7 @@
 import { useFormContext, useWatch } from "react-hook-form";
 import SuggestiveInput from "~/components/inputs/SuggestiveInput";
 import type { WorkAssignments } from "~/utils/types";
-import { type MASTER_WORK_ROLES } from "~/utils/ui";
+import type { MASTER_WORK_ROLES } from "~/utils/ui";
 
 interface WorkAssignmentsSectionProps {
   roleDefinitions: (typeof MASTER_WORK_ROLES)[number][];

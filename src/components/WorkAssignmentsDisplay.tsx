@@ -14,9 +14,7 @@ export default function WorkAssignmentsDisplay({
     ? MASTER_WORK_ROLES.filter((r) => rolesConfig.includes(r.key))
     : MASTER_WORK_ROLES;
 
-  const customRoles = (assignments as any)?.[CUSTOM_ROLE_KEY] as
-    | { role: string; name: string }[]
-    | undefined;
+  const customRoles = assignments?.[CUSTOM_ROLE_KEY];
 
   return (
     <div className="space-y-3">
@@ -24,7 +22,9 @@ export default function WorkAssignmentsDisplay({
         const value = assignments[role.key as keyof WorkAssignments];
 
         if (role.type === "dual") {
-          const dualValue = value as { upper?: string; lower?: string } | undefined;
+          const dualValue = value as
+            | { upper?: string; lower?: string }
+            | undefined;
           return (
             <div key={role.key} className="flex flex-col gap-1">
               <p className="text font-semibold">{role.label}</p>
