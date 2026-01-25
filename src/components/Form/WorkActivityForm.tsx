@@ -246,6 +246,10 @@ export default function WorkActivityForm({
             {...register("title")}
             onChange={(e) => {
               const val = e.target.value;
+
+              // [Fix]: 如果選擇的標題與當前值相同，不進行重置
+              if (val === watch("title")) return;
+
               setValue("title", val);
 
               // Unified logic: Title selection determines the role configuration
