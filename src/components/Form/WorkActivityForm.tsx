@@ -2,13 +2,13 @@ import {
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  restrictToFirstScrollableAncestor,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
 import {
@@ -103,6 +103,7 @@ function SortableCustomRoleItem({
         {...attributes}
         {...listeners}
         className="flex w-8 cursor-grab items-center justify-center self-stretch rounded-lg bg-base-300/30 text-base-content/30 transition-colors hover:bg-base-300/60 hover:text-base-content/60 active:cursor-grabbing"
+        style={{ touchAction: "none" }}
       >
         <GripVertical className="h-5 w-5" />
       </div>
@@ -192,7 +193,17 @@ export default function WorkActivityForm({
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -414,10 +425,7 @@ export default function WorkActivityForm({
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
-              modifiers={[
-                restrictToVerticalAxis,
-                restrictToFirstScrollableAncestor,
-              ]}
+              modifiers={[restrictToVerticalAxis]}
             >
               <SortableContext
                 items={customRoleFields.map((f) => f.id)}
