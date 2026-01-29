@@ -339,7 +339,7 @@ export default function WorkActivityForm({
             </label>
             <input
               type="text"
-              placeholder="例如：春季大典"
+              placeholder="例如：法會執禮"
               className="tiani-input w-full"
               {...register("roleTitleInput", { required: isCeremonyMode })}
             />
