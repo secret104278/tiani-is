@@ -1,10 +1,36 @@
+import {
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  restrictToFirstScrollableAncestor,
+  restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { YideWorkType } from "@prisma/client";
 import type { inferRouterOutputs } from "@trpc/server";
 import _ from "lodash";
 import { isNil } from "lodash";
+import { GripVertical } from "lucide-react";
 import { useRouter } from "next/router";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import {
+  FormProvider,
+  type UseFormRegister,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import type { WorkRouter } from "~/server/api/routers/work";
 import { api } from "~/utils/api";
 import type { WorkAssignments } from "~/utils/types";
@@ -37,6 +63,73 @@ interface WorkActivityFormData {
   assignments: WorkAssignments;
   customRoles: { role: string; name: string }[];
   rolesConfig: string[];
+}
+
+function SortableCustomRoleItem({
+  field,
+  index,
+  register,
+  remove,
+}: {
+  field: { id: string };
+  index: number;
+  register: UseFormRegister<WorkActivityFormData>;
+  remove: (index: number) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : "auto",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative flex gap-2 border-base-300 border-b py-4 first:pt-0 ${
+        isDragging ? "bg-base-200 opacity-50" : ""
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex w-8 cursor-grab items-center justify-center self-stretch rounded-lg bg-base-300/30 text-base-content/30 transition-colors hover:bg-base-300/60 hover:text-base-content/60 active:cursor-grabbing"
+      >
+        <GripVertical className="h-5 w-5" />
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <input
+            placeholder="職務 (如: 獻供上執禮)"
+            className="input input-bordered w-full"
+            {...register(`customRoles.${index}.role` as const)}
+          />
+          <button
+            type="button"
+            className="btn btn-ghost btn-circle text-error"
+            onClick={() => remove(index)}
+          >
+            <TrashIcon className="h-6 w-6" />
+          </button>
+        </div>
+        <input
+          placeholder="人員姓名"
+          className="input input-bordered w-full"
+          {...register(`customRoles.${index}.name` as const)}
+        />
+      </div>
+    </div>
+  );
 }
 
 export default function WorkActivityForm({
@@ -92,10 +185,28 @@ export default function WorkActivityForm({
     fields: customRoleFields,
     append: appendCustomRole,
     remove: removeCustomRole,
+    move: moveCustomRole,
   } = useFieldArray({
     control,
     name: "customRoles",
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = customRoleFields.findIndex((f) => f.id === active.id);
+      const newIndex = customRoleFields.findIndex((f) => f.id === over.id);
+      moveCustomRole(oldIndex, newIndex);
+    }
+  };
 
   const router = useRouter();
   const unitName = getUnitBySlug(unitSlug)?.name;
@@ -292,44 +403,46 @@ export default function WorkActivityForm({
           />
         </div>
 
-        <div className="my-4 rounded-md border border-base-300 bg-base-100 p-4">
-          <div className="mb-2 font-bold text-sm">
-            工作分配 / 職務欄位 (自行輸入)
-          </div>
-          <div className="space-y-4">
-            {customRoleFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="relative flex flex-col gap-2 border-base-300 border-b pb-4 last:border-0 last:pb-0"
-              >
-                <div className="flex items-center gap-2">
-                  <input
-                    placeholder="職務 (如: 交通)"
-                    className="input input-bordered w-full"
-                    {...register(`customRoles.${index}.role` as const)}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-circle text-error"
-                    onClick={() => removeCustomRole(index)}
-                  >
-                    <TrashIcon className="h-6 w-6" />
-                  </button>
-                </div>
-                <input
-                  placeholder="人員姓名"
-                  className="input input-bordered w-full"
-                  {...register(`customRoles.${index}.name` as const)}
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              className="btn btn-outline btn-sm w-full"
-              onClick={() => appendCustomRole({ role: "", name: "" })}
+        <div className="mt-4">
+          <label className="label">
+            <span className="label-text text-sm">
+              工作分配 / 職務欄位 (自行輸入)
+            </span>
+          </label>
+          <div className="space-y-0">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[
+                restrictToVerticalAxis,
+                restrictToFirstScrollableAncestor,
+              ]}
             >
-              <PlusIcon className="h-4 w-4" /> 新增自訂欄位
-            </button>
+              <SortableContext
+                items={customRoleFields.map((f) => f.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {customRoleFields.map((field, index) => (
+                  <SortableCustomRoleItem
+                    key={field.id}
+                    field={field}
+                    index={index}
+                    register={register}
+                    remove={removeCustomRole}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+            <div className="pt-4">
+              <button
+                type="button"
+                className="btn btn-outline btn-sm w-full"
+                onClick={() => appendCustomRole({ role: "", name: "" })}
+              >
+                <PlusIcon className="h-4 w-4" /> 新增自訂欄位
+              </button>
+            </div>
           </div>
         </div>
 
