@@ -60,10 +60,12 @@ export interface WorkAssignments {
   _custom_roles?: { role: string; name: string }[];
 }
 
-export interface VolunteerRole {
-  roleKey: string;
-  position?: "upper" | "lower";
-}
+export type VolunteerRole =
+  | string
+  | {
+      roleKey: string;
+      position?: "upper" | "lower";
+    };
 
 export interface UserProfileFormData {
   name?: string;

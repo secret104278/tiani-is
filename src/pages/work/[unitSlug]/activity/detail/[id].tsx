@@ -84,58 +84,46 @@ const VolunteerListDialog = ({
     volunteerRoles: unknown;
   }[];
 }) => {
-  const volunteerMap: Record<
-    string,
-    { upper: string[]; lower: string[]; multiple: string[] }
-  > = {};
+  const volunteerMap: Record<string, string[]> = {};
 
   for (const staff of staffs) {
     const roles = (staff.volunteerRoles as VolunteerRole[]) || [];
-    for (const role of roles) {
-      if (!volunteerMap[role.roleKey]) {
-        volunteerMap[role.roleKey] = { upper: [], lower: [], multiple: [] };
-      }
-      const entry = volunteerMap[role.roleKey];
-      if (!entry) continue;
+    const name = staff.user.name || "未具名";
 
-      const name = staff.user.name || "未具名";
-      if (role.position === "upper") {
-        entry.upper.push(name);
-      } else if (role.position === "lower") {
-        entry.lower.push(name);
+    for (const role of roles) {
+      let roleLabel = "";
+      if (typeof role === "string") {
+        roleLabel = role;
       } else {
-        entry.multiple.push(name);
+        const roleDef = MASTER_WORK_ROLES.find((r) => r.key === role.roleKey);
+        if (!roleDef) continue;
+        if (role.position === "upper") {
+          roleLabel = `${roleDef.label} (上首)`;
+        } else if (role.position === "lower") {
+          roleLabel = `${roleDef.label} (下首)`;
+        } else {
+          roleLabel = roleDef.label;
+        }
       }
+
+      if (!volunteerMap[roleLabel]) {
+        volunteerMap[roleLabel] = [];
+      }
+      volunteerMap[roleLabel]?.push(name);
     }
   }
 
   return (
     <Dialog title="志願幫辦名單" show={show} closeModal={onClose}>
       <div className="max-h-[60vh] space-y-4 overflow-y-auto">
-        {Object.entries(volunteerMap).map(([roleKey, data]) => {
-          const roleDef = MASTER_WORK_ROLES.find((r) => r.key === roleKey);
-          if (!roleDef) return null;
-
-          return (
-            <div key={roleKey} className="flex flex-col gap-1">
-              <p className="font-semibold">{roleDef.label}</p>
-              <div className="ml-4 space-y-1 text-sm">
-                {roleDef.type === "dual" ? (
-                  <>
-                    {data.upper.length > 0 && (
-                      <p>上首：{data.upper.join(", ")}</p>
-                    )}
-                    {data.lower.length > 0 && (
-                      <p>下首：{data.lower.join(", ")}</p>
-                    )}
-                  </>
-                ) : (
-                  <p>{data.multiple.join(", ")}</p>
-                )}
-              </div>
+        {Object.entries(volunteerMap).map(([roleLabel, names]) => (
+          <div key={roleLabel} className="flex flex-col gap-1">
+            <p className="font-semibold">{roleLabel}</p>
+            <div className="ml-4 text-sm">
+              <p>{names.join(", ")}</p>
             </div>
-          );
-        })}
+          </div>
+        ))}
         {Object.keys(volunteerMap).length === 0 && (
           <p className="py-4 text-center text-gray-500">目前尚無志願幫辦人員</p>
         )}
@@ -269,15 +257,13 @@ export default function WorkActivityDetailPage() {
           onConfirm={() => deleteActivity({ activityId: activity.id })}
         />
       </div>
-      {!isOffering && (
-        <button
-          className="btn btn-outline mt-2 w-full"
-          onClick={() => setShowVolunteerList(true)}
-        >
-          <QueueListIcon className="h-4 w-4" />
-          志願幫辦名單
-        </button>
-      )}
+      <button
+        className="btn btn-outline mt-2 w-full"
+        onClick={() => setShowVolunteerList(true)}
+      >
+        <QueueListIcon className="h-4 w-4" />
+        志願幫辦名單
+      </button>
 
       <VolunteerListDialog
         show={showVolunteerList}
@@ -320,8 +306,8 @@ export default function WorkActivityDetailPage() {
       );
     }
 
-    const buttonLabel = !isOfferingNotice ? "我可以參與幫辦" : "我可以參加";
-    const dialogTitle = !isOfferingNotice ? "我可以參與幫辦" : "我可以參加";
+    const buttonLabel = "我可以參與幫辦";
+    const dialogTitle = "我可以參與幫辦";
 
     return (
       <>

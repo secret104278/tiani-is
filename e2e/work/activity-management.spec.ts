@@ -8,14 +8,19 @@ test.describe("YideWork Activity Management", () => {
 
     await page.locator('select[name="title"]').selectOption("辦道通知");
 
-    const bandaoSection = page.locator('div:has(> label:has-text("辦道"))');
-    await bandaoSection.getByPlaceholder("上首").fill("User B");
-    await bandaoSection.getByPlaceholder("下首").fill("User C");
+    // Add custom assignments
+    await page.getByRole("button", { name: "新增自訂欄位" }).click();
+    await page
+      .locator('input[placeholder="職務 (如: 獻供上執禮)"]')
+      .fill("辦道執禮");
+    await page.locator('input[placeholder="人員姓名"]').fill("User B, User C");
 
-    const dianchuanshiSection = page.locator(
-      'div:has(> label:has-text("點傳師服務"))',
-    );
-    await dianchuanshiSection.getByPlaceholder("逗號分隔").fill("User A");
+    await page.getByRole("button", { name: "新增自訂欄位" }).click();
+    await page
+      .locator('input[placeholder="職務 (如: 獻供上執禮)"]')
+      .nth(1)
+      .fill("點傳師服務 / 講師服務");
+    await page.locator('input[placeholder="人員姓名"]').nth(1).fill("User A");
 
     await page.locator('select[name="locationId"]').selectOption({ index: 0 });
     await page.locator('input[name="startDateTime"]').fill("2025-12-25T10:00");
@@ -33,8 +38,8 @@ test.describe("YideWork Activity Management", () => {
 
     await expect(page.getByText("點傳師服務 / 講師服務")).toBeVisible();
     await expect(page.getByText("User A", { exact: true })).toBeVisible();
-    await expect(page.getByText("上首：User B")).toBeVisible();
-    await expect(page.getByText("下首：User C")).toBeVisible();
+    await expect(page.getByText("辦道執禮")).toBeVisible();
+    await expect(page.getByText("User B, User C")).toBeVisible();
   });
 
   test("Manage activity staff", async ({

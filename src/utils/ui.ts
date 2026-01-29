@@ -223,6 +223,25 @@ export const WORK_ROLE_PRESETS = {
 
 export const WORK_ASSIGNMENT_ROLES = MASTER_WORK_ROLES;
 
+export const VOLUNTEER_WORK_ROLES = [
+  "配合安排",
+  "獻供上執禮",
+  "獻供下執禮",
+  "獻供上跪接",
+  "獻供下跪接",
+  "端果",
+  "整果",
+  "淨手毛巾",
+  "請壇上執禮",
+  "請壇下執禮",
+  "辦道上執禮",
+  "辦道下執禮",
+  "獻香上執禮",
+  "獻香下執禮",
+  "參辭駕上執禮",
+  "參辭駕下執禮",
+] as const;
+
 export const OFFERING_FESTIVALS = [
   "初一",
   "十五",

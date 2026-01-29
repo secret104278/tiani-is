@@ -26,7 +26,9 @@ test.describe("YideWork Activity Ceremony & Volunteer List", () => {
 
     // Add custom roles
     await page.getByRole("button", { name: "新增自訂欄位" }).click();
-    await page.locator('input[placeholder="職務 (如: 交通)"]').fill("交通");
+    await page
+      .locator('input[placeholder="職務 (如: 獻供上執禮)"]')
+      .fill("交通");
     await page.locator('input[placeholder="人員姓名"]').fill("張三");
 
     await page.getByRole("button", { name: "送出" }).click();

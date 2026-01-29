@@ -27,10 +27,10 @@ test.describe("Work Participation Flow", () => {
     // 2. Open dialog
     await participateBtn.click();
 
-    // 3. Select Role (Ban Dao -> Cao Chi)
+    // 3. Select Role (Ban Dao -> Ban Dao Shang Zhi Li)
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByText("學習項目")).toBeVisible();
-    await dialog.getByLabel("操持").check();
+    await expect(dialog.getByText("選擇您要學習的項目")).toBeVisible();
+    await dialog.getByLabel("辦道上執禮").check();
 
     // 4. Submit
     await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
@@ -54,7 +54,7 @@ test.describe("Work Participation Flow", () => {
     await page.getByRole("button", { name: "志願幫辦名單" }).click();
     const volunteerDialog = page.getByRole("dialog", { name: "志願幫辦名單" });
     await expect(volunteerDialog.getByText(loginAsUser.name!)).toBeVisible();
-    await expect(volunteerDialog.getByText("操持")).toBeVisible();
+    await expect(volunteerDialog.getByText("辦道上執禮")).toBeVisible();
   });
 
   test("Participation with 'Flexible' Option (Ban Dao)", async ({
@@ -102,18 +102,51 @@ test.describe("Work Participation Flow", () => {
     await page.goto(`/work/yide/activity/detail/${activity.id}`);
 
     // 1. Verify button text
-    const participateBtn = page.getByRole("button", { name: "我可以參加" });
+    const participateBtn = page.getByRole("button", { name: "我可以參與幫辦" });
     await expect(participateBtn).toBeVisible();
 
-    // 2. Submit simplified dialog
+    // 2. Submit dialog (Now offering also shows roles, but we can just pick one or Cooperate)
     await participateBtn.click();
     const dialog = page.getByRole("dialog");
-    // For offering, no checkboxes. Just click button.
-    await expect(dialog.getByText("點擊下方按鈕即可報名")).toBeVisible();
-    await dialog.getByRole("button", { name: "我可以參加" }).click();
+    await expect(dialog.getByText("選擇您要學習的項目")).toBeVisible();
+    await dialog.getByLabel("獻供上執禮").check();
+    await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
 
     // 3. Assertions
     await expect(page.getByRole("button", { name: "取消參加" })).toBeVisible();
+  });
+
+  test("Mutual Exclusion of 'Flexible' Option", async ({
+    loginAsUser,
+    createWorkActivity,
+    page,
+  }) => {
+    const activity = await createWorkActivity(loginAsUser.id, {
+      title: "辦道通知",
+      description: `MutualExclusion ${getUniqueId()}`,
+    });
+
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
+
+    await page.getByRole("button", { name: "我可以參與幫辦" }).click();
+    const dialog = page.getByRole("dialog");
+
+    // 1. Check a specific role then check '配合安排'
+    await dialog.getByLabel("辦道上執禮").check();
+    await expect(dialog.getByLabel("辦道上執禮")).toBeChecked();
+
+    await dialog.getByLabel("配合安排").check();
+    await expect(dialog.getByLabel("配合安排")).toBeChecked();
+    // Specific role should be UNCHECKED
+    await expect(dialog.getByLabel("辦道上執禮")).not.toBeChecked();
+
+    // 2. Check '配合安排' then check a specific role
+    await dialog.getByLabel("辦道下執禮").check();
+    await expect(dialog.getByLabel("辦道下執禮")).toBeChecked();
+    // '配合安排' should be UNCHECKED
+    await expect(dialog.getByLabel("配合安排")).not.toBeChecked();
+
+    await page.keyboard.press("Escape");
   });
 
   test("Automatic Cleanup on Leave", async ({
@@ -128,10 +161,10 @@ test.describe("Work Participation Flow", () => {
 
     await page.goto(`/work/yide/activity/detail/${activity.id}`);
 
-    // Join and assign to "表文"
+    // Join and assign to "獻香上執禮"
     await page.getByRole("button", { name: "我可以參與幫辦" }).click();
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("表文").check();
+    await dialog.getByLabel("獻香上執禮").check();
     await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
 
     const assignmentsSection = page
@@ -190,10 +223,14 @@ test.describe("Work Participation Flow", () => {
     await page.getByRole("link", { name: "編輯" }).click();
 
     // 3. Check Suggestive Input
-    // "總招集" field
-    const zongZhaoji = page
-      .locator('div:has(> label:has-text("總招集"))')
-      .locator("input");
+    // Add custom role first
+    await page.getByRole("button", { name: "新增自訂欄位" }).click();
+    const customRoleInput = page.locator(
+      'input[placeholder="職務 (如: 獻供上執禮)"]',
+    );
+    await customRoleInput.fill("總招集");
+
+    const zongZhaoji = page.locator('input[placeholder="人員姓名"]');
     await zongZhaoji.focus();
     // Type first char
     await zongZhaoji.pressSequentially(testUser.name!.substring(0, 1));

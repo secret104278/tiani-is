@@ -219,10 +219,13 @@ export const activityRouter = createTRPCRouter({
       z.object({
         roles: z
           .array(
-            z.object({
-              roleKey: z.string(),
-              position: z.enum(["upper", "lower"]).optional(),
-            }),
+            z.union([
+              z.string(),
+              z.object({
+                roleKey: z.string(),
+                position: z.enum(["upper", "lower"]).optional(),
+              }),
+            ]),
           )
           .optional(),
       }),
