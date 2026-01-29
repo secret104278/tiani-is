@@ -10,21 +10,17 @@ import { api } from "~/utils/api";
 import type { WorkAssignments } from "~/utils/types";
 import {
   CUSTOM_ROLE_KEY,
-  MASTER_WORK_ROLES,
   OFFERING_FESTIVALS,
   VOLUNTEER_ACTIVITY_TOPIC_OTHER,
   WORK_ACTIVITY_TITLES,
-  WORK_ROLE_PRESETS,
   getCurrentDateTime,
   getDateTimeString,
   getDurationHour,
   getEndTime,
   getUnitBySlug,
-  titleIsOther,
 } from "~/utils/ui";
 import { AlertWarning } from "../utils/Alert";
 import ReactiveButton from "../utils/ReactiveButton";
-import WorkAssignmentsSection from "./WorkAssignmentsSection";
 
 type YideWorkActivity = inferRouterOutputs<WorkRouter>["getActivity"];
 
@@ -40,7 +36,6 @@ interface WorkActivityFormData {
   description: string;
   assignments: WorkAssignments;
   customRoles: { role: string; name: string }[];
-  preset: string;
   rolesConfig: string[];
 }
 
@@ -61,38 +56,10 @@ export default function WorkActivityForm({
     duration: 2, // 預設 2 小時，雖然隱藏但仍需數值
     offeringFestival: "",
     offeringFestivalOther: "",
-    preset: "offering",
-    rolesConfig: [...WORK_ROLE_PRESETS.offering.roles],
+    rolesConfig: [],
   };
   if (defaultActivity) {
     const isCustomTitle = !WORK_ACTIVITY_TITLES.includes(defaultActivity.title);
-
-    let rolesConfig = (defaultActivity.rolesConfig as string[]) ?? [];
-    let preset = "full";
-
-    // Legacy data fallback
-    if (_.isEmpty(rolesConfig)) {
-      if (defaultActivity.title === "獻供通知") {
-        preset = "offering";
-        rolesConfig = [...WORK_ROLE_PRESETS.offering.roles];
-      } else if (defaultActivity.title === "辦道通知" || isCustomTitle) {
-        preset = "taoCeremony";
-        rolesConfig = [...WORK_ROLE_PRESETS.taoCeremony.roles];
-      } else if (defaultActivity.title === "執禮通知") {
-        preset = "full";
-        rolesConfig = [];
-      }
-    } else {
-      // Try to find matching preset
-      const matchedPreset = Object.entries(WORK_ROLE_PRESETS).find(
-        ([, def]) =>
-          def.roles.length === rolesConfig.length &&
-          def.roles.every((r) => rolesConfig.includes(r)),
-      );
-      if (matchedPreset) {
-        preset = matchedPreset[0];
-      }
-    }
 
     formDefaultValues = {
       title: isCustomTitle ? "執禮通知" : defaultActivity.title,
@@ -111,8 +78,7 @@ export default function WorkActivityForm({
         (defaultActivity.assignments as WorkAssignments)?.[CUSTOM_ROLE_KEY] ||
         [],
       offeringFestival: defaultActivity.festival ?? "",
-      preset,
-      rolesConfig,
+      rolesConfig: (defaultActivity.rolesConfig as string[]) ?? [],
     };
   }
 
@@ -222,11 +188,6 @@ export default function WorkActivityForm({
     });
   };
 
-  const currentRoleKeys = watch("rolesConfig") || [];
-  const activeRoleDefinitions = MASTER_WORK_ROLES.filter((r) =>
-    currentRoleKeys.includes(r.key),
-  );
-
   const canSaveDraft =
     isNil(defaultActivity) || defaultActivity.status === "DRAFT";
 
@@ -251,16 +212,6 @@ export default function WorkActivityForm({
               if (val === watch("title")) return;
 
               setValue("title", val);
-
-              // Unified logic: Title selection determines the role configuration
-              let targetPreset: keyof typeof WORK_ROLE_PRESETS = "taoCeremony";
-              if (val === "獻供通知") targetPreset = "offering";
-              if (val === "辦道通知") targetPreset = "taoCeremony";
-              if (val === "執禮通知") targetPreset = "ceremony";
-
-              const presetDef = WORK_ROLE_PRESETS[targetPreset];
-              setValue("preset", targetPreset);
-              setValue("rolesConfig", [...presetDef.roles]);
               setValue("assignments", {});
             }}
           >
@@ -341,53 +292,46 @@ export default function WorkActivityForm({
           />
         </div>
 
-        {isCeremonyMode && (
-          <div className="my-4 rounded-md border border-base-300 bg-base-100 p-4">
-            <div className="mb-2 font-bold text-sm">
-              自訂職務欄位 (自行輸入)
-            </div>
-            <div className="space-y-4">
-              {customRoleFields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="relative flex flex-col gap-2 border-base-300 border-b pb-4 last:border-0 last:pb-0"
-                >
-                  <div className="flex items-center gap-2">
-                    <input
-                      placeholder="職務 (如: 交通)"
-                      className="input input-bordered w-full"
-                      {...register(`customRoles.${index}.role` as const)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-circle text-error"
-                      onClick={() => removeCustomRole(index)}
-                    >
-                      <TrashIcon className="h-6 w-6" />
-                    </button>
-                  </div>
-                  <input
-                    placeholder="人員姓名"
-                    className="input input-bordered w-full"
-                    {...register(`customRoles.${index}.name` as const)}
-                  />
-                </div>
-              ))}
-              <button
-                type="button"
-                className="btn btn-outline btn-sm w-full"
-                onClick={() => appendCustomRole({ role: "", name: "" })}
-              >
-                <PlusIcon className="h-4 w-4" /> 新增自訂欄位
-              </button>
-            </div>
+        <div className="my-4 rounded-md border border-base-300 bg-base-100 p-4">
+          <div className="mb-2 font-bold text-sm">
+            工作分配 / 職務欄位 (自行輸入)
           </div>
-        )}
-
-        <WorkAssignmentsSection
-          roleDefinitions={activeRoleDefinitions}
-          staffNames={staffNames}
-        />
+          <div className="space-y-4">
+            {customRoleFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="relative flex flex-col gap-2 border-base-300 border-b pb-4 last:border-0 last:pb-0"
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    placeholder="職務 (如: 交通)"
+                    className="input input-bordered w-full"
+                    {...register(`customRoles.${index}.role` as const)}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-circle text-error"
+                    onClick={() => removeCustomRole(index)}
+                  >
+                    <TrashIcon className="h-6 w-6" />
+                  </button>
+                </div>
+                <input
+                  placeholder="人員姓名"
+                  className="input input-bordered w-full"
+                  {...register(`customRoles.${index}.name` as const)}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm w-full"
+              onClick={() => appendCustomRole({ role: "", name: "" })}
+            >
+              <PlusIcon className="h-4 w-4" /> 新增自訂欄位
+            </button>
+          </div>
+        </div>
 
         <div className="divider" />
         <div>
