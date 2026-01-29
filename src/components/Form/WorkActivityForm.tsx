@@ -318,7 +318,7 @@ export default function WorkActivityForm({
             <span className="label-text text-sm">佛堂名稱</span>
           </label>
           <select
-            className="select select-bordered"
+            className="select select-bordered w-full"
             {...register("locationId", { valueAsNumber: true })}
           >
             {locations?.map((location: { id: number; name: string }) => (
@@ -327,6 +327,18 @@ export default function WorkActivityForm({
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="label">
+            <span className="label-text text-sm">時間</span>
+          </label>
+          <input
+            type="datetime-local"
+            className="tiani-input w-full"
+            required
+            {...register("startDateTime", { valueAsDate: true })}
+          />
         </div>
 
         {isCeremonyMode && (
@@ -376,19 +388,6 @@ export default function WorkActivityForm({
           roleDefinitions={activeRoleDefinitions}
           staffNames={staffNames}
         />
-
-        <div className="divider" />
-        <div>
-          <label className="label">
-            <span className="label-text text-sm">時間</span>
-          </label>
-          <input
-            type="datetime-local"
-            className="tiani-input"
-            required
-            {...register("startDateTime", { valueAsDate: true })}
-          />
-        </div>
 
         <div className="divider" />
         <div>
