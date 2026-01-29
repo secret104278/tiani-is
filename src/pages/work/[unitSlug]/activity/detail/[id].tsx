@@ -432,13 +432,9 @@ export default function WorkActivityDetailPage() {
         )}
 
         {!_.isEmpty(activity.assignments) &&
-          (activity.rolesConfig ||
-            activity.title.includes("辦道") ||
-            activity.title.includes("獻供")) &&
           (isTaoActivity ? (
-            <div className="collapse-arrow collapse mt-4 bg-base-200">
-              <input type="checkbox" />
-              <div className="collapse-title divider font-medium">
+            <div tabIndex={0} className="collapse-arrow collapse bg-base-200">
+              <div className="collapse-title font-medium">
                 工作分配 (點擊展開)
               </div>
               <div className="collapse-content">
