@@ -57,11 +57,14 @@ export default function WorkActivityQiudaorenPage() {
     !!session.user.role.is_work_admin ||
     session.user.id === activity.organiserId;
 
-  const isStaff =
+  const isAssignedStaff =
     !isManager &&
-    activity.staffs?.some((staff) => staff.user.id === session?.user.id);
+    activity.staffs?.some(
+      (staff) => staff.user.id === session?.user.id && !staff.volunteerRoles,
+    );
 
-  if (!isManager && !isStaff) return <AlertWarning>沒有權限</AlertWarning>;
+  if (!isManager && !isAssignedStaff)
+    return <AlertWarning>沒有權限</AlertWarning>;
 
   const totalQiudaoren = qiudaorens?.length ?? 0;
 

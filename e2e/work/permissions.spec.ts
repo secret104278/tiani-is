@@ -59,5 +59,42 @@ test.describe("YideWork Permissions", () => {
     await expect(
       page.getByRole("button", { name: "我要帶人來求道" }),
     ).toBeVisible();
+
+    await page.goto(`/work/yide/activity/qiudaoren/${activity.id}`);
+    await expect(page.getByText("求道人清單")).toBeVisible();
+    await expect(page.getByText("沒有權限")).not.toBeVisible();
+  });
+
+  test("Volunteer access to specific activity (should NOT see Qiudaoren list)", async ({
+    loginAsWorkAdmin,
+    testUser,
+    page,
+    createWorkActivity,
+    switchUser,
+  }) => {
+    // 1. Create activity as admin
+    const activity = await createWorkActivity(loginAsWorkAdmin.id, {
+      workType: "TAO",
+    });
+
+    // 2. Login as normal user and volunteer
+    await switchUser(testUser.id);
+    await page.goto(`/work/yide/activity/detail/${activity.id}`);
+
+    await page.getByRole("button", { name: "我可以參與幫辦" }).click();
+    await page.getByLabel("配合安排").check();
+    await page.getByRole("button", { name: "我可以參與幫辦" }).last().click();
+
+    // 3. Verify user is now staff but a volunteer
+    await expect(page.getByRole("button", { name: "取消參加" })).toBeVisible();
+
+    // 4. Verify user should NOT see Qiudaoren list button
+    await expect(
+      page.getByRole("link", { name: "求道人清單" }),
+    ).not.toBeVisible();
+
+    // 5. Verify direct access is denied
+    await page.goto(`/work/yide/activity/qiudaoren/${activity.id}`);
+    await expect(page.getByText("沒有權限")).toBeVisible();
   });
 });

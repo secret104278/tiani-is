@@ -191,6 +191,10 @@ export default function WorkActivityDetailPage() {
     (staff) => staff.user.id === session.user.id,
   );
 
+  const isAssignedStaff = activity.staffs?.some(
+    (staff) => staff.user.id === session.user.id && !staff.volunteerRoles,
+  );
+
   const isEnded = activityIsEnded(activity.endDateTime);
 
   const isOffering = activity.workType === YideWorkType.OFFERING;
@@ -391,7 +395,7 @@ export default function WorkActivityDetailPage() {
       </div>
       {isManager && <AdminPanel />}
       {isOffering && <StaffList />}
-      {isQiudaoYili && (isManager || isStaff) && (
+      {isQiudaoYili && (isManager || isAssignedStaff) && (
         <div className="flex flex-row space-x-2">
           <QiudaorenPanel />
         </div>
