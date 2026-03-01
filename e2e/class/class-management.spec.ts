@@ -38,19 +38,30 @@ test.describe("YiDeClass Management", () => {
     publishedClassActivity,
   }) => {
     const unitSlug = "yide";
-    await page.goto(`/class/${unitSlug}/activity/detail/${publishedClassActivity.id}`);
+    await page.goto(
+      `/class/${unitSlug}/activity/detail/${publishedClassActivity.id}`,
+    );
 
     // Wait for the admin panel to be visible
     await expect(page.getByText("義德班務管理")).toBeVisible();
 
     // Check all three admin links have the correct href including unitSlug
-    const checkRecordLink = page.getByRole('link', { name: "打卡名單" });
-    await expect(checkRecordLink).toHaveAttribute('href', `/class/${unitSlug}/activity/checkrecord/${publishedClassActivity.id}`);
+    const checkRecordLink = page.getByRole("link", { name: "打卡名單" });
+    await expect(checkRecordLink).toHaveAttribute(
+      "href",
+      `/class/${unitSlug}/activity/checkrecord/${publishedClassActivity.id}`,
+    );
 
-    const leaveRecordLink = page.getByRole('link', { name: "請假名單" });
-    await expect(leaveRecordLink).toHaveAttribute('href', `/class/${unitSlug}/activity/leaverecord/${publishedClassActivity.id}`);
+    const leaveRecordLink = page.getByRole("link", { name: "請假名單" });
+    await expect(leaveRecordLink).toHaveAttribute(
+      "href",
+      `/class/${unitSlug}/activity/leaverecord/${publishedClassActivity.id}`,
+    );
 
-    const absentLink = page.getByRole('link', { name: "缺席名單" });
-    await expect(absentLink).toHaveAttribute('href', `/class/${unitSlug}/activity/absent/${publishedClassActivity.id}`);
+    const absentLink = page.getByRole("link", { name: "缺席名單" });
+    await expect(absentLink).toHaveAttribute(
+      "href",
+      `/class/${unitSlug}/activity/absent/${publishedClassActivity.id}`,
+    );
   });
 });

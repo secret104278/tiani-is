@@ -293,33 +293,22 @@ export default function WorkActivityDetailPage() {
   );
 
   const ParticipateControl = () => {
-    const isOfferingNotice = activity.title === "獻供通知";
-
     if (isEnded) return null;
 
-    if (isStaff) {
-      return (
-        <ReactiveButton
-          className="btn btn-error"
-          onClick={() => leaveActivity({ activityId: activity.id })}
-          loading={leaveActivityIsPending}
-        >
-          <UserMinusIcon className="h-4 w-4" />
-          取消參加
-        </ReactiveButton>
-      );
-    }
-
-    const buttonLabel = "我可以參與幫辦";
-    const dialogTitle = "我可以參與幫辦";
+    const buttonLabel = isStaff ? "修改幫辦項目" : "我可以參與幫辦";
+    const dialogTitle = "參與幫辦項目";
 
     return (
       <>
         <ReactiveButton
-          className="btn btn-accent"
+          className={isStaff ? "btn btn-error" : "btn btn-accent"}
           onClick={() => setParticipateDialogOpen(true)}
         >
-          <UserPlusIcon className="h-4 w-4" />
+          {isStaff ? (
+            <UserMinusIcon className="h-4 w-4" />
+          ) : (
+            <UserPlusIcon className="h-4 w-4" />
+          )}
           {buttonLabel}
         </ReactiveButton>
         <Dialog
@@ -393,36 +382,38 @@ export default function WorkActivityDetailPage() {
       <div className="flex items-center justify-end space-x-4">
         {!isManager && <ShareLineBtn />}
       </div>
-      {isManager && <AdminPanel />}
-      {isOffering && <StaffList />}
-      {isQiudaoYili && (isManager || isAssignedStaff) && (
-        <div className="flex flex-row space-x-2">
-          <QiudaorenPanel />
-        </div>
-      )}
+      {isManager ? <AdminPanel /> : null}
+      {isOffering ? <StaffList /> : null}
+      {isQiudaoYili ? (
+        isManager || isAssignedStaff ? (
+          <div className="flex flex-row space-x-2">
+            <QiudaorenPanel />
+          </div>
+        ) : null
+      ) : null}
       <ParticipateControl />
       <div className="flex flex-col space-y-2 align-bottom">
         <p>壇務：{activity.organiser.name}</p>
 
-        {activity.festival && (
+        {activity.festival ? (
           <div className="flex items-center">
             <FlagIcon className="mr-1 h-4 w-4" />
             <p>節日：{activity.festival}</p>
           </div>
-        )}
+        ) : null}
         <div className="flex items-center">
           <MapPinIcon className="mr-1 h-4 w-4" />
           <p>佛堂：{activity.location.name}</p>
         </div>
         <TimeDisplay />
-        {!_.isEmpty(activity.description?.trim()) && (
+        {!_.isEmpty(activity.description?.trim()) ? (
           <article className="prose hyphens-auto whitespace-break-spaces break-words py-4">
             {activity.description}
           </article>
-        )}
+        ) : null}
 
-        {!_.isEmpty(activity.assignments) &&
-          (isTaoActivity ? (
+        {!_.isEmpty(activity.assignments) ? (
+          isTaoActivity ? (
             <div tabIndex={0} className="collapse-arrow collapse bg-base-200">
               <div className="collapse-title font-medium">
                 工作分配 (點擊展開)
@@ -442,10 +433,11 @@ export default function WorkActivityDetailPage() {
                 rolesConfig={activity.rolesConfig as string[]}
               />
             </>
-          ))}
+          )
+        ) : null}
       </div>
 
-      {isQiudaoYili && (
+      {isQiudaoYili ? (
         <div className="flex flex-row space-x-2">
           <ReactiveButton
             className="btn btn-primary flex-1"
@@ -457,9 +449,9 @@ export default function WorkActivityDetailPage() {
             我要帶人來求道
           </ReactiveButton>
         </div>
-      )}
+      ) : null}
 
-      {isQiudaoYili && (
+      {isQiudaoYili ? (
         <Dialog
           title="我要帶人來求道"
           show={qiudaorenDialogOpen}
@@ -472,15 +464,17 @@ export default function WorkActivityDetailPage() {
             defaultValues={undefined}
           />
         </Dialog>
-      )}
+      ) : null}
 
-      {isQiudaoYili && myQiudaorens && (
-        <QiudaorenList
-          qiudaorens={myQiudaorens}
-          activityId={activity.id}
-          groupBy="qiudaoren"
-        />
-      )}
+      {isQiudaoYili ? (
+        myQiudaorens ? (
+          <QiudaorenList
+            qiudaorens={myQiudaorens}
+            activityId={activity.id}
+            groupBy="qiudaoren"
+          />
+        ) : null
+      ) : null}
     </div>
   );
 }

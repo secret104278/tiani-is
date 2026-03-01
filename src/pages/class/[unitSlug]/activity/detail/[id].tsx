@@ -216,7 +216,9 @@ export default function ClassActivityDetailPage() {
           請假名單
         </button>
       </Link>
-      <Link href={`/class/${router.query.unitSlug}/activity/absent/${activity.id}`}>
+      <Link
+        href={`/class/${router.query.unitSlug}/activity/absent/${activity.id}`}
+      >
         <button className="btn w-full">
           <QueueListIcon className="h-4 w-4" />
           缺席名單

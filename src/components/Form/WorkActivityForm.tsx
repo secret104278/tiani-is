@@ -8,9 +8,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  restrictToVerticalAxis,
-} from "@dnd-kit/modifiers";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   SortableContext,
   sortableKeyboardCoordinates,

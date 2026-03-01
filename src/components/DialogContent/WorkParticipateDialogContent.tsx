@@ -1,5 +1,6 @@
 import { useClose } from "@headlessui/react";
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { AlertWarning } from "~/components/utils/Alert";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import { api } from "~/utils/api";
@@ -15,15 +16,36 @@ export default function WorkParticipateDialogContent({
   activityId,
   onSuccess,
 }: WorkParticipateDialogContentProps) {
+  const { data: session } = useSession();
   const close = useClose();
   const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const utils = api.useUtils();
 
-  const { isLoading: activityIsLoading, error: activityError } =
-    api.workActivity.getActivity.useQuery({
-      activityId,
-    });
+  const {
+    data: activity,
+    isLoading: activityIsLoading,
+    error: activityError,
+  } = api.workActivity.getActivity.useQuery({
+    activityId,
+  });
+
+  const isStaff = activity?.staffs?.some(
+    (staff) => staff.user.id === session?.user?.id,
+  );
+
+  useEffect(() => {
+    if (activity && session?.user?.id && !hasInitialized) {
+      const myStaff = activity.staffs?.find(
+        (s) => s.user.id === session.user.id,
+      );
+      if (myStaff?.volunteerRoles) {
+        setSelectedRoles(new Set(myStaff.volunteerRoles as string[]));
+      }
+      setHasInitialized(true);
+    }
+  }, [activity, session, hasInitialized]);
 
   const {
     mutate: participateActivity,
@@ -37,6 +59,15 @@ export default function WorkParticipateDialogContent({
     },
   });
 
+  const { mutate: leaveActivity, isPending: leaveActivityIsPending } =
+    api.workActivity.leaveActivity.useMutation({
+      onSuccess: () => {
+        void utils.workActivity.getActivity.invalidate();
+        onSuccess?.();
+        close();
+      },
+    });
+
   const handleParticipate = () => {
     if (selectedRoles.size === 0) return;
 
@@ -49,25 +80,27 @@ export default function WorkParticipateDialogContent({
   };
 
   const toggleRole = (role: string) => {
-    const newSelected = new Set(selectedRoles);
-    const COOPERATE_ROLE = "配合安排";
+    setSelectedRoles((prev) => {
+      const newSelected = new Set(prev);
+      const COOPERATE_ROLE = "配合安排";
 
-    if (role === COOPERATE_ROLE) {
-      if (newSelected.has(COOPERATE_ROLE)) {
-        newSelected.delete(COOPERATE_ROLE);
+      if (role === COOPERATE_ROLE) {
+        if (newSelected.has(COOPERATE_ROLE)) {
+          newSelected.delete(COOPERATE_ROLE);
+        } else {
+          newSelected.clear();
+          newSelected.add(COOPERATE_ROLE);
+        }
       } else {
-        newSelected.clear();
-        newSelected.add(COOPERATE_ROLE);
+        if (newSelected.has(role)) {
+          newSelected.delete(role);
+        } else {
+          newSelected.delete(COOPERATE_ROLE);
+          newSelected.add(role);
+        }
       }
-    } else {
-      if (newSelected.has(role)) {
-        newSelected.delete(role);
-      } else {
-        newSelected.delete(COOPERATE_ROLE);
-        newSelected.add(role);
-      }
-    }
-    setSelectedRoles(newSelected);
+      return newSelected;
+    });
   };
 
   if (activityIsLoading) return <div className="loading loading-spinner" />;
@@ -81,9 +114,9 @@ export default function WorkParticipateDialogContent({
 
   return (
     <div className="space-y-4">
-      {participateActivityError && (
+      {participateActivityError ? (
         <AlertWarning>{participateActivityError.message}</AlertWarning>
-      )}
+      ) : null}
 
       <div>
         <label className="label">
@@ -91,7 +124,7 @@ export default function WorkParticipateDialogContent({
         </label>
         <div className="space-y-4">
           {/* Cooperate Role */}
-          {cooperateRole && (
+          {cooperateRole ? (
             <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-primary bg-primary/5 p-3">
               <input
                 type="checkbox"
@@ -103,9 +136,9 @@ export default function WorkParticipateDialogContent({
                 {cooperateRole}
               </span>
             </label>
-          )}
+          ) : null}
 
-          <div className="divider text-xs opacity-50">或是選擇特定項目</div>
+          <div className="divider text-xs opacity-50">或是選擇學習項目</div>
 
           {/* Other Roles */}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -129,15 +162,32 @@ export default function WorkParticipateDialogContent({
 
       <div className="divider" />
 
-      <ReactiveButton
-        type="button"
-        className="btn btn-primary w-full"
-        onClick={handleParticipate}
-        loading={participateActivityIsPending}
-        disabled={selectedRoles.size === 0}
-      >
-        我可以參與幫辦
-      </ReactiveButton>
+      <div className="flex flex-col gap-2">
+        <ReactiveButton
+          type="button"
+          className="btn btn-primary w-full"
+          onClick={handleParticipate}
+          loading={participateActivityIsPending}
+          disabled={selectedRoles.size === 0}
+        >
+          {isStaff ? "修改參加項目" : "我可以參與幫辦"}
+        </ReactiveButton>
+
+        {isStaff ? (
+          <ReactiveButton
+            type="button"
+            className="btn btn-error btn-outline w-full"
+            onClick={() => leaveActivity({ activityId })}
+            loading={leaveActivityIsPending}
+          >
+            取消參加
+          </ReactiveButton>
+        ) : null}
+      </div>
+
+      <p className="text-center text-base-content/60 text-xs">
+        以上選項僅列入參考，工作分配依公告為準
+      </p>
     </div>
   );
 }

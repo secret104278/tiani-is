@@ -48,7 +48,9 @@ test.describe("YideWork Activity New Features", () => {
     await dialog.getByLabel("獻供上執禮").check();
     await dialog.getByRole("button", { name: "我可以參與幫辦" }).click();
 
-    await expect(page.getByText("取消參加")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "修改幫辦項目" }),
+    ).toBeVisible();
 
     await expect(page.getByText("節日：初一")).toBeVisible();
     await expect(page.getByText("獻供執禮")).toBeVisible();
