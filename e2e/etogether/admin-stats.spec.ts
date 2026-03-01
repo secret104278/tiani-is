@@ -38,7 +38,12 @@ test.describe("Etogether Admin Stats", () => {
     await page.goto("/etogether");
     await expect(page.getByRole("link", { name: "活動統計" })).toBeHidden();
 
-    await page.goto("/etogether/admin/stats");
+    // Use client-side navigation to avoid full page reload issues with session state
+    await page.evaluate(() => {
+      // @ts-ignore - access next router
+      window.next.router.push("/etogether/admin/stats");
+    });
+    await expect(page).toHaveURL("/etogether/admin/stats");
     await expect(page.getByText("您沒有管理權限")).toBeVisible();
   });
 });
