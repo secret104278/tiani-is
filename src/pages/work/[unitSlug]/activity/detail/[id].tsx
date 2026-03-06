@@ -414,7 +414,8 @@ export default function WorkActivityDetailPage() {
 
         {!_.isEmpty(activity.assignments) ? (
           isTaoActivity ? (
-            <div tabIndex={0} className="collapse-arrow collapse bg-base-200">
+            <form className="collapse-arrow collapse bg-base-200">
+              <input type="checkbox" />
               <div className="collapse-title font-medium">
                 工作分配 (點擊展開)
               </div>
@@ -424,7 +425,7 @@ export default function WorkActivityDetailPage() {
                   rolesConfig={activity.rolesConfig as string[]}
                 />
               </div>
-            </div>
+            </form>
           ) : (
             <>
               <div className="divider">工作分配</div>
