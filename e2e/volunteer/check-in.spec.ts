@@ -37,9 +37,9 @@ test.describe("Volunteer Check-in", () => {
     const dialogHeading = page.getByRole("heading", { name: "定位打卡" });
     await expect(dialogHeading).toBeVisible();
 
-    // Click the "打卡" button inside the dialog
+    // Click the "確認打卡" button inside the dialog
     const punchButton = page.getByRole("button", {
-      name: "打卡",
+      name: "確認打卡",
       exact: true,
     });
     await expect(punchButton).toBeEnabled();

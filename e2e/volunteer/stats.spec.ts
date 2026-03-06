@@ -22,9 +22,9 @@ test.describe("Volunteer Stats", () => {
     await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
     const punchButton = page
       .getByRole("button")
-      .filter({ hasText: /打卡|定位中|超出範圍/ });
+      .filter({ hasText: /確認打卡|定位中|超出範圍/ });
     // Wait longer for positioning to finish
-    await expect(punchButton).toHaveText("打卡", { timeout: 20000 });
+    await expect(punchButton).toHaveText("確認打卡", { timeout: 20000 });
     await punchButton.click();
     await checkInPromise;
 
@@ -36,7 +36,7 @@ test.describe("Volunteer Stats", () => {
     );
     await casualCard.getByRole("button", { name: "簽退" }).click();
     await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-    await page.getByRole("button", { name: "打卡", exact: true }).click();
+    await page.getByRole("button", { name: "確認打卡", exact: true }).click();
     await checkOutPromise;
 
     // 2. Setup Activity Data
@@ -55,7 +55,7 @@ test.describe("Volunteer Stats", () => {
     );
     await page.getByRole("button", { name: "簽到" }).click();
     await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-    await page.getByRole("button", { name: "打卡", exact: true }).click();
+    await page.getByRole("button", { name: "確認打卡", exact: true }).click();
     await actInPromise;
 
     // Activity Check-Out
@@ -66,7 +66,7 @@ test.describe("Volunteer Stats", () => {
     );
     await page.getByRole("button", { name: "簽退" }).click();
     await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-    await page.getByRole("button", { name: "打卡", exact: true }).click();
+    await page.getByRole("button", { name: "確認打卡", exact: true }).click();
     await actOutPromise;
 
     // 3. Verify Stats Page

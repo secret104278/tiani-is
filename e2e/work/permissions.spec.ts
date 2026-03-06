@@ -86,7 +86,9 @@ test.describe("YideWork Permissions", () => {
     await page.getByRole("button", { name: "我可以參與幫辦" }).last().click();
 
     // 3. Verify user is now staff but a volunteer
-    await expect(page.getByRole("button", { name: "取消參加" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "修改幫辦項目" }),
+    ).toBeVisible();
 
     // 4. Verify user should NOT see Qiudaoren list button
     await expect(

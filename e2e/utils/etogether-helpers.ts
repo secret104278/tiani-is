@@ -108,6 +108,6 @@ export async function cancelRegistration(page: Page) {
 export async function performEtogetherCheckIn(page: Page) {
   await page.getByRole("button", { name: "簽到" }).click();
   await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-  await page.getByRole("button", { name: "打卡" }).click();
+  await page.getByRole("button", { name: "確認打卡", exact: true }).click();
   await expect(page.getByRole("button", { name: "已完成簽到" })).toBeVisible();
 }

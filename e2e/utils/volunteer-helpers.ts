@@ -80,9 +80,18 @@ export async function createActivity(
 export async function performActivityCheckIn(page: Page) {
   const checkInBtn = page.getByRole("button", { name: "簽到" });
   await expect(checkInBtn).toBeEnabled();
+  
+  const responsePromise = page.waitForResponse(
+    (res) =>
+      res.url().includes("volunteerActivity.checkInActivity") &&
+      res.status() === 200,
+  );
+
   await checkInBtn.click();
   await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-  await page.getByRole("button", { name: "打卡", exact: true }).click();
+  await page.getByRole("button", { name: "確認打卡", exact: true }).click();
+  
+  await responsePromise;
   await expect(page.getByRole("dialog")).toBeHidden();
 }
 
@@ -90,9 +99,18 @@ export async function performActivityCheckOut(page: Page) {
   const checkOutBtn = page.getByRole("button", { name: "簽退" });
   await expect(checkOutBtn).toBeVisible();
   await expect(checkOutBtn).toBeEnabled();
+
+  const responsePromise = page.waitForResponse(
+    (res) =>
+      res.url().includes("volunteerActivity.checkInActivity") &&
+      res.status() === 200,
+  );
+
   await checkOutBtn.click();
   await expect(page.getByRole("heading", { name: "定位打卡" })).toBeVisible();
-  await page.getByRole("button", { name: "打卡", exact: true }).click();
+  await page.getByRole("button", { name: "確認打卡", exact: true }).click();
+  
+  await responsePromise;
   await expect(page.getByRole("dialog")).toBeHidden();
 }
 

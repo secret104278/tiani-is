@@ -24,9 +24,17 @@ test.describe("YiDeClass Attendance", () => {
       checkInDialog.getByRole("heading", { name: "定位打卡" }),
     ).toBeVisible();
 
+    const checkInResponsePromise = page.waitForResponse(
+      (res) =>
+        res.url().includes("classActivity.checkInActivity") &&
+        res.status() === 200,
+    );
+
     await checkInDialog
-      .getByRole("button", { name: "打卡", exact: true })
+      .getByRole("button", { name: "確認打卡", exact: true })
       .click();
+
+    await checkInResponsePromise;
     await expect(checkInDialog).toBeHidden();
     await expect(
       page.getByRole("button", { name: "已完成簽到" }),
@@ -49,7 +57,12 @@ test.describe("YiDeClass Attendance", () => {
     await expect(page.getByRole("button", { name: "取消請假" })).toBeVisible();
 
     // 4. Cancel Leave
+    const cancelLeavePromise = page.waitForResponse(
+      (res) =>
+        res.url().includes("classActivity.cancelLeave") && res.status() === 200,
+    );
     await page.getByRole("button", { name: "取消請假" }).click();
+    await cancelLeavePromise;
     await expect(
       page.getByRole("button", { name: "請假", exact: true }),
     ).toBeVisible();
