@@ -74,7 +74,7 @@ export const activityRouter = createTRPCRouter({
           unit: input.unit,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
-          status: input.isDraft ? "DRAFT" : undefined,
+          status: input.isDraft ? "DRAFT" : "PUBLISHED",
           version: {
             increment: 1,
           },

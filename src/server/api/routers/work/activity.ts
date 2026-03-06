@@ -114,7 +114,7 @@ export const activityRouter = createTRPCRouter({
             ? undefined
             : input.assignments,
           rolesConfig: input.rolesConfig,
-          status: input.isDraft ? "DRAFT" : undefined,
+          status: input.isDraft ? "DRAFT" : "PUBLISHED",
           version: {
             increment: 1,
           },
