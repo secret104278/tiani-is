@@ -17,9 +17,15 @@ export const checkinRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Temporary bypass GPS and QR requirement
+      const hasValidGeo = true;
+      const hasValidQr = true;
+
+      /*
       const hasValidGeo =
         !Number.isNaN(input.latitude) && !Number.isNaN(input.longitude);
       const hasValidQr = !!(input.qrToken && isValidQrToken(input.qrToken));
+      */
 
       if (!hasValidGeo && !hasValidQr) {
         throw new Error("無效的檢查方式");

@@ -33,6 +33,11 @@ export const checkinRouter = createTRPCRouter({
         )
           throw new Error("非課程時間，無法簽到");
 
+        // Temporary bypass GPS and QR requirement
+        const hasValidGeo = true;
+        const hasValidQr = true;
+
+        /*
         const hasValidGeo =
           !isNil(input.latitude) &&
           !isNil(input.longitude) &&
@@ -40,6 +45,7 @@ export const checkinRouter = createTRPCRouter({
 
         const hasValidQr =
           !isNil(input.qrToken) && isValidQrToken(input.qrToken);
+        */
 
         if (!hasValidGeo && !hasValidQr) {
           if (isNil(input.latitude) || isNil(input.longitude))
@@ -88,12 +94,18 @@ export const checkinRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Temporary bypass GPS and QR requirement
+      const hasValidGeo = true;
+      const hasValidQr = true;
+
+      /*
       const hasValidGeo =
         !isNil(input.latitude) &&
         !isNil(input.longitude) &&
         !isOutOfRange(input.latitude, input.longitude);
 
       const hasValidQr = !isNil(input.qrToken) && isValidQrToken(input.qrToken);
+      */
 
       if (!hasValidGeo && !hasValidQr) throw new Error("超出打卡範圍");
 

@@ -11,6 +11,7 @@ import {
 import { AlertWarning } from "../../utils/Alert";
 import ReactiveButton from "../../utils/ReactiveButton";
 
+/*
 const ViewFocus = dynamic(() => import("~/components/Map/ViewFocus"), {
   ssr: false,
 });
@@ -25,6 +26,7 @@ const QrScannerComponent = dynamic(
     ssr: false,
   },
 );
+*/
 
 export default function BaseCheckInDialogContent({
   checkInIsLoading,
@@ -39,6 +41,7 @@ export default function BaseCheckInDialogContent({
     qrToken?: string;
   }) => void;
 }) {
+  /*
   const geoState = useGeolocation();
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [qrError, setQrError] = useState<string | null>(null);
@@ -88,46 +91,27 @@ export default function BaseCheckInDialogContent({
         center[1],
       ) <= TIANI_GPS_RADIUS_KM,
   );
+  */
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="h-96">
-        <CheckInMap key={mapKey}>
-          {!geoState.loading && (
-            <ViewFocus
-              showMarker
-              center={[geoState.latitude!, geoState.longitude!]}
-            />
-          )}
-        </CheckInMap>
+      <div className="py-8 text-center">
+        <p className="text-lg font-medium">確定要進行打卡嗎？</p>
       </div>
       <div className="flex gap-2">
         <ReactiveButton
           className="btn btn-primary flex-1"
-          disabled={
-            geoState.loading || !isEmpty(geoState.error) || isOutOfRange
-          }
           loading={checkInIsLoading}
           error={checkInError}
           onClick={() =>
-            isNumber(geoState.latitude) &&
-            isNumber(geoState.longitude) &&
-            Number.isFinite(geoState.latitude) &&
-            Number.isFinite(geoState.longitude) &&
             onCheckIn({
-              latitude: geoState.latitude,
-              longitude: geoState.longitude,
+              latitude: undefined,
+              longitude: undefined,
             })
           }
         >
-          {geoState.loading ? "定位中..." : isOutOfRange ? "超出範圍" : "打卡"}
+          確認打卡
         </ReactiveButton>
-        <button
-          className="btn btn-secondary flex-1"
-          onClick={() => setShowQrScanner(true)}
-        >
-          掃描 QR
-        </button>
       </div>
     </div>
   );
