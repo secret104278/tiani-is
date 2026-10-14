@@ -1,4 +1,5 @@
 import {
+  ArrowDownTrayIcon,
   CheckBadgeIcon,
   PencilSquareIcon,
   PlusIcon,
@@ -17,6 +18,7 @@ import Dialog from "~/components/utils/Dialog";
 import ReactiveButton from "~/components/utils/ReactiveButton";
 import type { EtogetherRouter } from "~/server/api/routers/etogether";
 import { api } from "~/utils/api";
+import { downloadCsv } from "~/utils/csv";
 import { truncateTitle } from "~/utils/ui";
 
 type Register =
@@ -138,6 +140,24 @@ export default function EtogetherRegistrationPage() {
     }
   }
 
+  const exportRegistrations = () => {
+    const rows: (string | number)[][] = [
+      ["分組", "姓名", "報名方式", "報名人", "簽到"],
+    ];
+    for (const subgroup of activity.subgroups) {
+      for (const entry of userBySubgroup[subgroup.id] ?? []) {
+        rows.push([
+          subgroup.title,
+          entry.name,
+          entry.isExternal ? "代報名" : "本人",
+          mainRegisterMap[entry.mainRegisterId]?.user.name ?? "",
+          entry.checked ? "已簽到" : "",
+        ]);
+      }
+    }
+    downloadCsv(`${activity.title}_報名名單.csv`, rows);
+  };
+
   return (
     <div className="flex flex-col space-y-4">
       <Link className="link" href={`/etogether/activity/detail/${activity.id}`}>
@@ -162,7 +182,11 @@ export default function EtogetherRegistrationPage() {
           <div className="stat-value">{totalRegisters}</div>
         </div>
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button type="button" className="btn" onClick={exportRegistrations}>
+          <ArrowDownTrayIcon className="h-4 w-4" />
+          匯出 Excel
+        </button>
         <ReactiveButton
           className="btn"
           onClick={() => setCheckInDialogOpen(true)}
