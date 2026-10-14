@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { signRegistrationExportToken } from "~/server/etogether/registrationExport";
 import {
   activityManageProcedure,
   activityPublishedOnlyProcedure,
@@ -132,6 +133,15 @@ export const registerRouter = createTRPCRouter({
           subgroups: true,
         },
       }),
+  ),
+
+  createRegistrationExportUrl: activityManageProcedure.mutation(
+    async ({ input }) => {
+      const token = await signRegistrationExportToken(input.activityId);
+      // openExternalBrowser=1 makes LINE open the link in Safari/Chrome,
+      // since LINE's in-app browser cannot download files.
+      return `/api/etogether/registrations-export?token=${encodeURIComponent(token)}&openExternalBrowser=1`;
+    },
   ),
 
   manualExternalRegister: activityManageProcedure
